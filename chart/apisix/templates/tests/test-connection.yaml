@@ -27,5 +27,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "apisix.fullname" . }}:{{ .Values.gateway.http.port }}']
+      args: ['{{ include "apisix.fullname" . }}:{{ .Values.gateway.http.containerPort }}']
   restartPolicy: Never
