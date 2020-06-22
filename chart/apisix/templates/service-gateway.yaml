@@ -1,0 +1,64 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "apisix.fullname" . }}-gateway
+  annotations:
+    {{- range $key, $value := .Values.gateway.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  labels:
+    {{- include "apisix.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.gateway.type }}
+  {{- if eq .Values.gateway.type "LoadBalancer" }}
+  {{- if .Values.gateway.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.gateway.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.gateway.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+  {{- range $cidr := .Values.gateway.loadBalancerSourceRanges }}
+  - {{ $cidr }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  externalIPs:
+  {{- range $ip := .Values.gateway.externalIPs }}
+  - {{ $ip }}
+  {{- end }}
+  ports:
+  {{- if .Values.gateway.http.enabled }}
+  - name: apisix-gateway
+    port: {{ .Values.gateway.http.servicePort }}
+    targetPort: {{ .Values.gateway.http.containerPort }}
+  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.http.nodePort))) }}
+    nodePort: {{ .Values.gateway.http.nodePort }}
+  {{- end }}
+    protocol: TCP
+  {{- end }}
+  {{- if or .Values.gateway.tls.enabled }}
+  - name: apisix-gateway-tls
+    port: {{ .Values.gateway.tls.servicePort }}
+    targetPort: {{ .Values.gateway.tls.containerPort }}
+  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.tls.nodePort))) }}
+    nodePort: {{ .Values.gateway.tls.nodePort }}
+  {{- end }}
+    protocol: TCP
+  {{- end }}
+  selector:
+    {{- include "apisix.selectorLabels" . | nindent 4 }}
