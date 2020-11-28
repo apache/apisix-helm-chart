@@ -18,6 +18,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "apisix.fullname" . }}
+  namespace: {{ .Release.Namespace }}
 data:
   config.yaml: |-
     #
@@ -72,9 +73,14 @@ data:
       #    disk_path: "/tmp/disk_cache_two"
       #    cache_levels: "1:2"
 
-    #  allow_admin:                  # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
-    #    - 127.0.0.0/24              # If we don't set any IP list, then any IP access is allowed by default.
-    #    - 172.17.0.0/24
+      allow_admin:                  # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
+      {{- if .Values.allow.ipList }}
+      {{- range $ips := .Values.allow.ipList }}
+        - {{ $ips }}
+      {{- end }}
+      {{- else }}
+        - 0.0.0.0/0
+      {{- end}}
       #   - "::/64"
       # port_admin: 9180              # use a separate port
 
@@ -141,8 +147,9 @@ data:
         - {{ .Values.etcd.host | quote }}         # multiple etcd address
       prefix: {{ .Values.etcd.prefix | quote }}     # apisix configurations prefix
       timeout: {{ .Values.etcd.timeout }}   # 3 seconds
-
+    {{- if .Values.plugins }}
     plugins:                          # plugin list
+    {{- end }}
     {{- range $plugin := .Values.plugins }}
       - {{ $plugin }}
     {{- end }}

@@ -18,6 +18,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "apisix.fullname" . }}-test-connection"
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
   annotations:

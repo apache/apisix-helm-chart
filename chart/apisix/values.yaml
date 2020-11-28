@@ -19,7 +19,8 @@ image:
   repository: apache/apisix
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 1.3-alpine
+  tag: 2.1-centos
+
 
 imagePullSecrets: []
 nameOverride: ""
@@ -70,7 +71,7 @@ gateway:
 # etcd configuration
 # use the FQDN address or the IP of the etcd
 etcd:
-  host: http://etcd-apisix.local:2379 # http://172.20.128.89:2379
+  host: http://etcd:2379 # http://172.20.128.89:2379
   prefix: "/apisix"
   timeout: 3
 
@@ -95,34 +96,51 @@ admin:
     admin: edd1c9f034335f136f87ad84b625c8f1
     viewer: 4054f7cf07e344346cd3f287985e76a2
 
+allow:
+  # The ip range for allowing access to Apache APISIX
+  ipList:
+    - 127.0.0.1/24
+
 # APISIX plugins to be enabled
 plugins:
-  - example-plugin
-  - limit-req
-  - limit-count
-  - limit-conn
-  - key-auth
+  - api-breaker
+  - authz-keycloak
   - basic-auth
-  - prometheus
-  - node-status
-  - jwt-auth
-  - zipkin
-  - ip-restriction
+  - batch-requests
+  - consumer-restriction
+  - cors
+  - echo
+  - fault-injection
   - grpc-transcode
-  - serverless-pre-function
-  - serverless-post-function
+  - hmac-auth
+  - http-logger
+  - ip-restriction
+  - jwt-auth
+  - kafka-logger
+  - key-auth
+  - limit-conn
+  - limit-count
+  - limit-req
+  - node-status
   - openid-connect
+  - prometheus
+  - proxy-cache
+  - proxy-mirror
   - proxy-rewrite
   - redirect
+  - referer-restriction
+  - request-id
+  - request-validation
   - response-rewrite
-  - fault-injection
-  - udp-logger
-  - wolf-rbac
-  - proxy-cache
+  - serverless-post-function
+  - serverless-pre-function
+  - sls-logger
+  - syslog
   - tcp-logger
-  - proxy-mirror
-  - kafka-logger
-  - cors
+  - udp-logger
+  - uri-blocker
+  - wolf-rbac
+  - zipkin
 stream_plugins:
   - mqtt-proxy
 
