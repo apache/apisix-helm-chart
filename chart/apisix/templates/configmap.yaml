@@ -143,10 +143,16 @@ data:
         #  ipc_shared_dict: 100m        # custom shared cache, format: `cache-key: cache-size`
 
     etcd:
+    {{- if .Values.etcd.enabled }}
+      host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
+        - http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.cluster.local:2379
+    {{- else }}
       host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
         - {{ .Values.etcd.host | quote }}         # multiple etcd address
+    {{- end }}
       prefix: {{ .Values.etcd.prefix | quote }}     # apisix configurations prefix
-      timeout: {{ .Values.etcd.timeout }}   # 3 seconds
+      timeout: {{ .Values.etcd.timeout }}   # 30 seconds
+
     {{- if .Values.plugins }}
     plugins:                          # plugin list
     {{- end }}

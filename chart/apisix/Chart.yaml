@@ -37,3 +37,10 @@ version: 2.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 appVersion: 2.1.0
+
+dependencies:
+  - name: etcd
+    version: 5.2.1
+    repository: https://charts.bitnami.com/bitnami
+    condition: etcd.enabled
+
