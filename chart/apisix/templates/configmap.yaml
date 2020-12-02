@@ -145,7 +145,7 @@ data:
     etcd:
     {{- if .Values.etcd.enabled }}
       host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-        - http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.cluster.local:2379
+        - "http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.cluster.local:2379"
     {{- else }}
       host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
         - {{ .Values.etcd.host | quote }}         # multiple etcd address
