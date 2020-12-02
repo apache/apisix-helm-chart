@@ -179,8 +179,3 @@ tolerations: []
 
 affinity: {}
 
-# Enable etcd rbac
-#auth:
-# rbac:
-#   enabled: true
-#   rootPassword: JJSzoI9mBt
