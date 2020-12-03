@@ -19,10 +19,6 @@
 
 # Apache APISIX Helm Charts
 
-**The Charts is for installing Apache APISIX 2.x.**
-
-Tips: Apache APISIX is based on etcd v3 from version 2.0, the etcd version is required to be at least 3.4. [Apache APISIX CHANGELOG.](https://github.com/apache/apisix/blob/master/CHANGELOG.md)
-
 ## Install
 
 ```shell
