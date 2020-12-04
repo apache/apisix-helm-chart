@@ -19,6 +19,15 @@
 
 # Apache APISIX Helm Charts
 
+## Dependencies
+
+Update the dependency chart 
+
+```shell
+$ helm repo add bitnami https://charts.bitnami.com/bitnami
+$ helm dependency update ./chart/apisix
+```
+
 ## Install
 
 ```shell
