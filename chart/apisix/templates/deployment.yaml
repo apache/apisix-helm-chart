@@ -78,6 +78,12 @@ spec:
               subPath: config.yaml
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      {{- if .Values.etcd.enabled }}
+      initContainers:
+      - name: wait-etcd
+        image: busybox:1.28
+        command: ['sh', '-c', "until nc -z {{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.gateway.k8s_domain }} {{ .Values.etcd.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
+      {{- end }}
       volumes:
         - configMap:
             name: {{ include "apisix.fullname" . }}
