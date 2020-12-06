@@ -41,6 +41,7 @@ securityContext: {}
 
 gateway:
   type: NodePort
+  k8s_domain: cluster.local
   # type: LoadBalancer
   # annotations:
   #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
@@ -73,9 +74,10 @@ gateway:
 etcd:
   # install etcd(v3) by default, set false if do not want to install etcd(v3) together
   enabled: true
-  host: http://etcd:2379 # http://172.20.128.89:2379
+  host: etcd.host # host or ip e.g.172.20.128.89
   prefix: "/apisix"
   timeout: 30
+  port: 2379
   auth:
     rbac:
       # No authentication by default
