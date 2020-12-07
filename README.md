@@ -17,14 +17,64 @@
 #
 -->
 
-Apache APISIX
-=============
+# Apache APISIX Helm Charts
 
-## Documentation
+## Dependencies
 
-#### Prerequisites
+Update the dependency chart 
 
-* Install etcd
+```shell
+$ helm repo add bitnami https://charts.bitnami.com/bitnami
+$ helm dependency update ./chart/apisix
+```
 
-#### Deploy the chart
-$ helm install <release_name> ./chart/apisix
+## Install
+
+```shell
+$ helm install apisix ./chart/apisix -n default
+```
+
+## Uninstall
+
+```shell
+helm uninstall apisix ./chart/apisix -n default
+```
+
+## FAQ
+
+1. How to install APISIX only?
+
+The Charts will install etcd 3.4.14 by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host=http://your_etcd_address:2379`.
+
+Please use the FQDN address or the IP of the etcd.
+
+```shell
+$ helm install apisix ./chart/apisix -n default \
+    --set etcd.enabled=false \
+    --set etcd.host=http://your_etcd_address:2379
+```
+
+2. Why get 403 when I access Apache APISIX admin api?
+
+We can define `allow.ipList` in CIDR.
+
+```shell
+$ helm install apisix ./chart/apisix -n default \
+    --set allow.ipList="10.22.100.12/8" \
+    --set allow.ipList="172.0.0.0/24"
+```
+
+If you want to allow all IPs for a quick test, just set `allow.ipList=""`
+
+```shell
+$ helm install apisix ./chart/apisix -n default \
+    --set allow.ipList=""
+```
+
+## Seeking help
+
+- Mailing List: Mail to dev-subscribe@apisix.apache.org, follow the reply to subscribe the mailing list.
+- QQ Group - 578997126, 552030619
+- [Slack Workspace](http://s.apache.org/slack-invite) - join `#apisix` on our Slack to meet the team and ask questions
+- ![Twitter Follow](https://img.shields.io/twitter/follow/ApacheAPISIX?style=social) - follow and interact with us using hashtag `#ApacheAPISIX`
+- [bilibili video](https://space.bilibili.com/551921247)

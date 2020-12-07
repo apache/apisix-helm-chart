@@ -18,6 +18,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "apisix.fullname" . }}
+  namespace: {{ .Release.Namespace }}
 data:
   config.yaml: |-
     #
@@ -72,9 +73,14 @@ data:
       #    disk_path: "/tmp/disk_cache_two"
       #    cache_levels: "1:2"
 
-    #  allow_admin:                  # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
-    #    - 127.0.0.0/24              # If we don't set any IP list, then any IP access is allowed by default.
-    #    - 172.17.0.0/24
+      allow_admin:                  # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
+      {{- if .Values.allow.ipList }}
+      {{- range $ips := .Values.allow.ipList }}
+        - {{ $ips }}
+      {{- end }}
+      {{- else }}
+        - 0.0.0.0/0
+      {{- end}}
       #   - "::/64"
       # port_admin: 9180              # use a separate port
 
@@ -137,12 +143,19 @@ data:
         #  ipc_shared_dict: 100m        # custom shared cache, format: `cache-key: cache-size`
 
     etcd:
+    {{- if .Values.etcd.enabled }}
       host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-        - {{ .Values.etcd.host | quote }}         # multiple etcd address
+        - "http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.gateway.k8s_domain }}:{{ .Values.etcd.port }}"
+    {{- else }}
+      host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
+        - "http://{{ .Values.etcd.host }}:{{ .Values.etcd.port }}"         # multiple etcd address
+    {{- end }}
       prefix: {{ .Values.etcd.prefix | quote }}     # apisix configurations prefix
-      timeout: {{ .Values.etcd.timeout }}   # 3 seconds
+      timeout: {{ .Values.etcd.timeout }}   # 30 seconds
 
+    {{- if .Values.plugins }}
     plugins:                          # plugin list
+    {{- end }}
     {{- range $plugin := .Values.plugins }}
       - {{ $plugin }}
     {{- end }}

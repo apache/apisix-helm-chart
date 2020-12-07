@@ -18,6 +18,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "apisix.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
@@ -77,13 +78,12 @@ spec:
               subPath: config.yaml
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-        # - name: dnsmasq
-        #   image: "janeczku/go-dnsmasq:release-1.0.7"
-        #   args:
-        #     - --listen
-        #     - "127.0.0.1:53"
-        #     - --default-resolver
-        #     - --append-search-domains
+      {{- if .Values.etcd.enabled }}
+      initContainers:
+      - name: wait-etcd
+        image: busybox:1.28
+        command: ['sh', '-c', "until nc -z {{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.gateway.k8s_domain }} {{ .Values.etcd.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
+      {{- end }}
       volumes:
         - configMap:
             name: {{ include "apisix.fullname" . }}
