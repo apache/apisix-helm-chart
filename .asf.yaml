@@ -20,9 +20,10 @@ github:
     homepage: https://apisix.apache.org/
     labels:
       - apisix
-      - helm chart
+      - helm
+      - chart
       - k8s
-      - Kubernetes
+      - kubernetes
 
     features:
       issues: true
