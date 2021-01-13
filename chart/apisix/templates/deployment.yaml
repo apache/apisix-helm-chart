@@ -59,7 +59,7 @@ spec:
               protocol: TCP
             {{- if .Values.admin.enabled }}
             - name: admin
-              containerPort: {{ .Values.admin.containerPort }}
+              containerPort: {{ .Values.admin.port }}
               protocol: TCP
             {{- end }}
           readinessProbe:

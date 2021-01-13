@@ -83,7 +83,7 @@ data:
       {{- end}}
       #   - "::/64"
       {{- if .Values.admin.enabled }}
-      port_admin: {{ .Values.admin.containerPort }}
+      port_admin: {{ .Values.admin.port }}
       {{- end }}
 
       # Default token when use API to call for Admin API.

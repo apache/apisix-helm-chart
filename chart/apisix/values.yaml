@@ -104,7 +104,7 @@ admin:
   #   - "143.231.0.0/16"
   externalIPs: []
   #
-  containerPort: 9180
+  port: 9180
   servicePort: 9180
   # Admin API support CORS response headers
   cors: true
