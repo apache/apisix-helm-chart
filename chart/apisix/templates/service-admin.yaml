@@ -13,55 +13,45 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+{{ if .Values.admin.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "apisix.fullname" . }}-gateway
+  name: {{ include "apisix.fullname" . }}-admin
   namespace: {{ .Release.Namespace }}
   annotations:
-    {{- range $key, $value := .Values.gateway.annotations }}
+    {{- range $key, $value := .Values.admin.annotations }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.gateway.type }}
-  {{- if eq .Values.gateway.type "LoadBalancer" }}
-  {{- if .Values.gateway.loadBalancerIP }}
-  loadBalancerIP: {{ .Values.gateway.loadBalancerIP }}
+  type: {{ .Values.admin.type }}
+  {{- if eq .Values.admin.type "LoadBalancer" }}
+  {{- if .Values.admin.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.admin.loadBalancerIP }}
   {{- end }}
-  {{- if .Values.gateway.loadBalancerSourceRanges }}
+  {{- if .Values.admin.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:
-  {{- range $cidr := .Values.gateway.loadBalancerSourceRanges }}
+  {{- range $cidr := .Values.admin.loadBalancerSourceRanges }}
   - {{ $cidr }}
   {{- end }}
   {{- end }}
   {{- end }}
   {{- if gt (len .Values.admin.externalIPs) 0 }}
   externalIPs:
-  {{- range $ip := .Values.gateway.externalIPs }}
+  {{- range $ip := .Values.admin.externalIPs }}
   - {{ $ip }}
   {{- end }}
   {{- end }}
   ports:
-  {{- if .Values.gateway.http.enabled }}
-  - name: apisix-gateway
-    port: {{ .Values.gateway.http.servicePort }}
-    targetPort: {{ .Values.gateway.http.containerPort }}
-  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.http.nodePort))) }}
-    nodePort: {{ .Values.gateway.http.nodePort }}
+  - name: apisix-admin
+    port: {{ .Values.admin.servicePort }}
+    targetPort: {{ .Values.admin.containerPort }}
+  {{- if (and (eq .Values.admin.type "NodePort") (not (empty .Values.admin.nodePort))) }}
+    nodePort: {{ .Values.admin.nodePort }}
   {{- end }}
     protocol: TCP
-  {{- end }}
-  {{- if or .Values.gateway.tls.enabled }}
-  - name: apisix-gateway-tls
-    port: {{ .Values.gateway.tls.servicePort }}
-    targetPort: {{ .Values.gateway.tls.containerPort }}
-  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.tls.nodePort))) }}
-    nodePort: {{ .Values.gateway.tls.nodePort }}
-  {{- end }}
-    protocol: TCP
-  {{- end }}
   selector:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
+{{ end }}

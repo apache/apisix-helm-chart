@@ -57,6 +57,11 @@ spec:
             - name: tls
               containerPort: {{ .Values.gateway.tls.containerPort }}
               protocol: TCP
+            {{- if .Values.admin.enabled }}
+            - name: admin
+              containerPort: {{ .Values.admin.port }}
+              protocol: TCP
+            {{- end }}
           readinessProbe:
             failureThreshold: 6
             initialDelaySeconds: 10

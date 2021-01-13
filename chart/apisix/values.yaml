@@ -97,6 +97,15 @@ dns:
 admin:
   # Enable Admin API
   enabled: true
+  # admin service type
+  type: ClusterIP
+  # loadBalancerIP: a.b.c.d
+  # loadBalancerSourceRanges:
+  #   - "143.231.0.0/16"
+  externalIPs: []
+  #
+  port: 9180
+  servicePort: 9180
   # Admin API support CORS response headers
   cors: true
   # Admin API credentials

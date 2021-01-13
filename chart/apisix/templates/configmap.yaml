@@ -82,7 +82,9 @@ data:
         - 0.0.0.0/0
       {{- end}}
       #   - "::/64"
-      # port_admin: 9180              # use a separate port
+      {{- if .Values.admin.enabled }}
+      port_admin: {{ .Values.admin.port }}
+      {{- end }}
 
       # Default token when use API to call for Admin API.
       # *NOTE*: Highly recommended to modify this value to protect APISIX's Admin API.
