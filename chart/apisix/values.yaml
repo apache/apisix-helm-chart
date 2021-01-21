@@ -21,17 +21,18 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: 2.1-alpine
 
-
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
 podAnnotations: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  {}
   # fsGroup: 2000
 
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -74,10 +75,11 @@ gateway:
 etcd:
   # install etcd(v3) by default, set false if do not want to install etcd(v3) together
   enabled: true
-  host: etcd.host # host or ip e.g.172.20.128.89
+  host:
+    - http://etcd.host:2379 # host or ip e.g. http://172.20.128.89:2379
   prefix: "/apisix"
   timeout: 30
-  port: 2379
+  defaultPort: 2379
   auth:
     rbac:
       # No authentication by default
@@ -163,9 +165,9 @@ stream_plugins:
 
 resources:
   limits:
-    cpu: '2'
+    cpu: "2"
   requests:
-    cpu: '50m'
+    cpu: "50m"
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -188,5 +190,5 @@ nodeSelector: {}
 
 tolerations: []
 
-affinity: {}
-
+affinity: 
+  enabled: true
