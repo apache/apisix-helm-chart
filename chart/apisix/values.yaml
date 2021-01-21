@@ -191,4 +191,4 @@ nodeSelector: {}
 tolerations: []
 
 affinity: 
-  enabled: true
+  enabled: false
