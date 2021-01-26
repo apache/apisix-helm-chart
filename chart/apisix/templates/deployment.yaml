@@ -109,7 +109,7 @@ spec:
                   values:
                   - {{ include "apisix.name" . }}
               topologyKey: kubernetes.io/hostname
-            weight: 100'
+            weight: 100
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
