@@ -91,13 +91,12 @@ data:
       # Disabling this configuration item means that the Admin API does not
       # require any authentication.
       admin_key:
-        -
-          name: "admin"
+        # admin: can everything for configuration data
+        - name: "admin"
           key: {{ .Values.admin.credentials.admin }}
           role: admin
-                                      # viewer: only can view configuration data
-        -
-          name: "viewer"
+        # viewer: only can view configuration data
+        - name: "viewer"
           key: {{ .Values.admin.credentials.viewer }}
           role: viewer
       router:
@@ -147,10 +146,12 @@ data:
     etcd:
     {{- if .Values.etcd.enabled }}
       host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-        - "http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.gateway.k8s_domain }}:{{ .Values.etcd.port }}"
+        - "http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.gateway.k8s_domain }}:{{ .Values.etcd.defaultPort }}"
     {{- else }}
       host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-        - "http://{{ .Values.etcd.host }}:{{ .Values.etcd.port }}"         # multiple etcd address
+        {{- range $value := .Values.etcd.host }}
+        - "{{ $value }}"             # multiple etcd address
+        {{- end}}
     {{- end }}
       prefix: {{ .Values.etcd.prefix | quote }}     # apisix configurations prefix
       timeout: {{ .Values.etcd.timeout }}   # 30 seconds
