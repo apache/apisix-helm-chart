@@ -17,6 +17,20 @@
 #
 -->
 
-# Apache APISIX Helm Charts
+# Apache APISIX Dashboard Helm Chart
 
-Apache APISIX Helm Charts provide the installation of [Apache APISIX](https://github.com/apache/apisix#apache-apisix) components for kubernetes.
+## Install
+
+To install the chart with release name `apisix-dashboard`:
+
+```shell
+$ helm install apisix-dashboard . -n default
+```
+
+## Uninstall
+
+To uninstall/delete the `apisix-dashboard` release:
+
+```shell
+$ helm uninstall apisix-dashboard . -n default
+```
