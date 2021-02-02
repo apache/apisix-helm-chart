@@ -190,6 +190,7 @@ autoscaling:
 nodeSelector: {}
 
 tolerations: []
+
 # It sets the anti-affinity of the Pod by default, if the affinity.enabled is set to true. 
 # If you want to set other affinity configuration, please modify the affinity item in tmplate/deployment.yaml
 affinity: 

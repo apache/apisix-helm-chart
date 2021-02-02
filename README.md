@@ -50,6 +50,7 @@ Please use the FQDN address or the IP of the etcd.
 
 ```shell
 # If you need to export etcd through kubernetes service, the host needs to be set to FQDN
+
 $ helm install apisix ./chart/apisix -n default \
     --set etcd.enabled=false \
     --set etcd.host={http://etcd_node_1:2379\,http://etcd_node_2:2379}
