@@ -20,3 +20,6 @@
 # Apache APISIX Helm Charts
 
 Apache APISIX Helm Charts provide the installation of [Apache APISIX](https://github.com/apache/apisix#apache-apisix) components for kubernetes.
+
+- [Apache APISIX Helm Chart](https://github.com/apache/apisix-helm-chart/tree/master/charts/apisix)
+- [Apache APISIX Dashboard Helm Chart](https://github.com/apache/apisix-helm-chart/tree/master/charts/apisix-dashboard)
