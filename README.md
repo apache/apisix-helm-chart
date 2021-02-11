@@ -44,15 +44,29 @@ helm uninstall apisix ./chart/apisix -n default
 
 1. How to install APISIX only?
 
-The Charts will install etcd 3.4.14 by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host={http://your_etcd_address:2379}`.
+The Charts will install etcd 3.4.14 by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host={http://your_etcd_address:2379}` .
+
+Then you need to set your own ETCD information. It's importent.
 
 Please use the FQDN address or the IP of the etcd.
 
+In order to support multiple hosts, the `etcd.host` attribute uses an array format. So you need passing array values through `{}` (unix shell require quotes) in helm.
+
+> Single etcd host
+
 ```shell
-# if etcd export by kubernetes service need spell fully qualified name
 $ helm install apisix ./chart/apisix -n default \
     --set etcd.enabled=false \
-    --set etcd.host={http://etcd_node_1:2379\,http://etcd_node_2:2379}
+    --set etcd.host={http://etcd_host:2379}
+```
+
+> Multiple etcd host
+
+
+```shell
+$ helm install apisix ./chart/apisix -n default \
+    --set etcd.enabled=false \
+    --set etcd.host={http://etcd_host_1:2379\,http://etcd_host_1:2379}
 ```
 
 2. Why get 403 when I access Apache APISIX admin api?
