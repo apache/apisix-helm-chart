@@ -197,3 +197,4 @@ affinity: {}
 # It sets the anti-affinity of the Pod by default, if the affinity.enabled is set to true. 
 antiAffinity:
   enabled: false
+  

@@ -101,7 +101,7 @@ spec:
       {{- with .Values.affinity }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.antiAffinity.enable }}
+      {{- if .Values.antiAffinity.enabled }}
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
