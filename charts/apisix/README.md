@@ -17,56 +17,46 @@
 #
 -->
 
-# Apache APISIX Helm Charts
+# Apache APISIX Helm Chart
 
-Apache APISIX Helm Charts provide the installation of [Apache APISIX](https://github.com/apache/apisix#apache-apisix) components for kubernetes.
+## Dependencies
 
 Update the dependency chart 
 
 ```shell
 $ helm repo add bitnami https://charts.bitnami.com/bitnami
-$ helm dependency update ./chart/apisix
+$ helm dependency update .
 ```
 
 ## Install
 
+To install the chart with release name `apisix`:
+
 ```shell
-$ helm install apisix ./chart/apisix -n default
+$ helm install apisix . -n default
 ```
 
 ## Uninstall
 
+To uninstall/delete the `apisix` release:
+
 ```shell
-helm uninstall apisix ./chart/apisix -n default
+helm uninstall apisix . -n default
 ```
 
 ## FAQ
 
 1. How to install APISIX only?
 
-The Charts will install etcd 3.4.14 by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host={http://your_etcd_address:2379}` .
-
-Then you need to set your own ETCD information. It's importent.
+The Charts will install etcd 3.4.14 by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host={http://your_etcd_address:2379}`.
 
 Please use the FQDN address or the IP of the etcd.
 
-In order to support multiple hosts, the `etcd.host` attribute uses an array format. So you need passing array values through `{}` (unix shell require quotes) in helm.
-
-> Single etcd host
-
 ```shell
-$ helm install apisix ./chart/apisix -n default \
+# if etcd export by kubernetes service need spell fully qualified name
+$ helm install apisix . -n default \
     --set etcd.enabled=false \
-    --set etcd.host={http://etcd_host:2379}
-```
-
-> Multiple etcd host
-
-
-```shell
-$ helm install apisix ./chart/apisix -n default \
-    --set etcd.enabled=false \
-    --set etcd.host={http://etcd_host_1:2379\,http://etcd_host_1:2379}
+    --set etcd.host={http://etcd_node_1:2379\,http://etcd_node_2:2379}
 ```
 
 2. Why get 403 when I access Apache APISIX admin api?
@@ -74,7 +64,7 @@ $ helm install apisix ./chart/apisix -n default \
 We can define `allow.ipList` in CIDR.
 
 ```shell
-$ helm install apisix ./chart/apisix -n default \
+$ helm install apisix . -n default \
     --set allow.ipList="10.22.100.12/8" \
     --set allow.ipList="172.0.0.0/24"
 ```
@@ -82,7 +72,7 @@ $ helm install apisix ./chart/apisix -n default \
 If you want to allow all IPs for a quick test, just set `allow.ipList=""`
 
 ```shell
-$ helm install apisix ./chart/apisix -n default \
+$ helm install apisix . -n default \
     --set allow.ipList=""
 ```
 
@@ -93,5 +83,3 @@ $ helm install apisix ./chart/apisix -n default \
 - [Slack Workspace](http://s.apache.org/slack-invite) - join `#apisix` on our Slack to meet the team and ask questions
 - ![Twitter Follow](https://img.shields.io/twitter/follow/ApacheAPISIX?style=social) - follow and interact with us using hashtag `#ApacheAPISIX`
 - [bilibili video](https://space.bilibili.com/551921247)
-- [Apache APISIX Helm Chart](https://github.com/apache/apisix-helm-chart/tree/master/charts/apisix)
-- [Apache APISIX Dashboard Helm Chart](https://github.com/apache/apisix-helm-chart/tree/master/charts/apisix-dashboard)
