@@ -21,7 +21,7 @@
 
 ## Dependencies
 
-Update the dependency chart 
+Update the dependency chart
 
 ```shell
 $ helm repo add bitnami https://charts.bitnami.com/bitnami
