@@ -97,8 +97,11 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.affinity.enable }}
       affinity:
+      {{- with .Values.affinity }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.podAntiAffinity.enabled }}
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
@@ -109,7 +112,7 @@ spec:
                   values:
                   - {{ include "apisix.name" . }}
               topologyKey: kubernetes.io/hostname
-            weight: 100'
+            weight: 100
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
