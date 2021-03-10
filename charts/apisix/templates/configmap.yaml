@@ -146,7 +146,7 @@ data:
     etcd:
     {{- if .Values.etcd.enabled }}
       host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-        - "http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.gateway.k8s_domain }}:{{ .Values.etcd.defaultPort }}"
+        - "http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
     {{- else }}
       host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
         {{- range $value := .Values.etcd.host }}
