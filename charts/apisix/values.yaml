@@ -42,7 +42,6 @@ securityContext:
 
 gateway:
   type: NodePort
-  k8s_domain: cluster.local
   # type: LoadBalancer
   # annotations:
   #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
@@ -79,7 +78,8 @@ etcd:
     - http://etcd.host:2379 # host or ip e.g. http://172.20.128.89:2379
   prefix: "/apisix"
   timeout: 30
-  defaultPort: 2379
+
+  # if etcd.enabled is true, set more values of bitnami/etcd helm chart
   auth:
     rbac:
       # No authentication by default
