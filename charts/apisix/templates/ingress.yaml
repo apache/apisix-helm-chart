@@ -14,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-{{- if .Values.ingress.enabled -}}
-{{- $fullName := include "apisix-dashboard.fullname" . -}}
-{{- $svcPort := .Values.service.port -}}
+{{- if .Values.gateway.ingress.enabled -}}
+{{- $fullName := include "apisix.fullname" . -}}
+{{- $svcPort := .Values.gateway.http.servicePort -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion }}
 apiVersion: networking.k8s.io/v1beta1
 {{- else -}}
@@ -26,15 +26,15 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    {{- include "apisix-dashboard.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+    {{- include "apisix.labels" . | nindent 4 }}
+  {{- with .Values.gateway.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.ingress.tls }}
+  {{- if .Values.gateway.ingress.tls }}
   tls:
-    {{- range .Values.ingress.tls }}
+    {{- range .Values.gateway.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -43,14 +43,14 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
+    {{- range .Values.gateway.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
           {{- range .paths }}
           - path: {{ . }}
             backend:
-              serviceName: {{ $fullName }}
+              serviceName: {{ $fullName }}-gateway
               servicePort: {{ $svcPort }}
           {{- end }}
     {{- end }}
