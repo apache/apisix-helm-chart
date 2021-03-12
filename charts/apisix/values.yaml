@@ -118,7 +118,7 @@ admin:
 dashboard:
   enabled: false
 
-ingressController:
+ingress-controller:
   enabled: false
 
 allow:
