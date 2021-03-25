@@ -123,8 +123,10 @@ ingress-controller:
 
 allow:
   # The ip range for allowing access to Apache APISIX
+  # If you want to call this through rest api, please update  ClusterIP to NodePort.
   ipList:
     - 127.0.0.1/24
+    - 0.0.0.0/0
 
 # APISIX plugins to be enabled
 plugins:
