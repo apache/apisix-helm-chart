@@ -4,11 +4,7 @@
     {
       "type": "category",
       "label": "Installation",
-      "items": [
-        "apisix",
-        "apisix-dashboard",
-        "apisix-ingress-controller"
-      ]
+      "items": ["apisix", "apisix-dashboard", "apisix-ingress-controller"]
     }
   ]
 }
