@@ -1,3 +1,7 @@
+---
+title: Apache APISIX Dashboard Helm Chart
+---
+
 <!--
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more

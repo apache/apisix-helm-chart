@@ -1,0 +1,10 @@
+{
+  "version": 0.4,
+  "sidebar": [
+    {
+      "type": "category",
+      "label": "Installation",
+      "items": ["apisix", "apisix-dashboard", "apisix-ingress-controller"]
+    }
+  ]
+}
