@@ -17,10 +17,26 @@
 #
 -->
 
-# Apache APISIX Helm Charts
+# Apache APISIX Ingress Controller Helm Chart
 
-Apache APISIX Helm Charts provide the installation of [Apache APISIX](https://github.com/apache/apisix#apache-apisix) components for kubernetes.
+## Prerequisites
 
-- [Apache APISIX Helm Chart](https://github.com/apache/apisix-helm-chart/tree/master/charts/apisix)
-- [Apache APISIX Dashboard Helm Chart](https://github.com/apache/apisix-helm-chart/tree/master/charts/apisix-dashboard)
-- [Apache APISIX Ingress Controller Helm Chart](https://github.com/apache/apisix-helm-chart/tree/master/charts/apisix-ingress-controller)
+- Kubernetes 1.12+
+- [Apache APISIX](https://github.com/apache/apisix#configure-and-installation)
+- [Helm v3.0+](https://helm.sh/docs/intro/quickstart/#install-helm)
+
+## Install
+
+To install the chart with release name `apisix-ingress-controller`:
+
+```bash
+helm install apisix-ingress-controller --namespace ingress-apisix .
+```
+
+## Uninstall
+
+To uninstall/delete the `apisix-ingress-controller` release:
+
+```bash
+helm uninstall apisix-ingress-controller --namespace ingress-apisix
+```
