@@ -21,6 +21,6 @@
 
 Apache APISIX Helm Charts provide the installation of [Apache APISIX](https://github.com/apache/apisix#apache-apisix) components for kubernetes.
 
-- [Apache APISIX Helm Chart](https://github.com/apache/apisix-helm-chart/tree/master/charts/apisix)
-- [Apache APISIX Dashboard Helm Chart](https://github.com/apache/apisix-helm-chart/tree/master/charts/apisix-dashboard)
-- [Apache APISIX Ingress Controller Helm Chart](https://github.com/apache/apisix-helm-chart/tree/master/charts/apisix-ingress-controller)
+- [Apache APISIX Helm Chart](./docs/en/latest/apisix.md)
+- [Apache APISIX Dashboard Helm Chart](./docs/en/latest/apisix-dashboard.md)
+- [Apache APISIX Ingress Controller Helm Chart](./docs/en/latest/apisix-ingress-controller.md)
