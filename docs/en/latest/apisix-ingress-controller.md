@@ -21,8 +21,6 @@ title: Apache APISIX Ingress Controller Helm Chart
 #
 -->
 
-# Apache APISIX Ingress Controller Helm Chart
-
 ## Prerequisites
 
 - [Kubernetes 1.12+](https://kubernetes.io/docs/setup/)

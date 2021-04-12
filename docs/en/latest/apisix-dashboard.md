@@ -21,8 +21,6 @@ title: Apache APISIX Dashboard Helm Chart
 #
 -->
 
-# Apache APISIX Dashboard Helm Chart
-
 ## Install
 
 To install the chart with release name `apisix-dashboard`:

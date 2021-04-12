@@ -21,8 +21,6 @@ title: Apache APISIX Helm Chart
 #
 -->
 
-# Apache APISIX Helm Chart
-
 ## Dependencies
 
 Update the dependency chart
