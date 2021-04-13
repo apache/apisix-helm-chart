@@ -47,14 +47,51 @@ service:
   port: 80
 
 config:
+  # the error log level, default is info, optional values are:
+  # debug
+  # info
+  # warn
+  # error
+  # panic
+  # fatal
   logLevel: "info"
+  # the output file path of error log, default is stderr, when
+  # the file path is "stderr" or "stdout", logs are marshalled
+  # plainly, which is more readable for human; otherwise logs
+  # are marshalled in JSON format, which can be parsed by
+  # programs easily.
   logOutput: "stderr"
+  # the HTTP Server listen address, default is ":8080"
   httpListen: ":8080"
+  # enable profiling via web interfaces host:port/debug/pprof, default is true.
   enableProfiling: true
+  # Kubernetes related configurations.
   kubernetes:
+    # the Kubernetes configuration file path, default is "", so the in-cluster
+    # configuration will be used.
     kubeconfig: ""
+    # how long should apisix-ingress-controller re-synchronizes with Kubernetes,
+    # default is 6h,
     resyncInterval: "60s"
+    # namespace list that controller will watch for resources,
+    # by default all namespaces (represented by "*") are watched.
     appNamespaces: ["*"]
+    # the election id for the controller leader campaign,
+    # only the leader will watch and delivery resource changes,
+    # other instances (as candidates) stand by.
+    electionId: "ingress-apisix-leader"
+    # The class of an Ingress object is set using the field IngressClassName in
+    # Kubernetes clusters version v1.18.0 or higher or the annotation
+    # "kubernetes.io/ingress.class" (deprecated).
+    ingressClass: "apisix"
+    # the supported ingress api group version, can be "networking/v1beta1",
+    # "networking/v1" (for Kubernetes version v1.19.0 or higher), and
+    # "extensions/v1beta1", default is "networking/v1".
+    ingressVersion: "networking/v1"
+    # the supported apisixroute api group version, can be "apisix.apache.org/v1"
+    # or "apisix.apache.org/v2alpha1",
+    apisixRouteVersion: "apisix.apache.org/v2alpha1"
+  # APISIX related configurations.
   apisix:
     baseURL: "http://apisix-admin:9180/apisix/admin"
     adminKey: "edd1c9f034335f136f87ad84b625c8f1"
