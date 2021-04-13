@@ -18,6 +18,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "apisix-dashboard.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "apisix-dashboard.labels" . | nindent 4 }}
 spec:
