@@ -31,6 +31,9 @@ data:
       - {{ . | quote }}
       {{- end }}
       {{- end }}
+      ingress_class: {{ .Values.config.kubernetes.ingressClass | quote }}
+      ingress_version: {{ .Values.config.kubernetes.ingressVersion | quote }}
+      apisix_route_version: {{ .Values.config.kubernetes.apisixRouteVersion | quote }}
     apisix:
       base_url: {{ .Values.config.apisix.baseURL | quote }}
       admin_key: {{ .Values.config.apisix.adminKey | quote }}
