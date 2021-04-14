@@ -29,10 +29,12 @@ title: Apache APISIX Ingress Controller Helm Chart
 
 ## Install
 
-To install the chart with release name `apisix-ingress-controller`:
+To install apisix-ingress-controller which release name is `apisix-ingress-controller`:
 
 ```bash
-helm install apisix-ingress-controller --namespace ingress-apisix .
+$ helm repo add apisix https://charts.apiseven.com
+$ helm repo update
+$ helm install apisix-ingress-controller apisix/apisix-ingress-controller --namespace ingress-apisix
 ```
 
 ## Uninstall
@@ -41,4 +43,37 @@ To uninstall/delete the `apisix-ingress-controller` release:
 
 ```bash
 helm uninstall apisix-ingress-controller --namespace ingress-apisix
+```
+
+## Deployment Options
+
+### ingress version
+
+By default apisix-ingress-controller watches the [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resources in api group `networking/v1`, however, if your Kubernetes cluster is prior to `v1.19`, you need to change the ingress watching version.
+
+If your Kubernetes version is older than `v1.14`, then:
+
+```shell
+helm install apisix-ingress-controller apisix/apisix-ingress-controller --namespace ingress-apisix --set config.kubernetes.ingressVersion=extensions/v1beta1
+```
+
+Or if your Kubernetes version is between `v1.14` and `v1.19`, try below:
+
+```shell
+helm install apisix-ingress-controller apisix/apisix-ingress-controller --namespace ingress-apisix --set config.kubernetes.ingressVersion=networking/v1beta1
+```
+
+## Upgrade Considerations
+
+### CRD
+
+CRDs upgrading is special as helm chart will skip to apply these resources when they already exist.
+
+> With the arrival of Helm 3, we removed the old crd-install hooks for a more simple methodology. There is now a special directory called crds that you can create in your chart to hold your CRDs. These CRDs are not templated, but will be installed by default when running a helm install for the chart. If the CRD already exists, it will be skipped with a warning. If you wish to skip the CRD installation step, you can pass the --skip-crds flag.
+
+In such a case, you may need to apply these CRDs by yourself.
+
+```shell
+$ cd /path/to/apisix-ingress-controller
+$ kubectl apply -k samples/deploy/crd/
 ```
