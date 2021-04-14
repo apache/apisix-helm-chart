@@ -18,6 +18,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "apisix-dashboard.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "apisix-dashboard.labels" . | nindent 4 }}
 data:
