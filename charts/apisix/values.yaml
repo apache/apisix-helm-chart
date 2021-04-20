@@ -166,6 +166,7 @@ plugins:
   - uri-blocker
   - wolf-rbac
   - zipkin
+  - traffic-split
 stream_plugins:
   - mqtt-proxy
 
