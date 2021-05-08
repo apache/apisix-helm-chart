@@ -103,13 +103,21 @@ data:
         http: 'radixtree_uri'         # radixtree_uri: match route by uri(base on radixtree)
                                       # radixtree_host_uri: match route by host + uri(base on radixtree)
         ssl: 'radixtree_sni'          # radixtree_sni: match route by SNI(base on radixtree)
-      # stream_proxy:                 # TCP/UDP proxy
-      #   tcp:                        # TCP proxy port list
-      #     - 9100
-      #     - 9101
-      #   udp:                        # UDP proxy port list
-      #     - 9200
-      #     - 9211
+      {{- if and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0)) }}
+      stream_proxy:                 # TCP/UDP proxy
+        {{- if gt (len .Values.gateway.stream.tcp) 0 }}
+        tcp:                        # TCP proxy port list
+          {{- range .Values.gateway.stream.tcp }}
+          - {{ . }}
+          {{- end }}
+        {{- end }}
+        {{- if gt (len .Values.gateway.stream.udp) 0 }}
+        udp:                        # UDP proxy port list
+          {{- range .Values.gateway.stream.udp }}
+          - {{ . }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
       # dns_resolver:
       #   {{- range $resolver := .Values.dns.resolvers }}
       #   - {{ $resolver }}

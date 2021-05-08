@@ -55,7 +55,10 @@ gateway:
     containerPort: 9443
     http2:
       enabled: true
-
+  stream: # L4 proxy (TCP/UDP)
+    enabled: false
+    tcp: []
+    udp: []
   ingress:
     enabled: false
     annotations:
