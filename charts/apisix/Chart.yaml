@@ -17,7 +17,7 @@
 apiVersion: v2
 name: apisix
 description: A Helm chart for Apache APISIX
-
+icon: https://apache.org/logos/res/apisix/apisix.png
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
