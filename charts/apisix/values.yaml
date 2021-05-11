@@ -28,7 +28,7 @@ apisix:
     # Overrides the image tag whose default is the chart appVersion.
     tag: 2.5-alpine
 
-replicaCount: 1
+  replicaCount: 1
 
 nameOverride: ""
 fullnameOverride: ""

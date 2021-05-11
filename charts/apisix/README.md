@@ -58,11 +58,12 @@ The following tables lists the configurable parameters of the apisix chart and t
 
 ### apisix parameters
 
-| Parameter                 | Description                                     | Default                                                 |
-|---------------------------|-------------------------------------------------|---------------------------------------------------------|
-| `apisix.enabled`          | Enable or disable Apache APISIX itself          | `true`                                                  |
-| `apisix.enabled`          | Enable or disable Apache APISIX itself          | `true`                                                  |
-| `apisix.image.repository` | Apache APISIX  image repository                 | `apache/apisix`                                         |
-| `apisix.image.tag`        | Apache APISIX  image tag                        | `{TAG_NAME}` (the latest Apache APISIX image tag)       |
-| `apisix.image.pullPolicy` | Apache APISIX image pull policy                 | `IfNotPresent`                                          |
+| Parameter                  | Description                                     | Default                                                 |
+|----------------------------|-------------------------------------------------|---------------------------------------------------------|
+| `apisix.enabled`           | Enable or disable Apache APISIX itself          | `true`                                                  |
+| `apisix.enabled`           | Enable or disable Apache APISIX itself          | `true`                                                  |
+| `apisix.image.repository`  | Apache APISIX image repository                  | `apache/apisix`                                         |
+| `apisix.image.tag`         | Apache APISIX image tag                         | `{TAG_NAME}` (the latest Apache APISIX image tag)       |
+| `apisix.image.pullPolicy`  | Apache APISIX image pull policy                 | `IfNotPresent`                                          |
+| `apisix.image.replicaCount`| Apache APISIX deploy replica count              | `1`                                                     |
 

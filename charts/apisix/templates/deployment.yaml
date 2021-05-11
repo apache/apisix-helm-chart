@@ -24,7 +24,7 @@ metadata:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
 {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.apisix.replicaCount }}
 {{- end }}
   selector:
     matchLabels:
