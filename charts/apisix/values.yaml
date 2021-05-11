@@ -93,6 +93,9 @@ etcd:
       # No authentication by default
       enabled: false
 
+  service:
+    port: 2379
+
 dns:
   resolvers:
     - 127.0.0.1
