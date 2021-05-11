@@ -1,4 +1,2 @@
 .DS_Store
-*.tgz
-*.lock
 test_**.yaml
