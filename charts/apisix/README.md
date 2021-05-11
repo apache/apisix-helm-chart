@@ -49,6 +49,13 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following tables lists the configurable parameters of the apisix chart and their default values per section/component:
 
+### Global parameters
+
+| Parameter                 | Description                                     | Default                                                 |
+|---------------------------|-------------------------------------------------|---------------------------------------------------------|
+| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]` (does not add image pull secrets to deployed pods) |
+
+
 ### apisix parameters
 
 | Parameter                 | Description                                     | Default                                                 |

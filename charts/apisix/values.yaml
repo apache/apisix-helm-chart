@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+global:
+  imagePullSecrets: []
+
 apisix:
   # Enable or disable Apache APISIX itself
   # Set it to flase and ingress-controller.enabled=true will deploy only ingress-controller
@@ -26,7 +29,6 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: 2.5-alpine
 
-imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
