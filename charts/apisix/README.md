@@ -67,3 +67,18 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.image.pullPolicy`  | Apache APISIX image pull policy                 | `IfNotPresent`                                          |
 | `apisix.image.replicaCount`| Apache APISIX deploy replica count              | `1`                                                     |
 
+
+### admin parameters
+
+| Parameter                  | Description                                                                      | Default                                                 |
+|----------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------|
+| `admin.enabled`            | Enable or disable Apache APISIX admin API                                        | `true`                                                  |
+| `admin.port`               | which port to use for Apache APISIX admin API                                    | `9180`                                                  |
+| `admin.servicePort`        | Service port to use for Apache APISIX admin API                                  | `9180`                                                  |
+| `admin.containerPort`      | Container port to use for Apache APISIX admin API                                | `9180`                                                  |
+| `admin.type`               | Apache APISIX admin API service type                                             | `ClusterIP`                                             |
+| `admin.externalIPs`        | IPs for which nodes in the cluster will also accept traffic for the servic       | `[]`                                                    |
+| `admin.cors`               | Apache APISIX admin API support CORS response headers                            | `true`                                                  |
+| `admin.credentials.admin`  | Apache APISIX admin API admin role credentials                                   | `edd1c9f034335f136f87ad84b625c8f1`                      |
+| `admin.credentials.viewer` | Apache APISIX admin API viewer role credentials                                  | `4054f7cf07e344346cd3f287985e76a2`                      |
+| `admin.allow.ipList`       | the IP range allowed to Apache APISIX admin API                                  | `true`                                                  |
