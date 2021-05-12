@@ -75,7 +75,6 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `admin.enabled`            | Enable or disable Apache APISIX admin API                                        | `true`                                                  |
 | `admin.port`               | which port to use for Apache APISIX admin API                                    | `9180`                                                  |
 | `admin.servicePort`        | Service port to use for Apache APISIX admin API                                  | `9180`                                                  |
-| `admin.containerPort`      | Container port to use for Apache APISIX admin API                                | `9180`                                                  |
 | `admin.type`               | Apache APISIX admin API service type                                             | `ClusterIP`                                             |
 | `admin.externalIPs`        | IPs for which nodes in the cluster will also accept traffic for the servic       | `[]`                                                    |
 | `admin.cors`               | Apache APISIX admin API support CORS response headers                            | `true`                                                  |

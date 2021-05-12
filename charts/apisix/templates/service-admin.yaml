@@ -47,7 +47,7 @@ spec:
   ports:
   - name: apisix-admin
     port: {{ .Values.admin.servicePort }}
-    targetPort: {{ .Values.admin.containerPort }}
+    targetPort: {{ .Values.admin.port }}
   {{- if (and (eq .Values.admin.type "NodePort") (not (empty .Values.admin.nodePort))) }}
     nodePort: {{ .Values.admin.nodePort }}
   {{- end }}
