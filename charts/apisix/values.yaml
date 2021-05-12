@@ -17,6 +17,7 @@
 global:
   imagePullSecrets: []
 
+
 apisix:
   # Enable or disable Apache APISIX itself
   # Set it to flase and ingress-controller.enabled=true will deploy only ingress-controller
@@ -60,6 +61,7 @@ apisix:
   podAntiAffinity:
     enabled: false
 
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -96,35 +98,6 @@ gateway:
   #    hosts:
   #      - chart-example.local
 
-# etcd configuration
-# use the FQDN address or the IP of the etcd
-etcd:
-  # install etcd(v3) by default, set false if do not want to install etcd(v3) together
-  enabled: true
-  host:
-    - http://etcd.host:2379 # host or ip e.g. http://172.20.128.89:2379
-  prefix: "/apisix"
-  timeout: 30
-
-  # if etcd.enabled is true, set more values of bitnami/etcd helm chart
-  auth:
-    rbac:
-      # No authentication by default
-      enabled: false
-
-  service:
-    port: 2379
-
-dns:
-  resolvers:
-    - 127.0.0.1
-    - 172.20.0.10
-    - 114.114.114.114
-    - 223.5.5.5
-    - 1.1.1.1
-    - 8.8.8.8
-  validity: 30
-  timeout: 5
 
 admin:
   # Enable Admin API
@@ -149,12 +122,6 @@ admin:
     # The ip range for allowing access to Apache APISIX
     ipList:
       - 127.0.0.1/24
-
-dashboard:
-  enabled: false
-
-ingress-controller:
-  enabled: false
 
 
 # APISIX plugins to be enabled
@@ -201,6 +168,19 @@ plugins:
 stream_plugins:
   - mqtt-proxy
 
+
+dns:
+  resolvers:
+    - 127.0.0.1
+    - 172.20.0.10
+    - 114.114.114.114
+    - 223.5.5.5
+    - 1.1.1.1
+    - 8.8.8.8
+  validity: 30
+  timeout: 5
+
+
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -208,3 +188,30 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
 
+
+# etcd configuration
+# use the FQDN address or the IP of the etcd
+etcd:
+  # install etcd(v3) by default, set false if do not want to install etcd(v3) together
+  enabled: true
+  host:
+    - http://etcd.host:2379 # host or ip e.g. http://172.20.128.89:2379
+  prefix: "/apisix"
+  timeout: 30
+
+  # if etcd.enabled is true, set more values of bitnami/etcd helm chart
+  auth:
+    rbac:
+      # No authentication by default
+      enabled: false
+
+  service:
+    port: 2379
+
+
+dashboard:
+  enabled: false
+
+
+ingress-controller:
+  enabled: false
