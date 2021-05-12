@@ -53,6 +53,13 @@ apisix:
     #   cpu: 100m
     #   memory: 128Mi
 
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  # If true, it will sets the anti-affinity of the Pod.
+  podAntiAffinity:
+    enabled: false
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -201,12 +208,3 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
 
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
-# If true, it will sets the anti-affinity of the Pod.
-podAntiAffinity:
-  enabled: false
