@@ -83,7 +83,7 @@ spec:
               name: apisix-config
               subPath: config.yaml
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.apisix.resources | nindent 12 }}
       {{- if .Values.etcd.enabled }}
       initContainers:
       - name: wait-etcd

@@ -69,6 +69,7 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.podAnnotations`    | Annotations to add to each pod                      | `{}`                                                    |
 | `apisix.podSecurityContext`| Set the securityContext for Apache APISIX pods      | `{}`                                                    |
 | `apisix.securityContext`   | Set the securityContext for Apache APISIX container | `{}`                                                    |
+| `apisix.resources`         | Set pod resource requests & limits                  | `{}`                                                    |
 
 
 ### admin parameters
