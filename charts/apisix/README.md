@@ -76,6 +76,19 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.podAntiAffinity.enabled`         | Enable or disable podAntiAffinity                   | `{}`                                                    |
 
 
+### gateway parameters
+
+Apache APISIX service parameters, this determines how users can access itself.
+
+| Parameter                  | Description                                                                      | Default                                                 |
+|----------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------|
+| `gateway.type`             | Apache APISIX service type for user access itself                                | `NodePort`                                              |
+| `gateway.http`             | Apache APISIX service settings for http                                          |                                                         |
+| `gateway.tls`              | Apache APISIX service settings for tls                                           |                                                         |
+| `gateway.stream`           | Apache APISIX service settings for stream                                        |                                                         |
+| `gateway.ingress`          | Using ingress access Apache APISIX service                                       |                                                         |
+
+
 ### admin parameters
 
 | Parameter                  | Description                                                                      | Default                                                 |
@@ -89,3 +102,21 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `admin.credentials.admin`  | Apache APISIX admin API admin role credentials                                   | `edd1c9f034335f136f87ad84b625c8f1`                      |
 | `admin.credentials.viewer` | Apache APISIX admin API viewer role credentials                                  | `4054f7cf07e344346cd3f287985e76a2`                      |
 | `admin.allow.ipList`       | the IP range allowed to Apache APISIX admin API                                  | `true`                                                  |
+
+### plugins and stream_plugins parameters 
+
+Default enabled plugins.
+
+
+### etcd parameters
+
+Configurations for etcd sub chart.
+
+### dashboard parameters
+
+Configurations for apisix-dashboard sub chart.
+
+
+### ingress-controller parameters
+
+Configurations for Apache APISIX ingress-controller sub chart.
