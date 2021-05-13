@@ -61,7 +61,6 @@ The following tables lists the configurable parameters of the apisix chart and t
 | Parameter                                | Description                                         | Default                                                 |
 |------------------------------------------|-----------------------------------------------------|---------------------------------------------------------|
 | `apisix.enabled`                         | Enable or disable Apache APISIX itself              | `true`                                                  |
-| `apisix.enabled`                         | Enable or disable Apache APISIX itself              | `true`                                                  |
 | `apisix.image.repository`                | Apache APISIX image repository                      | `apache/apisix`                                         |
 | `apisix.image.tag`                       | Apache APISIX image tag                             | `{TAG_NAME}` (the latest Apache APISIX image tag)       |
 | `apisix.image.pullPolicy`                | Apache APISIX image pull policy                     | `IfNotPresent`                                          |
@@ -73,7 +72,7 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.nodeSelector`                    | Node labels for Apache APISIX pod assignment        | `{}`                                                    |
 | `apisix.tolerations`                     | List of node taints to tolerate                     | `{}`                                                    |
 | `apisix.affinity`                        | Set affinity for Apache APISIX deploy               | `{}`                                                    |
-| `apisix.podAntiAffinity.enabled`         | Enable or disable podAntiAffinity                   | `{}`                                                    |
+| `apisix.podAntiAffinity.enabled`         | Enable or disable podAntiAffinity                   | `false`                                                 |
 
 
 ### gateway parameters
