@@ -17,7 +17,7 @@
 apiVersion: v2
 name: apisix
 description: A Helm chart for Apache APISIX
-
+icon: https://apache.org/logos/res/apisix/apisix.png
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -45,11 +45,11 @@ dependencies:
     condition: etcd.enabled
   - name: apisix-dashboard
     version: 0.1.2
-    repository: file://../apisix-dashboard
+    repository: https://charts.apiseven.com
     condition: dashboard.enabled
     alias: dashboard
   - name: apisix-ingress-controller
     version: 0.4.0
-    repository: file://../apisix-ingress-controller
+    repository: https://charts.apiseven.com
     condition: ingress-controller.enabled
     alias: ingress-controller

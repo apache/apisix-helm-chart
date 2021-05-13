@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if .Values.apisix.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -74,8 +75,8 @@ data:
       #    cache_levels: "1:2"
 
       allow_admin:                  # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
-      {{- if .Values.allow.ipList }}
-      {{- range $ips := .Values.allow.ipList }}
+      {{- if .Values.admin.allow.ipList }}
+      {{- range $ips := .Values.admin.allow.ipList }}
         - {{ $ips }}
       {{- end }}
       {{- else }}
@@ -174,3 +175,4 @@ data:
     {{- range $plugin := .Values.stream_plugins }}
       - {{ $plugin }}
     {{- end }}
+{{- end }}

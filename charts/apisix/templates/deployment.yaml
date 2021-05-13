@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if .Values.apisix.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,7 +24,7 @@ metadata:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
 {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.apisix.replicaCount }}
 {{- end }}
   selector:
     matchLabels:
@@ -38,7 +39,7 @@ spec:
       labels:
         {{- include "apisix.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
+      {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -48,8 +49,8 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.apisix.image.repository }}:{{ .Values.apisix.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.apisix.image.pullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.gateway.http.containerPort }}
@@ -82,7 +83,7 @@ spec:
               name: apisix-config
               subPath: config.yaml
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.apisix.resources | nindent 12 }}
       {{- if .Values.etcd.enabled }}
       initContainers:
       - name: wait-etcd
@@ -93,15 +94,15 @@ spec:
         - configMap:
             name: {{ include "apisix.fullname" . }}
           name: apisix-config
-      {{- with .Values.nodeSelector }}
+      {{- with .Values.apisix.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       affinity:
-      {{- with .Values.affinity }}
+      {{- with .Values.apisix.affinity }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.podAntiAffinity.enabled }}
+      {{- if .Values.apisix.podAntiAffinity.enabled }}
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
@@ -114,7 +115,8 @@ spec:
               topologyKey: kubernetes.io/hostname
             weight: 100
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- with .Values.apisix.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+{{- end }}

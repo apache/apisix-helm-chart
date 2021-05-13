@@ -14,36 +14,57 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+global:
+  imagePullSecrets: []
+
+
 apisix:
   # Enable or disable Apache APISIX itself
   # Set it to flase and ingress-controller.enabled=true will deploy only ingress-controller
   enabled: true
 
-replicaCount: 1
-image:
-  repository: apache/apisix
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: 2.5-alpine
+  image:
+    repository: apache/apisix
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: 2.5-alpine
 
-imagePullSecrets: []
+  replicaCount: 1
+
+  podAnnotations: {}
+  podSecurityContext: {}
+    # fsGroup: 2000
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  # If true, it will sets the anti-affinity of the Pod.
+  podAntiAffinity:
+    enabled: false
+
+
 nameOverride: ""
 fullnameOverride: ""
 
-podAnnotations: {}
-
-podSecurityContext:
-  {}
-  # fsGroup: 2000
-
-securityContext:
-  {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
 gateway:
   type: NodePort
@@ -66,7 +87,7 @@ gateway:
     udp: []
   ingress:
     enabled: false
-    annotations:
+    annotations: {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     hosts:
@@ -77,32 +98,6 @@ gateway:
   #    hosts:
   #      - chart-example.local
 
-# etcd configuration
-# use the FQDN address or the IP of the etcd
-etcd:
-  # install etcd(v3) by default, set false if do not want to install etcd(v3) together
-  enabled: true
-  host:
-    - http://etcd.host:2379 # host or ip e.g. http://172.20.128.89:2379
-  prefix: "/apisix"
-  timeout: 30
-
-  # if etcd.enabled is true, set more values of bitnami/etcd helm chart
-  auth:
-    rbac:
-      # No authentication by default
-      enabled: false
-
-dns:
-  resolvers:
-    - 127.0.0.1
-    - 172.20.0.10
-    - 114.114.114.114
-    - 223.5.5.5
-    - 1.1.1.1
-    - 8.8.8.8
-  validity: 30
-  timeout: 5
 
 admin:
   # Enable Admin API
@@ -123,16 +118,11 @@ admin:
     admin: edd1c9f034335f136f87ad84b625c8f1
     viewer: 4054f7cf07e344346cd3f287985e76a2
 
-dashboard:
-  enabled: false
+  allow:
+    # The ip range for allowing access to Apache APISIX
+    ipList:
+      - 127.0.0.1/24
 
-ingress-controller:
-  enabled: false
-
-allow:
-  # The ip range for allowing access to Apache APISIX
-  ipList:
-    - 127.0.0.1/24
 
 # APISIX plugins to be enabled
 plugins:
@@ -178,21 +168,18 @@ plugins:
 stream_plugins:
   - mqtt-proxy
 
-resources:
-  limits:
-    cpu: "2"
-  requests:
-    cpu: "50m"
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+
+dns:
+  resolvers:
+    - 127.0.0.1
+    - 172.20.0.10
+    - 114.114.114.114
+    - 223.5.5.5
+    - 1.1.1.1
+    - 8.8.8.8
+  validity: 30
+  timeout: 5
+
 
 autoscaling:
   enabled: false
@@ -201,12 +188,30 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
 
-nodeSelector: {}
 
-tolerations: []
+# etcd configuration
+# use the FQDN address or the IP of the etcd
+etcd:
+  # install etcd(v3) by default, set false if do not want to install etcd(v3) together
+  enabled: true
+  host:
+    - http://etcd.host:2379 # host or ip e.g. http://172.20.128.89:2379
+  prefix: "/apisix"
+  timeout: 30
 
-affinity: {}
+  # if etcd.enabled is true, set more values of bitnami/etcd helm chart
+  auth:
+    rbac:
+      # No authentication by default
+      enabled: false
 
-# If true, it will sets the anti-affinity of the Pod.
-podAntiAffinity:
+  service:
+    port: 2379
+
+
+dashboard:
+  enabled: false
+
+
+ingress-controller:
   enabled: false
