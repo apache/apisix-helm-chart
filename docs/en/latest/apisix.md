@@ -63,19 +63,19 @@ $ helm install apisix . -n default \
 
 2. Why get 403 when I access Apache APISIX admin api?
 
-We can define `allow.ipList` in CIDR.
+We can define `admin.allow.ipList` in CIDR.
 
 ```shell
 $ helm install apisix . -n default \
-    --set allow.ipList="10.22.100.12/8" \
-    --set allow.ipList="172.0.0.0/24"
+    --set admin.allow.ipList="10.22.100.12/8" \
+    --set admin.allow.ipList="172.0.0.0/24"
 ```
 
-If you want to allow all IPs for a quick test, just set `allow.ipList=""`
+If you want to allow all IPs for a quick test, just set `admin.allow.ipList=""`
 
 ```shell
 $ helm install apisix . -n default \
-    --set allow.ipList=""
+    --set admin.allow.ipList=""
 ```
 
 ## Seeking help
