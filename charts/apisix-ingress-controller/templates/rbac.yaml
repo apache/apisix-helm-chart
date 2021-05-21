@@ -99,14 +99,13 @@ rules:
       - deployments
       - deployments/scale
       - ingresses
+      - ingresses/status
       - networkpolicies
       - replicasets
       - replicasets/scale
       - replicationcontrollers/scale
     verbs:
-      - get
-      - list
-      - watch
+      - '*'
   - apiGroups:
       - policy
     resources:
@@ -136,13 +135,15 @@ rules:
       - apisix.apache.org
     resources:
       - apisixroutes
+      - apisixroutes/status
       - apisixupstreams
+      - apisixupstreams/status
       - apisixservices
       - apisixtlses
+      - apisixtlses/status
+      - apisixclusterconfigs
     verbs:
-      - get
-      - list
-      - watch
+      - '*'
   - apiGroups:
       - coordination.k8s.io
     resources:
