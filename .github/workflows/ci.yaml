@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - "*"
+
+  push:
+
+jobs:
+
+  helm:
+    name: Helm chart
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        k8s: [v1.14.10, v1.15.12, v1.16.15, v1.17.17, v1.18.19, v1.19.11, v1.20.7, v1.21.1]
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Lint
+        run: |
+          docker run --rm --interactive --network host \
+              --name ct-lint \
+              --volume ".":/workdir \
+              --workdir /workdir \
+              quay.io/helmpack/chart-testing:v3.3.1 ct lint \
+                  --charts charts/apisix \
+                  --helm-extra-args "--timeout 60s"
+
+
+      - name: fix permissions
+        run: |
+          sudo mkdir -p $HOME/.kube
+          sudo chmod -R 777 $HOME/.kube
+
+      - name: Create Kubernetes ${{ matrix.k8s }} cluster
+        id: kind
+        uses: engineerd/setup-kind@v0.5.0
+        with:
+          version: v0.11.0
+          config: test/e2e/kind.yaml
+          image: kindest/node:${{ matrix.k8s }}
+
+      - name: Test
+        env:
+          KIND_CLUSTER_NAME: kind
+          SKIP_CLUSTER_CREATION: true
+        run: |
+          kind get kubeconfig > $HOME/.kube/kind-config-kind
+          docker run --rm --interactive --network host \
+              --name ct \
+              --volume $HOME/.kube/kind-config-kind:/root/.kube/config \
+              --volume ".":/workdir \
+              --workdir /workdir \
+              quay.io/helmpack/chart-testing:v3.3.1 ct install \
+                  --charts charts/apisix \
+                  --helm-extra-args "--timeout 60s"
+
