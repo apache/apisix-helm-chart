@@ -25,12 +25,16 @@ jobs:
         run: |
           docker run --rm --interactive --network host \
               --name ct-lint \
-              --volume ".":/workdir \
-              --workdir /workdir \
-              quay.io/helmpack/chart-testing:v3.3.1 ct lint \
+              --volume $PWD:/workdir \
+              --workdir /workdir/charts/apisix \
+              quay.io/helmpack/chart-testing:v3.4.0 sh -c 'helm dependency update \
+               && cd ../.. \
+               && helm repo add bitnami https://charts.bitnami.com/bitnami \
+               && helm repo add apisix https://charts.apiseven.com \
+               && ct lint \
                   --charts charts/apisix \
-                  --helm-extra-args "--timeout 60s"
-
+                  --charts charts/apisix-dashboard \
+                  --charts charts/apisix-ingress-controller'
 
       - name: fix permissions
         run: |
@@ -54,9 +58,11 @@ jobs:
           docker run --rm --interactive --network host \
               --name ct \
               --volume $HOME/.kube/kind-config-kind:/root/.kube/config \
-              --volume ".":/workdir \
-              --workdir /workdir \
-              quay.io/helmpack/chart-testing:v3.3.1 ct install \
-                  --charts charts/apisix \
-                  --helm-extra-args "--timeout 60s"
-
+              --volume $PWD:/workdir \
+              --workdir /workdir/charts/apisix \
+              quay.io/helmpack/chart-testing:v3.4.0 sh -c 'helm dependency update \
+               && cd ../.. \
+               && helm repo add bitnami https://charts.bitnami.com/bitnami \
+               && helm repo add apisix https://charts.apiseven.com \
+               && ct install \
+                  --charts charts/apisix'

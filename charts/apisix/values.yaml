@@ -81,7 +81,7 @@ gateway:
     containerPort: 9443
     http2:
       enabled: true
-  stream: # L4 proxy (TCP/UDP)
+  stream:  # L4 proxy (TCP/UDP)
     enabled: false
     tcp: []
     udp: []
@@ -195,7 +195,7 @@ etcd:
   # install etcd(v3) by default, set false if do not want to install etcd(v3) together
   enabled: true
   host:
-    - http://etcd.host:2379 # host or ip e.g. http://172.20.128.89:2379
+    - http://etcd.host:2379  # host or ip e.g. http://172.20.128.89:2379
   prefix: "/apisix"
   timeout: 30
 
