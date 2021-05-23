@@ -20,6 +20,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
       - name: Lint
         run: |
@@ -43,7 +45,7 @@ jobs:
 
       - name: Create Kubernetes ${{ matrix.k8s }} cluster
         id: kind
-        uses: engineerd/setup-kind@v0.5.0
+        uses: ./.github/actions/setup-kind
         with:
           version: v0.11.0
           config: test/e2e/kind.yaml
