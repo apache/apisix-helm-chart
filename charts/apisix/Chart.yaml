@@ -53,3 +53,6 @@ dependencies:
     repository: https://charts.apiseven.com
     condition: ingress-controller.enabled
     alias: ingress-controller
+
+maintainers:
+  - name: tao12345666333

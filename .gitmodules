@@ -1,0 +1,4 @@
+[submodule ".github/actions/setup-kind"]
+	path = .github/actions/setup-kind
+	url = https://github.com/engineerd/setup-kind.git
+	branch = v0.5.0

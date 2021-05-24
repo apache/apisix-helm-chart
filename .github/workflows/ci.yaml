@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - "*"
+
+  push:
+
+jobs:
+
+  helm:
+    name: Helm chart
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        k8s: [v1.14.10, v1.15.12, v1.16.15, v1.17.17, v1.18.19, v1.19.11, v1.20.7, v1.21.1]
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Lint
+        run: |
+          docker run --rm --interactive --network host \
+              --name ct-lint \
+              --volume $PWD:/workdir \
+              --workdir /workdir/charts/apisix \
+              quay.io/helmpack/chart-testing:v3.4.0 sh -c 'helm dependency update \
+               && cd ../.. \
+               && helm repo add bitnami https://charts.bitnami.com/bitnami \
+               && helm repo add apisix https://charts.apiseven.com \
+               && ct lint \
+                  --charts charts/apisix \
+                  --charts charts/apisix-dashboard \
+                  --charts charts/apisix-ingress-controller'
+
+      - name: fix permissions
+        run: |
+          sudo mkdir -p $HOME/.kube
+          sudo chmod -R 777 $HOME/.kube
+
+      - name: Create Kubernetes ${{ matrix.k8s }} cluster
+        id: kind
+        uses: ./.github/actions/setup-kind
+        with:
+          version: v0.11.0
+          config: test/e2e/kind.yaml
+          image: kindest/node:${{ matrix.k8s }}
+
+      - name: Test
+        env:
+          KIND_CLUSTER_NAME: kind
+          SKIP_CLUSTER_CREATION: true
+        run: |
+          kind get kubeconfig > $HOME/.kube/kind-config-kind
+          docker run --rm --interactive --network host \
+              --name ct \
+              --volume $HOME/.kube/kind-config-kind:/root/.kube/config \
+              --volume $PWD:/workdir \
+              --workdir /workdir/charts/apisix \
+              quay.io/helmpack/chart-testing:v3.4.0 sh -c 'helm dependency update \
+               && cd ../.. \
+               && helm repo add bitnami https://charts.bitnami.com/bitnami \
+               && helm repo add apisix https://charts.apiseven.com \
+               && ct install \
+                  --charts charts/apisix'
