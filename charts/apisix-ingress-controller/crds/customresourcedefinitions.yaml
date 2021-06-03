@@ -35,6 +35,8 @@ spec:
     kind: ApisixRoute
     shortNames:
       - ar
+  subresources:
+    status: {}
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -53,6 +55,8 @@ spec:
     kind: ApisixTls
     shortNames:
       - atls
+  subresources:
+    status: {}
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -71,3 +75,5 @@ spec:
     kind: ApisixUpstream
     shortNames:
       - au
+  subresources:
+    status: {}
