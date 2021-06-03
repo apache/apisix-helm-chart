@@ -79,13 +79,14 @@ The following tables lists the configurable parameters of the apisix chart and t
 
 Apache APISIX service parameters, this determines how users can access itself.
 
-| Parameter                  | Description                                                                      | Default                                                 |
-|----------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------|
-| `gateway.type`             | Apache APISIX service type for user access itself                                | `NodePort`                                              |
-| `gateway.http`             | Apache APISIX service settings for http                                          |                                                         |
-| `gateway.tls`              | Apache APISIX service settings for tls                                           |                                                         |
-| `gateway.stream`           | Apache APISIX service settings for stream                                        |                                                         |
-| `gateway.ingress`          | Using ingress access Apache APISIX service                                       |                                                         |
+| Parameter                       | Description                                                                      | Default                                                 |
+|---------------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------|
+| `gateway.type`                  | Apache APISIX service type for user access itself                                | `NodePort`                                              |
+| `gateway.externalTrafficPolicy` | Setting how the Service route external traffic                                   | `Cluster`                                               |
+| `gateway.http`                  | Apache APISIX service settings for http                                          |                                                         |
+| `gateway.tls`                   | Apache APISIX service settings for tls                                           |                                                         |
+| `gateway.stream`                | Apache APISIX service settings for stream                                        |                                                         |
+| `gateway.ingress`               | Using ingress access Apache APISIX service                                       |                                                         |
 
 
 ### admin parameters

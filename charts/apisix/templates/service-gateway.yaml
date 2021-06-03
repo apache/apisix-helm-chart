@@ -28,6 +28,7 @@ metadata:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.gateway.type }}
+  externalTrafficPolicy: {{ .Values.gateway.externalTrafficPolicy }}
   {{- if eq .Values.gateway.type "LoadBalancer" }}
   {{- if .Values.gateway.loadBalancerIP }}
   loadBalancerIP: {{ .Values.gateway.loadBalancerIP }}
