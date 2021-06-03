@@ -110,3 +110,10 @@ autoscaling:
 
 nodeSelector: {}
 tolerations: []
+
+# namespace: "ingress-apisix"
+
+serviceMonitor:
+  enabled: false
+  namespace: "monitoring"
+  interval: 15s

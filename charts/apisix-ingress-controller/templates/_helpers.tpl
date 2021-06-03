@@ -78,3 +78,7 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- define "apisix-ingress-controller.namespace" -}}
+{{- default .Release.Namespace .Values.namespace -}}
+{{- end -}}
