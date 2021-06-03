@@ -21,21 +21,14 @@ title: Apache APISIX Helm Chart
 #
 -->
 
-## Dependencies
-
-Update the dependency chart
-
-```shell
-$ helm repo add bitnami https://charts.bitnami.com/bitnami
-$ helm dependency update .
-```
-
 ## Install
 
 To install the chart with release name `apisix`:
 
 ```shell
-$ helm install apisix . -n default
+$ helm repo add apisix https://charts.apiseven.com
+$ helm repo update
+$ helm install apisix apisix/apisix
 ```
 
 ## Uninstall
@@ -43,7 +36,7 @@ $ helm install apisix . -n default
 To uninstall/delete the `apisix` release:
 
 ```shell
-helm uninstall apisix . -n default
+helm uninstall apisix
 ```
 
 ## FAQ
@@ -56,7 +49,7 @@ Please use the FQDN address or the IP of the etcd.
 
 ```shell
 # if etcd export by kubernetes service need spell fully qualified name
-$ helm install apisix . -n default \
+$ helm install apisix apisix/apisix \
     --set etcd.enabled=false \
     --set etcd.host={http://etcd_node_1:2379\,http://etcd_node_2:2379}
 ```
@@ -66,7 +59,7 @@ $ helm install apisix . -n default \
 We can define `admin.allow.ipList` in CIDR.
 
 ```shell
-$ helm install apisix . -n default \
+$ helm install apisix apisix/apisix \
     --set admin.allow.ipList="10.22.100.12/8" \
     --set admin.allow.ipList="172.0.0.0/24"
 ```
@@ -74,7 +67,7 @@ $ helm install apisix . -n default \
 If you want to allow all IPs for a quick test, just set `admin.allow.ipList=""`
 
 ```shell
-$ helm install apisix . -n default \
+$ helm install apisix apisix/apisix \
     --set admin.allow.ipList=""
 ```
 

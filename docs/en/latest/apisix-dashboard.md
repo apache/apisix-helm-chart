@@ -26,7 +26,9 @@ title: Apache APISIX Dashboard Helm Chart
 To install the chart with release name `apisix-dashboard`:
 
 ```shell
-$ helm install apisix-dashboard . -n default
+$ helm repo add apisix https://charts.apiseven.com
+$ helm repo update
+$ helm install apisix-dashboard apisix/apisix-dashboard
 ```
 
 ## Uninstall
@@ -34,5 +36,5 @@ $ helm install apisix-dashboard . -n default
 To uninstall/delete the `apisix-dashboard` release:
 
 ```shell
-$ helm uninstall apisix-dashboard . -n default
+$ helm uninstall apisix-dashboard
 ```
