@@ -4,9 +4,9 @@ dependencies:
   version: 5.2.1
 - name: apisix-dashboard
   repository: https://charts.apiseven.com
-  version: 0.1.2
+  version: 0.1.3
 - name: apisix-ingress-controller
   repository: https://charts.apiseven.com
-  version: 0.4.0
-digest: sha256:111cf0f06c6039a02340f3ddafba83882336774ec5539dfceef8f6d59d5d6d34
-generated: "2021-05-11T15:52:54.405811637+08:00"
+  version: 0.4.1
+digest: sha256:04166d386d29a8e72a9f08788429425054cfa51785dfb82d922e62957730c5ac
+generated: "2021-06-03T12:25:47.924354041+08:00"
