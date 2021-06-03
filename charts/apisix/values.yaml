@@ -68,6 +68,9 @@ fullnameOverride: ""
 
 gateway:
   type: NodePort
+  # If you want to keep the client source IP, you can set this to Local.
+  # ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  externalTrafficPolicy: Cluster
   # type: LoadBalancer
   # annotations:
   #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
