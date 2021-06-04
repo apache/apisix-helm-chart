@@ -105,8 +105,7 @@ Apache APISIX service parameters, this determines how users can access itself.
 
 ### plugins and stream_plugins parameters 
 
-Default enabled plugins. See [configmap template](charts/apisix/templates/configmap.yaml) for details.
-
+Default enabled plugins. See [configmap template](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/templates/configmap.yaml) for details.
 
 ### etcd parameters
 
