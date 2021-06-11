@@ -211,6 +211,8 @@ etcd:
   service:
     port: 2379
 
+  replicaCount: 3
+
 
 dashboard:
   enabled: false
