@@ -82,6 +82,9 @@ data:
       {{- else }}
         - 0.0.0.0/0
       {{- end}}
+      {{- if .Values.ingress-controller.enabled }}
+        - 0.0.0.0/0
+      {{- end}}
       #   - "::/64"
       {{- if .Values.admin.enabled }}
       port_admin: {{ .Values.admin.port }}
