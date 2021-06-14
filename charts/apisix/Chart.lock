@@ -1,7 +1,7 @@
 dependencies:
 - name: etcd
   repository: https://charts.bitnami.com/bitnami
-  version: 5.2.1
+  version: 6.2.6
 - name: apisix-dashboard
   repository: https://charts.apiseven.com
   version: 0.1.4
