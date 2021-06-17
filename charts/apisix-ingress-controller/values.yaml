@@ -42,7 +42,7 @@ replicaCount: 1
 image:
   repository: apache/apisix-ingress-controller
   pullPolicy: IfNotPresent
-  tag: "0.6.0"
+  tag: "1.0.0"
 
 imagePullSecrets: []
 
