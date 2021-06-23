@@ -211,12 +211,19 @@ etcd:
   service:
     port: 2379
 
-  replicaCount: 3
+  statefulset:
+    replicaCount: 3
 
 
 dashboard:
   enabled: false
-
+  config:
+    conf:
+      etcd:
+        endpoints:
+          - apisix-etcd:2379
+        username: admin
+        password: edd1c9f034335f136f87ad84b625c8f1
 
 ingress-controller:
   enabled: false
