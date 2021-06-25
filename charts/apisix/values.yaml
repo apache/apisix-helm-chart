@@ -221,11 +221,6 @@ etcd:
 
 dashboard:
   enabled: false
-  config:
-    conf:
-      etcd:
-        endpoints:
-          - apisix-etcd:2379
 
 ingress-controller:
   enabled: false
