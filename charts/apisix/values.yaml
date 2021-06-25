@@ -219,8 +219,10 @@ etcd:
     size: 8Gi
     # storageClass: "-"
 
+
 dashboard:
   enabled: false
+
 
 ingress-controller:
   enabled: false
