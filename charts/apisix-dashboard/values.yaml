@@ -24,7 +24,7 @@ image:
   repository: apache/apisix-dashboard
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2.6"
+  tag: "2.7"
 
 imagePullSecrets: []
 nameOverride: ""
