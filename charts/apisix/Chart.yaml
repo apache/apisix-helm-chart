@@ -44,7 +44,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: etcd.enabled
   - name: apisix-dashboard
-    version: 0.1.4
+    version: 0.1.5
     repository: https://charts.apiseven.com
     condition: dashboard.enabled
     alias: dashboard
