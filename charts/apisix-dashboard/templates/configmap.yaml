@@ -60,3 +60,7 @@ data:
           password: {{ .password }}
         {{- end }}
     {{- end }}
+  {{ if .Values.config.schema }}
+  schema.json: |-
+{{ .Values.config.schema | indent 4 }}
+  {{ end }}

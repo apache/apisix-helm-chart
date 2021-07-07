@@ -69,6 +69,11 @@ spec:
             - mountPath: /usr/local/apisix-dashboard/conf/conf.yaml
               name: apisix-dashboard-config
               subPath: conf.yaml
+            {{ if .Values.config.schema }}
+            - mountPath: /usr/local/apisix-dashboard/conf/schema.json
+              name: apisix-dashboard-config
+              subPath: schema.json
+            {{ end }}
       volumes:
         - configMap:
             name: {{ include "apisix-dashboard.fullname" . }}

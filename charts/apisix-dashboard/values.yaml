@@ -62,6 +62,7 @@ config:
       endpoints:
         - apisix-etcd:2379
       # Etcd basic auth info
+      prefix: "/apisix"
       username: ~
       password: ~
     log:
@@ -77,6 +78,7 @@ config:
     users:
       - username: admin
         password: admin
+  schema: ~
 
 service:
   type: ClusterIP

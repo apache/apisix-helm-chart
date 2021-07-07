@@ -31,6 +31,12 @@ $ helm repo update
 $ helm install apisix-dashboard apisix/apisix-dashboard
 ```
 
+- Configure the custom plug-in JSONSchema
+
+```shell
+helm install <name> dickens7/apisix-dashboard . -n <namespace> --set-file config.schema=./schema.json
+```
+
 ## Uninstall
 
 To uninstall/delete the `apisix-dashboard` release:
@@ -38,3 +44,29 @@ To uninstall/delete the `apisix-dashboard` release:
 ```shell
 $ helm uninstall apisix-dashboard
 ```
+
+First Header | Second Header
+------------ | -------------
+Content from cell 1 | Content from cell 2
+Content in the first column | Content in the second column
+
+## Configuration
+
+Parameter | Description | Default
+------------ | ------------- | ------------- 
+ Config.conf |  |  
+ config.conf.listen.host | the address on which the `Manager API` should listen. | 0.0.0.0
+ config.conf.listen.port | The port on which the `Manager API` should listen. | 9000
+ config.conf.etcd.endpoints | upports defining multiple etcd host addresses for an etcd cluster | [apisix-etcd:2379]
+ config.conf.etcd.prefix | apisix config's prefix in etcd | /apisix
+ config.conf.etcd.username | ignore etcd username if not enable etcd auth | nil
+ config.conf.etcd.password | ignore etcd password if not enable etcd auth | nil
+ config.conf.log.errorLog.level | supports levels, lower to higher: debug, info, warn, error, panic, fatal | warn
+ config.conf.log.errorLog.filePath | supports relative path, absolute path, standard output | /dev/stderr
+ config.conf.log.accessLog.filePath | supports relative path, absolute path, standard output | /dev/stdout
+ Config.authentication |  |  
+ config.authentication.secert | secret for jwt token generation. | secert
+ config.authentication.expireTime | jwt token expire time, in second | 3600
+ config.authentication.users | username and password for login `manager api` | 
+ Config.schema |  |  
+ config.schema | Configure the custom plug-in JSONSchema | 
