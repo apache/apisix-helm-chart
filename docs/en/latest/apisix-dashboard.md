@@ -34,7 +34,7 @@ $ helm install apisix-dashboard apisix/apisix-dashboard
 - Configure the custom plug-in JSONSchema
 
 ```shell
-helm install <name> dickens7/apisix-dashboard . -n <namespace> --set-file config.schema=./schema.json
+helm install <name> apisix/apisix-dashboard . -n <namespace> --set-file config.schema=./schema.json
 ```
 
 ## Uninstall
