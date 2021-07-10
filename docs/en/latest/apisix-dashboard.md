@@ -65,3 +65,4 @@ Parameter | Description | Default
  config.authentication.users | username and password for login `Manager API` | 
  Config.schema |  |  
  config.schema | Jsonchema exported on the Apisix server [How to get jsonschema?](https://apisix.apache.org/docs/dashboard/FAQ/#4-after-modifying-the-plugin-schema-or-creating-a-custom-plugin-in-apache-apisix-why-cant-i-find-it-on-the-dashboard) | 
+ 
