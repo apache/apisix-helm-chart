@@ -31,7 +31,7 @@ $ helm repo update
 $ helm install apisix-dashboard apisix/apisix-dashboard
 ```
 
-- Configure the custom plug-in JSONSchema
+- Configure the custom plug-in JSONSchema [How to get jsonschema?](https://apisix.apache.org/docs/dashboard/FAQ/#4-after-modifying-the-plugin-schema-or-creating-a-custom-plugin-in-apache-apisix-why-cant-i-find-it-on-the-dashboard)
 
 ```shell
 helm install <name> apisix/apisix-dashboard . -n <namespace> --set-file config.schema=./schema.json
@@ -44,11 +44,6 @@ To uninstall/delete the `apisix-dashboard` release:
 ```shell
 $ helm uninstall apisix-dashboard
 ```
-
-First Header | Second Header
------------- | -------------
-Content from cell 1 | Content from cell 2
-Content in the first column | Content in the second column
 
 ## Configuration
 
@@ -67,6 +62,6 @@ Parameter | Description | Default
  Config.authentication |  |  
  config.authentication.secert | secret for jwt token generation. | secert
  config.authentication.expireTime | jwt token expire time, in second | 3600
- config.authentication.users | username and password for login `manager api` | 
+ config.authentication.users | username and password for login `Manager API` | 
  Config.schema |  |  
- config.schema | Configure the custom plug-in JSONSchema | 
+ config.schema | Jsonchema exported on the Apisix server [How to get jsonschema?](https://apisix.apache.org/docs/dashboard/FAQ/#4-after-modifying-the-plugin-schema-or-creating-a-custom-plugin-in-apache-apisix-why-cant-i-find-it-on-the-dashboard) | 
