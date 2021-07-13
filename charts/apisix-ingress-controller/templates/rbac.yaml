@@ -104,7 +104,6 @@ rules:
       - deployments
       - deployments/scale
       - ingresses
-      - ingresses/status
       - networkpolicies
       - replicasets
       - replicasets/scale
@@ -142,10 +141,12 @@ rules:
       - apisixroutes/status
       - apisixupstreams
       - apisixupstreams/status
-      - apisixservices
       - apisixtlses
       - apisixtlses/status
       - apisixclusterconfigs
+      - apisixclusterconfigs/status
+      - apisixconsumers
+      - apisixconsumers/status
     verbs:
       - '*'
   - apiGroups:
