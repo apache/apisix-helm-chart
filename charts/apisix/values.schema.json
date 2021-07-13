@@ -1,0 +1,255 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "apisix": {
+      "type": "object",
+      "title": "APISIX Setting(s)",
+      "form": true,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable apisix",
+          "description": "Enable or disable Apache APISIX itself",
+          "form": true,
+          "default": true
+        },
+        "replicaCount": {
+          "type": "integer",
+          "title": "Number of replicas",
+          "form": true,
+          "default": 1,
+          "hidden": {
+            "condition": false,
+            "value": "apisix.enabled"
+          }
+        }
+      }
+    },
+    "etcd": {
+      "type": "object",
+      "title": "Etcd configuration",
+      "form": true,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable etcd",
+          "description": "install etcd(v3) by default, set false if do not want to install etcd(v3) together",
+          "form": true,
+          "default": true
+        },
+        "replicaCount": {
+          "type": "integer",
+          "title": "Number of replicas",
+          "form": true,
+          "default": 3,
+          "hidden": {
+            "value": "etcd.enabled",
+            "condition": false
+          }
+        },
+        "host": {
+          "type": "array",
+          "title": "External etcd address",
+          "form": true,
+          "hidden": {
+            "value": "etcd.enabled",
+            "condition": true
+          },
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "gateway": {
+      "type": "object",
+      "title": "APISIX gateway setting(s)",
+      "form": true,
+      "properties": {
+        "tls": {
+          "type": "object",
+          "title": "TLS setting(s)",
+          "form": true,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "title": "Enabled TLS",
+              "form": true
+            }
+          }
+        },
+        "stream": {
+          "type": "object",
+          "title": "Stream setting(s)",
+          "form": true,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "title": "Enable TCP/UDP porxy",
+              "form": true
+            }
+          }
+        }
+      }
+    },
+    "dashboard": {
+      "type": "object",
+      "title": "Dashboard setting(s)",
+      "form": true,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enabled Dashboard",
+          "form": true,
+          "default": true
+        }
+      }
+    },
+    "ingress-controller": {
+      "type": "object",
+      "title": "Ingress setting(s)",
+      "form": true,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enabled Ingress-Controller",
+          "form": true,
+          "default": true
+        }
+      }
+    },
+    "admin": {
+      "type": "object",
+      "title": "Admin API setting(s)",
+      "form": true,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Admin API",
+          "form": true,
+          "default": true
+        }
+      }
+    },
+    "plugins": {
+      "type": "array",
+      "title": "APISIX Plugins",
+      "form": true,
+      "description": "APISIX plugins to be enabled",
+      "items": {
+        "type": "string",
+        "enum": [
+          "api-breaker",
+          "authz-keycloak",
+          "basic-auth",
+          "batch-requests",
+          "consumer-restriction",
+          "cors",
+          "echo",
+          "fault-injection",
+          "grpc-transcode",
+          "hmac-auth",
+          "http-logger",
+          "ip-restriction",
+          "jwt-auth",
+          "kafka-logger",
+          "key-auth",
+          "limit-conn",
+          "limit-count",
+          "limit-req",
+          "node-status",
+          "openid-connect",
+          "prometheus",
+          "proxy-cache",
+          "proxy-mirror",
+          "proxy-rewrite",
+          "redirect",
+          "referer-restriction",
+          "request-id",
+          "request-validation",
+          "response-rewrite",
+          "serverless-post-function",
+          "serverless-pre-function",
+          "sls-logger",
+          "syslog",
+          "tcp-logger",
+          "udp-logger",
+          "uri-blocker",
+          "wolf-rbac",
+          "zipkin",
+          "traffic-split"
+        ]
+      }
+    },
+    "stream_plugins": {
+      "type": "array",
+      "title": "APISIX Stream Plugin",
+      "description": "APISIX plugins to be enabled",
+      "form": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "mqtt-proxy"
+        ]
+      }
+    },
+    "autoscaling": {
+      "type": "object",
+      "title": "Autoscaling setting(s)",
+      "form": true,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enabled HPA",
+          "form": true
+        },
+        "minReplicas": {
+          "type": "integer",
+          "title": "minReplicas",
+          "form": true,
+          "default": 1,
+          "minimum": 1,
+          "hidden": {
+            "value": "autoscaling.enabled",
+            "condition": false
+          }
+        },
+        "maxReplicas": {
+          "type": "integer",
+          "title": "maxReplicas",
+          "form": true,
+          "default": 100,
+          "hidden": {
+            "value": "autoscaling.enabled",
+            "condition": false
+          }
+        },
+        "targetCPUUtilizationPercentage": {
+          "type": "integer",
+          "title": "targetCPUUtilizationPercentage",
+          "form": true,
+          "default": 80,
+          "minimum": 1,
+          "maximum": 100,
+          "hidden": {
+            "value": "autoscaling.enabled",
+            "condition": false
+          }
+        },
+        "targetMemoryUtilizationPercentage": {
+          "type": "integer",
+          "title": "targetMemoryUtilizationPercentage",
+          "form": true,
+          "default": 80,
+          "minimum": 1,
+          "maximum": 100,
+          "hidden": {
+            "value": "autoscaling.enabled",
+            "condition": false
+          }
+        }
+      }
+    }
+  }
+}
