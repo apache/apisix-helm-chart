@@ -4,7 +4,7 @@
   "properties": {
     "apisix": {
       "type": "object",
-      "title": "APISIX Setting(s)",
+      "title": "Apache APISIX Setting(s)",
       "form": true,
       "properties": {
         "enabled": {
@@ -19,6 +19,7 @@
           "title": "Number of replicas",
           "form": true,
           "default": 1,
+          "minimum": 1,
           "hidden": {
             "condition": false,
             "value": "apisix.enabled"
@@ -43,6 +44,7 @@
           "title": "Number of replicas",
           "form": true,
           "default": 3,
+          "minimum": 1,
           "hidden": {
             "value": "etcd.enabled",
             "condition": false
