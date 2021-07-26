@@ -25,7 +25,7 @@ title: FAQ
 
 The Charts will install ETCD `3.4.14` by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host={http://your_etcd_address:2379}`.
 
-Please use the FQDN address or the IP of the etcd.
+Please use the FQDN or the IP address of the ETCD cluster.
 
 ```shell
 # if etcd export by kubernetes service need spell fully qualified name
