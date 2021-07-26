@@ -23,7 +23,7 @@ title: FAQ
 
 ### 1. How to install APISIX only?
 
-The Charts will install etcd 3.4.14 by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host={http://your_etcd_address:2379}`.
+The Charts will install ETCD `3.4.14` by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host={http://your_etcd_address:2379}`.
 
 Please use the FQDN address or the IP of the etcd.
 
