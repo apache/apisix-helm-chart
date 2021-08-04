@@ -42,7 +42,7 @@ replicaCount: 1
 image:
   repository: apache/apisix-ingress-controller
   pullPolicy: IfNotPresent
-  tag: "1.0.0"
+  tag: "1.1.0"
 
 imagePullSecrets: []
 
@@ -75,7 +75,7 @@ config:
     kubeconfig: ""
     # how long should apisix-ingress-controller re-synchronizes with Kubernetes,
     # default is 6h,
-    resyncInterval: "60s"
+    resyncInterval: "6h"
     # namespace list that controller will watch for resources,
     # by default all namespaces (represented by "*") are watched.
     appNamespaces: ["*"]
