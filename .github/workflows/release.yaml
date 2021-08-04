@@ -12,6 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
+          submodules: recursive
           fetch-depth: 0
 
       - name: Configure Git
@@ -20,9 +21,9 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Install Helm
-        uses: ./.github/actions/setup-helm
-        with:
-          version: v3.4.0
+        run: |
+          echo "installing helm 3..."
+          curl -sSL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
       - name: Add Helm repo
         run: |
