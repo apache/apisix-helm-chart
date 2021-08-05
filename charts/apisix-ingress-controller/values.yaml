@@ -42,7 +42,7 @@ replicaCount: 1
 image:
   repository: apache/apisix-ingress-controller
   pullPolicy: IfNotPresent
-  tag: "1.0.0"
+  tag: "1.1.0"
 
 imagePullSecrets: []
 
@@ -75,7 +75,7 @@ config:
     kubeconfig: ""
     # how long should apisix-ingress-controller re-synchronizes with Kubernetes,
     # default is 6h,
-    resyncInterval: "60s"
+    resyncInterval: "6h"
     # namespace list that controller will watch for resources,
     # by default all namespaces (represented by "*") are watched.
     appNamespaces: ["*"]
@@ -92,8 +92,8 @@ config:
     # "extensions/v1beta1", default is "networking/v1".
     ingressVersion: "networking/v1"
     # the supported apisixroute api group version, can be "apisix.apache.org/v1"
-    # or "apisix.apache.org/v2alpha1",
-    apisixRouteVersion: "apisix.apache.org/v2alpha1"
+    # "apisix.apache.org/v2alpha1" or "apisix.apache.org/v2beta1"
+    apisixRouteVersion: "apisix.apache.org/v2beta1"
   # APISIX related configurations.
   apisix:
     baseURL: "http://apisix-admin:9180/apisix/admin"

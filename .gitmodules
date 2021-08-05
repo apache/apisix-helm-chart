@@ -2,9 +2,6 @@
 	path = .github/actions/setup-kind
 	url = https://github.com/engineerd/setup-kind.git
 	branch = v0.5.0
-[submodule ".github/actions/setup-helm"]
-	path = .github/actions/setup-helm
-	url = https://github.com/Azure/setup-helm.git
 [submodule ".github/actions/chart-releaser-action"]
 	path = .github/actions/chart-releaser-action
 	url = https://github.com/helm/chart-releaser-action.git
