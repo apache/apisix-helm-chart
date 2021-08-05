@@ -1,0 +1,65 @@
+apiVersion: v1
+entries:
+  apisix:
+  - apiVersion: v2
+    appVersion: 2.7.0
+    created: "2021-08-05T02:07:04.078643959Z"
+    dependencies:
+    - condition: etcd.enabled
+      name: etcd
+      repository: https://charts.bitnami.com/bitnami
+      version: 6.2.6
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: apisix-dashboard
+      repository: https://charts.apiseven.com
+      version: 0.1.5
+    - alias: ingress-controller
+      condition: ingress-controller.enabled
+      name: apisix-ingress-controller
+      repository: https://charts.apiseven.com
+      version: 0.5.0
+    description: A Helm chart for Apache APISIX
+    digest: 2a50f26ec79edc88bd5ca3f345194642ba948b1cfda3aa5a6cdaffd3456b8c12
+    icon: https://apache.org/logos/res/apisix/apisix.png
+    maintainers:
+    - name: tao12345666333
+    name: apisix
+    type: application
+    urls:
+    - https://github.com/apache/apisix-helm-chart/releases/download/apisix-0.3.5/apisix-0.3.5.tgz
+    version: 0.3.5
+  apisix-dashboard:
+  - apiVersion: v2
+    appVersion: 2.7.0
+    created: "2021-08-05T02:07:04.234131918Z"
+    description: A Helm chart for Apache APISIX Dashboard
+    digest: c0ea8fd8a8bf93e3ea788338be67469b4ba3f34ab2d3e64b9c9a05aad9765fcf
+    icon: https://apache.org/logos/res/apisix/apisix.png
+    maintainers:
+    - name: tao12345666333
+    name: apisix-dashboard
+    type: application
+    urls:
+    - https://github.com/apache/apisix-helm-chart/releases/download/apisix-dashboard-0.1.5/apisix-dashboard-0.1.5.tgz
+    version: 0.1.5
+  apisix-ingress-controller:
+  - apiVersion: v2
+    appVersion: 1.1.0
+    created: "2021-08-05T02:07:04.355209928Z"
+    description: Apache APISIX Ingress Controller for Kubernetes
+    digest: c4c1939a2bdb0c3abe9d3bc8be62be289c86dcef3540eeac8a83fcb1e2ce80b6
+    icon: https://apache.org/logos/res/apisix/apisix.png
+    keywords:
+    - ingress
+    - apisix
+    - nginx
+    - crd
+    maintainers:
+    - name: tao12345666333
+    name: apisix-ingress-controller
+    type: application
+    urls:
+    - https://github.com/apache/apisix-helm-chart/releases/download/apisix-ingress-controller-0.6.0/apisix-ingress-controller-0.6.0.tgz
+    version: 0.6.0
+generated: "2021-08-05T02:07:04.355214928Z"
