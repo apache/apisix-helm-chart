@@ -109,6 +109,7 @@ data:
         ssl: 'radixtree_sni'          # radixtree_sni: match route by SNI(base on radixtree)
       {{- if and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0)) }}
       stream_proxy:                 # TCP/UDP proxy
+        only: {{ .Values.gateway.stream.only }}
         {{- if gt (len .Values.gateway.stream.tcp) 0 }}
         tcp:                        # TCP proxy port list
           {{- range .Values.gateway.stream.tcp }}
