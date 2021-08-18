@@ -21,7 +21,7 @@ title: FAQ
 #
 -->
 
-### 1. How to install APISIX only?
+### How to install APISIX only?
 
 The Charts will install ETCD `3.4.14` by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host={http://your_etcd_address:2379}`.
 
@@ -34,7 +34,7 @@ $ helm install apisix apisix/apisix \
     --set etcd.host={http://etcd_node_1:2379\,http://etcd_node_2:2379}
 ```
 
-2. Why get 403 when I access Apache APISIX admin api?
+### Why get 403 when I access Apache APISIX admin api?
 
 We can define `admin.allow.ipList` in CIDR.
 
