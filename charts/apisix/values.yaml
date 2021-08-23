@@ -86,6 +86,7 @@ gateway:
       enabled: true
   stream:  # L4 proxy (TCP/UDP)
     enabled: false
+    only: false
     tcp: []
     udp: []
   ingress:
