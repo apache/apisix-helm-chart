@@ -101,6 +101,10 @@ config:
 
 resources: {}
 
+admin:
+  serviceName: apisix-admin
+  servicePort: 9180
+
 autoscaling:
   enabled: false
   minReplicas: 1
