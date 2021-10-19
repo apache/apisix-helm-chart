@@ -48,8 +48,8 @@ spec:
                 path: config.yaml
       initContainers:
         - name: wait-apisix-admin
-          image: busybox:1.28
-          command: ['sh', '-c', "until nc -z {{ .Values.admin.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local {{ .Values.admin.servicePort }} ; do echo waiting for apisix-admin; sleep 2; done;"]
+          image: {{ .Values.initContainer.image }}:{{.Values.initContainer.tag }}
+          command: ['sh', '-c', "until nc -z {{ .Values.admin.serviceName }}.{{ .Values.admin.serviceNamespace }}.svc.{{.Values.kubernetes.clusterDomain}} {{ .Values.admin.servicePort }} ; do echo waiting for apisix-admin; sleep 2; done;"]
       containers:
         - name: {{ .Chart.Name }}
           command:

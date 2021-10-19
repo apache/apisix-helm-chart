@@ -103,7 +103,15 @@ resources: {}
 
 admin:
   serviceName: apisix-admin
+  serviceNamespace: ingress-apisix
   servicePort: 9180
+
+kubernetes:
+  clusterDomain: cluster.local
+
+initContainer:
+  image: busybox
+  tag: 1.28
 
 autoscaling:
   enabled: false
