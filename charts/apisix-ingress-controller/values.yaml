@@ -45,6 +45,7 @@ image:
   tag: "1.2.0"
 
 imagePullSecrets: []
+clusterDomain: cluster.local
 
 service:
   port: 80
@@ -96,18 +97,12 @@ config:
     apisixRouteVersion: "apisix.apache.org/v2beta1"
   # APISIX related configurations.
   apisix:
-    baseURL: "http://apisix-admin:9180/apisix/admin"
+    serviceName: apisix-admin
+    serviceNamespace: ingress-apisix
+    servicePort: 9180
     adminKey: "edd1c9f034335f136f87ad84b625c8f1"
 
 resources: {}
-
-admin:
-  serviceName: apisix-admin
-  serviceNamespace: ingress-apisix
-  servicePort: 9180
-
-kubernetes:
-  clusterDomain: cluster.local
 
 initContainer:
   image: busybox

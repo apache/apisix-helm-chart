@@ -35,7 +35,7 @@ data:
       ingress_version: {{ .Values.config.kubernetes.ingressVersion | quote }}
       apisix_route_version: {{ .Values.config.kubernetes.apisixRouteVersion | quote }}
     apisix:
-      base_url: {{ .Values.config.apisix.baseURL | quote }}
+      base_url: http://{{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{.Values.clusterDomain}}:{{ .Values.config.apisix.servicePort }}/apisix/admin
       admin_key: {{ .Values.config.apisix.adminKey | quote }}
 kind: ConfigMap
 metadata:
