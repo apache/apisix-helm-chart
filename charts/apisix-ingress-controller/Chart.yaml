@@ -24,8 +24,8 @@ keywords:
   - nginx
   - crd
 type: application
-version: 0.7.0
-appVersion: 1.2.0
+version: 0.8.0
+appVersion: 1.3.0
 
 maintainers:
   - name: tao12345666333
