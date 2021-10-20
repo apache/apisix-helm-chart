@@ -20,14 +20,14 @@ global:
 
 apisix:
   # Enable or disable Apache APISIX itself
-  # Set it to flase and ingress-controller.enabled=true will deploy only ingress-controller
+  # Set it to false and ingress-controller.enabled=true will deploy only ingress-controller
   enabled: true
 
   image:
     repository: apache/apisix
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 2.7-alpine
+    tag: 2.10.0-alpine
 
   replicaCount: 1
 
@@ -142,6 +142,7 @@ plugins:
   - hmac-auth
   - http-logger
   - ip-restriction
+  - ua-restriction
   - jwt-auth
   - kafka-logger
   - key-auth
@@ -150,6 +151,7 @@ plugins:
   - limit-req
   - node-status
   - openid-connect
+  - authz-casbin
   - prometheus
   - proxy-cache
   - proxy-mirror
@@ -169,8 +171,12 @@ plugins:
   - wolf-rbac
   - zipkin
   - traffic-split
+  - gzip
+  - real-ip
 stream_plugins:
   - mqtt-proxy
+  - ip-restriction
+  - limit-conn
 
 
 dns:

@@ -12,10 +12,10 @@ This chart bootstraps all the components needed to run Apache APISIX on a Kubern
 ## TL;DR
 
 ```sh
-➜ helm repo add apisix https://charts.apiseven.com
-➜ helm repo update
+helm repo add apisix https://charts.apiseven.com
+helm repo update
 
-➜ helm install apisix/apisix --generate-name
+helm install apisix/apisix --generate-name
 ```
 
 ## Prerequisites
@@ -29,10 +29,10 @@ This chart bootstraps all the components needed to run Apache APISIX on a Kubern
 To install the chart with the release name `my-apisix`:
 
 ```sh
-➜ helm repo add apisix https://charts.apiseven.com
-➜ helm repo update
+helm repo add apisix https://charts.apiseven.com
+helm repo update
 
-➜ helm install my-apisix apisix/apisix
+helm install my-apisix apisix/apisix
 ```
 
 ## Uninstall
@@ -40,7 +40,7 @@ To install the chart with the release name `my-apisix`:
  To uninstall/delete a Helm release `my-apisix`:
 
  ```sh
-➜ helm delete my-apisix
+helm delete my-apisix
  ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.

@@ -29,7 +29,7 @@ Please use the FQDN or the IP address of the ETCD cluster.
 
 ```shell
 # if etcd export by kubernetes service need spell fully qualified name
-$ helm install apisix apisix/apisix \
+helm install apisix apisix/apisix \
     --set etcd.enabled=false \
     --set etcd.host={http://etcd_node_1:2379\,http://etcd_node_2:2379}
 ```
@@ -39,7 +39,7 @@ $ helm install apisix apisix/apisix \
 We can define `admin.allow.ipList` in CIDR.
 
 ```shell
-$ helm install apisix apisix/apisix \
+helm install apisix apisix/apisix \
     --set admin.allow.ipList="10.22.100.12/8" \
     --set admin.allow.ipList="172.0.0.0/24"
 ```
@@ -47,6 +47,6 @@ $ helm install apisix apisix/apisix \
 If you want to allow all IPs for a quick test, just set `admin.allow.ipList=""`
 
 ```shell
-$ helm install apisix apisix/apisix \
+helm install apisix apisix/apisix \
     --set admin.allow.ipList=""
 ```
