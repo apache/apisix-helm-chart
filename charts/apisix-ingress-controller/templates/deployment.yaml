@@ -46,6 +46,10 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
+      initContainers:
+        - name: wait-apisix-admin
+          image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
+          command: ['sh', '-c', "until nc -z {{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{ .Values.clusterDomain }} {{ .Values.config.apisix.servicePort }} ; do echo waiting for apisix-admin; sleep 2; done;"]
       containers:
         - name: {{ .Chart.Name }}
           command:
