@@ -23,6 +23,12 @@ apisix:
   # Set it to false and ingress-controller.enabled=true will deploy only ingress-controller
   enabled: true
 
+  customLuaSharedDicts: []
+    # - name: foo
+    #   size: 10k
+    # - name: bar
+    #   size: 1m
+
   image:
     repository: apache/apisix
     pullPolicy: IfNotPresent
