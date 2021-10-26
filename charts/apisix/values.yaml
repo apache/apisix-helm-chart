@@ -178,6 +178,28 @@ stream_plugins:
   - ip-restriction
   - limit-conn
 
+# customPlugins allows you to mount your own HTTP plugins.
+customPlugins:
+  enabled: false
+  # the lua_path that tells APISIX where it can find plugins,
+  # note the last ';' is required.
+  luaPath: "/opts/custom_plugins/?.lua;"
+  plugins:
+      # plugin name.
+    - name: ""
+      # plugin attrs
+      attrs: |
+      # plugin codes can be saved inside configmap object.
+      configMap:
+        # name of configmap.
+        name: ""
+        # since keys in configmap is flat, mountPath allows to define the mount
+        # path, so that plugin codes can be mounted hierarchically.
+        mounts:
+          - key: ""
+            path: ""
+          - key: ""
+            path: ""
 
 dns:
   resolvers:

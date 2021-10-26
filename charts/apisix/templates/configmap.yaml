@@ -49,6 +49,10 @@ data:
       enable_ipv6: true
       config_center: etcd             # etcd: use etcd to store the config value
                                       # yaml: fetch the config value from local yaml file `/your_path/conf/apisix.yaml`
+      {{- if .Values.customPlugins.enabled }}
+      extra_lua_path: {{ .Values.customPlugins.luaPath | quote }}
+      {{- end }}
+
 
       #proxy_protocol:                 # Proxy Protocol configuration
       #  listen_http_port: 9181        # The port with proxy protocol for http, it differs from node_listen and port_admin.
@@ -171,12 +175,24 @@ data:
 
     {{- if .Values.plugins }}
     plugins:                          # plugin list
-    {{- end }}
     {{- range $plugin := .Values.plugins }}
       - {{ $plugin }}
+    {{- end }}
+    {{- if .Values.customPlugins.enabled }}
+    {{- range $plugin := .Values.customPlugins.plugins }}
+      - {{ $plugin.name }}
+    {{- end }}
+    {{- end }}
     {{- end }}
     stream_plugins:
     {{- range $plugin := .Values.stream_plugins }}
       - {{ $plugin }}
+    {{- end }}
+
+    {{- if .Values.customPlugins.enabled }}
+    plugin_attr:
+    {{- range $plugin := .Values.customPlugins.plugins }}
+      {{ $plugin.name }}: {{ $plugin.attrs | toYaml | nindent 8 }}
+    {{- end }}
     {{- end }}
 {{- end }}

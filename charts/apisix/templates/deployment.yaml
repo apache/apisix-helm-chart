@@ -82,6 +82,15 @@ spec:
             - mountPath: /usr/local/apisix/conf/config.yaml
               name: apisix-config
               subPath: config.yaml
+          {{- if .Values.customPlugins.enabled }}
+          {{- range $plugin := .Values.customPlugins.plugins }}
+          {{- range $mount := $plugin.configMap.mounts }}
+            - mountPath: {{ $mount.path }}
+              name: plugin-{{ $plugin.configMap.name }}
+              subPath: {{ $mount.key }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
           resources:
             {{- toYaml .Values.apisix.resources | nindent 12 }}
       {{- if .Values.etcd.enabled }}
@@ -94,6 +103,13 @@ spec:
         - configMap:
             name: {{ include "apisix.fullname" . }}
           name: apisix-config
+      {{- if .Values.customPlugins.enabled }}
+      {{- range $plugin := .Values.customPlugins.plugins }}
+        - name: plugin-{{ $plugin.configMap.name }}
+          configMap:
+            name: {{ $plugin.configMap.name }}
+      {{- end }}
+      {{- end }}
       {{- with .Values.apisix.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
