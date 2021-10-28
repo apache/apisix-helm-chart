@@ -163,6 +163,24 @@ data:
           {{ $dict.name }}: {{ $dict.size }}
         {{- end }}
         {{- end }}
+      {{- if .Values.configurationSnippet.main }}
+      main_configuration_snippet: {{ toYaml .Values.configurationSnippet.main | indent 6 }}
+      {{- end }}
+      {{- if .Values.configurationSnippet.httpStart }}
+      http_configuration_snippet: {{ toYaml .Values.configurationSnippet.httpStart | indent 6 }}
+      {{- end }}
+      {{- if .Values.configurationSnippet.httpEnd }}
+      http_end_configuration_snippet: {{ toYaml .Values.configurationSnippet.httpEnd | indent 6 }}
+      {{- end }}
+      {{- if .Values.configurationSnippet.httpSrv }}
+      http_server_configuration_snippet: {{ toYaml .Values.configurationSnippet.httpSrv | indent 6 }}
+      {{- end }}
+      {{- if .Values.configurationSnippet.httpAdmin }}
+      http_admin_configuration_snippet: {{ toYaml .Values.configurationSnippet.httpAdmin | indent 6 }}
+      {{- end }}
+      {{- if .Values.configurationSnippet.stream }}
+      stream_configuration_snippet: {{ toYaml .Values.configurationSnippet.stream | indent 6 }}
+      {{- end }}
 
     etcd:
     {{- if .Values.etcd.enabled }}
