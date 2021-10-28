@@ -183,7 +183,7 @@ customPlugins:
   enabled: false
   # the lua_path that tells APISIX where it can find plugins,
   # note the last ';' is required.
-  luaPath: "/opts/custom_plugins/?.lua;"
+  luaPath: "/opts/custom_plugins/?.lua"
   plugins:
       # plugin name.
     - name: ""
