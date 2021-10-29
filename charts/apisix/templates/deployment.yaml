@@ -83,8 +83,9 @@ spec:
               name: apisix-config
               subPath: config.yaml
             {{- if and .Values.gateway.tls.enabled .Values.gateway.tls.existingCASecret }}
-            - mountPath: /usr/local/apisix/conf/ssl
+            - mountPath: /usr/local/apisix/conf/ssl/{{ .Values.gateway.tls.certCAFilename }}
               name: ssl
+              subPath: {{ .Values.gateway.tls.certCAFilename }}
             {{- end }}
           {{- if .Values.customPlugins.enabled }}
           {{- range $plugin := .Values.customPlugins.plugins }}
