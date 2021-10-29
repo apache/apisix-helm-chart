@@ -257,6 +257,14 @@ etcd:
     rbac:
       # No authentication by default
       enabled: false
+      user: ""
+      password: ""
+    tls:
+      enabled: false
+      existingSecret: ""
+      certFilename: ""
+      certKeyFilename: ""
+      verify: true
 
   service:
     port: 2379
