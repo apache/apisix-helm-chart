@@ -88,6 +88,8 @@ gateway:
     enabled: false
     servicePort: 443
     containerPort: 9443
+    existingCASecret: ""
+    certCAFilename: ""
     http2:
       enabled: true
   stream:  # L4 proxy (TCP/UDP)
