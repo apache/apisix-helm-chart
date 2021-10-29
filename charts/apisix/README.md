@@ -103,6 +103,17 @@ Apache APISIX service parameters, this determines how users can access itself.
 | `admin.credentials.viewer` | Apache APISIX admin API viewer role credentials                                  | `4054f7cf07e344346cd3f287985e76a2`                      |
 | `admin.allow.ipList`       | the IP range allowed to Apache APISIX admin API                                  | `true`                                                  |
 
+### custom configuration snippet parameters
+
+| Parameter                        | Description                                                                                        | Default |
+|----------------------------------|----------------------------------------------------------------------------------------------------|---------|
+| `configurationSnippet.main`      | Add custom Nginx configuration (main block) to nginx.conf                                          | `{}`    |
+| `configurationSnippet.httpStart` | Add custom Nginx configuration (http block) to nginx.conf                                          | `{}`    |
+| `configurationSnippet.httpEnd`   | Add custom Nginx configuration (http block) to nginx.conf, will be put at the bottom of http block | `{}`    |
+| `configurationSnippet.httpSrv`   | Add custom Nginx configuration (server block) to nginx.conf                                        | `{}`    |
+| `configurationSnippet.httpAdmin` | Add custom Nginx configuration (Admin API server block) to nginx.conf                              | `{}`    |
+| `configurationSnippet.stream`    | Add custom Nginx configuration (stream block) to nginx.conf                                        | `{}`    |
+
 ### plugins and stream_plugins parameters 
 
 Default enabled plugins. See [configmap template](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/templates/configmap.yaml) for details.

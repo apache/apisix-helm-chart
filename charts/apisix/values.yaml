@@ -226,6 +226,19 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
 
+# Custom configuration snippet.
+configurationSnippet:
+  main: |
+
+  httpStart: |
+
+  httpEnd: |
+
+  httpSrv: |
+
+  httpAdmin: |
+
+  stream: |
 
 # etcd configuration
 # use the FQDN address or the IP of the etcd
