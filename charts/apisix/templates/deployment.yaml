@@ -87,6 +87,10 @@ spec:
               name: ssl
               subPath: {{ .Values.gateway.tls.certCAFilename }}
             {{- end }}
+            {{- if .Values.etcd.auth.tls.enabled }}
+            - mountPath: /etcd-ssl
+              name: etcd-ssl
+            {{- end }}
           {{- if .Values.customPlugins.enabled }}
           {{- range $plugin := .Values.customPlugins.plugins }}
           {{- range $mount := $plugin.configMap.mounts }}
@@ -112,6 +116,11 @@ spec:
         - secret:
             secretName: {{ .Values.gateway.tls.existingCASecret | quote }}
           name: ssl
+        {{- end }}
+        {{- if .Values.etcd.auth.tls.enabled }}
+        - secret:
+            secretName: {{ .Values.etcd.auth.tls.existingSecret | quote }}
+          name: etcd-ssl
         {{- end }}
       {{- if .Values.customPlugins.enabled }}
       {{- range $plugin := .Values.customPlugins.plugins }}

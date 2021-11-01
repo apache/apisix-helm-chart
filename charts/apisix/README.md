@@ -116,13 +116,28 @@ Apache APISIX service parameters, this determines how users can access itself.
 | `configurationSnippet.httpAdmin` | Add custom Nginx configuration (Admin API server block) to nginx.conf                              | `{}`    |
 | `configurationSnippet.stream`    | Add custom Nginx configuration (stream block) to nginx.conf                                        | `{}`    |
 
+### etcd parameters
+
+| Parameter                       | Description                                                                                                                                                      | Default                     |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| `etcd.enabled`                  | use built-in etcd                                                                                                                                                | `true`                      |
+| `etcd.host`                     | if `etcd.enabled` is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379. | `["http://etcd.host:2379"]` |
+| `etcd.prefix`                   | apisix configurations prefix                                                                                                                                     | `/apisix`                   |
+| `etcd.timeout`                  | Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster                                                                    | `30`                        |
+| `etcd.auth.rbac.enabled`        | enable auth for etcd                                                                                                                                             | `false`                     |
+| `etcd.auth.rbac.user`           | root username for etcd                                                                                                                                           | `""`                        |
+| `etcd.auth.rbac.password`       | root password for etcd                                                                                                                                           | `""`                        |
+| `etcd.auth.tls.enabled`         | enable etcd client certificate                                                                                                                                   | `false`                     |
+| `etcd.auth.tls.existingSecret`  | name of the secret contains etcd client cert                                                                                                                     | `""`                        |
+| `etcd.auth.tls.certFilename`    | etcd client cert filename using in `etcd.auth.tls.existingSecret`                                                                                                | `""`                        |
+| `etcd.auth.tls.certKeyFilename` | etcd client cert key filename using in `etcd.auth.tls.existingSecret`                                                                                            | `""`                        |
+| `etcd.auth.tls.verify`          | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd                                                                              | `true`                      |
+
+If etcd.enabled is true, set more values of bitnami/etcd helm chart use etcd as prefix
+
 ### plugins and stream_plugins parameters 
 
 Default enabled plugins. See [configmap template](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/templates/configmap.yaml) for details.
-
-### etcd parameters
-
-Configurations for etcd sub chart.
 
 ### dashboard parameters
 

@@ -197,6 +197,16 @@ data:
     {{- end }}
       prefix: {{ .Values.etcd.prefix | quote }}     # apisix configurations prefix
       timeout: {{ .Values.etcd.timeout }}   # 30 seconds
+      {{- if .Values.etcd.auth.rbac.enabled }}
+      user: {{ .Values.etcd.auth.rbac.user | quote }}
+      password: {{ .Values.etcd.auth.rbac.password | quote }}
+      {{- end }}
+      {{- if .Values.etcd.auth.tls.enabled }}
+      tls:
+        cert: "/etcd-ssl/{{ .Values.etcd.auth.tls.certFilename }}"
+        key: "/etcd-ssl/{{ .Values.etcd.auth.tls.certKeyFilename }}"
+        verify: {{ .Values.etcd.auth.tls.verify }}
+      {{- end }}
 
     {{- if .Values.plugins }}
     plugins:                          # plugin list
