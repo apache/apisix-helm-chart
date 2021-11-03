@@ -186,6 +186,8 @@ stream_plugins:
   - ip-restriction
   - limit-conn
 
+pluginAttrs: null
+
 # customPlugins allows you to mount your own HTTP plugins.
 customPlugins:
   enabled: false
@@ -265,6 +267,7 @@ etcd:
       certFilename: ""
       certKeyFilename: ""
       verify: true
+      sni: ""
 
   service:
     port: 2379
