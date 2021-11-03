@@ -167,22 +167,22 @@ data:
         {{- end }}
         {{- end }}
       {{- if .Values.configurationSnippet.main }}
-      main_configuration_snippet: {{ toYaml .Values.configurationSnippet.main | indent 6 }}
+      main_configuration_snippet: {{- toYaml .Values.configurationSnippet.main | indent 6 }}
       {{- end }}
       {{- if .Values.configurationSnippet.httpStart }}
-      http_configuration_snippet: {{ toYaml .Values.configurationSnippet.httpStart | indent 6 }}
+      http_configuration_snippet: {{- toYaml .Values.configurationSnippet.httpStart | indent 6 }}
       {{- end }}
       {{- if .Values.configurationSnippet.httpEnd }}
-      http_end_configuration_snippet: {{ toYaml .Values.configurationSnippet.httpEnd | indent 6 }}
+      http_end_configuration_snippet: {{- toYaml .Values.configurationSnippet.httpEnd | indent 6 }}
       {{- end }}
       {{- if .Values.configurationSnippet.httpSrv }}
-      http_server_configuration_snippet: {{ toYaml .Values.configurationSnippet.httpSrv | indent 6 }}
+      http_server_configuration_snippet: {{- toYaml .Values.configurationSnippet.httpSrv | indent 6 }}
       {{- end }}
       {{- if .Values.configurationSnippet.httpAdmin }}
       http_admin_configuration_snippet: {{ toYaml .Values.configurationSnippet.httpAdmin | indent 6 }}
       {{- end }}
       {{- if .Values.configurationSnippet.stream }}
-      stream_configuration_snippet: {{ toYaml .Values.configurationSnippet.stream | indent 6 }}
+      stream_configuration_snippet: {{- toYaml .Values.configurationSnippet.stream | indent 6 }}
       {{- end }}
 
     etcd:
@@ -227,7 +227,7 @@ data:
     {{- if .Values.customPlugins.enabled }}
     plugin_attr:
     {{- range $plugin := .Values.customPlugins.plugins }}
-      {{ $plugin.name }}: {{ $plugin.attrs | toYaml | nindent 8 }}
+      {{ $plugin.name }}: {{- $plugin.attrs | toYaml | nindent 8 }}
     {{- end }}
     {{- end }}
 {{- end }}
