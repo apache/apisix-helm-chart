@@ -188,7 +188,7 @@ stream_plugins:
   - ip-restriction
   - limit-conn
 
-pluginAttrs: null
+pluginAttrs: {}
 
 # customPlugins allows you to mount your own HTTP plugins.
 customPlugins:
