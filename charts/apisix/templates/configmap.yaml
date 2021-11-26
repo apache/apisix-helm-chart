@@ -226,6 +226,13 @@ data:
 
     {{- if .Values.customPlugins.enabled }}
     plugin_attr:
+      {{- if .Values.serviceMonitor.enabled }}
+      prometheus:
+        export_addr:
+          ip: 0.0.0.0
+          port: {{ .Values.serviceMonitor.containerPort }}
+        export_uri: {{ .Values.serviceMonitor.path }}
+      {{- end }}
     {{- range $plugin := .Values.customPlugins.plugins }}
       {{ $plugin.name }}: {{- $plugin.attrs | toYaml | nindent 8 }}
     {{- end }}

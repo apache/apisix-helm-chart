@@ -63,6 +63,11 @@ spec:
               containerPort: {{ .Values.admin.port }}
               protocol: TCP
             {{- end }}
+            {{- if .Values.serviceMonitor.enabled }}
+            - name: prometheus
+              containerPort: {{ .Values.serviceMonitor.containerPort }}
+              protocol: TCP
+            {{- end }}
           readinessProbe:
             failureThreshold: 6
             initialDelaySeconds: 10
