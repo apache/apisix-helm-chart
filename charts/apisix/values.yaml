@@ -247,7 +247,7 @@ configurationSnippet:
 serviceMonitor:
   enabled: false
   # namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix
-  namespace: ""   
+  namespace: ""
   # interval at which metrics should be scraped
   interval: 15s
   # path of the metrics endpoint
