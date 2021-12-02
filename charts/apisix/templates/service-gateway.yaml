@@ -40,7 +40,7 @@ spec:
   {{- end }}
   {{- end }}
   {{- end }}
-  {{- if gt (len .Values.admin.externalIPs) 0 }}
+  {{- if gt (len .Values.gateway.externalIPs) 0 }}
   externalIPs:
   {{- range $ip := .Values.gateway.externalIPs }}
   - {{ $ip }}
