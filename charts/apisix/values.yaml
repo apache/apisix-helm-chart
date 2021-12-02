@@ -80,6 +80,7 @@ gateway:
   # type: LoadBalancer
   # annotations:
   #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
+  externalIPs: []
   http:
     enabled: true
     servicePort: 80
