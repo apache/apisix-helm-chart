@@ -23,6 +23,9 @@ apisix:
   # Set it to false and ingress-controller.enabled=true will deploy only ingress-controller
   enabled: true
 
+  # Use Pod metadata.uid as the APISIX id.
+  setIDFromPodUID: false
+
   customLuaSharedDicts: []
     # - name: foo
     #   size: 10k
@@ -66,7 +69,6 @@ apisix:
   # If true, it will sets the anti-affinity of the Pod.
   podAntiAffinity:
     enabled: false
-
 
 nameOverride: ""
 fullnameOverride: ""
@@ -186,6 +188,8 @@ stream_plugins:
   - ip-restriction
   - limit-conn
 
+pluginAttrs: {}
+
 # customPlugins allows you to mount your own HTTP plugins.
 customPlugins:
   enabled: false
@@ -265,6 +269,7 @@ etcd:
       certFilename: ""
       certKeyFilename: ""
       verify: true
+      sni: ""
 
   service:
     port: 2379

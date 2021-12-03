@@ -79,6 +79,11 @@ spec:
                 - -c
                 - "sleep 30"
           volumeMounts:
+            {{- if .Values.apisix.setIDFromPodUID }}
+            - mountPath: /usr/local/apisix/conf/apisix.uid
+              name: id
+              subPath: apisix.uid
+            {{- end }}
             - mountPath: /usr/local/apisix/conf/config.yaml
               name: apisix-config
               subPath: config.yaml
@@ -121,6 +126,14 @@ spec:
         - secret:
             secretName: {{ .Values.etcd.auth.tls.existingSecret | quote }}
           name: etcd-ssl
+        {{- end }}
+        {{- if .Values.apisix.setIDFromPodUID }}
+        - downwardAPI:
+            items:
+              - path: "apisix.uid"
+                fieldRef:
+                  fieldPath: metadata.uid
+          name: id
         {{- end }}
       {{- if .Values.customPlugins.enabled }}
       {{- range $plugin := .Values.customPlugins.plugins }}

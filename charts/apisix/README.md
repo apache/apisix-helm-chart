@@ -73,6 +73,16 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.tolerations`                     | List of node taints to tolerate                     | `{}`                                                    |
 | `apisix.affinity`                        | Set affinity for Apache APISIX deploy               | `{}`                                                    |
 | `apisix.podAntiAffinity.enabled`         | Enable or disable podAntiAffinity                   | `false`                                                 |
+| `apisix.setIDFromPodUID` | Whether to use the Pod UID as the APISIX instance id, see [apache/apisix#5417](https://github.com/apache/apisix/issues/5417) to decide whether you should enable this setting) | `false` |
+| `apisix.customLuaSharedDicts` | Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict  | `[]` |
+| `apisix.pluginAttrs` | Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details | `{}` |
+| `apisix.customPlugins.enabled` | Whether to configure some custom plugins | `false` |
+| `apisix.customPlugins.luaPath` | Configure `LUA_PATH` so that custom plugin codes can be located | `""` |
+| `apisix.customPlugins.plugins[].name` | Custom plugin name | `""` |
+| `apisix.customPlugins.plugins[].attrs` | Custom plugin attributes | `{}` |
+| `apisix.customPlugins.plugins[].configMap.name` | Name of the ConfigMap where the plugin codes store | `""` |
+| `apisix.customPlugins.plugins[].configMap.mounts[].key` | Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the plugin code path. | `""` |
+| `apisix.customPlugins.plugins[].configMap.mounts[].path` | Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the plugin code path. | `""` |
 
 
 ### gateway parameters
@@ -132,8 +142,9 @@ Apache APISIX service parameters, this determines how users can access itself.
 | `etcd.auth.tls.certFilename`    | etcd client cert filename using in `etcd.auth.tls.existingSecret`                                                                                                | `""`                        |
 | `etcd.auth.tls.certKeyFilename` | etcd client cert key filename using in `etcd.auth.tls.existingSecret`                                                                                            | `""`                        |
 | `etcd.auth.tls.verify`          | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd                                                                              | `true`                      |
+| `etcd.auth.tls.sni`            | specify the TLS [Server Name Indication](https://en.wikipedia.org/wiki/Server_Name_Indication) extension,  the ETCD endpoint hostname will be used when this setting is unset. | `""` |
 
-If etcd.enabled is true, set more values of bitnami/etcd helm chart use etcd as prefix
+If etcd.enabled is true, set more values of bitnami/etcd helm chart use etcd as prefix.
 
 ### plugins and stream_plugins parameters 
 
