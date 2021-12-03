@@ -124,3 +124,7 @@ serviceMonitor:
   enabled: false
   namespace: "monitoring"
   interval: 15s
+  # @param serviceMonitor.labels ServiceMonitor extra labels
+  labels: {}
+  # @param serviceMonitor.annotations ServiceMonitor annotations
+  annotations: {}
