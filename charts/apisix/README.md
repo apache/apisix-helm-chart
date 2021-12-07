@@ -150,6 +150,33 @@ If etcd.enabled is true, set more values of bitnami/etcd helm chart use etcd as 
 
 Default enabled plugins. See [configmap template](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/templates/configmap.yaml) for details.
 
+### discovery parameters
+
+| Parameter                       | Description                                                                                                                                                                         | Default    |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| `discovery.enabled`                  | Enable or disable Apache APISIX integration service discovery | `false` |
+| `discovery.registry`                  | Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281), and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery) | nil |
+
+If you have enabled this feature,  here is an example:
+
+```yaml
+discovery:
+  enabled: true
+  registry:
+    eureka:
+      host:
+        - "http://${username}:${password}@${eureka_host1}:${eureka_port1}"
+        - "http://${username}:${password}@${eureka_host2}:${eureka_port2}"
+      prefix: "/eureka/"
+      fetch_interval: 30
+      weight: 100
+      timeout:
+        connect: 2000
+        send: 2000
+        read: 5000
+```
+
+
 ### dashboard parameters
 
 Configurations for apisix-dashboard sub chart.

@@ -213,6 +213,29 @@ customPlugins:
           - key: ""
             path: ""
 
+discovery:
+  enabled: false
+  registry:
+      # Integration service discovery registry. E.g eureka\dns\nacos\consul_kv
+      # reference:
+      # https://apisix.apache.org/docs/apisix/discovery#configuration-for-eureka
+      # https://apisix.apache.org/docs/apisix/discovery/dns#service-discovery-via-dns
+      # https://apisix.apache.org/docs/apisix/discovery/consul_kv#configuration-for-consul-kv
+      # https://apisix.apache.org/docs/apisix/discovery/nacos#configuration-for-nacos
+      #
+      # an eureka example:
+      # eureka:
+      #   host:
+      #     - "http://${username}:${password}@${eureka_host1}:${eureka_port1}"
+      #     - "http://${username}:${password}@${eureka_host2}:${eureka_port2}"
+      #   prefix: "/eureka/"
+      #   fetch_interval: 30
+      #   weight: 100
+      #   timeout:
+      #     connect: 2000
+      #     send: 2000
+      #     read: 5000
+
 dns:
   resolvers:
     - 127.0.0.1
