@@ -282,6 +282,10 @@ serviceMonitor:
   path: /apisix/prometheus/metrics
   # container port where the metrics are exposed
   containerPort: 9091
+  # @param serviceMonitor.labels ServiceMonitor extra labels
+  labels: {}
+  # @param serviceMonitor.annotations ServiceMonitor annotations
+  annotations: {}
 
 # etcd configuration
 # use the FQDN address or the IP of the etcd
