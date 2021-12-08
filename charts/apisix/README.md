@@ -176,6 +176,16 @@ discovery:
         read: 5000
 ```
 
+### logs parameters
+
+| Parameter                       | Description                                                                                                                                                                         | Default    |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| `logs.enableAccessLog`                  | Enable access log or not, default true | `true` |
+| `logs.accessLog`                  | Access log path | `/dev/stdout` |
+| `logs.accessLogFormat`                  | Access log format | `$remote_addr - $remote_user [$time_local] $http_host \"$request\" $status $body_bytes_sent $request_time \"$http_referer\" \"$http_user_agent\" $upstream_addr $upstream_status $upstream_response_time \"$upstream_scheme://$upstream_host$upstream_uri\"` |
+| `logs.accessLogFormatEscape`                  | Allows setting json or default characters escaping in variables | `default` |
+| `logs.errorLog`                  | Error log path | `/dev/stderr` |
+| `logs.errorLogLevel`                  | Error log level | `warn` |
 
 ### dashboard parameters
 
