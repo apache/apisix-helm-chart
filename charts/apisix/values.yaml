@@ -279,6 +279,23 @@ configurationSnippet:
 
   stream: |
 
+# Observability configuration.
+# ref: https://apisix.apache.org/docs/apisix/plugins/prometheus/
+serviceMonitor:
+  enabled: false
+  # namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix
+  namespace: ""
+  # interval at which metrics should be scraped
+  interval: 15s
+  # path of the metrics endpoint
+  path: /apisix/prometheus/metrics
+  # container port where the metrics are exposed
+  containerPort: 9091
+  # @param serviceMonitor.labels ServiceMonitor extra labels
+  labels: {}
+  # @param serviceMonitor.annotations ServiceMonitor annotations
+  annotations: {}
+
 # etcd configuration
 # use the FQDN address or the IP of the etcd
 etcd:
