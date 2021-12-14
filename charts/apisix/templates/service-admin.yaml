@@ -25,6 +25,7 @@ metadata:
     {{- end }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
+    app.kubernetes.io/service: apisix-admin
 spec:
   type: {{ .Values.admin.type }}
   {{- if eq .Values.admin.type "LoadBalancer" }}

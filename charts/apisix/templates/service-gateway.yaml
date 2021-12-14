@@ -26,6 +26,7 @@ metadata:
     {{- end }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
+    app.kubernetes.io/service: apisix-gateway
 spec:
   type: {{ .Values.gateway.type }}
   externalTrafficPolicy: {{ .Values.gateway.externalTrafficPolicy }}
