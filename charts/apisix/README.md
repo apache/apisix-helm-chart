@@ -195,3 +195,15 @@ Configurations for apisix-dashboard sub chart.
 ### ingress-controller parameters
 
 Configurations for Apache APISIX ingress-controller sub chart.
+
+### serviceMonitor parameters
+
+| Parameter                      | Description                                                  | Default                      |
+| ------------------------------ | ------------------------------------------------------------ | ---------------------------- |
+| `serviceMonitor.enabled`       | Enable or disable Apache APISIX serviceMonitor               | `false`                      |
+| `serviceMonitor.namespace`     | Namespace where the serviceMonitor is deployed               | `""`                         |
+| `serviceMonitor.interval`      | Interval at which metrics should be scraped                  | `15s`                        |
+| `serviceMonitor.path`          | Path of the Prometheus metrics endpoint                      | `/apisix/prometheus/metrics` |
+| `serviceMonitor.containerPort` | Container port which Prometheus metrics are exposed          | `9091`                       |
+| `serviceMonitor.labels`        | Label selector for select services and their underlying endpoint objects | `{}`                         |
+| `serviceMonitor.annotations`   | ServiceMonitor annotations                                   | `{}`                         |
