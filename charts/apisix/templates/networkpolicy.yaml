@@ -1,0 +1,77 @@
+{{- if .Values.apisix.networkPolicy.enabled }}
+{{- $fullName := include "apisix.fullname" . -}}
+kind: NetworkPolicy
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+metadata:
+  name: {{ include "apisix.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: 
+    {{- include "apisix.labels" . | nindent 4 }}
+  {{- if .Values.apisix.networkPolicy.annotations }}
+    {{- with .Values.apisix.networkPolicy.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels: {{- include "apisix.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  {{- if .Values.apisix.networkPolicy.additionalEgress }}
+    - Egress
+  egress:
+    - ports:
+        - port: 53
+          protocol: UDP
+    - ports:
+        - port: {{ .Values.gateway.http.containerPort -}}
+        {{- if .Values.gateway.tls.enabled }}
+        - port: {{ .Values.gateway.tls.containerPort }}
+        {{end}}
+      to:
+        - podSelector:
+            matchLabels: {{- include "apisix.selectorLabels" . | nindent 14 }}
+    {{- if .Values.apisix.networkPolicy.additionalEgress }}
+      {{- with .Values.apisix.networkPolicy.additionalEgress }}
+        {{- toYaml . | nindent 4 }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  ingress:
+    - ports:
+        - port: {{ .Values.gateway.http.containerPort }}
+        {{- if .Values.gateway.tls.enabled }}
+        - port: {{ .Values.gateway.tls.containerPort }}
+        {{- end }}
+        {{- if .Values.admin.enabled }}
+        - port: {{ .Values.admin.port }}
+        {{- end }}
+        {{- if .Values.serviceMonitor.enabled }}
+        - port: {{ .Values.serviceMonitor.containerPort }}
+        {{- end }}
+      {{- if not .Values.apisix.networkPolicy.enableExternal }}
+      from:
+        - podSelector:
+            matchLabels:
+              {{ $fullName }}-client: "true"
+        {{- if .Values.apisix.networkPolicy.ingressNSMatchLabels }}
+        - namespaceSelector:
+            matchLabels:
+              {{- range $key, $value := .Values.apisix.networkPolicy.ingressNSMatchLabels }}
+              {{ $key | quote }}: {{ $value | quote }}
+              {{- end }}
+          {{- if .Values.apisix.networkPolicy.ingressNSPodMatchLabels }}
+          podSelector:
+            matchLabels:
+              {{- range $key, $value := .Values.apisix.networkPolicy.ingressNSPodMatchLabels }}
+              {{ $key | quote }}: {{ $value | quote }}
+              {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- if .Values.apisix.networkPolicy.additionalIngress }}
+      {{- with .Values.apisix.networkPolicy.additionalIngress }}
+        {{- toYaml . | nindent 4 }}
+      {{- end }}    {{- end }}
+{{- end }}

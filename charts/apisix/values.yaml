@@ -50,6 +50,43 @@ apisix:
     # readOnlyRootFilesystem: true
     # runAsNonRoot: true
     # runAsUser: 1000
+  networkPolicy:
+    enabled: true
+    annotations: {}
+    
+    # Allow all ingress connections
+    # Set it to false to only allow pods with the correct label to access to the ports
+    
+    enableExternal: true
+    
+    # Add additional ingress rules to the NetworkPolicy
+    # e.g:
+    # extraIngress:
+    #   - ports:
+    #       - port: 8080
+    #     from:
+    #       - podSelector:
+    #            matchLabels:
+    #              app: backend
+    #
+    additionalIngress: []
+    
+    # Add additional egress rules to the NetworkPolicy
+    # e.g:
+    # extraEgress:
+    # - ports:
+    #     - port: 8080
+    #   to:
+    #     - podSelector:
+    #           matchLabels:
+    #             app: backend
+    #
+    additionalEgress: []
+    
+    ingressNSMatchLabels: {}
+    # Allow traffic from specific namespaces
+    ingressNSPodMatchLabels: {} 
+    # Allow trafic from specific pods from other namespaces
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
