@@ -24,14 +24,9 @@ spec:
     - ports:
         - port: 53
           protocol: UDP
-    - ports:
-        - port: {{ .Values.gateway.http.containerPort -}}
-        {{- if .Values.gateway.tls.enabled }}
-        - port: {{ .Values.gateway.tls.containerPort }}
-        {{end}}
-      to:
-        - podSelector:
-            matchLabels: {{- include "apisix.selectorLabels" . | nindent 14 }}
+        - port: 53
+          protocol: TCP
+        - port: {{ .Values.etcd.service.port -}}
     {{- if .Values.apisix.networkPolicy.additionalEgress }}
       {{- with .Values.apisix.networkPolicy.additionalEgress }}
         {{- toYaml . | nindent 4 }}
