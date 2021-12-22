@@ -51,7 +51,7 @@ apisix:
     # runAsNonRoot: true
     # runAsUser: 1000
   networkPolicy:
-    enabled: true
+    enabled: false
     annotations: {}
     
     # Allow all ingress connections
