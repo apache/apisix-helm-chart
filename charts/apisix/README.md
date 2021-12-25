@@ -205,5 +205,5 @@ Configurations for Apache APISIX ingress-controller sub chart.
 | `serviceMonitor.interval`      | Interval at which metrics should be scraped                  | `15s`                        |
 | `serviceMonitor.path`          | Path of the Prometheus metrics endpoint                      | `/apisix/prometheus/metrics` |
 | `serviceMonitor.containerPort` | Container port which Prometheus metrics are exposed          | `9091`                       |
-| `serviceMonitor.labels`        | Label selector for select services and their underlying endpoint objects | `{}`                         |
+| `serviceMonitor.labels`        | ServiceMonitor extra labels                                  | `{}`                         |
 | `serviceMonitor.annotations`   | ServiceMonitor annotations                                   | `{}`                         |
