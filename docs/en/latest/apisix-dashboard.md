@@ -28,7 +28,7 @@ To install the chart with release name `apisix-dashboard`:
 ```shell
 helm repo add apisix https://charts.apiseven.com
 helm repo update
-helm install apisix-dashboard apisix/apisix-dashboard
+helm install apisix-dashboard apisix/apisix-dashboard --create-namespace --namespace apisix
 ```
 
 ## Uninstall
