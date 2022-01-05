@@ -81,10 +81,10 @@ config:
   # enable profiling via web interfaces host:port/debug/pprof, default is true.
   enableProfiling: true
   # whether to enable support for Gateway API.
-  # Note: This feature is currently under development and may not work as expected. 
+  # Note: This feature is currently under development and may not work as expected.
   # It is not recommended to use it in a production environment.
   # Before we announce support for it to reach Beta level or GA.
-  enableGatewayAPI: false            
+  enableGatewayAPI: false
   # Kubernetes related configurations.
   kubernetes:
     # the Kubernetes configuration file path, default is "", so the in-cluster
