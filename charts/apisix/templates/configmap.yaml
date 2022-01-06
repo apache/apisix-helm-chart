@@ -246,6 +246,7 @@ data:
           ip: 0.0.0.0
           port: {{ .Values.serviceMonitor.containerPort }}
         export_uri: {{ .Values.serviceMonitor.path }}
+        metric_prefix: {{ .Values.serviceMonitor.metricPrefix }}
     {{- end }}
     {{- if .Values.customPlugins.enabled }}
     {{- range $plugin := .Values.customPlugins.plugins }}
