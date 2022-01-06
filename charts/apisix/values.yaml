@@ -31,6 +31,16 @@ apisix:
     #   size: 10k
     # - name: bar
     #   size: 1m
+  luaModuleHook:
+    enabled: false
+    luaPath: "" # extend lua_package_path to load third party code
+    hookPoint: "" # the hook module which will be used to inject third party code into APISIX
+                  # use the lua require style like: "module.say_hello"
+    configMapRef: # configmap that stores the codes
+      name: ""
+      mounts: # mounts decides how to mount the codes to the container.
+      - key: ""
+        path: ""
 
   image:
     repository: apache/apisix

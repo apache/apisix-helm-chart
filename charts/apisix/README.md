@@ -76,13 +76,12 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.setIDFromPodUID` | Whether to use the Pod UID as the APISIX instance id, see [apache/apisix#5417](https://github.com/apache/apisix/issues/5417) to decide whether you should enable this setting) | `false` |
 | `apisix.customLuaSharedDicts` | Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict  | `[]` |
 | `apisix.pluginAttrs` | Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details | `{}` |
-| `apisix.customPlugins.enabled` | Whether to configure some custom plugins | `false` |
-| `apisix.customPlugins.luaPath` | Configure `LUA_PATH` so that custom plugin codes can be located | `""` |
-| `apisix.customPlugins.plugins[].name` | Custom plugin name | `""` |
-| `apisix.customPlugins.plugins[].attrs` | Custom plugin attributes | `{}` |
-| `apisix.customPlugins.plugins[].configMap.name` | Name of the ConfigMap where the plugin codes store | `""` |
-| `apisix.customPlugins.plugins[].configMap.mounts[].key` | Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the plugin code path. | `""` |
-| `apisix.customPlugins.plugins[].configMap.mounts[].path` | Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the plugin code path. | `""` |
+| `apisix.luaModuleHook.enabled` | Whether to add a custom lua module | `false` |
+| `apisix.luaModuleHook.luaPath` | Configure `LUA_PATH` so that your own lua module codes can be located | `""` |
+| `apisix.luaModuleHook.hookPoint` | The entrypoint of your lua module, use Lua require syntax, like `"module.say_hello"`  | `""` |
+| `apisix.luaModuleHook.configMapRef.name` | Name of the ConfigMap where the lua module codes store | "" |
+| `apisix.luaModuleHook.configMapRef.mounts[].key` | Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the lua module code path. | `""` |
+| `apisix.luaModuleHook.configMapRef.mounts[].path` | Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the lua module code path. | `""` |
 
 
 ### gateway parameters
@@ -149,6 +148,18 @@ If etcd.enabled is true, set more values of bitnami/etcd helm chart use etcd as 
 ### plugins and stream_plugins parameters 
 
 Default enabled plugins. See [configmap template](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/templates/configmap.yaml) for details.
+
+### custom plugin parameters
+
+| Parameter                       | Description                                                                                                                                                      | Default                     |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| `apisix.customPlugins.enabled` | Whether to configure some custom plugins | `false` |
+| `apisix.customPlugins.luaPath` | Configure `LUA_PATH` so that custom plugin codes can be located | `""` |
+| `apisix.customPlugins.plugins[].name` | Custom plugin name | `""` |
+| `apisix.customPlugins.plugins[].attrs` | Custom plugin attributes | `{}` |
+| `apisix.customPlugins.plugins[].configMap.name` | Name of the ConfigMap where the plugin codes store | `""` |
+| `apisix.customPlugins.plugins[].configMap.mounts[].key` | Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the plugin code path. | `""` |
+| `apisix.customPlugins.plugins[].configMap.mounts[].path` | Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the plugin code path. | `""` |
 
 ### discovery parameters
 
