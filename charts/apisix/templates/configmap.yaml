@@ -49,8 +49,12 @@ data:
       enable_ipv6: true
       config_center: etcd             # etcd: use etcd to store the config value
                                       # yaml: fetch the config value from local yaml file `/your_path/conf/apisix.yaml`
-      {{- if .Values.customPlugins.enabled }}
-      extra_lua_path: {{ .Values.customPlugins.luaPath | quote }}
+      {{- if or .Values.customPlugins.enabled .Values.apisix.luaModuleHook.enabled }}
+      extra_lua_path: {{ .Values.customPlugins.luaPath }};{{ .Values.apisix.luaModuleHook.luaPath }}
+      {{- end }}
+
+      {{- if .Values.apisix.luaModuleHook.enabled }}
+      lua_module_hook: {{ .Values.apisix.luaModuleHook.hookPoint | quote }}
       {{- end }}
 
 
@@ -166,7 +170,7 @@ data:
           - 127.0.0.1
           - 'unix:'
         {{- if .Values.apisix.customLuaSharedDicts }}
-        lua_shared_dicts:              # add custom shared cache to nginx.conf
+        custom_lua_shared_dict:              # add custom shared cache to nginx.conf
         {{- range $dict := .Values.apisix.customLuaSharedDicts }}
           {{ $dict.name }}: {{ $dict.size }}
         {{- end }}
