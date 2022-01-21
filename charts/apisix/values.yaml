@@ -299,6 +299,8 @@ serviceMonitor:
   enabled: false
   # namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix
   namespace: ""
+  # name of the serviceMonitor, by default, it is the same as the apisix fullname
+  name: ""
   # interval at which metrics should be scraped
   interval: 15s
   # path of the metrics endpoint

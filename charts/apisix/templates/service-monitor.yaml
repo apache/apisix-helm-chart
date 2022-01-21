@@ -18,7 +18,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "apisix.fullname" . }}
+  name: {{ .Values.serviceMonitor.name | default (include "apisix.fullname" .) }}
   namespace: {{ .Values.serviceMonitor.namespace | default .Release.Namespace }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
