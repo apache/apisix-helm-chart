@@ -23,6 +23,9 @@ apisix:
   # Set it to false and ingress-controller.enabled=true will deploy only ingress-controller
   enabled: true
 
+  # Enable nginx IPv6 resolver
+  enableIPv6: true
+
   # Use Pod metadata.uid as the APISIX id.
   setIDFromPodUID: false
 
