@@ -61,6 +61,7 @@ The following tables lists the configurable parameters of the apisix chart and t
 | Parameter                                | Description                                         | Default                                                 |
 |------------------------------------------|-----------------------------------------------------|---------------------------------------------------------|
 | `apisix.enabled`                         | Enable or disable Apache APISIX itself              | `true`                                                  |
+| `apisix.enableIPv6`                      | Enable nginx IPv6 resolver                          | `true`                                                  |
 | `apisix.image.repository`                | Apache APISIX image repository                      | `apache/apisix`                                         |
 | `apisix.image.tag`                       | Apache APISIX image tag                             | `{TAG_NAME}` (the latest Apache APISIX image tag)       |
 | `apisix.image.pullPolicy`                | Apache APISIX image pull policy                     | `IfNotPresent`                                          |
@@ -145,7 +146,7 @@ Apache APISIX service parameters, this determines how users can access itself.
 
 If etcd.enabled is true, set more values of bitnami/etcd helm chart use etcd as prefix.
 
-### plugins and stream_plugins parameters 
+### plugins and stream_plugins parameters
 
 Default enabled plugins. See [configmap template](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/templates/configmap.yaml) for details.
 
