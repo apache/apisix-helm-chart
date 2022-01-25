@@ -287,7 +287,6 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
 
-
 # Custom configuration snippet.
 configurationSnippet:
   main: |
