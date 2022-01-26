@@ -81,11 +81,6 @@ config:
   ingressStatusAddress: []
   # enable profiling via web interfaces host:port/debug/pprof, default is true.
   enableProfiling: true
-  # whether to enable support for Gateway API.
-  # Note: This feature is currently under development and may not work as expected.
-  # It is not recommended to use it in a production environment.
-  # Before we announce support for it to reach Beta level or GA.
-  enableGatewayAPI: false
   # Kubernetes related configurations.
   kubernetes:
     # the Kubernetes configuration file path, default is "", so the in-cluster
@@ -118,6 +113,11 @@ config:
     # the supported apisixroute api group version, can be "apisix.apache.org/v1"
     # "apisix.apache.org/v2alpha1" or "apisix.apache.org/v2beta1"
     apisixRouteVersion: "apisix.apache.org/v2beta1"
+    # whether to enable support for Gateway API.
+    # Note: This feature is currently under development and may not work as expected.
+    # It is not recommended to use it in a production environment.
+    # Before we announce support for it to reach Beta level or GA.
+    enableGatewayAPI: false
   # APISIX related configurations.
   apisix:
     serviceName: apisix-admin
