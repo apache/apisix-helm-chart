@@ -24,9 +24,10 @@ data:
     key_file: {{ .Values.config.keyFile | quote }}
     http_listen: {{ .Values.config.httpListen | quote }}
     https_listen: {{ .Values.config.httpsListen | quote }}
-    {{- if gt (len .Values.config.kubernetes.appNamespaces) 0 }}
+    ingress_publish_service: {{ .Values.config.kubernetes.ingressPublishService }}
+    {{- if gt (len .Values.config.kubernetes.ingressStatusAddress) 0 }}
     ingress_status_address:
-    {{- range .Values.config.kubernetes.ingressPublishService }}
+    {{- range .Values.config.kubernetes.ingressStatusAddress }}
     - {{ . | quote }}
     {{- end }}
     {{- end }}

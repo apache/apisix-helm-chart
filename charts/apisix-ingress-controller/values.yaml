@@ -78,6 +78,7 @@ config:
   # The format is "namespace/svc-name" to solve the situation that
   # the data plane and the controller are not deployed in the same namespace.
   ingressPublishService: ""
+  ingressStatusAddress: []
   # enable profiling via web interfaces host:port/debug/pprof, default is true.
   enableProfiling: true
   # whether to enable support for Gateway API.
