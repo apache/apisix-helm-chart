@@ -42,7 +42,7 @@ data:
       {{- end }}
       {{- end }}
 
-      {{- if gt (len .Values.config.kubernetes.appNamespaces) 0 }}
+      {{- if gt (len .Values.config.kubernetes.namespaceSelector) 0 }}
       namespace_selector:
       {{- range .Values.config.kubernetes.namespaceSelector }}
       - {{ . | quote }}
