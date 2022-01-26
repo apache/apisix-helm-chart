@@ -21,6 +21,13 @@ metadata:
   name: {{ include "apisix.fullname" . }}
   namespace: {{ .Release.Namespace }}
 data:
+{{- if .Values.apisix.enableCustomizedConfig }}
+  config.yaml: |-
+    {{- range $key, $value := .Values.apisix.customizedConfig }}
+    {{ $key }}:
+      {{- include "apisix.tplvalues.render" (dict "value" $value "context" $) | nindent 6 }}
+    {{- end }}
+{{- else }}
   config.yaml: |-
     #
     # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -263,4 +270,5 @@ data:
     {{- end }}
     {{- end }}
     {{- end }}
+{{- end }}
 {{- end }}
