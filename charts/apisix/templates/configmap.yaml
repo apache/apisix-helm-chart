@@ -47,6 +47,10 @@ data:
       node_listen: {{ .Values.gateway.http.containerPort }}             # APISIX listening port
       enable_admin: {{ .Values.admin.enabled }}
       enable_admin_cors: {{ .Values.admin.cors }}
+<<<<<<< HEAD
+=======
+      enable_debug: false
+>>>>>>> master
       {{- if or .Values.customPlugins.enabled .Values.apisix.luaModuleHook.enabled }}
       extra_lua_path: {{ .Values.customPlugins.luaPath }};{{ .Values.apisix.luaModuleHook.luaPath }}
       {{- end }}
@@ -55,6 +59,11 @@ data:
       lua_module_hook: {{ .Values.apisix.luaModuleHook.hookPoint | quote }}
       {{- end }}
 
+      enable_dev_mode: false                       # Sets nginx worker_processes to 1 if set to true
+      enable_reuseport: true                       # Enable nginx SO_REUSEPORT switch if set to true.
+      enable_ipv6: {{ .Values.apisix.enableIPv6 }} # Enable nginx IPv6 resolver
+      config_center: etcd                          # etcd: use etcd to store the config value
+                                                   # yaml: fetch the config value from local yaml file `/your_path/conf/apisix.yaml`
 
       allow_admin:                  # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
       {{- if .Values.admin.allow.ipList }}
