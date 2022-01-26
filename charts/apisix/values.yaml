@@ -71,6 +71,7 @@ apisix:
   # See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details
   podDisruptionBudget:
     enabled: false
+    minAvailable: 90%
     maxUnavailable: 1
 
   resources: {}
