@@ -69,6 +69,9 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.podAnnotations`                  | Annotations to add to each pod                      | `{}`                                                    |
 | `apisix.podSecurityContext`              | Set the securityContext for Apache APISIX pods      | `{}`                                                    |
 | `apisix.securityContext`                 | Set the securityContext for Apache APISIX container | `{}`                                                    |
+| `apisix.podDisruptionBudget.enabled`     | Enable or disable podDisruptionBudget               | `false`                                                 |
+| `apisix.podDisruptionBudget.minAvailable`| Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details | `Not set` |
+| `apisix.podDisruptionBudget.maxUnavailable`| Set the maxUnavailable of podDisruptionBudget     | `1`                                                     |
 | `apisix.resources`                       | Set pod resource requests & limits                  | `{}`                                                    |
 | `apisix.nodeSelector`                    | Node labels for Apache APISIX pod assignment        | `{}`                                                    |
 | `apisix.tolerations`                     | List of node taints to tolerate                     | `{}`                                                    |
