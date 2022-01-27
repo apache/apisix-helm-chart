@@ -63,7 +63,7 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.enabled`                         | Enable or disable Apache APISIX itself              | `true`                                                  |
 | `apisix.enableIPv6`                      | Enable nginx IPv6 resolver                          | `true`                                                  |
 | `apisix.enableCustomizedConfig`          | Enable full customized `config.yaml`                | `false`                                                  |
-| `apisix.customizedConfig`                | If `apisix.enableCustomizedConfig` is true, full customized `config.yaml`  | `{}`                                                 |
+| `apisix.customizedConfig`                | If `apisix.enableCustomizedConfig` is true, full customized `config.yaml`. Please note that other settings will be ignored  | `{}`                                                 |
 | `apisix.image.repository`                | Apache APISIX image repository                      | `apache/apisix`                                         |
 | `apisix.image.tag`                       | Apache APISIX image tag                             | `{TAG_NAME}` (the latest Apache APISIX image tag)       |
 | `apisix.image.pullPolicy`                | Apache APISIX image pull policy                     | `IfNotPresent`                                          |
