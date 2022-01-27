@@ -20,7 +20,17 @@ data:
     # log options
     log_level: {{ .Values.config.logLevel | quote }}
     log_output: {{ .Values.config.logOutput | quote }}
+    cert_file: {{ .Values.config.certFile | quote }}
+    key_file: {{ .Values.config.keyFile | quote }}
     http_listen: {{ .Values.config.httpListen | quote }}
+    https_listen: {{ .Values.config.httpsListen | quote }}
+    ingress_publish_service: {{ .Values.config.ingressPublishService }}
+    {{- if gt (len .Values.config.ingressStatusAddress) 0 }}
+    ingress_status_address:
+    {{- range .Values.config.ingressStatusAddress }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- end }}
     enable_profiling: {{ .Values.config.enableProfiling }}
     kubernetes:
       kubeconfig: {{ .Values.config.kubernetes.kubeconfig | quote }}
@@ -31,12 +41,23 @@ data:
       - {{ . | quote }}
       {{- end }}
       {{- end }}
+
+      {{- if gt (len .Values.config.kubernetes.namespaceSelector) 0 }}
+      namespace_selector:
+      {{- range .Values.config.kubernetes.namespaceSelector }}
+      - {{ . | quote }}
+      {{- end }}
+      {{- end }}
+      election_id: {{ .Values.config.kubernetes.electionId | quote }}
       ingress_class: {{ .Values.config.kubernetes.ingressClass | quote }}
       ingress_version: {{ .Values.config.kubernetes.ingressVersion | quote }}
+      watch_endpointslices: {{ .Values.config.kubernetes.watchEndpointSlices }}
       apisix_route_version: {{ .Values.config.kubernetes.apisixRouteVersion | quote }}
+      enable_gateway_api: {{ .Values.config.kubernetes.enableGatewayAPI }}
     apisix:
-      base_url: http://{{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{ .Values.clusterDomain }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
-      admin_key: {{ .Values.config.apisix.adminKey | quote }}
+      default_cluster_base_url: http://{{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{ .Values.clusterDomain }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
+      default_cluster_admin_key: {{ .Values.config.apisix.adminKey | quote }}
+      default_cluster_name: {{ .Values.config.apisix.clusterName | quote }}
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-configmap

@@ -147,6 +147,8 @@ rules:
       - apisixclusterconfigs/status
       - apisixconsumers
       - apisixconsumers/status
+      - apisixpluginconfigs
+      - apisixpluginconfigs/status
     verbs:
       - '*'
   - apiGroups:
