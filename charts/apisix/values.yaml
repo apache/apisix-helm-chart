@@ -71,6 +71,12 @@ apisix:
     # runAsNonRoot: true
     # runAsUser: 1000
 
+  # See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 90%
+    maxUnavailable: 1
+
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
