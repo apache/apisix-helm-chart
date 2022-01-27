@@ -49,7 +49,7 @@ apisix:
       - key: ""
         path: ""
 
-  enableCustomizedConfig: true
+  enableCustomizedConfig: false
   customizedConfig: {}
 
   image:
