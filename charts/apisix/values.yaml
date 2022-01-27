@@ -49,6 +49,9 @@ apisix:
       - key: ""
         path: ""
 
+  enableCustomizedConfig: false
+  customizedConfig: {}
+
   image:
     repository: apache/apisix
     pullPolicy: IfNotPresent
