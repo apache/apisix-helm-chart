@@ -88,6 +88,8 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.luaModuleHook.configMapRef.name` | Name of the ConfigMap where the lua module codes store | "" |
 | `apisix.luaModuleHook.configMapRef.mounts[].key` | Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the lua module code path. | `""` |
 | `apisix.luaModuleHook.configMapRef.mounts[].path` | Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the lua module code path. | `""` |
+| `apisix.timezone` | The timezone where APISIX container uses. For example: UTC, Asia/Shanghai                   | `UTC`|
+| `apisix.extraEnvVars` | APISIX container extra environment variables                   | `[]`|
 
 
 ### gateway parameters
