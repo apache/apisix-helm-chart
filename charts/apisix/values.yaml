@@ -104,6 +104,15 @@ apisix:
   timezone: UTC
 
   # extraEnvVars An array to add extra env vars
+  # e.g:
+  # extraEnvVars:
+  #   - name: FOO
+  #     value: "bar"
+  #   - name: FOO2
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: SECRET_NAME
+  #         key: KEY
   extraEnvVars: []
 
 nameOverride: ""
