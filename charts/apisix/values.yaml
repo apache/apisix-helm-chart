@@ -102,7 +102,7 @@ apisix:
   # You may need to set the timezone to be consistent with your local time zone,
   # otherwise the apisix's logs may used to retrieve event maybe in wrong timezone.
   timezone: UTC
-  
+
   # extraEnvVars An array to add extra env vars
   extraEnvVars: []
 
