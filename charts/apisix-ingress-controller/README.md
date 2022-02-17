@@ -57,3 +57,41 @@ See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_h
 ```console
 helm show values apisix/apisix-ingress-controller
 ```
+
+### Security context
+
+A security context provides us with a way to define privilege and access control for a Pod or even at the container level.
+
+Check [here](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#securitycontext-v1-core) to see the SecurityContext resource with more detail.
+
+Check also [here](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) to see a full explanation and some examples to configure the security context.
+
+Right below you have an example of the security context configuration. In this case, we define that all the processes in the container will run with user ID 1000. 
+```yaml
+...
+
+spec:
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
+...
+```
+
+The same for the group definition, where we define the primary group of 3000 for all processes.
+
+**It's quite important to know, if the `runAsGroup` is omited, the primary group will be root(0)**, which in some cases goes against some security policies.
+
+
+To define this configuration at the **pod level**, you need to set:
+```
+    --set podSecurityContext.runAsUser=«VALUE»
+    --set podSecurityContext.runAsGroup=«VALUE»
+    ...
+```
+
+The same for container level, you need to set:
+```
+    --set securityContext.runAsUser=«VALUE»
+    --set SecurityContext.runAsGroup=«VALUE»
+    ...
+```
