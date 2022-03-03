@@ -340,13 +340,16 @@ etcd:
   auth:
     rbac:
       # No authentication by default
-      create: false
-      rootPassword: ""
-    client:
-      useAutoTLS: false
+      enabled: false
+      user: ""
+      password: ""
+    tls:
+      enabled: false
       existingSecret: ""
       certFilename: ""
       certKeyFilename: ""
+      verify: true
+      sni: ""
 
   service:
     port: 2379
