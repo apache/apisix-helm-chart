@@ -22,7 +22,7 @@ helm repo update
 **Important:** only helm3 is supported
 
 ```console
-helm install [RELEASE_NAME] apisix/apisix-ingress-controller
+helm install [RELEASE_NAME] apisix/apisix-ingress-controller --namespace ingress-apisix --create-namespace
 ```
 
 The command deploys apisix-ingress-controller on the Kubernetes cluster in the default configuration.
@@ -34,7 +34,7 @@ _See [helm install](https://helm.sh/docs/helm/helm_install/) for command documen
 ## Uninstall Chart
 
 ```console
-helm uninstall [RELEASE_NAME]
+helm uninstall [RELEASE_NAME] --namespace ingress-apisix
 ```
 
 This removes all the Kubernetes components associated with the chart and deletes the release.
@@ -48,7 +48,6 @@ helm upgrade [RELEASE_NAME] [CHART] --install
 ```
 
 _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation._
-
 
 ## Configuration
 
@@ -66,7 +65,8 @@ Check [here](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23
 
 Check also [here](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) to see a full explanation and some examples to configure the security context.
 
-Right below you have an example of the security context configuration. In this case, we define that all the processes in the container will run with user ID 1000. 
+Right below you have an example of the security context configuration. In this case, we define that all the processes in the container will run with user ID 1000.
+
 ```yaml
 ...
 
@@ -81,16 +81,17 @@ The same for the group definition, where we define the primary group of 3000 for
 
 **It's quite important to know, if the `runAsGroup` is omited, the primary group will be root(0)**, which in some cases goes against some security policies.
 
-
 To define this configuration at the **pod level**, you need to set:
-```
+
+```yaml
     --set podSecurityContext.runAsUser=«VALUE»
     --set podSecurityContext.runAsGroup=«VALUE»
     ...
 ```
 
 The same for container level, you need to set:
-```
+
+```yaml
     --set securityContext.runAsUser=«VALUE»
     --set SecurityContext.runAsGroup=«VALUE»
     ...

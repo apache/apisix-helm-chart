@@ -8,21 +8,10 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
-
-## TL;DR
-
-```sh
-helm repo add apisix https://charts.apiseven.com
-helm repo update
-
-helm install apisix/apisix --generate-name
-```
-
 ## Prerequisites
 
 * Kubernetes v1.14+
 * Helm v3+
-
 
 ## Install
 
@@ -32,7 +21,7 @@ To install the chart with the release name `my-apisix`:
 helm repo add apisix https://charts.apiseven.com
 helm repo update
 
-helm install my-apisix apisix/apisix
+helm install [RELEASE_NAME] apisix/apisix --namespace ingress-apisix --create-namespace
 ```
 
 ## Uninstall
@@ -40,7 +29,7 @@ helm install my-apisix apisix/apisix
  To uninstall/delete a Helm release `my-apisix`:
 
  ```sh
-helm delete my-apisix
+helm delete [RELEASE_NAME] --namespace ingress-apisix
  ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -54,7 +43,6 @@ The following tables lists the configurable parameters of the apisix chart and t
 | Parameter                 | Description                                     | Default                                                 |
 |---------------------------|-------------------------------------------------|---------------------------------------------------------|
 | `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]` (does not add image pull secrets to deployed pods) |
-
 
 ### apisix parameters
 
@@ -89,7 +77,6 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.luaModuleHook.configMapRef.mounts[].key` | Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the lua module code path. | `""` |
 | `apisix.luaModuleHook.configMapRef.mounts[].path` | Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the lua module code path. | `""` |
 
-
 ### gateway parameters
 
 Apache APISIX service parameters, this determines how users can access itself.
@@ -104,7 +91,6 @@ Apache APISIX service parameters, this determines how users can access itself.
 | `gateway.tls.certCAFilename`    | filename be used in the `gateway.tls.existingCASecret`                                                                                                                                          | `""`       |
 | `gateway.stream`                | Apache APISIX service settings for stream                                                                                                                                           |            |
 | `gateway.ingress`               | Using ingress access Apache APISIX service                                                                                                                                          |            |
-
 
 ### admin parameters
 
@@ -207,7 +193,6 @@ discovery:
 ### dashboard parameters
 
 Configurations for apisix-dashboard sub chart.
-
 
 ### ingress-controller parameters
 
