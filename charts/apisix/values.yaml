@@ -240,6 +240,15 @@ customPlugins:
           - key: ""
             path: ""
 
+extraVolumes: []
+# - name: extras
+#   emptyDir: {}
+
+extraVolumeMounts: []
+# - name: extras
+#   mountPath: /usr/share/extras
+#   readOnly: true
+
 discovery:
   enabled: false
   registry:
