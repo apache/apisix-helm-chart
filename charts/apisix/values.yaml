@@ -210,12 +210,18 @@ plugins:
   - traffic-split
   - gzip
   - real-ip
+  - ext-plugin-pre-req
+  - ext-plugin-post-req
 stream_plugins:
   - mqtt-proxy
   - ip-restriction
   - limit-conn
 
 pluginAttrs: {}
+
+extPlugin:
+  enabled: false
+  cmd: []
 
 # customPlugins allows you to mount your own HTTP plugins.
 customPlugins:
