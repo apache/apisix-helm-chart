@@ -221,7 +221,7 @@ pluginAttrs: {}
 
 extPlugin:
   enabled: false
-  cmd: []
+  cmd: ["/path/to/apisix-plugin-runner/runner", "run"]
 
 # customPlugins allows you to mount your own HTTP plugins.
 customPlugins:
