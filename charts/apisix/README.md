@@ -76,6 +76,8 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.luaModuleHook.configMapRef.name` | Name of the ConfigMap where the lua module codes store | "" |
 | `apisix.luaModuleHook.configMapRef.mounts[].key` | Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the lua module code path. | `""` |
 | `apisix.luaModuleHook.configMapRef.mounts[].path` | Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the lua module code path. | `""` |
+| `extraVolumes` | Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. | `[]` |
+| `extraVolumeMounts` | Additional `volumeMounts`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. | `[]` |
 
 ### gateway parameters
 
