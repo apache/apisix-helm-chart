@@ -146,7 +146,7 @@ Default enabled plugins. See [configmap template](https://github.com/apache/apis
 
 | Parameter                       | Description                                                                                                                                                      | Default                     |
 |---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
-| `extPlugin.enabled` | Whether to allow an ext-plugin | `false` |
+| `extPlugin.enabled` | Enable External Plugins. See [external plugin](https://apisix.apache.org/docs/apisix/next/external-plugin/) | `false` |
 | `extPlugin.cmd` | the command and its arguements to run as a subprocess | `{}` |
 
 ### custom plugin parameters
