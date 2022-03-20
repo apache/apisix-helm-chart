@@ -91,6 +91,11 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+  # domain access apisix example: 
+  # paths:
+  #  - host: apisix-test.x.cn
+  #    paths:
+  #     - /*
   hosts:
     - host: apisix-dashboard.local
       paths: []
