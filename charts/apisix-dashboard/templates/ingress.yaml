@@ -24,6 +24,9 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
+  {{- if .Values.ingress.classNmae }}
+  ingressClassName: {{- .Values.ingress.classNmae -}}
+  {{- end }}
   name: {{ $fullName }}
   namespace: {{ .Release.Namespace }}
   labels:
