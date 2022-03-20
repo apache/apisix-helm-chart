@@ -87,7 +87,8 @@ service:
 ingress:
   enabled: false
   # kubernetes ingress attribe ingressClassName,default to "apisix" 
-  classNamw: "apisix"
+  # Kubernetes 1.18+ support ingressClassName attribe 
+  className: "apisix"
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
