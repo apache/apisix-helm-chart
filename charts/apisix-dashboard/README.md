@@ -99,14 +99,15 @@ The following tables lists the configurable parameters of the apisix-dashboard c
 
 ### Traffic Exposure parameters
 
-| Name                            | Description                                                                                            | Value                    |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------ |
-| `service.type`                  | Service type                                                                                           | `ClusterIP`              |
-| `service.port`                  | Service HTTP port                                                                                      | `80`                     |
-| `ingress.enabled`               | Set to true to enable ingress record generation                                                        | `false`                  |
-| `ingress.annotations`           | Ingress annotations                                                                                    | `{}`                     |
-| `ingress.hosts`                 | The list of hostnames to be covered with this ingress record.                                          | `[]`                     |
-| `ingress.tls`                   | Create TLS Secret                                                                                      | `false`                  |
+| Name                            | Description                                                                                      | Value       |
+| ------------------------------- |--------------------------------------------------------------------------------------------------|-------------|
+| `service.type`                  | Service type                                                                                     | `ClusterIP` |
+| `service.port`                  | Service HTTP port                                                                                | `80`        |
+| `ingress.enabled`               | Set to true to enable ingress record generation                                                  | `false`     |
+| `ingress.annotations`           | Ingress annotations                                                                              | `{}`        |
+| `ingress.hosts`                 | The list of hostnames to be covered with this ingress record.                                    | `[]`        |
+| `ingress.tls`                   | Create TLS Secret                                                                                | `false`     |
+| `ingress.className`             | `ingressClassName` replace `annotations kubernetes.io/ingress.class`, required kubernetes 1.18>= | `apisix`    |
 
 ### RBAC parameters
 
