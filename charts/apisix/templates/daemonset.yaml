@@ -193,19 +193,6 @@ spec:
       {{- with .Values.apisix.affinity }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.apisix.podAntiAffinity.enabled }}
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app.kubernetes.io/name
-                  operator: In
-                  values:
-                  - {{ include "apisix.name" . }}
-              topologyKey: kubernetes.io/hostname
-            weight: 100
-      {{- end }}
       {{- with .Values.apisix.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}

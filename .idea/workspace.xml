@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9a13d7de-d161-49e5-9db2-7f7bc56cdc41" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/charts/apisix/templates/daemonset.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/charts/apisix/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/charts/apisix/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/charts/apisix/templates/deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/charts/apisix/templates/deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/charts/apisix/values.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/charts/apisix/values.yaml" afterDir="false" />
-    </list>
+    <list default="true" id="9a13d7de-d161-49e5-9db2-7f7bc56cdc41" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
