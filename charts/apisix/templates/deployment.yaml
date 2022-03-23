@@ -13,8 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{- if eq .Values.apisix.kind "Deployment" }}
-{{- if .Values.apisix.enabled }}
+{{- if and (.Values.apisix.enabled) (eq .Values.apisix.kind "Deployment") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -101,6 +100,11 @@ spec:
                 - /bin/sh
                 - -c
                 - "sleep 30"
+          env:
+            - name: INTRANET_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           volumeMounts:
             {{- if .Values.apisix.setIDFromPodUID }}
             - mountPath: /usr/local/apisix/conf/apisix.uid
@@ -208,5 +212,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-{{- end }}
 {{- end }}
