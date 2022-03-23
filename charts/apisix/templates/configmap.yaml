@@ -257,6 +257,14 @@ data:
       - {{ $plugin }}
     {{- end }}
 
+    {{- if .Values.extPlugin.enabled }}
+    ext-plugin:
+      cmd:
+      {{- range $arg := .Values.extPlugin.cmd }}
+        - {{ $arg }}
+      {{- end }}
+    {{- end }}
+
     {{- if or .Values.pluginAttrs .Values.customPlugins.enabled .Values.serviceMonitor.enabled}}
     plugin_attr:
     {{- if .Values.serviceMonitor.enabled }}

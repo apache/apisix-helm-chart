@@ -143,6 +143,14 @@ If etcd.enabled is true, set more values of bitnami/etcd helm chart use etcd as 
 
 Default enabled plugins. See [configmap template](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/templates/configmap.yaml) for details.
 
+
+### external plugin parameters
+
+| Parameter                       | Description                                                                                                                                                      | Default                     |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| `extPlugin.enabled` | Enable External Plugins. See [external plugin](https://apisix.apache.org/docs/apisix/next/external-plugin/) | `false` |
+| `extPlugin.cmd` | the command and its arguements to run as a subprocess | `{}` |
+
 ### custom plugin parameters
 
 | Parameter                       | Description                                                                                                                                                      | Default                     |
