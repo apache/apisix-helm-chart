@@ -13,19 +13,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{- if eq .Values.apisix.kind "Deployment" }}
+{{- if eq .Values.apisix.kind "DaemonSet" }}
 {{- if .Values.apisix.enabled }}
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: {{ include "apisix.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
-{{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.apisix.replicaCount }}
-{{- end }}
   selector:
     matchLabels:
       {{- include "apisix.selectorLabels" . | nindent 6 }}
@@ -101,6 +98,11 @@ spec:
                 - /bin/sh
                 - -c
                 - "sleep 30"
+          env:
+            - name: INTRANET_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           volumeMounts:
             {{- if .Values.apisix.setIDFromPodUID }}
             - mountPath: /usr/local/apisix/conf/apisix.uid
