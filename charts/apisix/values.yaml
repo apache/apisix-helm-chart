@@ -56,7 +56,7 @@ apisix:
     repository: apache/apisix
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 2.12.0-alpine
+    tag: 2.12.1-alpine
 
   replicaCount: 1
 
@@ -229,12 +229,18 @@ plugins:
   - traffic-split
   - gzip
   - real-ip
+  - ext-plugin-pre-req
+  - ext-plugin-post-req
 stream_plugins:
   - mqtt-proxy
   - ip-restriction
   - limit-conn
 
 pluginAttrs: {}
+
+extPlugin:
+  enabled: false
+  cmd: ["/path/to/apisix-plugin-runner/runner", "run"]
 
 # customPlugins allows you to mount your own HTTP plugins.
 customPlugins:
@@ -258,6 +264,15 @@ customPlugins:
             path: ""
           - key: ""
             path: ""
+
+extraVolumes: []
+# - name: extras
+#   emptyDir: {}
+
+extraVolumeMounts: []
+# - name: extras
+#   mountPath: /usr/share/extras
+#   readOnly: true
 
 discovery:
   enabled: false

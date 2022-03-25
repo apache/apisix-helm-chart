@@ -141,6 +141,9 @@ spec:
               subPath: {{ $mount.key }}
           {{- end }}
           {{- end }}
+          {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.apisix.resources | nindent 12 }}
       {{- if .Values.etcd.enabled }}
@@ -182,6 +185,9 @@ spec:
         - name: lua-module-hook
           configMap:
             name: {{ .Values.apisix.luaModuleHook.configMapRef.name }}
+      {{- end }}
+      {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
       {{- end }}
       {{- with .Values.apisix.nodeSelector }}
       nodeSelector:

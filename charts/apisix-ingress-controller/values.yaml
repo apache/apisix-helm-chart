@@ -44,6 +44,8 @@ image:
   pullPolicy: IfNotPresent
   tag: "1.4.0"
 
+podAnnotations: {}
+
 imagePullSecrets: []
 clusterDomain: cluster.local
 
@@ -152,3 +154,15 @@ serviceMonitor:
   labels: {}
   # @param serviceMonitor.annotations ServiceMonitor annotations
   annotations: {}
+
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
