@@ -56,7 +56,7 @@ apisix:
     repository: apache/apisix
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 2.12.1-alpine
+    tag: 2.13.0-alpine
 
   replicaCount: 1
 
