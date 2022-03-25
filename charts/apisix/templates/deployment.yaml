@@ -100,11 +100,6 @@ spec:
                 - /bin/sh
                 - -c
                 - "sleep 30"
-          env:
-            - name: INTRANET_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
           volumeMounts:
             {{- if .Values.apisix.setIDFromPodUID }}
             - mountPath: /usr/local/apisix/conf/apisix.uid
