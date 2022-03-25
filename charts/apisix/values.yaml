@@ -101,7 +101,7 @@ apisix:
   # This value will be set on apisix container's environment variable TZ.
   # You may need to set the timezone to be consistent with your local time zone,
   # otherwise the apisix's logs may used to retrieve event maybe in wrong timezone.
-  timezone: UTC
+  timezone: ""
 
   # extraEnvVars An array to add extra env vars
   # e.g:
