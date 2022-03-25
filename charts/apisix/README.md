@@ -77,7 +77,7 @@ The following tables lists the configurable parameters of the apisix chart and t
 | `apisix.luaModuleHook.configMapRef.mounts[].key` | Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the lua module code path. | `""` |
 | `apisix.luaModuleHook.configMapRef.mounts[].path` | Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the lua module code path. | `""` |
 | `apisix.timezone` | The timezone where APISIX container uses. For example: UTC, Asia/Shanghai. This value will be set on apisix container's environment variable TZ. Sometimes may need to set the timezone to be consistent with local time zone, otherwise the apisix's logs may used to retrieve event maybe in wrong timezone.                | nil|
-| `apisix.extraEnvVars` | APISIX container extra environment variables                   | `[]`
+| `apisix.extraEnvVars` | APISIX container extra environment variables , See [define-environment-variable-container](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/) for the detail.                 | `[]`
 | `extraVolumes` | Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. | `[]` |
 | `extraVolumeMounts` | Additional `volumeMounts`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. | `[]` |
 
