@@ -25,6 +25,9 @@ spec:
   selector:
     matchLabels:
       {{- include "apisix.selectorLabels" . | nindent 6 }}
+  {{- if .Values.updateStrategy }}
+  updateStrategy: {{ toYaml .Values.updateStrategy | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       annotations:

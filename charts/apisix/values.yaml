@@ -249,6 +249,9 @@ customPlugins:
           - key: ""
             path: ""
 
+updateStrategy: {}
+  # type: RollingUpdate
+
 extraVolumes: []
 # - name: extras
 #   emptyDir: {}
