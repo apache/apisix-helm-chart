@@ -40,7 +40,7 @@ appVersion: 2.13.0
 
 dependencies:
   - name: etcd
-    version: 6.2.6
+    version: 7.0.1
     repository: https://charts.bitnami.com/bitnami
     condition: etcd.enabled
   - name: apisix-dashboard

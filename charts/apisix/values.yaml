@@ -374,7 +374,7 @@ etcd:
   auth:
     rbac:
       # No authentication by default
-      enabled: false
+      create: false
       user: ""
       password: ""
     tls:
