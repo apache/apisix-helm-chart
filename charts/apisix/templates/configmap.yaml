@@ -221,7 +221,7 @@ data:
     {{- end }}
       prefix: {{ .Values.etcd.prefix | quote }}     # apisix configurations prefix
       timeout: {{ .Values.etcd.timeout }}   # 30 seconds
-      {{- if .Values.etcd.auth.rbac.enabled }}
+      {{- if .Values.etcd.auth.rbac.create }}
       user: {{ .Values.etcd.auth.rbac.user | quote }}
       password: {{ .Values.etcd.auth.rbac.password | quote }}
       {{- end }}
