@@ -53,6 +53,14 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.apisix.image.repository }}:{{ .Values.apisix.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.apisix.image.pullPolicy }}
+          env:
+            {{- if .Values.apisix.timezone }}
+            - name: TZ
+              value: {{ .Values.apisix.timezone }}
+            {{- end }}
+            {{- if .Values.apisix.extraEnvVars }}
+            {{- include "apisix.tplvalues.render" (dict "value" .Values.apisix.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.gateway.http.containerPort }}
