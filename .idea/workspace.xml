@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9a13d7de-d161-49e5-9db2-7f7bc56cdc41" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/charts/apisix/templates/daemonset.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/charts/apisix/templates/daemonset.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/charts/apisix/templates/deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/charts/apisix/templates/deployment.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,7 +21,7 @@
     <option name="indexEntireGoPath" value="false" />
   </component>
   <component name="KubernetesApiPersistence">
-    <option name="context" value="kubernetes-admin-cc9fcc04fb5a24c6e8300677bc8f3d14c" />
+    <option name="context" value="kubernetes-admin-cc36ecf3739ef4112ba1060f78c87f656" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
