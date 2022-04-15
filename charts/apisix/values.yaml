@@ -58,6 +58,9 @@ apisix:
     # Overrides the image tag whose default is the chart appVersion.
     tag: 2.13.0-alpine
 
+  # Use a `DaemonSet` or `Deployment`
+  kind: Deployment
+  # kind is DaemonSet,replicaCount not become effective
   replicaCount: 1
 
   podAnnotations: {}
@@ -264,6 +267,9 @@ customPlugins:
             path: ""
           - key: ""
             path: ""
+
+updateStrategy: {}
+  # type: RollingUpdate
 
 extraVolumes: []
 # - name: extras

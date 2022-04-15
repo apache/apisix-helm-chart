@@ -13,23 +13,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{- if and (.Values.apisix.enabled) (eq .Values.apisix.kind "Deployment") }}
+{{- if and (.Values.apisix.enabled) (eq .Values.apisix.kind "DaemonSet") }}
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: {{ include "apisix.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
-{{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.apisix.replicaCount }}
-{{- end }}
   selector:
     matchLabels:
       {{- include "apisix.selectorLabels" . | nindent 6 }}
   {{- if .Values.updateStrategy }}
-  strategy: {{ toYaml .Values.updateStrategy | nindent 4 }}
+  updateStrategy: {{ toYaml .Values.updateStrategy | nindent 4 }}
   {{- end }}
   template:
     metadata:
@@ -53,14 +50,6 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.apisix.image.repository }}:{{ .Values.apisix.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.apisix.image.pullPolicy }}
-          env:
-            {{- if .Values.apisix.timezone }}
-            - name: TZ
-              value: {{ .Values.apisix.timezone }}
-            {{- end }}
-            {{- if .Values.apisix.extraEnvVars }}
-            {{- include "apisix.tplvalues.render" (dict "value" .Values.apisix.extraEnvVars "context" $) | nindent 12 }}
-            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.gateway.http.containerPort }}
@@ -200,19 +189,6 @@ spec:
       affinity:
       {{- with .Values.apisix.affinity }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.apisix.podAntiAffinity.enabled }}
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app.kubernetes.io/name
-                  operator: In
-                  values:
-                  - {{ include "apisix.name" . }}
-              topologyKey: kubernetes.io/hostname
-            weight: 100
       {{- end }}
       {{- with .Values.apisix.tolerations }}
       tolerations:
