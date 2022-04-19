@@ -165,10 +165,10 @@ data:
     nginx_config:                     # config for render the template to genarate nginx.conf
       error_log: "{{ .Values.logs.errorLog }}"
       error_log_level: "{{ .Values.logs.errorLogLevel }}"         # warn,error
-      worker_rlimit_nofile: {{- .Values.core.worker_rlimit_nofile }}     # the number of files a worker process can open, should be larger than worker_connections
+      worker_rlimit_nofile: {{ .Values.core.worker_rlimit_nofile }}     # the number of files a worker process can open, should be larger than worker_connections
       event:
-        worker_connections: {{- .Values.core.events.worker_connections }}
-        use: {{- .Values.core.events.use }}
+        worker_connections: {{ .Values.core.events.worker_connections }}
+        use: {{ .Values.core.events.use }}
       http:
         enable_access_log: {{ .Values.logs.enableAccessLog }}
         {{- if .Values.logs.enableAccessLog }}
