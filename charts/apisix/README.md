@@ -207,7 +207,6 @@ discovery:
 |----------------------------------|-------------------------------------------------------------------------------------|------------|
 | `core.worker_rlimit_nofile`      | `worker_rlimit_nofile` command value, ulimit a worker open fd                       | `20480` |
 | `core.events.worker_connections` | `worker_connections` command value, a worker connection number                      | `10620` |
-| `core.events.use`                | `events.use` command  value(`select、poll、kqueue、epoll`) [detail](http://nginx.org/en/docs/events.html), networker model | `epoll` |
 
 ### dashboard parameters
 

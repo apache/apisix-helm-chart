@@ -316,7 +316,6 @@ core:
   worker_rlimit_nofile: 20480
   events:
     worker_connections: 10620
-    use: epoll
 
 dns:
   resolvers:
