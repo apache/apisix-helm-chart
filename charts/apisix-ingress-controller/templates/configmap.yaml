@@ -61,5 +61,6 @@ data:
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-configmap
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "apisix-ingress-controller.labels" . | nindent 4 }}

@@ -18,6 +18,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "apisix-ingress-controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "apisix-ingress-controller.labels" . | nindent 4 }}
 spec:
