@@ -37,6 +37,14 @@ helm repo update
 helm install apisix-ingress-controller apisix/apisix-ingress-controller --namespace ingress-apisix --create-namespace
 ```
 
+If apisix use different namespace with "ingress-apisix", please set value of "config.apisix.serviceNamespace":
+
+```bash
+helm repo add apisix https://charts.apiseven.com
+helm repo update
+helm install apisix-ingress-controller apisix/apisix-ingress-controller --set config.apisix.serviceNamespace=apisix --namespace ingress-apisix --create-namespace
+```
+
 ## Uninstall
 
 To uninstall/delete the `apisix-ingress-controller` release:
