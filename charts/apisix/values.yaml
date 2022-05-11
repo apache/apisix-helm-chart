@@ -121,6 +121,11 @@ apisix:
 nameOverride: ""
 fullnameOverride: ""
 
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
 
 gateway:
   type: NodePort
