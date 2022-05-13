@@ -178,6 +178,7 @@ admin:
   cors: true
   # Admin API credentials
   credentials:
+    create: true
     admin: edd1c9f034335f136f87ad84b625c8f1
     viewer: 4054f7cf07e344346cd3f287985e76a2
 

@@ -76,6 +76,7 @@ config:
   authentication:
     secert: secert
     expireTime: 3600
+    userCreate: true
     users:
       - username: admin
         password: admin
