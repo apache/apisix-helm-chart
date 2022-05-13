@@ -64,20 +64,21 @@ The following tables lists the configurable parameters of the apisix-dashboard c
 
 ### Apache APISIX Dashboard configurable parameters
 
-| Name                                 | Description                                                                               | Value           |
-| ------------------------------------ | ----------------------------------------------------------------------------------------- | --------------- |
-| `config.conf.listen.host`                       | The address on which the `Manager API` should listen. The default value is 0.0.0.0, if want to specify, please enable it. This value accepts IPv4, IPv6, and hostname.                                                                   | `0.0.0.0`             |
-| `config.conf.listen.port`                       | The port on which the `Manager API` should listen.                                                                  | `9000`             |
-| `config.authentication.secert`                  | Secret for jwt token generation | `secert` |
-| `config.authentication.expireTime`                  | JWT token expire time, in second | `3600` |
-| `config.authentication.users`                  | Specifies username and password for login `manager api`. | `[{username: admin, password: admin}]` |
-| `config.conf.etcd.endpoints`                       | Supports defining multiple etcd host addresses for an etcd cluster                                                                  | `apisix-etcd:2379`             |
-| `config.conf.etcd.prefix`                       | Apache APISIX config's prefix in etcd, /apisix by default                                                                  | `/apisix`             |
-| `config.conf.etcd.username`                       | Specifies etcd basic auth username if  enable etcd auth                                                                | `~`             |
-| `config.conf.etcd.password`                       | Specifies etcd basic auth password  if  enable etcd auth                                                              | `~`             |
-| `config.conf.log.accessLog.filePath`                  | Access log path | `/dev/stdout` |
-| `config.conf.log.errorLog.filePath`                  | Error log path | `/dev/stderr` |
-| `config.conf.log.errorLog.level`                  | Error log level. Supports levels, lower to higher: debug, info, warn, error, panic, fatal | `warn` |
+| Name                                 | Description                                                                                                                                                     | Value                                  |
+| ------------------------------------ |-----------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------|
+| `config.conf.listen.host`                  | The address on which the `Manager API` should listen. The default value is 0.0.0.0, if want to specify, please enable it. This value accepts IPv4, IPv6, and hostname. | `0.0.0.0`                              |
+| `config.conf.listen.port`                  | The port on which the `Manager API` should listen.                                                                                                              | `9000`                                 |
+| `config.authentication.secert`             | Secret for jwt token generation                                                                                                                                 | `secert`                               |
+| `config.authentication.expireTime`         | JWT token expire time, in second                                                                                                                                | `3600`                                 |
+| `config.authentication.userCreate`         | If set to `true`, the username and password for login `manager api` will be generated randomly the first time you install the release                           | `true`                                 |
+| `config.authentication.users`             | Specifies username and password for login `manager api`.                                                                                                        | `[{username: admin, password: admin}]` |
+| `config.conf.etcd.endpoints`               | Supports defining multiple etcd host addresses for an etcd cluster                                                                                              | `apisix-etcd:2379`                     |
+| `config.conf.etcd.prefix`                  | Apache APISIX config's prefix in etcd, /apisix by default                                                                                                       | `/apisix`                              |
+| `config.conf.etcd.username`                | Specifies etcd basic auth username if  enable etcd auth                                                                                                         | `~`                                    |
+| `config.conf.etcd.password`                | Specifies etcd basic auth password  if  enable etcd auth                                                                                                        | `~`                                    |
+| `config.conf.log.accessLog.filePath`       | Access log path                                                                                                                                                 | `/dev/stdout`                          |
+| `config.conf.log.errorLog.filePath`        | Error log path                                                                                                                                                  | `/dev/stderr`                          |
+| `config.conf.log.errorLog.level`           | Error log level. Supports levels, lower to higher: debug, info, warn, error, panic, fatal                                                                       | `warn`                                 |
 
 ### Deployment parameters
 
