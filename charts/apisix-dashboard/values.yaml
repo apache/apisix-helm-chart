@@ -59,7 +59,7 @@ config:
       port: 9000
     etcd:
       # Supports defining multiple etcd host addresses for an etcd cluster.
-      # Leave it undefined to use <Release name>-apisix-etcd:2379 as an endpoint.
+      # Leave it undefined to use <Release name>-etcd:2379 as an endpoint.
       # endpoints:
       #   - apisix-etcd:2379
       # apisix configurations prefix
