@@ -153,7 +153,7 @@ spec:
       {{- if .Values.etcd.enabled }}
       initContainers:
       - name: wait-etcd
-        image: busybox:1.28
+        image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
         command: ['sh', '-c', "until nc -z {{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
       {{- end }}
       volumes:
