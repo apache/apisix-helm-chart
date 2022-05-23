@@ -185,6 +185,18 @@ admin:
     # The ip range for allowing access to Apache APISIX
     ipList:
       - 127.0.0.1/24
+  ingress:
+    enabled: false
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: apisix.local
+        paths: []
+    tls: []
+  #  - secretName: apisix-admin-tls
+  #    hosts:
+  #      - chart-example.local
 
 
 # APISIX plugins to be enabled
