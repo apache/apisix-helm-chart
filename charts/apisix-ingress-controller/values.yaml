@@ -123,7 +123,8 @@ config:
   # APISIX related configurations.
   apisix:
     serviceName: apisix-admin
-    serviceNamespace: ingress-apisix
+    # The namespace of apisix service, leave it empty to use the currently selected namespace when installing the chart.
+    serviceNamespace: ""
     servicePort: 9180
     adminKey: "edd1c9f034335f136f87ad84b625c8f1"
     clusterName: "default"
