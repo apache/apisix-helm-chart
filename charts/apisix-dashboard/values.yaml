@@ -58,9 +58,10 @@ config:
       host: 0.0.0.0
       port: 9000
     etcd:
-      # Supports defining multiple etcd host addresses for an etcd cluster
-      endpoints:
-        - apisix-etcd:2379
+      # Supports defining multiple etcd host addresses for an etcd cluster.
+      # Leave it undefined to use <Release name>-apisix-etcd:2379 as an endpoint.
+      # endpoints:
+      #   - apisix-etcd:2379
       # apisix configurations prefix
       prefix: "/apisix"
       # Etcd basic auth info
