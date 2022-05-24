@@ -3,6 +3,34 @@ entries:
   apisix:
   - apiVersion: v2
     appVersion: 2.13.1
+    created: "2022-05-24T03:40:26.753969129Z"
+    dependencies:
+    - condition: etcd.enabled
+      name: etcd
+      repository: https://charts.bitnami.com/bitnami
+      version: 7.0.4
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: apisix-dashboard
+      repository: https://charts.apiseven.com
+      version: 0.5.0
+    - alias: ingress-controller
+      condition: ingress-controller.enabled
+      name: apisix-ingress-controller
+      repository: https://charts.apiseven.com
+      version: 0.9.2
+    description: A Helm chart for Apache APISIX
+    digest: ee03370f3f9dcb8caca5aef6668bb1c78c5760d9170c66c29748923d6109ad44
+    icon: https://apache.org/logos/res/apisix/apisix.png
+    maintainers:
+    - name: tao12345666333
+    name: apisix
+    type: application
+    urls:
+    - https://github.com/apache/apisix-helm-chart/releases/download/apisix-0.9.4/apisix-0.9.4.tgz
+    version: 0.9.4
+  - apiVersion: v2
+    appVersion: 2.13.1
     created: "2022-05-12T08:03:33.575923764Z"
     dependencies:
     - condition: etcd.enabled
@@ -680,4 +708,4 @@ entries:
     urls:
     - https://github.com/apache/apisix-helm-chart/releases/download/apisix-ingress-controller-0.6.0/apisix-ingress-controller-0.6.0.tgz
     version: 0.6.0
-generated: "2022-05-16T10:03:38.287624382Z"
+generated: "2022-05-24T03:40:26.754287429Z"
