@@ -140,6 +140,8 @@ spec:
                   - basicAuth
                 - required:
                   - keyAuth
+                - required:
+                  - hmacAuth
                 properties:
                   basicAuth:
                     oneOf:
@@ -169,6 +171,48 @@ spec:
                         - password
                         type: object
                     type: object
+                  hmacAuth:
+                    type: object
+                    oneOf:
+                    - required:
+                      - value
+                    - required:
+                      - secretRef
+                    properties:
+                      value:
+                        type: object
+                        properties:
+                          access_key:
+                            type: string
+                          secret_key:
+                            type: string
+                          algorithm:
+                            type: string
+                          clock_skew:
+                            type: integer
+                          signed_headers:
+                            type: array
+                            items:
+                              type: string
+                          keep_headers:
+                            type: boolean
+                          encode_uri_params:
+                            type: boolean
+                          validate_request_body:
+                            type: boolean
+                          max_req_body:
+                            type: integer
+                        required:
+                        - access_key
+                        - secret_key
+                    secretRef:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          minLength: 1
+                      required:
+                      - name
                   keyAuth:
                     oneOf:
                     - required:
@@ -1047,6 +1091,7 @@ spec:
                           enum:
                           - basicAuth
                           - keyAuth
+                          - hmacAuth
                           type: string
                       required:
                       - enable
