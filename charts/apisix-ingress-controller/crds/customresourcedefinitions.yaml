@@ -443,9 +443,10 @@ spec:
                           minLength: 1
                           type: string
                         servicePort:
-                          maximum: 65535
-                          minimum: 1
-                          type: integer
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          x-kubernetes-int-or-string: true
                         subset:
                           type: string
                         weight:
@@ -467,9 +468,10 @@ spec:
                             minLength: 1
                             type: string
                           servicePort:
-                            maximum: 65535
-                            minimum: 1
-                            type: integer
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            x-kubernetes-int-or-string: true
                           subset:
                             type: string
                           weight:
@@ -616,9 +618,10 @@ spec:
                           minLength: 1
                           type: string
                         servicePort:
-                          maximum: 65535
-                          minimum: 1
-                          type: integer
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          x-kubernetes-int-or-string: true
                         subset:
                           type: string
                       required:
@@ -664,9 +667,10 @@ spec:
                           minLength: 1
                           type: string
                         servicePort:
-                          maximum: 65535
-                          minimum: 1
-                          type: integer
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          x-kubernetes-int-or-string: true
                         subset:
                           type: string
                       required:
@@ -784,9 +788,10 @@ spec:
                             minLength: 1
                             type: string
                           servicePort:
-                            maximum: 65535
-                            minimum: 1
-                            type: integer
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            x-kubernetes-int-or-string: true
                           subset:
                             type: string
                           weight:
@@ -937,9 +942,10 @@ spec:
                           minLength: 1
                           type: string
                         servicePort:
-                          maximum: 65535
-                          minimum: 1
-                          type: integer
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          x-kubernetes-int-or-string: true
                         subset:
                           type: string
                       required:
@@ -1063,9 +1069,10 @@ spec:
                             minLength: 1
                             type: string
                           servicePort:
-                            maximum: 65535
-                            minimum: 1
-                            type: integer
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            x-kubernetes-int-or-string: true
                           subset:
                             type: string
                           weight:
@@ -1219,9 +1226,10 @@ spec:
                           minLength: 1
                           type: string
                         servicePort:
-                          maximum: 65535
-                          minimum: 1
-                          type: integer
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          x-kubernetes-int-or-string: true
                         subset:
                           type: string
                       required:
