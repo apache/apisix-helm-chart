@@ -17,7 +17,6 @@
 global:
   imagePullSecrets: []
 
-
 apisix:
   # Enable or disable Apache APISIX itself
   # Set it to false and ingress-controller.enabled=true will deploy only ingress-controller
@@ -121,7 +120,6 @@ apisix:
 nameOverride: ""
 fullnameOverride: ""
 
-
 gateway:
   type: NodePort
   # If you want to keep the client source IP, you can set this to Local.
@@ -161,7 +159,6 @@ gateway:
   #    hosts:
   #      - chart-example.local
 
-
 admin:
   # Enable Admin API
   enabled: true
@@ -186,6 +183,11 @@ admin:
     ipList:
       - 127.0.0.1/24
 
+nginx:
+  workerRlimitNofile: "1047552"
+  workerConnections: "16384"
+  workerProcesses: auto
+  enableCPUAffinity: true
 
 # APISIX plugins to be enabled
 plugins:
@@ -399,10 +401,8 @@ etcd:
 
   replicaCount: 3
 
-
 dashboard:
   enabled: false
-
 
 ingress-controller:
   enabled: false
