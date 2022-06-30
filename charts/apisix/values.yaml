@@ -257,7 +257,7 @@ customPlugins:
       # plugin name.
     - name: ""
       # plugin attrs
-      attrs: 
+      attrs: {}
       # plugin codes can be saved inside configmap object.
       configMap:
         # name of configmap.
