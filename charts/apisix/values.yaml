@@ -184,8 +184,8 @@ admin:
       - 127.0.0.1/24
 
 nginx:
-  workerRlimitNofile: "1047552"
-  workerConnections: "16384"
+  workerRlimitNofile: "20480"
+  workerConnections: "10620"
   workerProcesses: auto
   enableCPUAffinity: true
 
