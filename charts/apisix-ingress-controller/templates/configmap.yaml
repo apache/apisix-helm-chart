@@ -55,7 +55,7 @@ data:
       apisix_route_version: {{ .Values.config.kubernetes.apisixRouteVersion | quote }}
       enable_gateway_api: {{ .Values.config.kubernetes.enableGatewayAPI }}
     apisix:
-      default_cluster_base_url: http://{{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{ .Values.clusterDomain }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
+      default_cluster_base_url: {{ (list "http://" (ternary (list .Release.Name "-apisix-admin" | join "") .Values.config.apisix.serviceName (eq .Values.config.apisix.serviceName "")) "." (ternary .Release.Namespace .Values.config.apisix.serviceNamespace (eq .Values.config.apisix.serviceNamespace "")) ".svc." .Values.clusterDomain ":" .Values.config.apisix.servicePort "/apisix/admin"| join "") }}
       default_cluster_admin_key: {{ .Values.config.apisix.adminKey | quote }}
       default_cluster_name: {{ .Values.config.apisix.clusterName | quote }}
 kind: ConfigMap

@@ -122,8 +122,10 @@ config:
     enableGatewayAPI: false
   # APISIX related configurations.
   apisix:
-    serviceName: apisix-admin
-    serviceNamespace: ingress-apisix
+    # The name of the APISIX admin service. Leave it empty to use <Release name>-apisix-admin.
+    serviceName: ""
+    # The namespace of APISIX admin service. Leave it empty to use the release namespace.
+    serviceNamespace: ""
     servicePort: 9180
     adminKey: "edd1c9f034335f136f87ad84b625c8f1"
     clusterName: "default"

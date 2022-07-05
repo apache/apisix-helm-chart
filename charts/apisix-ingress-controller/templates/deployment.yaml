@@ -54,8 +54,9 @@ spec:
                 path: config.yaml
       initContainers:
         - name: wait-apisix-admin
+          {{ $apisixAdmin := (list (ternary (list .Release.Name "-apisix-admin" | join "") .Values.config.apisix.serviceName (eq .Values.config.apisix.serviceName "")) "." (ternary .Release.Namespace .Values.config.apisix.serviceNamespace (eq .Values.config.apisix.serviceNamespace "")) ".svc." .Values.clusterDomain " " .Values.config.apisix.servicePort | join "") }}
           image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
-          command: ['sh', '-c', "until nc -z {{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{ .Values.clusterDomain }} {{ .Values.config.apisix.servicePort }} ; do echo waiting for apisix-admin; sleep 2; done;"]
+          command: ['sh', '-c', "until nc -w 3 -z  {{ $apisixAdmin }}; do echo Waiting for APISIX admin service at {{ $apisixAdmin }}...; sleep 2; done;"]
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
       containers:
