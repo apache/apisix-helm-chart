@@ -42,9 +42,12 @@ replicaCount: 1
 image:
   repository: apache/apisix-ingress-controller
   pullPolicy: IfNotPresent
-  tag: "1.0.0"
+  tag: "1.4.1"
+
+podAnnotations: {}
 
 imagePullSecrets: []
+clusterDomain: cluster.local
 
 service:
   port: 80
@@ -64,8 +67,20 @@ config:
   # are marshalled in JSON format, which can be parsed by
   # programs easily.
   logOutput: "stderr"
+  # the TLS certificate file path.
+  certFile: "/etc/webhook/certs/cert.pem"
+  # the TLS key file path.
+  keyFile: "/etc/webhook/certs/key.pem"
   # the HTTP Server listen address, default is ":8080"
   httpListen: ":8080"
+  # the HTTPS Server listen address, default is ":8443"
+  httpsListen: ":8443"
+  # the controller will use the Endpoint of this Service to
+  # update the status information of the Ingress resource.
+  # The format is "namespace/svc-name" to solve the situation that
+  # the data plane and the controller are not deployed in the same namespace.
+  ingressPublishService: ""
+  ingressStatusAddress: []
   # enable profiling via web interfaces host:port/debug/pprof, default is true.
   enableProfiling: true
   # Kubernetes related configurations.
@@ -75,10 +90,14 @@ config:
     kubeconfig: ""
     # how long should apisix-ingress-controller re-synchronizes with Kubernetes,
     # default is 6h,
-    resyncInterval: "60s"
+    resyncInterval: "6h"
     # namespace list that controller will watch for resources,
     # by default all namespaces (represented by "*") are watched.
     appNamespaces: ["*"]
+    # namespace_selector represent basis for selecting managed namespaces.
+    # the field is support since version 1.4.0
+    # For example, "apisix.ingress=watching", so ingress will watching the namespaces which labels "apisix.ingress=watching"
+    namespaceSelector: [""]
     # the election id for the controller leader campaign,
     # only the leader will watch and delivery resource changes,
     # other instances (as candidates) stand by.
@@ -91,15 +110,29 @@ config:
     # "networking/v1" (for Kubernetes version v1.19.0 or higher), and
     # "extensions/v1beta1", default is "networking/v1".
     ingressVersion: "networking/v1"
-    # the supported apisixroute api group version, can be "apisix.apache.org/v1"
-    # or "apisix.apache.org/v2alpha1",
-    apisixRouteVersion: "apisix.apache.org/v2alpha1"
+    # whether to watch EndpointSlices rather than Endpoints.
+    watchEndpointSlices: false
+    # the supported apisixroute api group version, can be "apisix.apache.org/v2beta1"
+    # "apisix.apache.org/v2beta2" or "apisix.apache.org/v2beta3"
+    apisixRouteVersion: "apisix.apache.org/v2beta3"
+    # whether to enable support for Gateway API.
+    # Note: This feature is currently under development and may not work as expected.
+    # It is not recommended to use it in a production environment.
+    # Before we announce support for it to reach Beta level or GA.
+    enableGatewayAPI: false
   # APISIX related configurations.
   apisix:
-    baseURL: "http://apisix-admin:9180/apisix/admin"
+    serviceName: apisix-admin
+    serviceNamespace: ingress-apisix
+    servicePort: 9180
     adminKey: "edd1c9f034335f136f87ad84b625c8f1"
+    clusterName: "default"
 
 resources: {}
+
+initContainer:
+  image: busybox
+  tag: 1.28
 
 autoscaling:
   enabled: false
@@ -117,3 +150,19 @@ serviceMonitor:
   enabled: false
   namespace: "monitoring"
   interval: 15s
+  # @param serviceMonitor.labels ServiceMonitor extra labels
+  labels: {}
+  # @param serviceMonitor.annotations ServiceMonitor annotations
+  annotations: {}
+
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000

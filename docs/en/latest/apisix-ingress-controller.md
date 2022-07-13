@@ -32,9 +32,9 @@ title: Apache APISIX Ingress Controller Helm Chart
 To install apisix-ingress-controller which release name is `apisix-ingress-controller`:
 
 ```bash
-$ helm repo add apisix https://charts.apiseven.com
-$ helm repo update
-$ helm install apisix-ingress-controller apisix/apisix-ingress-controller --namespace ingress-apisix
+helm repo add apisix https://charts.apiseven.com
+helm repo update
+helm install apisix-ingress-controller apisix/apisix-ingress-controller --namespace ingress-apisix --create-namespace
 ```
 
 ## Uninstall
@@ -74,6 +74,6 @@ CRDs upgrading is special as helm chart will skip to apply these resources when 
 In such a case, you may need to apply these CRDs by yourself.
 
 ```shell
-$ cd /path/to/apisix-ingress-controller
-$ kubectl apply -k samples/deploy/crd/
+cd /path/to/apisix-ingress-controller
+kubectl apply -k samples/deploy/crd/
 ```

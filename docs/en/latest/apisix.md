@@ -26,9 +26,9 @@ title: Apache APISIX Helm Chart
 To install the chart with release name `apisix`:
 
 ```shell
-$ helm repo add apisix https://charts.apiseven.com
-$ helm repo update
-$ helm install apisix apisix/apisix
+helm repo add apisix https://charts.apiseven.com
+helm repo update
+helm install apisix apisix/apisix --create-namespace  --namespace apisix
 ```
 
 ## Uninstall
@@ -37,38 +37,6 @@ To uninstall/delete the `apisix` release:
 
 ```shell
 helm uninstall apisix
-```
-
-## FAQ
-
-1. How to install APISIX only?
-
-The Charts will install etcd 3.4.14 by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host={http://your_etcd_address:2379}`.
-
-Please use the FQDN address or the IP of the etcd.
-
-```shell
-# if etcd export by kubernetes service need spell fully qualified name
-$ helm install apisix apisix/apisix \
-    --set etcd.enabled=false \
-    --set etcd.host={http://etcd_node_1:2379\,http://etcd_node_2:2379}
-```
-
-2. Why get 403 when I access Apache APISIX admin api?
-
-We can define `admin.allow.ipList` in CIDR.
-
-```shell
-$ helm install apisix apisix/apisix \
-    --set admin.allow.ipList="10.22.100.12/8" \
-    --set admin.allow.ipList="172.0.0.0/24"
-```
-
-If you want to allow all IPs for a quick test, just set `admin.allow.ipList=""`
-
-```shell
-$ helm install apisix apisix/apisix \
-    --set admin.allow.ipList=""
 ```
 
 ## Seeking help

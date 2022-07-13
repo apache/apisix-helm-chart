@@ -21,6 +21,13 @@ metadata:
   name: {{ include "apisix.fullname" . }}
   namespace: {{ .Release.Namespace }}
 data:
+{{- if .Values.apisix.enableCustomizedConfig }}
+  config.yaml: |-
+    {{- range $key, $value := .Values.apisix.customizedConfig }}
+    {{ $key }}:
+      {{- include "apisix.tplvalues.render" (dict "value" $value "context" $) | nindent 6 }}
+    {{- end }}
+{{- else }}
   config.yaml: |-
     #
     # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -44,11 +51,19 @@ data:
       enable_admin: {{ .Values.admin.enabled }}
       enable_admin_cors: {{ .Values.admin.cors }}
       enable_debug: false
-      enable_dev_mode: false          # Sets nginx worker_processes to 1 if set to true
-      enable_reuseport: true          # Enable nginx SO_REUSEPORT switch if set to true.
-      enable_ipv6: true
-      config_center: etcd             # etcd: use etcd to store the config value
-                                      # yaml: fetch the config value from local yaml file `/your_path/conf/apisix.yaml`
+      {{- if or .Values.customPlugins.enabled .Values.apisix.luaModuleHook.enabled }}
+      extra_lua_path: {{ .Values.customPlugins.luaPath }};{{ .Values.apisix.luaModuleHook.luaPath }}
+      {{- end }}
+
+      {{- if .Values.apisix.luaModuleHook.enabled }}
+      lua_module_hook: {{ .Values.apisix.luaModuleHook.hookPoint | quote }}
+      {{- end }}
+
+      enable_dev_mode: false                       # Sets nginx worker_processes to 1 if set to true
+      enable_reuseport: true                       # Enable nginx SO_REUSEPORT switch if set to true.
+      enable_ipv6: {{ .Values.apisix.enableIPv6 }} # Enable nginx IPv6 resolver
+      config_center: etcd                          # etcd: use etcd to store the config value
+                                                   # yaml: fetch the config value from local yaml file `/your_path/conf/apisix.yaml`
 
       #proxy_protocol:                 # Proxy Protocol configuration
       #  listen_http_port: 9181        # The port with proxy protocol for http, it differs from node_listen and port_admin.
@@ -107,18 +122,27 @@ data:
         http: 'radixtree_uri'         # radixtree_uri: match route by uri(base on radixtree)
                                       # radixtree_host_uri: match route by host + uri(base on radixtree)
         ssl: 'radixtree_sni'          # radixtree_sni: match route by SNI(base on radixtree)
-      {{- if and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0)) }}
+      {{- if or (index .Values "ingress-controller" "enabled") (and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0))) }}
       stream_proxy:                 # TCP/UDP proxy
-        {{- if gt (len .Values.gateway.stream.tcp) 0 }}
+        only: {{ .Values.gateway.stream.only }}
+        {{- if or (index .Values "ingress-controller" "enabled") (gt (len .Values.gateway.stream.tcp) 0) }}
         tcp:                        # TCP proxy port list
+          {{- if gt (len .Values.gateway.stream.tcp) 0}}
           {{- range .Values.gateway.stream.tcp }}
           - {{ . }}
           {{- end }}
+          {{- else}}
+          - 9100
+          {{- end }}
         {{- end }}
-        {{- if gt (len .Values.gateway.stream.udp) 0 }}
+        {{- if or (index .Values "ingress-controller" "enabled") (gt (len .Values.gateway.stream.udp) 0) }}
         udp:                        # UDP proxy port list
+          {{- if gt (len .Values.gateway.stream.udp) 0}}
           {{- range .Values.gateway.stream.udp }}
           - {{ . }}
+          {{- end }}
+          {{- else}}
+          - 9200
           {{- end }}
         {{- end }}
       {{- end }}
@@ -134,15 +158,25 @@ data:
         listen_port: {{ .Values.gateway.tls.containerPort }}
         ssl_protocols: "TLSv1 TLSv1.1 TLSv1.2 TLSv1.3"
         ssl_ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"
+        {{- if and .Values.gateway.tls.enabled .Values.gateway.tls.existingCASecret }}
+        ssl_trusted_certificate: "/usr/local/apisix/conf/ssl/{{ .Values.gateway.tls.certCAFilename }}"
+        {{- end }}
 
     nginx_config:                     # config for render the template to genarate nginx.conf
-      error_log: "/dev/stderr"
-      error_log_level: "warn"         # warn,error
-      worker_rlimit_nofile: 20480     # the number of files a worker process can open, should be larger than worker_connections
+      error_log: "{{ .Values.logs.errorLog }}"
+      error_log_level: "{{ .Values.logs.errorLogLevel }}"         # warn,error
+      worker_processes: "{{ .Values.nginx.workerProcesses }}"
+      enable_cpu_affinity: {{ default "true" .Values.nginx.enableCPUAffinity }}
+      worker_rlimit_nofile: {{ default "20480" .Values.nginx.workerRlimitNofile }}     # the number of files a worker process can open, should be larger than worker_connections
       event:
-        worker_connections: 10620
+        worker_connections: {{ default "10620" .Values.nginx.workerConnections  }}
       http:
-        access_log: "/dev/stdout"
+        enable_access_log: {{ .Values.logs.enableAccessLog }}
+        {{- if .Values.logs.enableAccessLog }}
+        access_log: "{{ .Values.logs.accessLog }}"
+        access_log_format: "{{ .Values.logs.accessLogFormat }}"
+        access_log_format_escape: {{ .Values.logs.accessLogFormatEscape }}
+        {{- end }}
         keepalive_timeout: 60s         # timeout during which a keep-alive client connection will stay open on the server side.
         client_header_timeout: 60s     # timeout for reading client request header, then 408 (Request Time-out) error is returned to the client
         client_body_timeout: 60s       # timeout for reading client request body, then 408 (Request Time-out) error is returned to the client
@@ -152,8 +186,30 @@ data:
         real_ip_from:                  # http://nginx.org/en/docs/http/ngx_http_realip_module.html#set_real_ip_from
           - 127.0.0.1
           - 'unix:'
-        #lua_shared_dicts:              # add custom shared cache to nginx.conf
-        #  ipc_shared_dict: 100m        # custom shared cache, format: `cache-key: cache-size`
+        {{- if .Values.apisix.customLuaSharedDicts }}
+        custom_lua_shared_dict:              # add custom shared cache to nginx.conf
+        {{- range $dict := .Values.apisix.customLuaSharedDicts }}
+          {{ $dict.name }}: {{ $dict.size }}
+        {{- end }}
+        {{- end }}
+      {{- if .Values.configurationSnippet.main }}
+      main_configuration_snippet: {{- toYaml .Values.configurationSnippet.main | indent 6 }}
+      {{- end }}
+      {{- if .Values.configurationSnippet.httpStart }}
+      http_configuration_snippet: {{- toYaml .Values.configurationSnippet.httpStart | indent 6 }}
+      {{- end }}
+      {{- if .Values.configurationSnippet.httpEnd }}
+      http_end_configuration_snippet: {{- toYaml .Values.configurationSnippet.httpEnd | indent 6 }}
+      {{- end }}
+      {{- if .Values.configurationSnippet.httpSrv }}
+      http_server_configuration_snippet: {{- toYaml .Values.configurationSnippet.httpSrv | indent 6 }}
+      {{- end }}
+      {{- if .Values.configurationSnippet.httpAdmin }}
+      http_admin_configuration_snippet: {{ toYaml .Values.configurationSnippet.httpAdmin | indent 6 }}
+      {{- end }}
+      {{- if .Values.configurationSnippet.stream }}
+      stream_configuration_snippet: {{- toYaml .Values.configurationSnippet.stream | indent 6 }}
+      {{- end }}
 
     etcd:
     {{- if .Values.etcd.enabled }}
@@ -167,15 +223,72 @@ data:
     {{- end }}
       prefix: {{ .Values.etcd.prefix | quote }}     # apisix configurations prefix
       timeout: {{ .Values.etcd.timeout }}   # 30 seconds
+      {{- if .Values.etcd.auth.rbac.create }}
+      user: {{ .Values.etcd.auth.rbac.user | quote }}
+      password: {{ .Values.etcd.auth.rbac.password | quote }}
+      {{- end }}
+      {{- if .Values.etcd.auth.tls.enabled }}
+      tls:
+        cert: "/etcd-ssl/{{ .Values.etcd.auth.tls.certFilename }}"
+        key: "/etcd-ssl/{{ .Values.etcd.auth.tls.certKeyFilename }}"
+        verify: {{ .Values.etcd.auth.tls.verify }}
+        sni: "{{ .Values.etcd.auth.tls.sni }}"
+      {{- end }}
+
+    {{- if .Values.discovery.enabled }}
+    discovery:
+      {{- range $key, $value := .Values.discovery.registry }}
+      {{ $key }}:
+        {{- include "apisix.tplvalues.render" (dict "value" $value "context" $) | nindent 8 }}
+      {{- end }}
+    {{- end }}
 
     {{- if .Values.plugins }}
     plugins:                          # plugin list
-    {{- end }}
     {{- range $plugin := .Values.plugins }}
       - {{ $plugin }}
+    {{- end }}
+    {{- if .Values.customPlugins.enabled }}
+    {{- range $plugin := .Values.customPlugins.plugins }}
+      - {{ $plugin.name }}
+    {{- end }}
+    {{- end }}
     {{- end }}
     stream_plugins:
     {{- range $plugin := .Values.stream_plugins }}
       - {{ $plugin }}
     {{- end }}
+
+    {{- if .Values.extPlugin.enabled }}
+    ext-plugin:
+      cmd:
+      {{- range $arg := .Values.extPlugin.cmd }}
+        - {{ $arg }}
+      {{- end }}
+    {{- end }}
+
+    {{- if or .Values.pluginAttrs .Values.customPlugins.enabled .Values.serviceMonitor.enabled}}
+    plugin_attr:
+    {{- if .Values.serviceMonitor.enabled }}
+      prometheus:
+        export_addr:
+          ip: 0.0.0.0
+          port: {{ .Values.serviceMonitor.containerPort }}
+        export_uri: {{ .Values.serviceMonitor.path }}
+        metric_prefix: {{ .Values.serviceMonitor.metricPrefix }}
+    {{- end }}
+    {{- if .Values.customPlugins.enabled }}
+    {{- range $plugin := .Values.customPlugins.plugins }}
+      {{- if $plugin.attrs }}
+      {{ $plugin.name }}: {{- $plugin.attrs | toYaml | nindent 8 }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.pluginAttrs }}
+    {{- range $name, $attrs := .Values.pluginAttrs }}
+      {{ $name}}: {{- $attrs | toYaml | nindent 8 }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+{{- end }}
 {{- end }}

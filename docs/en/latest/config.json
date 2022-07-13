@@ -5,6 +5,10 @@
       "type": "category",
       "label": "Installation",
       "items": ["apisix", "apisix-dashboard", "apisix-ingress-controller"]
+    },
+    {
+      "type": "doc",
+      "id": "FAQ"
     }
   ]
 }

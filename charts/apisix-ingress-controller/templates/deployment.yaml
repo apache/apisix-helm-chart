@@ -18,6 +18,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "apisix-ingress-controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "apisix-ingress-controller.labels" . | nindent 4 }}
 spec:
@@ -31,6 +32,9 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "apisix-ingress-controller.selectorLabels" . | nindent 8 }}
     spec:
@@ -39,6 +43,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "apisix-ingress-controller.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
         - name: configuration
           configMap:
@@ -46,6 +52,12 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
+      initContainers:
+        - name: wait-apisix-admin
+          image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
+          command: ['sh', '-c', "until nc -z {{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{ .Values.clusterDomain }} {{ .Values.config.apisix.servicePort }} ; do echo waiting for apisix-admin; sleep 2; done;"]
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
       containers:
         - name: {{ .Chart.Name }}
           command:

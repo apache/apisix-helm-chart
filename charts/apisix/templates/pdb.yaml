@@ -13,19 +13,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-apiVersion: v2
-name: apisix-ingress-controller
-description: Apache APISIX Ingress Controller for Kubernetes
-icon: https://apache.org/logos/res/apisix/apisix.png
-keywords:
-  - ingress
-  - apisix
-  - nginx
-  - crd
-type: application
-version: 0.9.3
-appVersion: 1.4.1
 
-maintainers:
-  - name: tao12345666333
+{{- if (and .Values.apisix.enabled .Values.apisix.podDisruptionBudget.enabled) }}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "apisix.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "apisix.labels" . | nindent 4 }}
+spec:
+{{- if .Values.apisix.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.apisix.podDisruptionBudget.minAvailable }}
+{{- else }}
+  maxUnavailable: {{ .Values.apisix.podDisruptionBudget.maxUnavailable }}
+{{- end }}
+  selector:
+    matchLabels:
+{{- include "apisix.selectorLabels" . | nindent 6 }}
+{{- end }}
