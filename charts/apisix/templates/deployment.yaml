@@ -50,7 +50,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- toYaml .Values.apisix.securityContext | nindent 12 }}
           image: "{{ .Values.apisix.image.repository }}:{{ .Values.apisix.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.apisix.image.pullPolicy }}
           env:
