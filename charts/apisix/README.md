@@ -220,3 +220,10 @@ Configurations for Apache APISIX ingress-controller sub chart.
 | `serviceMonitor.containerPort` | Container port which Prometheus metrics are exposed          | `9091`                       |
 | `serviceMonitor.labels`        | ServiceMonitor extra labels                                  | `{}`                         |
 | `serviceMonitor.annotations`   | ServiceMonitor annotations                                   | `{}`                         |
+
+### initContainers parameters
+
+| Parameter                      | Description          | Default   |
+|--------------------------------|----------------------|-----------|
+| `initContainer.image`          | Init container image | `busybox` |
+| `initContainer.tag`            | Init container tag   | `1.28`    |

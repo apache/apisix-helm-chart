@@ -27,7 +27,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   {{- if .Values.ingress.className }}
-  ingressClassName: {{- .Values.ingress.className -}}
+  ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
   name: {{ $fullName }}
   namespace: {{ .Release.Namespace }}

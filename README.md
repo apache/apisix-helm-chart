@@ -24,3 +24,5 @@ Apache APISIX Helm Charts provide the installation of [Apache APISIX](https://gi
 - [Apache APISIX Helm Chart](./docs/en/latest/apisix.md)
 - [Apache APISIX Dashboard Helm Chart](./docs/en/latest/apisix-dashboard.md)
 - [Apache APISIX Ingress Controller Helm Chart](./docs/en/latest/apisix-ingress-controller.md)
+
+Currently, APISIX Ingress Controller automatically manipulates some APISIX resources, which is not very compatible with APISIX Dashboard. In addition, users should not modify resources labeled `managed-by: apisix-ingress-controllers` via APISIX Dashboard.

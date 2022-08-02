@@ -17,7 +17,6 @@
 global:
   imagePullSecrets: []
 
-
 apisix:
   # Enable or disable Apache APISIX itself
   # Set it to false and ingress-controller.enabled=true will deploy only ingress-controller
@@ -56,7 +55,7 @@ apisix:
     repository: apache/apisix
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 2.13.1-alpine
+    tag: 2.15.0-alpine
 
   # Use a `DaemonSet` or `Deployment`
   kind: Deployment
@@ -166,7 +165,6 @@ gateway:
   #    hosts:
   #      - chart-example.local
 
-
 admin:
   # Enable Admin API
   enabled: true
@@ -191,6 +189,11 @@ admin:
     ipList:
       - 127.0.0.1/24
 
+nginx:
+  workerRlimitNofile: "20480"
+  workerConnections: "10620"
+  workerProcesses: auto
+  enableCPUAffinity: true
 
 # APISIX plugins to be enabled
 plugins:
@@ -260,7 +263,7 @@ customPlugins:
       # plugin name.
     - name: ""
       # plugin attrs
-      attrs: |
+      attrs: {}
       # plugin codes can be saved inside configmap object.
       configMap:
         # name of configmap.
@@ -328,6 +331,9 @@ dns:
   validity: 30
   timeout: 5
 
+initContainer:
+  image: busybox
+  tag: 1.28
 
 autoscaling:
   enabled: false
@@ -401,10 +407,8 @@ etcd:
 
   replicaCount: 3
 
-
 dashboard:
   enabled: false
-
 
 ingress-controller:
   enabled: false
