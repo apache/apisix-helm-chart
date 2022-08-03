@@ -166,7 +166,7 @@ data:
       error_log: "{{ .Values.logs.errorLog }}"
       error_log_level: "{{ .Values.logs.errorLogLevel }}"         # warn,error
       worker_processes: "{{ .Values.nginx.workerProcesses }}"
-      enable_cpu_affinity: {{ default "true" .Values.nginx.enableCPUAffinity }}
+      enable_cpu_affinity: {{ and true .Values.nginx.enableCPUAffinity }}
       worker_rlimit_nofile: {{ default "20480" .Values.nginx.workerRlimitNofile }}     # the number of files a worker process can open, should be larger than worker_connections
       event:
         worker_connections: {{ default "10620" .Values.nginx.workerConnections  }}
@@ -272,26 +272,9 @@ data:
     {{- end }}
 
     {{- if or .Values.pluginAttrs .Values.customPlugins.enabled .Values.serviceMonitor.enabled}}
-    plugin_attr:
-    {{- if .Values.serviceMonitor.enabled }}
-      prometheus:
-        export_addr:
-          ip: 0.0.0.0
-          port: {{ .Values.serviceMonitor.containerPort }}
-        export_uri: {{ .Values.serviceMonitor.path }}
-        metric_prefix: {{ .Values.serviceMonitor.metricPrefix }}
-    {{- end }}
-    {{- if .Values.customPlugins.enabled }}
-    {{- range $plugin := .Values.customPlugins.plugins }}
-      {{- if $plugin.attrs }}
-      {{ $plugin.name }}: {{- $plugin.attrs | toYaml | nindent 8 }}
-      {{- end }}
-    {{- end }}
-    {{- end }}
-    {{- if .Values.pluginAttrs }}
-    {{- range $name, $attrs := .Values.pluginAttrs }}
-      {{ $name}}: {{- $attrs | toYaml | nindent 8 }}
-    {{- end }}
+    {{- $pluginAttrs := include "apisix.pluginAttrs" . -}}
+    {{- if gt (len $pluginAttrs) 0 }}
+    plugin_attr: {{- $pluginAttrs | nindent 6 }}
     {{- end }}
     {{- end }}
 {{- end }}
