@@ -121,10 +121,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  create: true
+  create: false  # Set to `true` to create ServiceAccount for Kubernetes service discovery.
   annotations: {}
   name: ""
-
 
 gateway:
   type: NodePort
@@ -194,6 +193,10 @@ nginx:
   workerConnections: "10620"
   workerProcesses: auto
   enableCPUAffinity: true
+  envs: []
+    # Include the following environment variables for Kubernetes service discovery:
+    # - KUBERNETES_SERVICE_HOST
+    # - KUBERNETES_SERVICE_PORT
 
 # APISIX plugins to be enabled
 plugins:
@@ -290,26 +293,42 @@ extraVolumeMounts: []
 
 discovery:
   enabled: false
-  registry:
-      # Integration service discovery registry. E.g eureka\dns\nacos\consul_kv
-      # reference:
-      # https://apisix.apache.org/docs/apisix/discovery#configuration-for-eureka
-      # https://apisix.apache.org/docs/apisix/discovery/dns#service-discovery-via-dns
-      # https://apisix.apache.org/docs/apisix/discovery/consul_kv#configuration-for-consul-kv
-      # https://apisix.apache.org/docs/apisix/discovery/nacos#configuration-for-nacos
-      #
-      # an eureka example:
-      # eureka:
-      #   host:
-      #     - "http://${username}:${password}@${eureka_host1}:${eureka_port1}"
-      #     - "http://${username}:${password}@${eureka_host2}:${eureka_port2}"
-      #   prefix: "/eureka/"
-      #   fetch_interval: 30
-      #   weight: 100
-      #   timeout:
-      #     connect: 2000
-      #     send: 2000
-      #     read: 5000
+  registry: {}
+    # Integration service discovery registry. E.g eureka\dns\nacos\consul_kv
+    # reference:
+    # https://apisix.apache.org/docs/apisix/discovery/#configuration-for-eureka
+    # https://apisix.apache.org/docs/apisix/discovery/dns/#service-discovery-via-dns
+    # https://apisix.apache.org/docs/apisix/discovery/consul_kv/#configuration-for-consul-kv
+    # https://apisix.apache.org/docs/apisix/discovery/nacos/#configuration-for-nacos
+    # https://apisix.apache.org/docs/apisix/discovery/kubernetes/#configuration
+    #
+    # an eureka example:
+    # ```
+    # eureka:
+    #   host:
+    #     - "http://${username}:${password}@${eureka_host1}:${eureka_port1}"
+    #     - "http://${username}:${password}@${eureka_host2}:${eureka_port2}"
+    #   prefix: "/eureka/"
+    #   fetch_interval: 30
+    #   weight: 100
+    #   timeout:
+    #     connect: 2000
+    #     send: 2000
+    #     read: 5000
+    # ```
+    #
+    # the minimal Kubernetes example:
+    # ```
+    # kubernetes: {}
+    # ```
+    #
+    # The prerequisites for the above minimal Kubernetes example:
+    #  1. Set `.serviceAccount.create` (L124) to `true` to create the ServiceAccount with required permissions.
+    #     This is for allowing the default `.discovery.registry.kubernetes.client.token_file`.
+    #  2. Add the following environment variables into `.nginx.envs` (L196) to pass into nginx worker processes:
+    #      - KUBERNETES_SERVICE_HOST
+    #      - KUBERNETES_SERVICE_PORT
+    #     This is for allowing the default `host` and `port` of `.discovery.registry.kubernetes.service`.
 
 # access log and error log configuration
 logs:
