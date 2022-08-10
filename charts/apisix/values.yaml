@@ -125,6 +125,9 @@ serviceAccount:
   annotations: {}
   name: ""
 
+rbac:
+  create: false  # Set to `true` to create RBAC resources for Kubernetes service discovery.
+
 gateway:
   type: NodePort
   # If you want to keep the client source IP, you can set this to Local.
@@ -323,9 +326,12 @@ discovery:
     # ```
     #
     # The prerequisites for the above minimal Kubernetes example:
-    #  1. Set `.serviceAccount.create` (L124) to `true` to create the ServiceAccount with required permissions.
+    #  1. Set `.serviceAccount.create` (L124) to `true` to create the ServiceAccount.
     #     This is for allowing the default `.discovery.registry.kubernetes.client.token_file`.
-    #  2. Add the following environment variables into `.nginx.envs` (L196) to pass into nginx worker processes:
+    #  2. Set `.rbac.create` (L129) to `true` to create the necessary RBAC resources.
+    #     This is for allowing the default `.discovery.registry.kubernetes.client.token_file`.
+    #  3. Include the following environment variables in `.nginx.envs` (L199) to pass them into
+    #     nginx worker processes (https://nginx.org/en/docs/ngx_core_module.html#env):
     #      - KUBERNETES_SERVICE_HOST
     #      - KUBERNETES_SERVICE_PORT
     #     This is for allowing the default `host` and `port` of `.discovery.registry.kubernetes.service`.
