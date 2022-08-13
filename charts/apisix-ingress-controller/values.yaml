@@ -122,6 +122,8 @@ config:
     enableGatewayAPI: false
   # APISIX related configurations.
   apisix:
+    # Enabling this value, overrides serviceName and serviceNamespace.
+    # serviceFullname: "apisix-admin.apisix.svc.local"
     serviceName: apisix-admin
     serviceNamespace: ingress-apisix
     servicePort: 9180

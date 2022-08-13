@@ -37,6 +37,8 @@ helm repo update
 helm install apisix-ingress-controller apisix/apisix-ingress-controller --namespace ingress-apisix --create-namespace
 ```
 
+Note: APISIX Ingress Controller will try to establish a connection with APISIX admin in the location specified by `apisix.serviceName` and `apisix.serviceNamespace` values following the naming convention `<serviceName.serviceNamespace.svc.clusterDomain>`. You can override this behavior to specify a fully custom location by setting the `apisix.serviceFullname` value.
+
 ## Uninstall
 
 To uninstall/delete the `apisix-ingress-controller` release:
