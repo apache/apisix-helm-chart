@@ -188,6 +188,8 @@ nginx:
   workerConnections: "10620"
   workerProcesses: auto
   enableCPUAffinity: true
+  # Whether apisix shows the full version on response header Server
+  enableServerTokens: true
 
 # APISIX plugins to be enabled
 plugins:
