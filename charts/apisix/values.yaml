@@ -122,12 +122,12 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  create: false  # Set to `true` to create ServiceAccount for Kubernetes service discovery.
+  create: false
   annotations: {}
   name: ""
 
 rbac:
-  create: false  # Set to `true` to create RBAC resources for Kubernetes service discovery.
+  create: false
 
 gateway:
   type: NodePort
@@ -199,9 +199,6 @@ nginx:
   workerProcesses: auto
   enableCPUAffinity: true
   envs: []
-    # Include the following environment variables for Kubernetes service discovery:
-    # - KUBERNETES_SERVICE_HOST
-    # - KUBERNETES_SERVICE_PORT
 
 # APISIX plugins to be enabled
 plugins:
@@ -328,11 +325,11 @@ discovery:
     # ```
     #
     # The prerequisites for the above minimal Kubernetes example:
-    #  1. Set `.serviceAccount.create` (L124) to `true` to create the ServiceAccount.
-    #     This is for allowing the default `.discovery.registry.kubernetes.client.token_file`.
-    #  2. Set `.rbac.create` (L129) to `true` to create the necessary RBAC resources.
-    #     This is for allowing the default `.discovery.registry.kubernetes.client.token_file`.
-    #  3. Include the following environment variables in `.nginx.envs` (L199) to pass them into
+    #  1. [Optional] Set `.serviceAccount.create` to `true` to create a dedicated ServiceAccount.
+    #     It is recommended to do so, otherwise the default ServiceAccount "default" will be used.
+    #  2. [Required] Set `.rbac.create` to `true` to create and bind the necessary RBAC resources.
+    #     This grants the ServiceAccount in use to List-Watch Kubernetes Endpoints resources.
+    #  3. [Required] Include the following environment variables in `.nginx.envs` to pass them into
     #     nginx worker processes (https://nginx.org/en/docs/ngx_core_module.html#env):
     #      - KUBERNETES_SERVICE_HOST
     #      - KUBERNETES_SERVICE_PORT
