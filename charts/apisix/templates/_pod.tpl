@@ -12,6 +12,7 @@ spec:
   imagePullSecrets:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  serviceAccountName: {{ include "apisix.serviceAccountName" . }}
   securityContext: {{- toYaml .Values.podSecurityContext | nindent 4 }}
   containers:
     - name: {{ .Chart.Name }}
