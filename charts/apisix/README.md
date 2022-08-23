@@ -91,7 +91,8 @@ Apache APISIX service parameters, this determines how users can access itself.
 | `gateway.http`                  | Apache APISIX service settings for http                                                                                                                                             |            |
 | `gateway.tls`                   | Apache APISIX service settings for tls                                                                                                                                              |            |
 | `gateway.tls.existingCASecret`  | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) | `""`       |
-| `gateway.tls.certCAFilename`    | filename be used in the `gateway.tls.existingCASecret`                                                                                                                                          | `""`       |
+| `gateway.tls.certCAFilename`    | Filename be used in the `gateway.tls.existingCASecret`                                                                                                                                          | `""`       |
+| `gateway.tls.sslProtocols`    |   TLS protocols allowed to use.  | `"TLSv1.2 TLSv1.3"`       |
 | `gateway.stream`                | Apache APISIX service settings for stream                                                                                                                                           |            |
 | `gateway.ingress`               | Using ingress access Apache APISIX service                                                                                                                                          |            |
 

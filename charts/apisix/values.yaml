@@ -142,6 +142,7 @@ gateway:
     certCAFilename: ""
     http2:
       enabled: true
+    sslProtocols: "TLSv1.2 TLSv1.3"
   # L4 proxy (TCP/UDP)
   stream:
     enabled: false
