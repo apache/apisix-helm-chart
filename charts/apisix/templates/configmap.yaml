@@ -51,6 +51,7 @@ data:
       enable_admin: {{ .Values.admin.enabled }}
       enable_admin_cors: {{ .Values.admin.cors }}
       enable_debug: false
+      enable_server_tokens: {{ .Values.nginx.enableServerTokens }}
       {{- if or .Values.customPlugins.enabled .Values.apisix.luaModuleHook.enabled }}
       extra_lua_path: {{ .Values.customPlugins.luaPath }};{{ .Values.apisix.luaModuleHook.luaPath }}
       {{- end }}
