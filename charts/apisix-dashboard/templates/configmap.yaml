@@ -53,7 +53,7 @@ data:
     {{- end }}
     {{- with .Values.config.authentication }}
     authentication:
-      secert: {{ .secert }}
+      secret: {{ .secret }}
       expire_time: {{ .expireTime }}
       users:
         {{- range .users }}

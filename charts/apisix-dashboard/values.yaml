@@ -74,7 +74,7 @@ config:
         filePath: /dev/stdout
 
   authentication:
-    secert: secert
+    secret: secret
     expireTime: 3600
     users:
       - username: admin
