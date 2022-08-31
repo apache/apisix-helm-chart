@@ -83,6 +83,8 @@ config:
   ingressStatusAddress: []
   # enable profiling via web interfaces host:port/debug/pprof, default is true.
   enableProfiling: true
+  # Default interval for synchronizing Kubernetes resources to APISIX
+  apisixResourceSyncInterval: "300s"
   # Kubernetes related configurations.
   kubernetes:
     # the Kubernetes configuration file path, default is "", so the in-cluster
