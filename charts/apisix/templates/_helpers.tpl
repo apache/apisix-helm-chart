@@ -96,17 +96,3 @@ prometheus:
 {{- define "apisix.pluginAttrs" -}}
 {{- merge .Values.pluginAttrs (include "apisix.basePluginAttrs" . | fromYaml) | toYaml -}}
 {{- end -}}
-
-{{- define "apisix.podAntiAffinity" -}}
-{{- if and .Values.apisix.hostNetwork (eq .Values.apisix.kind "Deployment") }}
-podAntiAffinity:
-  requiredDuringSchedulingIgnoredDuringExecution:
-    - labelSelector:
-        matchExpressions:
-          - key: app.kubernetes.io/instance
-            operator: In
-            values:
-              - {{ .Release.Name }}
-      topologyKey: "kubernetes.io/hostname"
-{{- end }}
-{{- end -}}

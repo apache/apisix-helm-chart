@@ -171,8 +171,10 @@ spec:
   nodeSelector:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.apisix.affinity }}
   affinity:
-  {{- merge .Values.apisix.affinity (include "apisix.podAntiAffinity" . | fromYaml) | toYaml | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.apisix.tolerations }}
   tolerations:
     {{- toYaml . | nindent 4 }}
