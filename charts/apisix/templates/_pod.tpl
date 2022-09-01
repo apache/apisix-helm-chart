@@ -115,6 +115,10 @@ spec:
       {{- end }}
       resources:
       {{- toYaml .Values.apisix.resources | nindent 8 }}
+  {{- if .Values.apisix.hostNetwork }}
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  {{- end }}
   hostNetwork: {{ .Values.apisix.hostNetwork }}
   {{- if .Values.etcd.enabled }}
   initContainers:
