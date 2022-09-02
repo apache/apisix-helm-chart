@@ -202,6 +202,7 @@ plugins:
   - cors
   - echo
   - fault-injection
+  - file-logger
   - grpc-transcode
   - hmac-auth
   - http-logger
