@@ -13,6 +13,7 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   securityContext: {{- toYaml .Values.podSecurityContext | nindent 4 }}
+  serviceAccountName: {{ include "apisix.serviceAccountName" . }}
   containers:
     - name: {{ .Chart.Name }}
       securityContext: {{- toYaml .Values.securityContext | nindent 8 }}

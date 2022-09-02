@@ -17,6 +17,15 @@
 global:
   imagePullSecrets: []
 
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created
+  create: false
+  # The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  # Whether automounting API credentials for a service account
+  automountServiceAccountToken: true
+
 apisix:
   # Enable or disable Apache APISIX itself
   # Set it to false and ingress-controller.enabled=true will deploy only ingress-controller
