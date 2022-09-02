@@ -194,6 +194,7 @@ nginx:
 
 # APISIX plugins to be enabled
 plugins:
+  - file-logger
   - api-breaker
   - authz-keycloak
   - basic-auth
