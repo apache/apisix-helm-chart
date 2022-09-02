@@ -14,6 +14,7 @@ spec:
   {{- end }}
   securityContext: {{- toYaml .Values.podSecurityContext | nindent 4 }}
   serviceAccountName: {{ include "apisix.serviceAccountName" . }}
+  automountServiceAccountToken: true
   containers:
     - name: {{ .Chart.Name }}
       securityContext: {{- toYaml .Values.securityContext | nindent 8 }}

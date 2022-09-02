@@ -44,6 +44,13 @@ The following tables lists the configurable parameters of the apisix chart and t
 |---------------------------|-------------------------------------------------|---------------------------------------------------------|
 | `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]` (does not add image pull secrets to deployed pods) |
 
+### RBAC parameters
+
+| Name                         | Description                                                                                                           | Value  |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------ |
+| `serviceAccount.create`      | Specifies whether a ServiceAccount should be created                                                                  | `true` |
+| `serviceAccount.name`        | The name of the ServiceAccount to use. If not set and create is true, a name is generated using the fullname template | `nil`  |
+
 ### apisix parameters
 
 | Parameter                                         | Description                                                                                                                                                                                                                                                                                                                  | Default                                                |
