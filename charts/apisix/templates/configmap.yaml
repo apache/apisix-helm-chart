@@ -253,6 +253,14 @@ data:
       {{- end }}
     {{- end }}
 
+    {{- if .Values.vault.enabled }}
+    vault:
+      host: {{ .Values.vault.host }}
+      timeout: {{ .Values.vault.timeout }}
+      token: {{ .Values.vault.token }}
+      prefix: {{ .Values.vault.prefix }}
+    {{- end }}    
+
     {{- if .Values.plugins }}
     plugins:                          # plugin list
     {{- range $plugin := .Values.plugins }}
