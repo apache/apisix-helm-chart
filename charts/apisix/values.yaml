@@ -230,6 +230,7 @@ plugins:
   - proxy-cache
   - proxy-mirror
   - proxy-rewrite
+  - rocketmq-logger
   - redirect
   - referer-restriction
   - request-id
