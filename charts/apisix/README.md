@@ -234,8 +234,8 @@ Configurations for Apache APISIX ingress-controller sub chart.
 | Parameter                  | Description                                                                                      | Default                                                 |
 |----------------------------|--------------------------------------------------------------------------------------------------|---------------------------------------------------------|
 | `vault.enabled`            | Enable or disable the vault integration                                                          | `false`                                                 |
-| `vault.host`               | The host address where the vault server is running.                                              | ``                                                      |
-| `vault.timeout`            | HTTP timeout for each request.                                                                   | ``                                                      |
-| `vault.token`              | The generated token from vault instance that can grant access to read data from the vault.       | ``                                                      |
-| `vault.prefix`             | Prefix allows you to better enforcement of policies.                                             | ``                                                      |
+| `vault.host`               | The host address where the vault server is running.                                              |                                                         |
+| `vault.timeout`            | HTTP timeout for each request.                                                                   |                                                         |
+| `vault.token`              | The generated token from vault instance that can grant access to read data from the vault.       |                                                         |
+| `vault.prefix`             | Prefix allows you to better enforcement of policies.                                             |                                                         |
 
