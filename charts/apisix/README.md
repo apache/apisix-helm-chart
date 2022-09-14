@@ -96,7 +96,7 @@ Apache APISIX service parameters, this determines how users can access itself.
 | `gateway.stream`                | Apache APISIX service settings for stream                                                                                                                                           |            |
 | `gateway.ingress`               | Using ingress access Apache APISIX service                                                                                                                                          |            |
 | `gateway.ingress.annotations`   | Ingress annotations                                                                                                                                                                 | `[]`       |
-| `gateway.ingress.className`     | `ingressClassName` replaces `annotations kubernetes.io/ingress.class`, required kubernetes 1.18>=                                                                                   |            |
+| `gateway.ingress.className`     | `ingressClassName` replaces `annotations kubernetes.io/ingress.class`, required Kubernetes `1.18>=`                                                                                   |            |
 
 ### admin parameters
 
