@@ -95,6 +95,8 @@ Apache APISIX service parameters, this determines how users can access itself.
 | `gateway.tls.sslProtocols`    |   TLS protocols allowed to use.  | `"TLSv1.2 TLSv1.3"`       |
 | `gateway.stream`                | Apache APISIX service settings for stream                                                                                                                                           |            |
 | `gateway.ingress`               | Using ingress access Apache APISIX service                                                                                                                                          |            |
+| `gateway.ingress.annotations`   | Ingress annotations                                                                                                                                                                 | `[]`       |
+| `gateway.ingress.className`     | `ingressClassName` replaces `annotations kubernetes.io/ingress.class`, required kubernetes 1.18>=                                                                                   |            |
 
 ### admin parameters
 
