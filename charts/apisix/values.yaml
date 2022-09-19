@@ -442,3 +442,7 @@ ingress-controller:
 
 vault:
   enabled: false
+  host: ""
+  timeout: 10
+  token: ""
+  prefix: ""
