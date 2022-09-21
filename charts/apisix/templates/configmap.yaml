@@ -62,6 +62,7 @@ data:
       enable_dev_mode: false                       # Sets nginx worker_processes to 1 if set to true
       enable_reuseport: true                       # Enable nginx SO_REUSEPORT switch if set to true.
       enable_ipv6: {{ .Values.apisix.enableIPv6 }} # Enable nginx IPv6 resolver
+      enable_server_tokens: {{ .Values.apisix.enableServerTokens }} # Whether the APISIX version number should be shown in Server header
       config_center: etcd                          # etcd: use etcd to store the config value
                                                    # yaml: fetch the config value from local yaml file `/your_path/conf/apisix.yaml`
 

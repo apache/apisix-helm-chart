@@ -25,6 +25,9 @@ apisix:
   # Enable nginx IPv6 resolver
   enableIPv6: true
 
+  # Whether the APISIX version number should be shown in Server header
+  enableServerTokens: true
+
   # Use Pod metadata.uid as the APISIX id.
   setIDFromPodUID: false
 
