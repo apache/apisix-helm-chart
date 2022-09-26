@@ -83,6 +83,24 @@ spec:
     targetPort: {{ .Values.serviceMonitor.containerPort }}
     protocol: TCP
   {{- end }}
+  {{- if or .Values.gateway.proxyProtocol.http.enabled }}
+  - name: apisix-gateway-pp-http
+    port: {{ .Values.gateway.proxyProtocol.http.servicePort }}
+    targetPort: {{ .Values.gateway.proxyProtocol.http.containerPort }}
+  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.proxyProtocol.http.nodePort))) }}
+    nodePort: {{ .Values.proxyProtocol.http.nodePort }}
+  {{- end }}
+    protocol: TCP
+  {{- end }}
+  {{- if or .Values.gateway.proxyProtocol.https.enabled }}
+  - name: apisix-gateway-pp-https
+    port: {{ .Values.gateway.proxyProtocol.https.servicePort }}
+    targetPort: {{ .Values.gateway.proxyProtocol.https.containerPort }}
+  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.proxyProtocol.https.nodePort))) }}
+    nodePort: {{ .Values.proxyProtocol.https.nodePort }}
+  {{- end }}
+    protocol: TCP
+  {{- end }}
   {{- if and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0)) }}
   {{- with .Values.gateway.stream }}
   {{- if (gt (len .tcp) 0) }}

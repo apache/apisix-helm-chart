@@ -68,6 +68,11 @@ apisix:
   # - radixtree_uri_with_parameter: match route by uri with parameters
   httpRouter: radixtree_uri
 
+  proxyProtocol:
+    enabled: true
+    listenHttpPort: 9181
+    listenHttpsPort: 9182
+
   # -- Enable full customized config.yaml
   enableCustomizedConfig: false
   # -- If apisix.enableCustomizedConfig is true, full customized config.yaml.
@@ -258,7 +263,17 @@ gateway:
       enabled: true
     # -- TLS protocols allowed to use.
     sslProtocols: "TLSv1.2 TLSv1.3"
+  proxyProtocol:
+    http:
+      enabled: false
+      servicePort: 9181
+      containerPort: 9181
+    https:
+      enabled: false
+      servicePort: 9182
+      containerPort: 9182
   # -- Apache APISIX service settings for stream. L4 proxy (TCP/UDP)
+  # L4 proxy (TCP/UDP)
   stream:
     enabled: false
     only: false
