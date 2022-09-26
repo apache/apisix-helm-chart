@@ -51,6 +51,11 @@ apisix:
         - key: ""
           path: ""
 
+  proxyProtocol:
+    enabled: true
+    listenHttpPort: 9181
+    listenHttpsPort: 9182
+
   enableCustomizedConfig: false
   customizedConfig: {}
 
@@ -154,12 +159,22 @@ gateway:
     http2:
       enabled: true
     sslProtocols: "TLSv1.2 TLSv1.3"
+  proxyProtocol:
+    http:
+      enabled: false
+      servicePort: 9181
+      containerPort: 9181
+    https:
+      enabled: false
+      servicePort: 9182
+      containerPort: 9182
   # L4 proxy (TCP/UDP)
   stream:
     enabled: false
     only: false
     tcp: []
     udp: []
+
   ingress:
     enabled: false
     annotations: {}
