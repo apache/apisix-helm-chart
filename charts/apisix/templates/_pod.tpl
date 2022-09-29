@@ -10,7 +10,9 @@ metadata:
 spec:
   {{- with .Values.global.imagePullSecrets }}
   imagePullSecrets:
-    {{- toYaml . | nindent 4 }}
+    {{- range $.Values.global.imagePullSecrets }}
+    - name: {{ . }}
+    {{- end }}
   {{- end }}
   serviceAccountName: {{ include "apisix.serviceAccountName" . }}
   securityContext: {{- toYaml .Values.podSecurityContext | nindent 4 }}
