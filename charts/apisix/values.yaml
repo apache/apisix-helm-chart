@@ -15,6 +15,11 @@
 # limitations under the License.
 
 global:
+  # e.g.
+  # imagePullSecrets:
+  #   - my-registry-secrets
+  #   - other-registry-secrets
+  #
   imagePullSecrets: []
 
 apisix:
