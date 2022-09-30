@@ -28,7 +28,7 @@ data:
       {{- include "apisix.tplvalues.render" (dict "value" $value "context" $) | nindent 6 }}
     {{- end }}
 {{- else }}
-  {{- if semverCompare ">=2.99" .Values.apisix.image.tag }}
+  {{- if semverCompare ">=2.99.0" .Chart.AppVersion }}
     config.yaml: |-
       #
       # Licensed to the Apache Software Foundation (ASF) under one or more
