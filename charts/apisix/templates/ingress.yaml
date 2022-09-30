@@ -17,6 +17,11 @@
 {{- if (and .Values.apisix.enabled .Values.gateway.ingress.enabled) -}}
 {{- $fullName := include "apisix.fullname" . -}}
 {{- $svcPort := .Values.gateway.http.servicePort -}}
+{{- if and .Values.gateway.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.gateway.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.gateway.ingress.annotations "kubernetes.io/ingress.class" .Values.gateway.ingress.className}}
+  {{- end }}
+{{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.Version }}
 apiVersion: networking.k8s.io/v1
 {{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.Version }}
@@ -34,6 +39,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if and .Values.gateway.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.gateway.ingress.className }}
+  {{- end }}
   {{- if .Values.gateway.ingress.tls }}
   tls:
     {{- range .Values.gateway.ingress.tls }}
