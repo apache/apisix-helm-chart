@@ -154,6 +154,48 @@ Default enabled plugins. See [configmap template](https://github.com/apache/apis
 | `extPlugin.enabled` | Enable External Plugins. See [external plugin](https://apisix.apache.org/docs/apisix/next/external-plugin/) | `false` |
 | `extPlugin.cmd` | the command and its arguements to run as a subprocess | `{}` |
 
+### wasm plugin parameters
+
+| Parameter                       | Description                                                                                                                                                      | Default                     |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| `wasmPlugins.enabled` | Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/) | `false` |
+| `wasmPlugins.plugins[].name` | Set wasm plugin name | `""` |
+| `wasmPlugins.plugins[].priority` | Set wasm plugin priority | `7999` |
+| `wasmPlugins.plugins[].file` | Set path to wasm plugin | `""` |
+| `wasmPlugins.plugins[].http_request_phase` | Set which http request phase for the plugin to run in | `access` |
+
+Note:
+  - the easiest way to to include your wasm custom plugin is to rebuild apisix image with those custom plugin included within directory you define and later on gets referenced to `wasmPlugins.plugins[].file`
+  - otherwise you could use `extraVolumes` and `extraVolumeMounts` option to include your plugin by creating your plugin via `ConfigMap` and mount it to apisix pod like example below
+    ```
+    #... more options omitted ...
+    ingress-controller:
+      enabled: true
+
+    dashboard:
+      enabled: true
+
+    # assuming you install apisix in `apisix` namespace,
+    # create the plugin by this command and had the wasm plugin
+    # kubectl create configmap --namespace apisix --from-file=./wasm_plugin_x.wasm wasm-plugin-x
+    # Note: there are also size limitation on `ConfigMap`
+
+    # these options are kubernetes
+    # Volume and VolumeMount api objects
+    extraVolumes:
+    - name: wasm-plugin-x
+      configMap:
+        name: wasm-plugin-x
+        items:
+        - key: wasm_plugin_x.wasm
+          path: wasm_plugin_x.wasm
+    extraVolumeMounts:
+    - name: wasm-plugin-x
+      mountPath: /var/local/wasm-plugins/ # later on reference to `wasmPlugins.plugins[].file` as its value
+      readOnly: true
+    #... more options omitted ...
+    ```
+
 ### custom plugin parameters
 
 | Parameter                       | Description                                                                                                                                                      | Default                     |
