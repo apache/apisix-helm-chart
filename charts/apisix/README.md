@@ -165,7 +165,7 @@ Default enabled plugins. See [configmap template](https://github.com/apache/apis
 | `wasmPlugins.plugins[].http_request_phase` | Set which http request phase for the plugin to run in | `access` |
 
 Note:
-  - the easiest way to to include your wasm custom plugin is to rebuild apisix image with those custom plugin included within directory you define and later on gets referenced to `wasmPlugins.plugins[].file`
+  - the easiest way to include your wasm custom plugin is to rebuild the apisix image with those custom plugins included within the directory you define and later on gets referenced to `wasmPlugins.plugins[].file`
   - otherwise you could use `extraVolumes` and `extraVolumeMounts` option to include your plugin by creating your plugin via `ConfigMap` and mount it to apisix pod like example below
     ```
     #... more options omitted ...
