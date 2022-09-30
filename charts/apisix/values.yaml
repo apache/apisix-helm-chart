@@ -270,10 +270,7 @@ extPlugin:
 
 wasmPlugins:
   enabled: false
-  plugins:
-    - name: custom-plugin
-      file: /var/local/wasm-filters/custom_plugin.wasm
-      http_request_phase: access
+  plugins: []
 
 # customPlugins allows you to mount your own HTTP plugins.
 customPlugins:
