@@ -56,6 +56,12 @@ apisix:
         - key: ""
           path: ""
 
+  # Defines how apisix handles routing:
+  # - radixtree_uri: match route by uri(base on radixtree)
+  # - radixtree_host_uri: match route by host + uri(base on radixtree)
+  # - radixtree_uri_with_parameter: match route by uri with parameters
+  httpRouter: radixtree_uri
+
   enableCustomizedConfig: false
   customizedConfig: {}
 
