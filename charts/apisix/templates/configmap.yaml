@@ -293,5 +293,11 @@ data:
     plugin_attr: {{- $pluginAttrs | nindent 6 }}
     {{- end }}
     {{- end }}
+
+    {{- if .Values.wasmPlugins.enabled }}
+    wasm:
+      plugins:
+        {{- toYaml .Values.wasmPlugins.plugins | nindent 8 }}
+    {{- end }}
 {{- end }}
 {{- end }}

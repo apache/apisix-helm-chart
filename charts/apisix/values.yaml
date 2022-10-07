@@ -274,6 +274,10 @@ extPlugin:
   enabled: false
   cmd: ["/path/to/apisix-plugin-runner/runner", "run"]
 
+wasmPlugins:
+  enabled: false
+  plugins: []
+
 # customPlugins allows you to mount your own HTTP plugins.
 customPlugins:
   enabled: false
