@@ -90,8 +90,9 @@ data:
         #    cache_levels: "1:2"
 
         router:
-          http: 'radixtree_uri'         # radixtree_uri: match route by uri(base on radixtree)
-                                        # radixtree_host_uri: match route by host + uri(base on radixtree)
+          http: {{ .Values.apisix.httpRouter }}  # radixtree_uri: match route by uri(base on radixtree)
+                                                 # radixtree_host_uri: match route by host + uri(base on radixtree)
+                                                 # radixtree_uri_with_parameter: match route by uri with parameters
           ssl: 'radixtree_sni'          # radixtree_sni: match route by SNI(base on radixtree)
         {{- if or (index .Values "ingress-controller" "enabled") (and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0))) }}
         stream_proxy:                 # TCP/UDP proxy
@@ -233,6 +234,11 @@ data:
       {{- $pluginAttrs := include "apisix.pluginAttrs" . -}}
       {{- if gt (len $pluginAttrs) 0 }}
       plugin_attr: {{- $pluginAttrs | nindent 6 }}
+      {{- if .Values.wasmPlugins.enabled }}
+      wasm:
+        plugins:
+          {{- toYaml .Values.wasmPlugins.plugins | nindent 8 }}
+      {{- end }}
       deployment:
         role: traditional
         role_traditional:
@@ -390,8 +396,9 @@ data:
             key: {{ .Values.admin.credentials.viewer }}
             role: viewer
         router:
-          http: 'radixtree_uri'         # radixtree_uri: match route by uri(base on radixtree)
-                                        # radixtree_host_uri: match route by host + uri(base on radixtree)
+          http: {{ .Values.apisix.httpRouter }}  # radixtree_uri: match route by uri(base on radixtree)
+                                                 # radixtree_host_uri: match route by host + uri(base on radixtree)
+                                                 # radixtree_uri_with_parameter: match route by uri with parameters
           ssl: 'radixtree_sni'          # radixtree_sni: match route by SNI(base on radixtree)
         {{- if or (index .Values "ingress-controller" "enabled") (and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0))) }}
         stream_proxy:                 # TCP/UDP proxy
@@ -561,6 +568,11 @@ data:
       {{- if gt (len $pluginAttrs) 0 }}
       plugin_attr: {{- $pluginAttrs | nindent 6 }}
       {{- end }}
+      {{- end }}
+      {{- if .Values.wasmPlugins.enabled }}
+      wasm:
+        plugins:
+          {{- toYaml .Values.wasmPlugins.plugins | nindent 8 }}
       {{- end }}
   {{- end }}
 {{- end }}
