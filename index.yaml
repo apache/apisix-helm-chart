@@ -981,4 +981,4 @@ entries:
     urls:
     - https://github.com/apache/apisix-helm-chart/releases/download/apisix-ingress-controller-0.6.0/apisix-ingress-controller-0.6.0.tgz
     version: 0.6.0
-generated: "2022-10-09T02:59:45.534318682Z"
+generated: "2022-10-09T05:59:45.534318682Z"
