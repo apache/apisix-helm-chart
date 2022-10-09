@@ -8,7 +8,7 @@ This chart bootstraps an apisix-ingress-controller deployment on a [Kubernetes](
 
 ## Prerequisites
 
-Apisix ingress controller requires Kubernetes version 1.14+.
+Apisix ingress controller requires Kubernetes version 1.16+.
 
 ## Get Repo Info
 
