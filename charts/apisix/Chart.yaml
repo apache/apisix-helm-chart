@@ -31,7 +31,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.11.1-rc1
+version: 0.11.1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -51,7 +51,7 @@ dependencies:
     condition: dashboard.enabled
     alias: dashboard
   - name: apisix-ingress-controller
-    version: 0.10.0-rc1
+    version: 0.10.1
     repository: https://charts.apiseven.com
     condition: ingress-controller.enabled
     alias: ingress-controller
@@ -61,4 +61,4 @@ maintainers:
 
 # ref: https://artifacthub.io/docs/topics/annotations/helm/
 annotations:
-  artifacthub.io/prerelease: "true"
+  artifacthub.io/prerelease: "false"
