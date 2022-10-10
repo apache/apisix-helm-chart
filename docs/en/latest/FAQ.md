@@ -21,6 +21,9 @@ title: FAQ
 #
 -->
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 ### How to install APISIX only?
 
 The Charts will install ETCD `3.4.14` by default. If you want to install Apache APISIX only, please set `etcd.enabled=false` and set `etcd.host={http://your_etcd_address:2379}`.
@@ -40,6 +43,16 @@ Helm chart does not provide a direct way to deploy Apache APISIX running in stan
 
 Create a `deploy.yaml` with the following content.
 
+<Tabs
+  groupId="version"
+  defaultValue="3.0.0-beta"
+  values={[
+    {label: '3.0.0-beta', value: '3.0.0-beta'},
+    {label: '2.15', value: '2.15'},
+  ]}>
+  
+<TabItem value="2.15">
+
 ```yaml
 # deploy.yaml
 kind: ConfigMap
@@ -51,19 +64,6 @@ data:
     apisix:
       enable_admin: false
       config_center: yaml
-      enable_reuseport: true          # Enable nginx SO_REUSEPORT switch if set to true.
-      allow_admin:
-      - 127.0.0.0/24
-      - 0.0.0.0/0
-      stream_proxy:                 # TCP/UDP proxy
-        only: false
-        tcp:                        # TCP proxy port list
-          - 9100
-        udp:
-          - 9200          # 30 seconds
-    plugin_attr:
-      prometheus:
-        enable_export_server: false
 
 ---
 
@@ -121,7 +121,7 @@ spec:
             tcpSocket:
               port: 9080
             timeoutSeconds: 2
-          image: "apache/apisix:2.14.1-alpine"
+          image: "apache/apisix:2.15.0-alpine"
           imagePullPolicy: IfNotPresent
           name: apisix-deployment
           command: ["sh", "-c", "ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml  && /usr/bin/apisix init && /usr/bin/apisix init_etcd && /usr/local/openresty/bin/openresty -p /usr/local/apisix -g 'daemon off;'"]
@@ -166,6 +166,129 @@ spec:
       targetPort: 9443
   type: NodePort
 ```
+
+</TabItem>
+
+<TabItem value="3.0.0-beta">
+
+```yaml
+# deploy.yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: apisix-gw-config.yaml
+data:
+  config.yaml: |
+    deployment:
+      role: data_plane
+      role_data_plane:
+        config_provider: yaml
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: apisix.yaml
+data:
+  apisix.yaml: |
+    routes:
+      -
+        uri: /hi
+        upstream:
+          nodes:
+            "127.0.0.1:1980": 1
+          type: roundrobin
+    #END
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apisix-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apisix-deployment
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: apisix-deployment
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers: 
+        - livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            tcpSocket:
+              port: 9080
+            timeoutSeconds: 2
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            tcpSocket:
+              port: 9080
+            timeoutSeconds: 2
+          image: "apache/apisix:2.99.0-centos"
+          imagePullPolicy: IfNotPresent
+          name: apisix-deployment
+          command: ["sh", "-c","ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && /docker-entrypoint.sh docker-start"]
+          ports:
+            - containerPort: 9080
+              name: "http"
+              protocol: "TCP"
+            - containerPort: 9443
+              name: "https"
+              protocol: "TCP"
+          volumeMounts:
+            - mountPath: /usr/local/apisix/conf/config.yaml
+              name: apisix-config-yaml-configmap
+              subPath: config.yaml
+            - mountPath: /apisix-config
+              name: apisix-admin
+      volumes:
+        - configMap:
+            name: apisix-gw-config.yaml
+          name: apisix-config-yaml-configmap
+        - configMap:
+            name: apisix.yaml
+          name: apisix-admin
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: apisix-service
+spec:
+  selector:
+    app: apisix-deployment
+  ports:
+    - name: http
+      port: 9080
+      protocol: TCP
+      targetPort: 9080
+    - name: https
+      port: 9443
+      protocol: TCP
+      targetPort: 9443
+  type: NodePort
+```
+
+</TabItem>
+
+</Tabs>
 
 Apply the configuration in `deploy.yaml` to pod.
 
