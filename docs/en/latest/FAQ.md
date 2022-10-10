@@ -193,4 +193,3 @@ If you want to allow all IPs for a quick test, just set `admin.allow.ipList=""`
 helm install apisix apisix/apisix \
     --set admin.allow.ipList=""
 ```
-
