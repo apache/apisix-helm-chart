@@ -33,7 +33,7 @@ helm install apisix apisix/apisix \
     --set etcd.enabled=false \
     --set etcd.host={http://etcd_node_1:2379\,http://etcd_node_2:2379}
 ```
-### How to install Apache APISIX running in standalone mode？
+### How to install Apache APISIX running in standalone mode?
 
 Helm chart does not provide a direct way to deploy Apache APISIX running in standalone mode. You can install it in the following manner.
 
