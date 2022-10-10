@@ -50,124 +50,6 @@ Create a `deploy.yaml` with the following content.
     {label: '3.0.0-beta', value: '3.0.0-beta'},
     {label: '2.15', value: '2.15'},
   ]}>
-  
-<TabItem value="2.15">
-
-```yaml
-# deploy.yaml
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: apisix-gw-config.yaml
-data:
-  config.yaml: |
-    apisix:
-      enable_admin: false
-      config_center: yaml
-
----
-
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: apisix.yaml
-data:
-  apisix.yaml: |
-    routes:
-      -
-        uri: /hi
-        upstream:
-          nodes:
-            "127.0.0.1:1980": 1
-          type: roundrobin
-    #END
-
----
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: apisix-deployment
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: apisix-deployment
-  strategy:
-    rollingUpdate:
-      maxSurge: 50%
-      maxUnavailable: 1
-    type: RollingUpdate
-  template:
-    metadata:
-      labels:
-        app: apisix-deployment
-    spec:
-      terminationGracePeriodSeconds: 0
-      containers: 
-        - livenessProbe:
-            failureThreshold: 3
-            initialDelaySeconds: 1
-            periodSeconds: 2
-            successThreshold: 1
-            tcpSocket:
-              port: 9080
-            timeoutSeconds: 2
-          readinessProbe:
-            failureThreshold: 3
-            initialDelaySeconds: 1
-            periodSeconds: 2
-            successThreshold: 1
-            tcpSocket:
-              port: 9080
-            timeoutSeconds: 2
-          image: "apache/apisix:2.15.0-alpine"
-          imagePullPolicy: IfNotPresent
-          name: apisix-deployment
-          command: ["sh", "-c", "ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml  && /usr/bin/apisix init && /usr/bin/apisix init_etcd && /usr/local/openresty/bin/openresty -p /usr/local/apisix -g 'daemon off;'"]
-          ports:
-            - containerPort: 9080
-              name: "http"
-              protocol: "TCP"
-            - containerPort: 9443
-              name: "https"
-              protocol: "TCP"
-          volumeMounts:
-            - mountPath: /usr/local/apisix/conf/config.yaml
-              name: apisix-config-yaml-configmap
-              subPath: config.yaml
-            - mountPath: /apisix-config
-              name: apisix-admin
-      volumes:
-        - configMap:
-            name: apisix-gw-config.yaml
-          name: apisix-config-yaml-configmap
-        - configMap:
-            name: apisix.yaml
-          name: apisix-admin
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: apisix-service
-spec:
-  selector:
-    app: apisix-deployment
-  ports:
-    - name: http
-      port: 9080
-      protocol: TCP
-      targetPort: 9080
-    - name: https
-      port: 9443
-      protocol: TCP
-      targetPort: 9443
-  type: NodePort
-```
-
-</TabItem>
 
 <TabItem value="3.0.0-beta">
 
@@ -244,6 +126,124 @@ spec:
           imagePullPolicy: IfNotPresent
           name: apisix-deployment
           command: ["sh", "-c","ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && /docker-entrypoint.sh docker-start"]
+          ports:
+            - containerPort: 9080
+              name: "http"
+              protocol: "TCP"
+            - containerPort: 9443
+              name: "https"
+              protocol: "TCP"
+          volumeMounts:
+            - mountPath: /usr/local/apisix/conf/config.yaml
+              name: apisix-config-yaml-configmap
+              subPath: config.yaml
+            - mountPath: /apisix-config
+              name: apisix-admin
+      volumes:
+        - configMap:
+            name: apisix-gw-config.yaml
+          name: apisix-config-yaml-configmap
+        - configMap:
+            name: apisix.yaml
+          name: apisix-admin
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: apisix-service
+spec:
+  selector:
+    app: apisix-deployment
+  ports:
+    - name: http
+      port: 9080
+      protocol: TCP
+      targetPort: 9080
+    - name: https
+      port: 9443
+      protocol: TCP
+      targetPort: 9443
+  type: NodePort
+```
+
+</TabItem>
+
+<TabItem value="2.15">
+
+```yaml
+# deploy.yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: apisix-gw-config.yaml
+data:
+  config.yaml: |
+    apisix:
+      enable_admin: false
+      config_center: yaml
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: apisix.yaml
+data:
+  apisix.yaml: |
+    routes:
+      -
+        uri: /hi
+        upstream:
+          nodes:
+            "127.0.0.1:1980": 1
+          type: roundrobin
+    #END
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apisix-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apisix-deployment
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: apisix-deployment
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers: 
+        - livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            tcpSocket:
+              port: 9080
+            timeoutSeconds: 2
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            tcpSocket:
+              port: 9080
+            timeoutSeconds: 2
+          image: "apache/apisix:2.15.0-alpine"
+          imagePullPolicy: IfNotPresent
+          name: apisix-deployment
+          command: ["sh", "-c", "ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml  && /usr/bin/apisix init && /usr/bin/apisix init_etcd && /usr/local/openresty/bin/openresty -p /usr/local/apisix -g 'daemon off;'"]
           ports:
             - containerPort: 9080
               name: "http"
