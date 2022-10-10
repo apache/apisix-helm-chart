@@ -168,7 +168,7 @@ spec:
 
 Apply the configuration in `deploy.yaml` to pod.
 
-```
+```shell
 kubectl apply -f deploy.yaml
 ```
 
