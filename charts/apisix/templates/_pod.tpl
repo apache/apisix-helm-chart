@@ -15,10 +15,16 @@ spec:
     {{- end }}
   {{- end }}
   serviceAccountName: {{ include "apisix.serviceAccountName" . }}
-  securityContext: {{- toYaml .Values.podSecurityContext | nindent 4 }}
+  {{- with .Values.apisix.podSecurityContext }}
+  securityContext: 
+    {{- . | toYaml | nindent 4 }}
+  {{- end }}
   containers:
     - name: {{ .Chart.Name }}
-      securityContext: {{- toYaml .Values.securityContext | nindent 8 }}
+      {{- with .Values.apisix.securityContext }}
+      securityContext:
+        {{- . | toYaml | nindent 8 }}
+      {{- end }}
       image: "{{ .Values.apisix.image.repository }}:{{ default .Chart.AppVersion .Values.apisix.image.tag }}"
       imagePullPolicy: {{ .Values.apisix.image.pullPolicy }}
       env:
