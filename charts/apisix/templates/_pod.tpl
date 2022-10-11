@@ -19,6 +19,9 @@ spec:
   securityContext: 
     {{- . | toYaml | nindent 4 }}
   {{- end }}
+  {{- with .Values.apisix.priorityClassName }}
+  priorityClassName: {{ . }}
+  {{- end }}
   containers:
     - name: {{ .Chart.Name }}
       {{- with .Values.apisix.securityContext }}
