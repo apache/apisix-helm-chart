@@ -112,7 +112,7 @@ Apache APISIX service parameters, this determines how users can access itself.
 | `admin.cors`               | Apache APISIX admin API support CORS response headers                            | `true`                                                  |
 | `admin.credentials.admin`  | Apache APISIX admin API admin role credentials                                   | `edd1c9f034335f136f87ad84b625c8f1`                      |
 | `admin.credentials.viewer` | Apache APISIX admin API viewer role credentials                                  | `4054f7cf07e344346cd3f287985e76a2`                      |
-| `admin.allow.ipList`       | the IP range allowed to Apache APISIX admin API                                  | `["127.0.0.1/24"]`                                                  |
+| `admin.allow.ipList`       | The client IP CIDR allowed to access Apache APISIX Admin API service             | `["127.0.0.1/24"]`                                      |
 
 ### custom configuration snippet parameters
 
