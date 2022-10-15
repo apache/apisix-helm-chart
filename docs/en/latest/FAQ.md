@@ -298,6 +298,16 @@ kubectl apply -f deploy.yaml
 
 :::note
 1. The mount of the `apisix.yaml` file requires the injection of the softlink command, so do not change the configMap mount directory to `/usr/local/apisix/conf`, to avoid other configuration files being overwritten.
+
+```yaml
+# reference the apisix.yaml file in the mount directory to /usr/local/apisix/conf/apisix.yaml
+command: ["sh", "-c", "ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml  && /usr/bin/apisix init && /usr/bin/apisix init_etcd && /usr/local/openresty/bin/openresty -p /usr/local/apisix -g 'daemon off;'"]
+
+# configMap directory mounts
+- mountPath: /apisix-config
+  name: apisix-admin
+```
+
 2. The `apisix.yaml` is mounted as a configMap, so there will be a delay in reloading the rules after `apisix.yaml` is changed; please refer to this [document](https://kubernetes.io/docs/concepts/configuration/configmap/#mounted-configmaps-are-updated-automatically) for details. 
 :::
 
