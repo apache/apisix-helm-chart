@@ -182,4 +182,7 @@ spec:
   tolerations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- if .Values.apisix.topologySpreadConstraints }}
+  topologySpreadConstraints: {{ toYaml .Values.apisix.topologySpreadConstraints | nindent 8 }}
+  {{- end }}
 {{- end -}}
