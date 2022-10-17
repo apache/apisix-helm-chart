@@ -286,9 +286,9 @@ data:
           {{- else }}
           host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
             {{- if .Values.etcd.fullnameOverride }}
-            - "http://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
+            - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
             {{- else }}
-            - "http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
+            - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
             {{- end}}
           {{- end }}
         {{- else }}
@@ -516,9 +516,9 @@ data:
         {{- else }}
         host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
           {{- if .Values.etcd.fullnameOverride }}
-          - "http://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
+          - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
           {{- else }}
-          - "http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
+          - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
           {{- end}}
         {{- end}}
       {{- else }}
