@@ -276,21 +276,12 @@ data:
               role: viewer
         etcd:
         {{- if .Values.etcd.enabled }}
-          {{- if .Values.etcd.auth.tls.enabled }}
-          host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-            {{- if .Values.etcd.fullnameOverride }}
-            - "https://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
-            {{- else }}
-            - "https://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
-            {{- end}}
-          {{- else }}
           host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
             {{- if .Values.etcd.fullnameOverride }}
             - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
             {{- else }}
             - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
             {{- end}}
-          {{- end }}
         {{- else }}
           host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
             {{- range $value := .Values.etcd.host }}
@@ -506,21 +497,12 @@ data:
 
       etcd:
       {{- if .Values.etcd.enabled }}
-        {{- if .Values.etcd.auth.tls.enabled }}
-        host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-          {{- if .Values.etcd.fullnameOverride }}
-          - "https://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
-          {{- else }}
-          - "https://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
-          {{- end}}
-        {{- else }}
         host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
           {{- if .Values.etcd.fullnameOverride }}
           - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
           {{- else }}
           - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
           {{- end}}
-        {{- end}}
       {{- else }}
         host:                                 # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
           {{- range $value := .Values.etcd.host }}
