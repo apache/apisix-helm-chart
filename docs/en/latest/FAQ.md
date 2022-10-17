@@ -65,9 +65,7 @@ data:
       role: data_plane
       role_data_plane:
         config_provider: yaml
-
 ---
-
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -82,9 +80,7 @@ data:
             "127.0.0.1:1980": 1
           type: roundrobin
     #END
-
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -125,6 +121,7 @@ spec:
           image: "apache/apisix:2.99.0-centos"
           imagePullPolicy: IfNotPresent
           name: apisix-deployment
+          # reference the apisix.yaml file in the mount directory to /usr/local/apisix/conf/apisix.yaml
           command: ["sh", "-c","ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && /docker-entrypoint.sh docker-start"]
           ports:
             - containerPort: 9080
@@ -133,10 +130,12 @@ spec:
             - containerPort: 9443
               name: "https"
               protocol: "TCP"
+              
           volumeMounts:
             - mountPath: /usr/local/apisix/conf/config.yaml
               name: apisix-config-yaml-configmap
               subPath: config.yaml
+            # configMap directory mounts
             - mountPath: /apisix-config
               name: apisix-admin
       volumes:
@@ -146,9 +145,7 @@ spec:
         - configMap:
             name: apisix.yaml
           name: apisix-admin
-
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -183,9 +180,7 @@ data:
     apisix:
       enable_admin: false
       config_center: yaml
-
 ---
-
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -200,9 +195,7 @@ data:
             "127.0.0.1:1980": 1
           type: roundrobin
     #END
-
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -243,7 +236,8 @@ spec:
           image: "apache/apisix:2.15.0-alpine"
           imagePullPolicy: IfNotPresent
           name: apisix-deployment
-          command: ["sh", "-c", "ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml  && /usr/bin/apisix init && /usr/bin/apisix init_etcd && /usr/local/openresty/bin/openresty -p /usr/local/apisix -g 'daemon off;'"]
+          # reference the apisix.yaml file in the mount directory to /usr/local/apisix/conf/apisix.yaml
+          command: ["sh", "-c", "ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && /usr/bin/apisix init && /usr/bin/apisix init_etcd && /usr/local/openresty/bin/openresty -p /usr/local/apisix -g 'daemon off;'"]
           ports:
             - containerPort: 9080
               name: "http"
@@ -255,6 +249,7 @@ spec:
             - mountPath: /usr/local/apisix/conf/config.yaml
               name: apisix-config-yaml-configmap
               subPath: config.yaml
+            # configMap directory mounts
             - mountPath: /apisix-config
               name: apisix-admin
       volumes:
@@ -264,9 +259,7 @@ spec:
         - configMap:
             name: apisix.yaml
           name: apisix-admin
-
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -298,16 +291,6 @@ kubectl apply -f deploy.yaml
 
 :::note
 1. The mount of the `apisix.yaml` file requires the injection of the softlink command, so do not change the configMap mount directory to `/usr/local/apisix/conf`, to avoid other configuration files being overwritten.
-
-```yaml
-# reference the apisix.yaml file in the mount directory to /usr/local/apisix/conf/apisix.yaml
-command: ["sh", "-c", "ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml  && /usr/bin/apisix init && /usr/bin/apisix init_etcd && /usr/local/openresty/bin/openresty -p /usr/local/apisix -g 'daemon off;'"]
-
-# configMap directory mounts
-- mountPath: /apisix-config
-  name: apisix-admin
-```
-
 2. The `apisix.yaml` is mounted as a configMap, so there will be a delay in reloading the rules after `apisix.yaml` is changed; please refer to this [document](https://kubernetes.io/docs/concepts/configuration/configmap/#mounted-configmaps-are-updated-automatically) for details. 
 :::
 
