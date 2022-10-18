@@ -121,7 +121,7 @@ spec:
           image: "apache/apisix:2.99.0-centos"
           imagePullPolicy: IfNotPresent
           name: apisix-deployment
-          # reference the apisix.yaml file in the mount directory to /usr/local/apisix/conf/apisix.yaml
+          # Create a soft link to link the apisix.yaml file in the mount directory to /usr/local/apisix/conf/apisix.yaml.
           command: ["sh", "-c","ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && /docker-entrypoint.sh docker-start"]
           ports:
             - containerPort: 9080
@@ -236,7 +236,7 @@ spec:
           image: "apache/apisix:2.15.0-alpine"
           imagePullPolicy: IfNotPresent
           name: apisix-deployment
-          # reference the apisix.yaml file in the mount directory to /usr/local/apisix/conf/apisix.yaml
+          # Create a soft link to link the apisix.yaml file in the mount directory to /usr/local/apisix/conf/apisix.yaml.
           command: ["sh", "-c", "ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && /usr/bin/apisix init && /usr/bin/apisix init_etcd && /usr/local/openresty/bin/openresty -p /usr/local/apisix -g 'daemon off;'"]
           ports:
             - containerPort: 9080
