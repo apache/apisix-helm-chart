@@ -123,8 +123,8 @@ spec:
   dnsPolicy: ClusterFirstWithHostNet
   {{- end }}
   hostNetwork: {{ .Values.apisix.hostNetwork }}
-  {{- if .Values.etcd.enabled }}
   initContainers:
+    {{- if .Values.etcd.enabled }}
     - name: wait-etcd
       image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
       {{- if .Values.etcd.fullnameOverride }}
@@ -132,7 +132,10 @@ spec:
       {{ else }}
       command: ['sh', '-c', "until nc -z {{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
       {{- end }}
-  {{- end }}
+    {{- end }}
+    {{- if .Values.extraInitContainers }}
+    {{- toYaml .Values.extraInitContainers | nindent 4 }}
+    {{- end }}
   volumes:
     - configMap:
         name: {{ include "apisix.fullname" . }}
