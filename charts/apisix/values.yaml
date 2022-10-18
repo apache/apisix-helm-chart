@@ -109,9 +109,6 @@ apisix:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-  # If true, it will sets the anti-affinity of the Pod.
-  podAntiAffinity:
-    enabled: false
 
   # timezone is the timezone where apisix uses.
   # For example: "UTC" or "Asia/Shanghai"
