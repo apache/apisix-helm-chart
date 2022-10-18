@@ -96,3 +96,14 @@ prometheus:
 {{- define "apisix.pluginAttrs" -}}
 {{- merge .Values.pluginAttrs (include "apisix.basePluginAttrs" . | fromYaml) | toYaml -}}
 {{- end -}}
+
+{{/*
+Scheme to use while connecting etcd
+*/}}
+{{- define "apisix.etcd.auth.scheme" -}}
+{{- if .Values.etcd.auth.tls.enabled }}
+{{- "https" }}
+{{- else }}
+{{- "http" }}
+{{- end }}
+{{- end }}
