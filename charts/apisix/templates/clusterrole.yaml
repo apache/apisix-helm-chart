@@ -22,5 +22,5 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["endpoints"]
-    verbs: ["list", "watch"]
+    verbs: ["get", "list", "watch"]
 {{- end }}
