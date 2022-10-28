@@ -57,6 +57,10 @@ See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_h
 helm show values apisix/apisix-ingress-controller
 ```
 
+### Pod priority
+
+`priorityClassName` field referenced a name of a created `PriorityClass` object. Check [here](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption) for more details.
+
 ### Security context
 
 A security context provides us with a way to define privilege and access control for a Pod or even at the container level.

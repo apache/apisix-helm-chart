@@ -46,6 +46,8 @@ image:
 
 podAnnotations: {}
 
+priorityClassName: ""
+
 imagePullSecrets: []
 clusterDomain: cluster.local
 

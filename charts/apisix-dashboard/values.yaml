@@ -41,6 +41,8 @@ serviceAccount:
 
 podAnnotations: {}
 
+priorityClassName: ""
+
 podSecurityContext: {}
   # fsGroup: 2000
 
