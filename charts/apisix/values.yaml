@@ -65,6 +65,15 @@ apisix:
   enableCustomizedConfig: false
   customizedConfig: {}
 
+  # Enable custom debug.yaml config
+  enableCustomizedDebugConfig: false
+
+  # Custom debug.yaml contents for config map
+  customizedDebugConfig: {}
+
+  debug:
+    enabled: false # Enable basic debugging
+
   image:
     repository: apache/apisix
     pullPolicy: IfNotPresent
