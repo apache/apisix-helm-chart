@@ -76,6 +76,7 @@ apisix:
   # kind is DaemonSet, replicaCount not become effective
   replicaCount: 1
 
+  priorityClassName: ""
   podAnnotations: {}
   podSecurityContext: {}
     # fsGroup: 2000

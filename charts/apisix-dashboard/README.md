@@ -84,6 +84,7 @@ The following tables lists the configurable parameters of the apisix-dashboard c
 | Name                                            | Description                                                                               | Value           |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------- |
 | `replicaCount`                                  | Number of Apache APISIX Dashboard nodes                                                   | `1`             |
+| `priorityClassName`                             | Set the [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for pods | `""` |
 | `podAnnotations`                                | Apache APISIX Dashboard Pod annotations                                                   | `{}`            |
 | `nodeSelector`                                  | Node labels for pod assignment                                                            | `{}`            |
 | `tolerations`                                   | Tolerations for pod assignment                                                            | `[]`            |
