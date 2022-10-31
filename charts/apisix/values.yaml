@@ -72,7 +72,8 @@ apisix:
   customizedDebugConfig: {}
 
   debug:
-    enabled: false # Enable basic debugging
+    # Enable basic debugging
+    enabled: false 
 
   image:
     repository: apache/apisix
