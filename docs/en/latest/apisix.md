@@ -41,7 +41,7 @@ helm install apisix apisix/apisix --set apisix.image.tag=3.0.0-debian --create-n
 
 :::note
 
-apisix-ingress-controller is not compatible with APISIX 3.x.
+APISIX-Ingress-Controller and APISIX Dashboard are not compatible with APISIX 3.x.
 
 ## Uninstall
 
