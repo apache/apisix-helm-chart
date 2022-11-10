@@ -251,7 +251,9 @@ data:
         cert: "/etcd-ssl/{{ .Values.etcd.auth.tls.certFilename }}"
         key: "/etcd-ssl/{{ .Values.etcd.auth.tls.certKeyFilename }}"
         verify: {{ .Values.etcd.auth.tls.verify }}
+        {{- if .Values.etcd.auth.tls.sni }}
         sni: "{{ .Values.etcd.auth.tls.sni }}"
+        {{- end }}
       {{- end }}
     {{- end }}
 
