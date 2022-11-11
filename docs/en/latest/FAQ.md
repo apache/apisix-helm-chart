@@ -310,3 +310,10 @@ If you want to allow all IPs for a quick test, just set `admin.allow.ipList=""`
 helm install apisix apisix/apisix \
     --set admin.allow.ipList=""
 ```
+
+### Creating resources such as ApisixRoute has no effect?
+
+1. [check the synchronization status of CRD](https://apisix.apache.org/docs/ingress-controller/tutorials/check-crd-status)
+2. Find the current version of the CRD declaration in https://github.com/apache/apisix-ingress-controller, located in the samples/deploy/crd directory, overwrite and install them. 
+
+Note: this operation may result in loss or corruption of historical data. You should back up the relevant data in advance.
