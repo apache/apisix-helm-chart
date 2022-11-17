@@ -50,7 +50,6 @@ spec:
         - name: tls
           containerPort: {{ .Values.gateway.tls.containerPort }}
           protocol: TCP
-          hostPort: {{ .Values.gateway.tls.hostPort }}
           {{- if .Values.gateway.tls.hostPort }}
           hostPort: {{ .Values.gateway.tls.hostPort }}
           {{- end }}
