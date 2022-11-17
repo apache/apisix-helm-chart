@@ -154,10 +154,13 @@ gateway:
     enabled: true
     servicePort: 80
     containerPort: 9080
+    # hostPort: 80
+
   tls:
     enabled: false
     servicePort: 443
     containerPort: 9443
+    # hostPort: 443
     existingCASecret: ""
     certCAFilename: ""
     http2:
