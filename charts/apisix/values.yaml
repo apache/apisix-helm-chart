@@ -69,7 +69,7 @@ apisix:
     repository: apache/apisix
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 2.15.0-alpine
+    tag: 2.15.1-debian
 
   # Use a `DaemonSet` or `Deployment`
   kind: Deployment
