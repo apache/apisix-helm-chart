@@ -62,7 +62,11 @@ spec:
         {{- if (gt (len .tcp) 0) }}
         {{- range $index, $port := .tcp }}
         - name: proxy-tcp-{{ $index | toString }}
+        {{- if kindIs "map" $port }}
+          containerPort: {{ $port.addr }}
+        {{- else }}
           containerPort: {{ $port }}
+        {{- end }}
           protocol: TCP
         {{- end }}
         {{- end }}
