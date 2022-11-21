@@ -50,6 +50,27 @@ data:
         access_log:
           file_path: {{ .accessLog.filePath }}
       {{- end }}
+      {{- with .security }}
+      security:
+        {{- if .access_control_allow_origin }}
+        access_control_allow_origin: {{ .access_control_allow_origin }}
+        {{- end}}
+        {{- if .access_control_allow_credentials }}
+        access_control_allow_credentials: {{ .access_control_allow_credentials }}
+        {{- end}}
+        {{- if .access_control_allow_headers }}
+        access_control_allow_headers: {{ .access_control_allow_headers }}
+        {{- end}}
+        {{- if .access_control-allow_methods }}
+        access_control-allow_methods: {{ .access_control-allow_methods }}
+        {{- end}}
+        {{- if .x_frame_options }}
+        x_frame_options: {{ .x_frame_options }}
+        {{- end}}
+        {{- if .content_security_policy }}
+        content_security_policy: {{ .content_security_policy }}
+        {{- end}}
+      {{- end }}
     {{- end }}
     {{- with .Values.config.authentication }}
     authentication:
