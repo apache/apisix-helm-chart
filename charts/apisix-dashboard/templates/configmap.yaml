@@ -61,8 +61,8 @@ data:
         {{- if .access_control_allow_headers }}
         access_control_allow_headers: {{ .access_control_allow_headers }}
         {{- end}}
-        {{- if .access_control-allow_methods }}
-        access_control-allow_methods: {{ .access_control-allow_methods }}
+        {{- if .access_control_allow_methods }}
+        access_control_allow_methods: {{ .access_control_allow_methods }}
         {{- end}}
         {{- if .x_frame_options }}
         x_frame_options: {{ .x_frame_options }}
