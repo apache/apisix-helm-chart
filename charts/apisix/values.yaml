@@ -167,6 +167,12 @@ gateway:
   stream:
     enabled: false
     only: false
+    # tcp:
+    #   - port: 9101
+    #     nodePort: 30091
+    # udp:
+    #   - port: 9102
+    #     nodePort: 30092
     tcp: []
     udp: []
   ingress:
