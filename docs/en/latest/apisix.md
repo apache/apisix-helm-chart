@@ -31,6 +31,14 @@ helm repo update
 helm install apisix apisix/apisix --create-namespace  --namespace apisix
 ```
 
+### Start By One Line
+
+To quickly experience Apache APISIX related components like Apache APISIX Dashboard and Apache APISIX Ingress Controller. For a quick installation, start by one line:
+
+```shell
+helm upgrade --install apisix apisix/apisix --create-namespace  --namespace apisix --set dashboard.enabled=true --set ingress-controller.enabled=true --set ingress-controller.config.apisix.serviceNamespace=apisix
+```
+
 ### APISIX v3.x
 
 The current default version of APISIX installed is `2.15.0`, if you want to install APISIX 3.x, to install the chart of APISIX with:
