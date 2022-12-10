@@ -82,3 +82,26 @@ Create the name of the service account to use
 {{- define "apisix-ingress-controller.namespace" -}}
 {{- default .Release.Namespace .Values.namespace -}}
 {{- end -}}
+
+
+{{/*
+Apisix Admin Service Address
+*/}}
+{{- define "apisix-ingress-controller.serviceAddress" -}}
+{{- if .Values.config.apisix.serviceFullname -}}
+{{ .Values.config.apisix.serviceName }}
+{{- else }}
+{{- $serviceNamespace := .Release.Namespace -}}
+{{- if .Values.config.apisix.serviceNamespace -}}
+{{- $serviceNamespace = .Values.config.apisix.serviceNamespace -}}
+{{- end -}}
+{{ .Values.config.apisix.serviceName }}.{{ $serviceNamespace }}.svc.{{ .Values.clusterDomain }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Apisix Admin Service Url
+*/}}
+{{- define "apisix-admin.serviceUrl" -}}
+{{ include "apisix-ingress-controller.serviceAddress" . }}:{{ .Values.config.apisix.servicePort }}
+{{- end -}}

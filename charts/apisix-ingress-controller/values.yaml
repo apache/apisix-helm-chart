@@ -129,7 +129,7 @@ config:
     # Enabling this value, overrides serviceName and serviceNamespace.
     # serviceFullname: "apisix-admin.apisix.svc.local"
     serviceName: apisix-admin
-    serviceNamespace: ingress-apisix
+    # serviceNamespace: ingress-apisix
     servicePort: 9180
     adminKey: "edd1c9f034335f136f87ad84b625c8f1"
     clusterName: "default"
