@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# Default values for apisix-ingress-controller.
+# -- Default values for apisix-ingress-controller.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 #
@@ -24,16 +24,16 @@ nameOverride: ""
 fullnameOverride: ""
 
 rbac:
-  # Specifies whether RBAC resources should be created
+  # -- Specifies whether RBAC resources should be created
   create: true
 
 serviceAccount:
-  # Specifies whether a ServiceAccount should be created
+  # -- Specifies whether a ServiceAccount should be created
   create: true
-  # The name of the ServiceAccount to use.
+  # -- The name of the ServiceAccount to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-  # Whether automounting API credentials for a service account
+  # -- Whether automounting API credentials for a service account
   automountServiceAccountToken: true
 
 
@@ -55,78 +55,72 @@ service:
   port: 80
 
 config:
-  # the error log level, default is info, optional values are:
-  # debug
-  # info
-  # warn
-  # error
-  # panic
-  # fatal
+  # -- the error log level, default is info, optional values are: debug, info, warn, error, panic, fatal
   logLevel: "info"
-  # the output file path of error log, default is stderr, when
+  # -- the output file path of error log, default is stderr, when
   # the file path is "stderr" or "stdout", logs are marshalled
   # plainly, which is more readable for human; otherwise logs
   # are marshalled in JSON format, which can be parsed by
   # programs easily.
   logOutput: "stderr"
-  # the TLS certificate file path.
+  # -- the TLS certificate file path.
   certFile: "/etc/webhook/certs/cert.pem"
-  # the TLS key file path.
+  # -- the TLS key file path.
   keyFile: "/etc/webhook/certs/key.pem"
-  # the HTTP Server listen address, default is ":8080"
+  # -- the HTTP Server listen address, default is ":8080"
   httpListen: ":8080"
-  # the HTTPS Server listen address, default is ":8443"
+  # -- the HTTPS Server listen address, default is ":8443"
   httpsListen: ":8443"
-  # the controller will use the Endpoint of this Service to
+  # -- the controller will use the Endpoint of this Service to
   # update the status information of the Ingress resource.
   # The format is "namespace/svc-name" to solve the situation that
   # the data plane and the controller are not deployed in the same namespace.
   ingressPublishService: ""
   ingressStatusAddress: []
-  # enable profiling via web interfaces host:port/debug/pprof, default is true.
+  # -- enable profiling via web interfaces host:port/debug/pprof, default is true.
   enableProfiling: true
-  # Default interval for synchronizing Kubernetes resources to APISIX
+  # -- Default interval for synchronizing Kubernetes resources to APISIX
   apisixResourceSyncInterval: "300s"
-  # Kubernetes related configurations.
+  # -- Kubernetes related configurations.
   kubernetes:
-    # the Kubernetes configuration file path, default is "", so the in-cluster
+    # -- the Kubernetes configuration file path, default is "", so the in-cluster
     # configuration will be used.
     kubeconfig: ""
-    # how long should apisix-ingress-controller re-synchronizes with Kubernetes,
+    # -- how long should apisix-ingress-controller re-synchronizes with Kubernetes,
     # default is 6h,
     resyncInterval: "6h"
-    # namespace list that controller will watch for resources,
+    # -- namespace list that controller will watch for resources,
     # by default all namespaces (represented by "*") are watched.
     appNamespaces: ["*"]
-    # namespace_selector represent basis for selecting managed namespaces.
+    # -- namespace_selector represent basis for selecting managed namespaces.
     # the field is support since version 1.4.0
     # For example, "apisix.ingress=watching", so ingress will watching the namespaces which labels "apisix.ingress=watching"
     namespaceSelector: [""]
-    # the election id for the controller leader campaign,
+    # -- the election id for the controller leader campaign,
     # only the leader will watch and delivery resource changes,
     # other instances (as candidates) stand by.
     electionId: "ingress-apisix-leader"
-    # The class of an Ingress object is set using the field IngressClassName in
+    # -- The class of an Ingress object is set using the field IngressClassName in
     # Kubernetes clusters version v1.18.0 or higher or the annotation
     # "kubernetes.io/ingress.class" (deprecated).
     ingressClass: "apisix"
-    # the supported ingress api group version, can be "networking/v1beta1",
+    # -- the supported ingress api group version, can be "networking/v1beta1",
     # "networking/v1" (for Kubernetes version v1.19.0 or higher), and
     # "extensions/v1beta1", default is "networking/v1".
     ingressVersion: "networking/v1"
-    # whether to watch EndpointSlices rather than Endpoints.
+    # -- whether to watch EndpointSlices rather than Endpoints.
     watchEndpointSlices: false
-    # the supported apisixroute api group version, can be "apisix.apache.org/v2"
+    # -- the supported apisixroute api group version, can be "apisix.apache.org/v2"
     # "apisix.apache.org/v2beta3" or "apisix.apache.org/v2beta2"
     apisixRouteVersion: "apisix.apache.org/v2"
-    # whether to enable support for Gateway API.
+    # -- whether to enable support for Gateway API.
     # Note: This feature is currently under development and may not work as expected.
     # It is not recommended to use it in a production environment.
     # Before we announce support for it to reach Beta level or GA.
     enableGatewayAPI: false
-  # APISIX related configurations.
+  # -- APISIX related configurations.
   apisix:
-    # Enabling this value, overrides serviceName and serviceNamespace.
+    # -- Enabling this value, overrides serviceName and serviceNamespace.
     # serviceFullname: "apisix-admin.apisix.svc.local"
     serviceName: apisix-admin
     serviceNamespace: ingress-apisix
@@ -150,15 +144,15 @@ autoscaling:
 nodeSelector: {}
 tolerations: []
 
-# namespace: "ingress-apisix"
+# -- namespace: "ingress-apisix"
 
 serviceMonitor:
   enabled: false
   namespace: "monitoring"
   interval: 15s
-  # @param serviceMonitor.labels ServiceMonitor extra labels
+  # -- @param serviceMonitor.labels ServiceMonitor extra labels
   labels: {}
-  # @param serviceMonitor.annotations ServiceMonitor annotations
+  # -- @param serviceMonitor.annotations ServiceMonitor annotations
   annotations: {}
 
 

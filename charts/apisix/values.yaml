@@ -19,67 +19,83 @@ global:
   # imagePullSecrets:
   #   - my-registry-secrets
   #   - other-registry-secrets
-  #
+  # -- Global Docker registry secret names as an array
   imagePullSecrets: []
 
 apisix:
-  # Enable or disable Apache APISIX itself
+  # -- Enable or disable Apache APISIX itself
   # Set it to false and ingress-controller.enabled=true will deploy only ingress-controller
   enabled: true
 
-  # Enable nginx IPv6 resolver
+  # -- Enable nginx IPv6 resolver
   enableIPv6: true
 
-  # Whether the APISIX version number should be shown in Server header
+  # -- Whether the APISIX version number should be shown in Server header
   enableServerTokens: true
 
-  # Use Pod metadata.uid as the APISIX id.
+  # -- Use Pod metadata.uid as the APISIX id.
   setIDFromPodUID: false
 
+  # -- Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings,
+  # click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict
   customLuaSharedDicts: []
     # - name: foo
     #   size: 10k
     # - name: bar
     #   size: 1m
+  # -- Whether to add a custom lua module
   luaModuleHook:
     enabled: false
-    # extend lua_package_path to load third party code
+    # -- extend lua_package_path to load third party code
     luaPath: ""
-    # the hook module which will be used to inject third party code into APISIX
+    # -- the hook module which will be used to inject third party code into APISIX
     # use the lua require style like: "module.say_hello"
     hookPoint: ""
-    # configmap that stores the codes
+    # -- configmap that stores the codes
     configMapRef:
+      # -- Name of the ConfigMap where the lua module codes store
       name: ""
       # mounts decides how to mount the codes to the container.
       mounts:
+        # -- Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the lua module code path.
         - key: ""
+        # -- Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the lua module code path.
           path: ""
 
-  # Defines how apisix handles routing:
+  # -- Defines how apisix handles routing:
   # - radixtree_uri: match route by uri(base on radixtree)
   # - radixtree_host_uri: match route by host + uri(base on radixtree)
   # - radixtree_uri_with_parameter: match route by uri with parameters
   httpRouter: radixtree_uri
 
+  # -- Enable full customized config.yaml
   enableCustomizedConfig: false
+  # -- If apisix.enableCustomizedConfig is true, full customized config.yaml.
+  # Please note that other settings about APISIX config will be ignored
   customizedConfig: {}
 
   image:
+    # -- Apache APISIX image repository
     repository: apache/apisix
+    # -- Apache APISIX image pull policy
     pullPolicy: IfNotPresent
+    # -- Apache APISIX image tag
     # Overrides the image tag whose default is the chart appVersion.
     tag: 2.15.1-debian
 
-  # Use a `DaemonSet` or `Deployment`
+  # -- Use a `DaemonSet` or `Deployment`
   kind: Deployment
-  # kind is DaemonSet, replicaCount not become effective
+  # -- kind is DaemonSet, replicaCount not become effective
   replicaCount: 1
 
+  # -- Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods
   priorityClassName: ""
+  # -- Annotations to add to each pod
   podAnnotations: {}
+  # -- Set the securityContext for Apache APISIX pods
   podSecurityContext: {}
     # fsGroup: 2000
+  # -- Set the securityContext for Apache APISIX container
   securityContext: {}
     # capabilities:
     #   drop:
@@ -88,13 +104,21 @@ apisix:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  # See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details
+  # -- See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details
   podDisruptionBudget:
+    # -- Enable or disable podDisruptionBudget
     enabled: false
+    # -- Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. 
+    # See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) 
+    # for more details
     minAvailable: 90%
+    # -- Set the maxUnavailable of podDisruptionBudget
     maxUnavailable: 1
 
+  # -- Set pod resource requests & limits
   resources: {}
+    # -- Use the host's network namespace
+
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -107,18 +131,21 @@ apisix:
     #   memory: 128Mi
   hostNetwork: false
 
+  # -- Node labels for Apache APISIX pod assignment
   nodeSelector: {}
+  # -- List of node taints to tolerate
   tolerations: []
+  # -- Set affinity for Apache APISIX deploy
   affinity: {}
 
-  # timezone is the timezone where apisix uses.
+  # -- timezone is the timezone where apisix uses.
   # For example: "UTC" or "Asia/Shanghai"
   # This value will be set on apisix container's environment variable TZ.
   # You may need to set the timezone to be consistent with your local time zone,
   # otherwise the apisix's logs may used to retrieve event maybe in wrong timezone.
   timezone: ""
 
-  # extraEnvVars An array to add extra env vars
+  # -- extraEnvVars An array to add extra env vars
   # e.g:
   # extraEnvVars:
   #   - name: FOO
@@ -142,35 +169,45 @@ rbac:
   create: false
 
 gateway:
+  # -- Apache APISIX service type for user access itself
   type: NodePort
+  # -- Setting how the Service route external traffic
   # If you want to keep the client source IP, you can set this to Local.
+
   # ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
   externalTrafficPolicy: Cluster
   # type: LoadBalancer
   # annotations:
   #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
   externalIPs: []
+  # -- Apache APISIX service settings for http
   http:
     enabled: true
     servicePort: 80
     containerPort: 9080
+  # -- Apache APISIX service settings for tls
   tls:
     enabled: false
     servicePort: 443
     containerPort: 9443
+    # -- Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd)
     existingCASecret: ""
+    # -- Filename be used in the gateway.tls.existingCASecret
     certCAFilename: ""
     http2:
       enabled: true
+    # -- TLS protocols allowed to use.
     sslProtocols: "TLSv1.2 TLSv1.3"
-  # L4 proxy (TCP/UDP)
+  # -- Apache APISIX service settings for stream. L4 proxy (TCP/UDP)
   stream:
     enabled: false
     only: false
     tcp: []
     udp: []
+  # -- Using ingress access Apache APISIX service
   ingress:
     enabled: false
+    # -- Ingress annotations
     annotations: {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
@@ -183,26 +220,30 @@ gateway:
   #      - chart-example.local
 
 admin:
-  # Enable Admin API
+  # -- Enable Admin API
   enabled: true
-  # admin service type
+  # -- admin service type
   type: ClusterIP
   # loadBalancerIP: a.b.c.d
   # loadBalancerSourceRanges:
   #   - "143.231.0.0/16"
+  # -- IPs for which nodes in the cluster will also accept traffic for the servic
   externalIPs: []
-  #
+  # -- which port to use for Apache APISIX admin API
   port: 9180
+  # -- Service port to use for Apache APISIX admin API
   servicePort: 9180
-  # Admin API support CORS response headers
+  # -- Admin API support CORS response headers
   cors: true
-  # Admin API credentials
+  # -- Admin API credentials
   credentials:
+    # -- Apache APISIX admin API admin role credentials
     admin: edd1c9f034335f136f87ad84b625c8f1
+    # -- Apache APISIX admin API viewer role credentials
     viewer: 4054f7cf07e344346cd3f287985e76a2
 
   allow:
-    # The client IP CIDR allowed to access Apache APISIX Admin API service.
+    # -- The client IP CIDR allowed to access Apache APISIX Admin API service.
     ipList:
       - 127.0.0.1/24
 
@@ -213,7 +254,7 @@ nginx:
   enableCPUAffinity: true
   envs: []
 
-# APISIX plugins to be enabled
+# -- APISIX plugins to be enabled
 plugins:
   - api-breaker
   - authz-keycloak
@@ -266,32 +307,37 @@ stream_plugins:
   - ip-restriction
   - limit-conn
 
+# -- Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details
 pluginAttrs: {}
 
 extPlugin:
+  # -- Enable External Plugins. See [external plugin](https://apisix.apache.org/docs/apisix/next/external-plugin/)
   enabled: false
+  # -- the command and its arguements to run as a subprocess
   cmd: ["/path/to/apisix-plugin-runner/runner", "run"]
 
 wasmPlugins:
+  # -- Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/)
   enabled: false
   plugins: []
 
-# customPlugins allows you to mount your own HTTP plugins.
+# -- customPlugins allows you to mount your own HTTP plugins.
 customPlugins:
+  # -- Whether to configure some custom plugins
   enabled: false
-  # the lua_path that tells APISIX where it can find plugins,
+  # -- the lua_path that tells APISIX where it can find plugins,
   # note the last ';' is required.
   luaPath: "/opts/custom_plugins/?.lua"
   plugins:
-    # plugin name.
+    # -- plugin name.
     - name: ""
-      # plugin attrs
+      # -- plugin attrs
       attrs: {}
-      # plugin codes can be saved inside configmap object.
+      # -- plugin codes can be saved inside configmap object.
       configMap:
-        # name of configmap.
+        # -- name of configmap.
         name: ""
-        # since keys in configmap is flat, mountPath allows to define the mount
+        # -- since keys in configmap is flat, mountPath allows to define the mount
         # path, so that plugin codes can be mounted hierarchically.
         mounts:
           - key: ""
@@ -302,22 +348,28 @@ customPlugins:
 updateStrategy: {}
   # type: RollingUpdate
 
+# -- Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail.
 extraVolumes: []
 # - name: extras
 #   emptyDir: {}
 
+# -- Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail.
 extraVolumeMounts: []
 # - name: extras
 #   mountPath: /usr/share/extras
 #   readOnly: true
 
+# -- Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail.
 extraInitContainers: []
 # - name: init-myservice
 #   image: busybox:1.28
 #   command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
 
 discovery:
+  # -- Enable or disable Apache APISIX integration service discovery
   enabled: false
+  # -- Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281),
+  # and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery)
   registry: {}
     # Integration service discovery registry. E.g eureka\dns\nacos\consul_kv
     # reference:
@@ -360,11 +412,17 @@ discovery:
 
 # access log and error log configuration
 logs:
+  # -- Enable access log or not, default true
   enableAccessLog: true
+  # -- Access log path
   accessLog: "/dev/stdout"
+  # -- Access log format
   accessLogFormat: '$remote_addr - $remote_user [$time_local] $http_host \"$request\" $status $body_bytes_sent $request_time \"$http_referer\" \"$http_user_agent\" $upstream_addr $upstream_status $upstream_response_time \"$upstream_scheme://$upstream_host$upstream_uri\"'
+  # -- Allows setting json or default characters escaping in variables
   accessLogFormatEscape: default
+  # -- Error log path
   errorLog: "/dev/stderr"
+  # -- Error log level
   errorLogLevel: "warn"
 
 dns:
@@ -379,7 +437,9 @@ dns:
   timeout: 5
 
 initContainer:
+  # -- Init container image
   image: busybox
+  # -- Init container tag
   tag: 1.28
 
 autoscaling:
@@ -389,7 +449,7 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
 
-# Custom configuration snippet.
+# -- Custom configuration snippet.
 configurationSnippet:
   main: |
 
@@ -403,51 +463,63 @@ configurationSnippet:
 
   stream: |
 
-# Observability configuration.
+# -- Observability configuration.
 # ref: https://apisix.apache.org/docs/apisix/plugins/prometheus/
 serviceMonitor:
+  # -- Enable or disable Apache APISIX serviceMonitor
   enabled: false
-  # namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix
+  # -- namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix
   namespace: ""
-  # name of the serviceMonitor, by default, it is the same as the apisix fullname
+  # -- name of the serviceMonitor, by default, it is the same as the apisix fullname
   name: ""
-  # interval at which metrics should be scraped
+  # -- interval at which metrics should be scraped
   interval: 15s
-  # path of the metrics endpoint
+  # -- path of the metrics endpoint
   path: /apisix/prometheus/metrics
-  # prefix of the metrics
+  # -- prefix of the metrics
   metricPrefix: apisix_
-  # container port where the metrics are exposed
+  # -- container port where the metrics are exposed
   containerPort: 9091
-  # @param serviceMonitor.labels ServiceMonitor extra labels
+  # -- @param serviceMonitor.labels ServiceMonitor extra labels
   labels: {}
-  # @param serviceMonitor.annotations ServiceMonitor annotations
+  # -- @param serviceMonitor.annotations ServiceMonitor annotations
   annotations: {}
 
-# etcd configuration
+# -- etcd configuration
 # use the FQDN address or the IP of the etcd
 etcd:
-  # install etcd(v3) by default, set false if do not want to install etcd(v3) together
+  # -- install etcd(v3) by default, set false if do not want to install etcd(v3) together
   enabled: true
+  # -- if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379.
   host:
     # host or ip e.g. http://172.20.128.89:2379
     - http://etcd.host:2379
+  # -- apisix configurations prefix
   prefix: "/apisix"
+  # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
   timeout: 30
 
-  # if etcd.enabled is true, set more values of bitnami/etcd helm chart
+  # -- if etcd.enabled is true, set more values of bitnami/etcd helm chart
   auth:
     rbac:
-      # No authentication by default
+      # -- No authentication by default. Switch to enable RBAC authentication
       create: false
+      # -- root username for etcd
       user: ""
+      # -- root password for etcd
       password: ""
     tls:
+      # -- enable etcd client certificate
       enabled: false
+      # -- name of the secret contains etcd client cert
       existingSecret: ""
+      # -- etcd client cert filename using in etcd.auth.tls.existingSecret
       certFilename: ""
+      # -- etcd client cert key filename using in etcd.auth.tls.existingSecret
       certKeyFilename: ""
+      # -- whether to verify the etcd endpoint certificate when setup a TLS connection to etcd
       verify: true
+      # -- specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset.
       sni: ""
 
   service:
@@ -462,8 +534,13 @@ ingress-controller:
   enabled: false
 
 vault:
+  # -- Enable or disable the vault integration
   enabled: false
+  # -- The host address where the vault server is running.
   host: ""
+  # -- HTTP timeout for each request.
   timeout: 10
+  # -- The generated token from vault instance that can grant access to read data from the vault.
   token: ""
+  # -- Prefix allows you to better enforcement of policies.
   prefix: ""
