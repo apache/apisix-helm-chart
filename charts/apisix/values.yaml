@@ -108,8 +108,8 @@ apisix:
   podDisruptionBudget:
     # -- Enable or disable podDisruptionBudget
     enabled: false
-    # -- Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. 
-    # See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) 
+    # -- Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget.
+    # See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget)
     # for more details
     minAvailable: 90%
     # -- Set the maxUnavailable of podDisruptionBudget
