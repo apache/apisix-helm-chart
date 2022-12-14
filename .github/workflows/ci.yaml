@@ -84,4 +84,3 @@ jobs:
           fi
           git diff --exit-code
           rm -f ./helm-docs
-          
