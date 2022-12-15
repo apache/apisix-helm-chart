@@ -20,3 +20,7 @@
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
 {{- end }}
+2. Get The account to log in the application
+export USERNAME=$(kubectl get cm {{ include "apisix-dashboard.fullname" . }} -n {{ .Release.Namespace }} -o=jsonpath={.data} | sed -nr '/authentication/,+5 p' | awk -F": " '/username/{print $2}')
+export PASSWORD=$(kubectl get cm {{ include "apisix-dashboard.fullname" . }} -n {{ .Release.Namespace }} -o=jsonpath={.data} | sed -nr '/authentication/,+5 p' | awk -F": |]" '/password/{print $2}')
+echo "username: $USERNAME  password: $PASSWORD"

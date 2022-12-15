@@ -19,3 +19,7 @@
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:80
 {{- end }}
+2. Get admin API credentials:
+export ADMIN=$(kubectl get cm {{ include "apisix.fullname" . }} -n {{ .Release.Namespace }} -o=jsonpath={.data} | sed -nr '/- name: "admin"/,+2 p' | awk -F": " '/key/{print $2}')
+export VIEWER=$(kubectl get cm {{ include "apisix.fullname" . }} -n {{ .Release.Namespace }} -o=jsonpath={.data} | sed -nr '/- name: "viewer"/,+2 p' | awk -F": " '/key/{print $2}')
+echo "admin: $ADMIN  viewer: $VIEWER"

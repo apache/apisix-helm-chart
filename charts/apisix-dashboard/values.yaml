@@ -78,6 +78,7 @@ config:
   authentication:
     secret: secret
     expireTime: 3600
+    userCreate: true
     users:
       - username: admin
         password: admin

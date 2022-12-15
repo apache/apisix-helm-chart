@@ -55,9 +55,15 @@ data:
     authentication:
       secret: {{ .secret }}
       expire_time: {{ .expireTime }}
+      {{- if .userCreate }}
+      users:
+        - username: {{ randAlphaNum 8 }}
+          password: {{ randAlphaNum 8 }}
+      {{- else }}
       users:
         {{- range .users }}
         - username: {{ .username }}
           password: {{ .password }}
         {{- end }}
+      {{- end }}
     {{- end }}

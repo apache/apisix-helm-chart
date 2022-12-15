@@ -115,11 +115,19 @@ data:
       admin_key:
         # admin: can everything for configuration data
         - name: "admin"
+          {{- if .Values.admin.credentials.create }}
+          key: {{ randAlphaNum 32 }}
+          {{- else }}
           key: {{ .Values.admin.credentials.admin }}
+          {{- end }}
           role: admin
         # viewer: only can view configuration data
         - name: "viewer"
+          {{- if .Values.admin.credentials.create }}
+          key: {{ randAlphaNum 32 }}
+          {{- else }}
           key: {{ .Values.admin.credentials.viewer }}
+          {{- end }}
           role: viewer
       {{- end }}
 
