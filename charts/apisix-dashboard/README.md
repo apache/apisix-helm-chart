@@ -49,71 +49,48 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 
 ## Parameters
 
-The following tables lists the configurable parameters of the apisix-dashboard chart and their default values per section/component:
+## Values
 
-### Common parameters
-
-| Name               | Description                                                                                       | Value                    |
-| ------------------ | ------------------------------------------------------------------------------------------------- | ------------------------ |
-| `nameOverride`     | String to partially override apisix-dashboard.fullname template (will maintain the release name)  | `nil`                    |
-| `fullnameOverride` | String to fully override apisix-dashboard.fullname template                                       | `nil`                    |
-| `imagePullSecrets` | Docker registry secret names as an array                                                          | `[]`                     |
-| `image.repository` | Apache APISIX Dashboard image repository                                                          | `apache/apisix-dashboard`|
-| `image.tag`        | Apache APISIX Dashboard image tag (immutable tags are recommended)                                | `2.10.1-alpine`          |
-| `image.pullPolicy` | Apache APISIX Dashboard image pull policy                                                         | `IfNotPresent`           |
-
-### Apache APISIX Dashboard configurable parameters
-
-| Name                                 | Description                                                                               | Value           |
-| ------------------------------------ | ----------------------------------------------------------------------------------------- | --------------- |
-| `config.conf.listen.host`                       | The address on which the `Manager API` should listen. The default value is 0.0.0.0, if want to specify, please enable it. This value accepts IPv4, IPv6, and hostname.                                                                   | `0.0.0.0`             |
-| `config.conf.listen.port`                       | The port on which the `Manager API` should listen.                                                                  | `9000`             |
-| `config.authentication.secert`                  | Secret for jwt token generation | `secert` |
-| `config.authentication.expireTime`                  | JWT token expire time, in second | `3600` |
-| `config.authentication.users`                  | Specifies username and password for login `manager api`. | `[{username: admin, password: admin}]` |
-| `config.conf.etcd.endpoints`                       | Supports defining multiple etcd host addresses for an etcd cluster                                                                  | `apisix-etcd:2379`             |
-| `config.conf.etcd.prefix`                       | Apache APISIX config's prefix in etcd, /apisix by default                                                                  | `/apisix`             |
-| `config.conf.etcd.username`                       | Specifies etcd basic auth username if  enable etcd auth                                                                | `~`             |
-| `config.conf.etcd.password`                       | Specifies etcd basic auth password  if  enable etcd auth                                                              | `~`             |
-| `config.conf.log.accessLog.filePath`                  | Access log path | `/dev/stdout` |
-| `config.conf.log.errorLog.filePath`                  | Error log path | `/dev/stderr` |
-| `config.conf.log.errorLog.level`                  | Error log level. Supports levels, lower to higher: debug, info, warn, error, panic, fatal | `warn` |
-
-### Deployment parameters
-
-| Name                                            | Description                                                                               | Value           |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------- |
-| `replicaCount`                                  | Number of Apache APISIX Dashboard nodes                                                   | `1`             |
-| `priorityClassName`                             | Set the [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for pods | `""` |
-| `podAnnotations`                                | Apache APISIX Dashboard Pod annotations                                                   | `{}`            |
-| `nodeSelector`                                  | Node labels for pod assignment                                                            | `{}`            |
-| `tolerations`                                   | Tolerations for pod assignment                                                            | `[]`            |
-| `resources.limits`                              | The resources limits for Apache APISIX Dashboard containers                               | `{}`            |
-| `resources.requests`                            | The requested resources for Apache APISIX Dashboardcontainers                             | `{}`            |
-| `podSecurityContext`                            | Set the securityContext for Apache APISIX Dashboard pods                                  | `{}`            |
-| `securityContext`                               | Set the securityContext for Apache APISIX Dashboard container                             | `{}`            |
-| `autoscaling.enabled`                           | Enable autoscaling for Apache APISIX Dashboard deployment                                 | `false`         |
-| `autoscaling.minReplicas`                       | Minimum number of replicas to scale back                                                  | `1`             |
-| `autoscaling.maxReplicas`                       | Maximum number of replicas to scale out                                                   | `100`           |
-| `autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage                                                         | `80`            |
-| `autoscaling.targetMemoryUtilizationPercentage` | Target Memory utilization percentage                                                      | `nil`           |
-
-### Traffic Exposure parameters
-
-| Name                            | Description                                                                                      | Value       |
-| ------------------------------- |--------------------------------------------------------------------------------------------------|-------------|
-| `service.type`                  | Service type                                                                                     | `ClusterIP` |
-| `service.port`                  | Service HTTP port                                                                                | `80`        |
-| `ingress.enabled`               | Set to true to enable ingress record generation                                                  | `false`     |
-| `ingress.annotations`           | Ingress annotations                                                                              | `{}`        |
-| `ingress.hosts`                 | The list of hostnames to be covered with this ingress record.                                    | `[]`        |
-| `ingress.tls`                   | Create TLS Secret                                                                                | `false`     |
-| `ingress.className`             | `ingressClassName` replace `annotations kubernetes.io/ingress.class`, required kubernetes 1.18>= | `apisix`    |
-
-### RBAC parameters
-
-| Name                         | Description                                                                                                           | Value  |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------ |
-| `serviceAccount.create`      | Specifies whether a ServiceAccount should be created                                                                  | `true` |
-| `serviceAccount.name`        | The name of the ServiceAccount to use. If not set and create is true, a name is generated using the fullname template | `nil`  |
-| `serviceAccount.annotations` | Annotations to add to the ServiceAccount Metadata                                                                     | `{}`   |
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| affinity | object | `{}` |  |
+| autoscaling.enabled | bool | `false` | Enable autoscaling for Apache APISIX Dashboard deployment |
+| autoscaling.maxReplicas | int | `100` | Maximum number of replicas to scale out |
+| autoscaling.minReplicas | int | `1` | Minimum number of replicas to scale back |
+| autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization percentage |
+| config.authentication.expireTime | int | `3600` | JWT token expire time, in second |
+| config.authentication.secret | string | `"secret"` | Secret for jwt token generation |
+| config.authentication.users | list | `[{"password":"admin","username":"admin"}]` | Specifies username and password for login manager api. |
+| config.conf.etcd.endpoints | list | `["apisix-etcd:2379"]` | Supports defining multiple etcd host addresses for an etcd cluster |
+| config.conf.etcd.password | string | `nil` | Specifies etcd basic auth password if enable etcd auth |
+| config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
+| config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |
+| config.conf.listen.host | string | `"0.0.0.0"` | The address on which the Manager API should listen. The default value is 0.0.0.0, if want to specify, please enable it. This value accepts IPv4, IPv6, and hostname. |
+| config.conf.listen.port | int | `9000` | The port on which the Manager API should listen. |
+| config.conf.log.accessLog.filePath | string | `"/dev/stdout"` | Error log path |
+| config.conf.log.errorLog | object | `{"filePath":"/dev/stderr","level":"warn"}` | Error log level. Supports levels, lower to higher: debug, info, warn, error, panic, fatal |
+| config.conf.log.errorLog.filePath | string | `"/dev/stderr"` | Access log path |
+| fullnameOverride | string | `""` | String to fully override apisix-dashboard.fullname template |
+| image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX Dashboard image pull policy |
+| image.repository | string | `"apache/apisix-dashboard"` | Apache APISIX Dashboard image repository |
+| image.tag | string | `"2.13-alpine"` | Overrides the image tag whose default is the chart appVersion. Apache APISIX Dashboard image tag (immutable tags are recommended) |
+| imagePullSecrets | list | `[]` | Docker registry secret names as an array |
+| ingress.annotations | object | `{}` | Ingress annotations |
+| ingress.className | string | `""` | Kubernetes 1.18+ support ingressClassName attribute |
+| ingress.enabled | bool | `false` | Set to true to enable ingress record generation |
+| ingress.hosts | list | `[{"host":"apisix-dashboard.local","paths":[]}]` | The list of hostnams to be covered with this ingress record |
+| ingress.tls | list | `[]` | Create TLS Secret |
+| nameOverride | string | `""` | String to partially override apisix-dashboard.fullname template (will maintain the release name) |
+| nodeSelector | object | `{}` | Node labels for pod assignment |
+| podAnnotations | object | `{}` | Apache APISIX Dashboard Pod annotations |
+| podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX Dashboard pods |
+| priorityClassName | string | `""` | Set the [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for pods |
+| replicaCount | int | `1` | Number of Apache APISIX Dashboard nodes |
+| resources | object | `{}` |  |
+| securityContext | object | `{}` | Set the securityContext for Apache APISIX Dashboard container |
+| service.port | int | `80` | Service HTTP port |
+| service.type | string | `"ClusterIP"` | Service type |
+| serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
+| tolerations | list | `[]` | Tolerations for pod assignment |
