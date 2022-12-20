@@ -47,12 +47,12 @@ dependencies:
     condition: etcd.enabled
   - name: apisix-dashboard
     version: 0.6.1
-    repository: https://charts.apiseven.com
+    repository: https://apache.github.io/apisix-helm-chart
     condition: dashboard.enabled
     alias: dashboard
   - name: apisix-ingress-controller
     version: 0.10.2
-    repository: https://charts.apiseven.com
+    repository: https://apache.github.io/apisix-helm-chart
     condition: ingress-controller.enabled
     alias: ingress-controller
 
