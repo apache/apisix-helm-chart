@@ -80,7 +80,7 @@ jobs:
           ./helm-docs --chart-search-root=${GITHUB_WORKSPACE}/charts
           DIFF=$(git diff ${GITHUB_WORKSPACE}/charts/**/*md)
           if [ ! -z "$DIFF" ]; then
-            echo "Please use helm-docs in your clone, of your fork, of the project, and commit a updated README.md for the chart. https://github.com/kubernetes/ingress-nginx/blob/main/RELEASE.md#d-edit-the-valuesyaml-and-run-helm-docs"
+            echo "Please use helm-docs in your clone, of your fork, of the project, and commit a updated README.md for the chart."
           fi
           git diff --exit-code
           rm -f ./helm-docs
