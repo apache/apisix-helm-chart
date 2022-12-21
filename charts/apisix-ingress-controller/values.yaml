@@ -42,7 +42,7 @@ replicaCount: 1
 image:
   repository: apache/apisix-ingress-controller
   pullPolicy: IfNotPresent
-  tag: "1.5.1"
+  tag: "1.6.0-rc1"
 
 podAnnotations: {}
 
@@ -79,6 +79,8 @@ config:
   ingressStatusAddress: []
   # -- enable profiling via web interfaces host:port/debug/pprof, default is true.
   enableProfiling: true
+  # -- the APISIX admin API version. can be "v2" or "v3", default is "v3".
+  apisixAdminAPIVersion: "v3"
   # -- Default interval for synchronizing Kubernetes resources to APISIX
   apisixResourceSyncInterval: "300s"
   # -- Kubernetes related configurations.
@@ -89,9 +91,6 @@ config:
     # -- how long should apisix-ingress-controller re-synchronizes with Kubernetes,
     # default is 6h,
     resyncInterval: "6h"
-    # -- namespace list that controller will watch for resources,
-    # by default all namespaces (represented by "*") are watched.
-    appNamespaces: ["*"]
     # -- namespace_selector represent basis for selecting managed namespaces.
     # the field is support since version 1.4.0
     # For example, "apisix.ingress=watching", so ingress will watching the namespaces which labels "apisix.ingress=watching"
@@ -118,6 +117,12 @@ config:
     # It is not recommended to use it in a production environment.
     # Before we announce support for it to reach Beta level or GA.
     enableGatewayAPI: false
+    # -- the resource API version, support "apisix.apache.org/v2beta3" and "apisix.apache.org/v2".
+    # default is "apisix.apache.org/v2"
+    apiVersion: "apisix.apache.org/v2"
+    # -- Pluginmetadata in APISIX can be controlled through ConfigMap. default is ""
+    pluginMetadataCM: ""
+
   # -- APISIX related configurations.
   apisix:
     # -- Enabling this value, overrides serviceName and serviceNamespace.
