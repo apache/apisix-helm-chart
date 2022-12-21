@@ -32,16 +32,11 @@ data:
     {{- end }}
     {{- end }}
     enable_profiling: {{ .Values.config.enableProfiling }}
+    apisix-admin-api-version: {{ .Values.config.apisixAdminAPIVersion }}
     apisix-resource-sync-interval: {{ .Values.config.apisixResourceSyncInterval }}
     kubernetes:
       kubeconfig: {{ .Values.config.kubernetes.kubeconfig | quote }}
       resync_interval: {{ .Values.config.kubernetes.resyncInterval | quote }}
-      {{- if gt (len .Values.config.kubernetes.appNamespaces) 0 }}
-      app_namespaces:
-      {{- range .Values.config.kubernetes.appNamespaces }}
-      - {{ . | quote }}
-      {{- end }}
-      {{- end }}
 
       {{- if gt (len .Values.config.kubernetes.namespaceSelector) 0 }}
       namespace_selector:
@@ -55,6 +50,8 @@ data:
       watch_endpointslices: {{ .Values.config.kubernetes.watchEndpointSlices }}
       apisix_route_version: {{ .Values.config.kubernetes.apisixRouteVersion | quote }}
       enable_gateway_api: {{ .Values.config.kubernetes.enableGatewayAPI }}
+      apisix_version: {{ .Values.config.kubernetes.apiVersion | quote }}
+      plugin_metadata_cm: {{ .Values.config.kubernetes.pluginMetadataCM | quote }}
     apisix:
       {{ if .Values.config.apisix.serviceFullname }}
       default_cluster_base_url: http://{{ .Values.config.apisix.serviceFullname }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
