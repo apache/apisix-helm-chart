@@ -26,9 +26,9 @@ image:
   repository: apache/apisix-dashboard
   # -- Apache APISIX Dashboard image pull policy
   pullPolicy: IfNotPresent
-  # -- Overrides the image tag whose default is the chart appVersion.
+  # Overrides the image tag whose default is the chart appVersion.
   # Apache APISIX Dashboard image tag (immutable tags are recommended)
-  tag: 2.13-alpine
+  tag: 2.15.0-alpine
 
 # -- Docker registry secret names as an array
 imagePullSecrets: []
