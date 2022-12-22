@@ -73,7 +73,7 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | fullnameOverride | string | `""` | String to fully override apisix-dashboard.fullname template |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX Dashboard image pull policy |
 | image.repository | string | `"apache/apisix-dashboard"` | Apache APISIX Dashboard image repository |
-| image.tag | string | `"2.13-alpine"` | Overrides the image tag whose default is the chart appVersion. Apache APISIX Dashboard image tag (immutable tags are recommended) |
+| image.tag | string | `"2.15.0-alpine"` |  |
 | imagePullSecrets | list | `[]` | Docker registry secret names as an array |
 | ingress.annotations | object | `{}` | Ingress annotations |
 | ingress.className | string | `""` | Kubernetes 1.18+ support ingressClassName attribute |
