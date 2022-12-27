@@ -52,7 +52,7 @@ data:
       apisix_version: {{ .Values.config.kubernetes.apiVersion | quote }}
       plugin_metadata_cm: {{ .Values.config.kubernetes.pluginMetadataCM | quote }}
     apisix:
-      admin_api_version: {{ .Values.config.apisixAdminAPIVersion | quote }}
+      admin_api_version: {{ .Values.config.apisix.adminAPIVersion | quote }}
       {{ if .Values.config.apisix.serviceFullname }}
       default_cluster_base_url: http://{{ .Values.config.apisix.serviceFullname }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
       {{ else }}

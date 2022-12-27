@@ -79,8 +79,6 @@ config:
   ingressStatusAddress: []
   # -- enable profiling via web interfaces host:port/debug/pprof, default is true.
   enableProfiling: true
-  # -- the APISIX admin API version. can be "v2" or "v3", default is "v3".
-  apisixAdminAPIVersion: "v3"
   # -- Default interval for synchronizing Kubernetes resources to APISIX
   apisixResourceSyncInterval: "300s"
   # -- Kubernetes related configurations.
@@ -132,6 +130,8 @@ config:
     servicePort: 9180
     adminKey: "edd1c9f034335f136f87ad84b625c8f1"
     clusterName: "default"
+    # -- the APISIX admin API version. can be "v2" or "v3", default is "v2".
+    adminAPIVersion: "v2"
 
 resources: {}
 
