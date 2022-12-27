@@ -131,7 +131,7 @@ config:
     adminKey: "edd1c9f034335f136f87ad84b625c8f1"
     clusterName: "default"
     # -- the APISIX admin API version. can be "v2" or "v3", default is "v2".
-    apisixAdminAPIVersion: "v2"
+    adminAPIVersion: "v2"
 
 resources: {}
 

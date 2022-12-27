@@ -110,9 +110,9 @@ The same for container level, you need to set:
 | autoscaling.minReplicas | int | `1` |  |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | clusterDomain | string | `"cluster.local"` |  |
-| config.apisix | object | `{"adminKey":"edd1c9f034335f136f87ad84b625c8f1","clusterName":"default","serviceName":"apisix-admin","serviceNamespace":"ingress-apisix","servicePort":9180}` | APISIX related configurations. |
+| config.apisix | object | `{"adminAPIVersion":"v2","adminKey":"edd1c9f034335f136f87ad84b625c8f1","clusterName":"default","serviceName":"apisix-admin","serviceNamespace":"ingress-apisix","servicePort":9180}` | APISIX related configurations. |
+| config.apisix.adminAPIVersion | string | `"v2"` | the APISIX admin API version. can be "v2" or "v3", default is "v2". |
 | config.apisix.serviceName | string | `"apisix-admin"` | Enabling this value, overrides serviceName and serviceNamespace. serviceFullname: "apisix-admin.apisix.svc.local" |
-| config.apisixAdminAPIVersion | string | `"v3"` | the APISIX admin API version. can be "v2" or "v3", default is "v3". |
 | config.apisixResourceSyncInterval | string | `"300s"` | Default interval for synchronizing Kubernetes resources to APISIX |
 | config.certFile | string | `"/etc/webhook/certs/cert.pem"` | the TLS certificate file path. |
 | config.enableProfiling | bool | `true` | enable profiling via web interfaces host:port/debug/pprof, default is true. |
