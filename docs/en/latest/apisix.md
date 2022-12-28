@@ -39,17 +39,9 @@ To quickly experience Apache APISIX related components like Apache APISIX Dashbo
 helm repo add apisix https://charts.apiseven.com && helm repo update && helm upgrade --install apisix apisix/apisix --create-namespace  --namespace apisix --set dashboard.enabled=true --set ingress-controller.enabled=true --set ingress-controller.config.apisix.serviceNamespace=apisix
 ```
 
-### APISIX v3.x
-
-The current default version of APISIX installed is `2.15.0`, if you want to install APISIX 3.x, to install the chart of APISIX with:
-
-```shell
-helm install apisix apisix/apisix --set apisix.image.tag=3.0.0-debian --create-namespace --namespace apisix
-```
-
 :::note
 
-The latest APISIX Ingress Controller and APISIX Dashboard are not compatible with APISIX 3.x.
+The latest APISIX Dashboard are not compatible with APISIX 3.x.
 
 ## Uninstall
 
