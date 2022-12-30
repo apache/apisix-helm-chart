@@ -34,4 +34,4 @@ maintainers:
 
 # ref: https://artifacthub.io/docs/topics/annotations/helm/
 annotations:
-  artifacthub.io/prerelease: "true"
+  artifacthub.io/prerelease: "false"
