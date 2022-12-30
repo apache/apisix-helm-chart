@@ -51,7 +51,7 @@ dependencies:
     condition: dashboard.enabled
     alias: dashboard
   - name: apisix-ingress-controller
-    version: 0.11.2
+    version: 0.11.3
     repository: https://charts.apiseven.com
     condition: ingress-controller.enabled
     alias: ingress-controller
