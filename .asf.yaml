@@ -36,3 +36,11 @@ github:
 
     ghp_branch:  gh-pages
     ghp_path:    /
+
+    protected_branches:
+      master:
+        required_pull_request_reviews:
+          required_approving_review_count: 2
+      legacy:
+        required_pull_request_reviews:
+          required_approving_review_count: 2
