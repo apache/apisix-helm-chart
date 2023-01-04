@@ -50,6 +50,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | admin.port | int | `9180` | which port to use for Apache APISIX admin API |
 | admin.servicePort | int | `9180` | Service port to use for Apache APISIX admin API |
 | admin.type | string | `"ClusterIP"` | admin service type |
+| admin.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix-admin.local","paths":["/apisix"]}],"tls":[]}` | Using ingress access Apache APISIX admin service |
 | apisix.affinity | object | `{}` | Set affinity for Apache APISIX deploy |
 | apisix.customLuaSharedDicts | list | `[]` | Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict |
 | apisix.customizedConfig | object | `{}` | If apisix.enableCustomizedConfig is true, full customized config.yaml. Please note that other settings about APISIX config will be ignored |
