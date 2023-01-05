@@ -64,6 +64,11 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | config.conf.etcd.endpoints | list | `["apisix-etcd:2379"]` | Supports defining multiple etcd host addresses for an etcd cluster |
 | config.conf.etcd.password | string | `nil` | Specifies etcd basic auth password if enable etcd auth |
 | config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
+| config.conf.etcd.tls.caFile | string | `"ca.crt"` | Name of CA file in secret |
+| config.conf.etcd.tls.certFile | string | `"tls.crt"` | Name of cert file in secret |
+| config.conf.etcd.tls.enabled | bool | `false` | Enable tls when connecting to an etce cluster with TLS enabled |
+| config.conf.etcd.tls.existingSecret | string | `""` | Name of existing Secret object that contains certs fot TLS authentication |
+| config.conf.etcd.tls.keyFile | string | `"tls.key"` | Name of key file in secret |
 | config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |
 | config.conf.listen.host | string | `"0.0.0.0"` | The address on which the Manager API should listen. The default value is 0.0.0.0, if want to specify, please enable it. This value accepts IPv4, IPv6, and hostname. |
 | config.conf.listen.port | int | `9000` | The port on which the Manager API should listen. |
