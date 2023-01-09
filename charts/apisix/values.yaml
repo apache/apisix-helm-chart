@@ -202,7 +202,17 @@ gateway:
   stream:
     enabled: false
     only: false
+    # define several tcp ports. Elements
+    # tcp:
+    #   - 9100
+    #   - addr: 127.0.0.1:9101
+    #     tls: true
     tcp: []
+    # define several udp ports. Elements
+    # udp:
+    #   - 9200
+    #   - addr: 127.0.0.1:9201
+    #     tls: true
     udp: []
   # -- Using ingress access Apache APISIX service
   ingress:
