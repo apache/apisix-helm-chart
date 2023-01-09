@@ -527,11 +527,12 @@ etcd:
 
   replicaCount: 3
 
-dashboard:
-  enabled: false
-
+# -- Ingress controller configuration
 ingress-controller:
   enabled: false
+  config:
+    apisix:
+      AdminAPIVersion: "v3"
 
 vault:
   # -- Enable or disable the vault integration

@@ -99,7 +99,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | customPlugins.plugins[0].configMap | object | `{"mounts":[{"key":"","path":""},{"key":"","path":""}],"name":""}` | plugin codes can be saved inside configmap object. |
 | customPlugins.plugins[0].configMap.mounts | list | `[{"key":"","path":""},{"key":"","path":""}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | customPlugins.plugins[0].configMap.name | string | `""` | name of configmap. |
-| dashboard.enabled | bool | `false` |  |
 | discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
 | discovery.registry | object | `{}` | Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281), and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery) |
 | dns.resolvers[0] | string | `"127.0.0.1"` |  |
@@ -143,7 +142,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.tls.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | gateway.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
-| ingress-controller.enabled | bool | `false` |  |
+| ingress-controller | object | `{"config":{"apisix":{"AdminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.tag | float | `1.28` | Init container tag |
 | logs.accessLog | string | `"/dev/stdout"` | Access log path |
