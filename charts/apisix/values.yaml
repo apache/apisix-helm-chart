@@ -532,7 +532,7 @@ ingress-controller:
   enabled: false
   config:
     apisix:
-      AdminAPIVersion: "v3"
+      adminAPIVersion: "v3"
 
 vault:
   # -- Enable or disable the vault integration
