@@ -142,7 +142,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.tls.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | gateway.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
-| ingress-controller | object | `{"config":{"apisix":{"AdminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
+| ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.tag | float | `1.28` | Init container tag |
 | logs.accessLog | string | `"/dev/stdout"` | Access log path |
