@@ -16,7 +16,7 @@
 #
 apiVersion: v1
 data:
-  config.yaml: |
+  config.yaml: |-
     # log options
     log_level: {{ .Values.config.logLevel | quote }}
     log_output: {{ .Values.config.logOutput | quote }}
@@ -24,7 +24,7 @@ data:
     key_file: {{ .Values.config.keyFile | quote }}
     http_listen: {{ .Values.config.httpListen | quote }}
     https_listen: {{ .Values.config.httpsListen | quote }}
-    ingress_publish_service: {{ .Values.config.ingressPublishService }}
+    ingress_publish_service: {{ .Values.config.ingressPublishService | quote }}
     {{- if gt (len .Values.config.ingressStatusAddress) 0 }}
     ingress_status_address:
     {{- range .Values.config.ingressStatusAddress }}
@@ -36,12 +36,6 @@ data:
     kubernetes:
       kubeconfig: {{ .Values.config.kubernetes.kubeconfig | quote }}
       resync_interval: {{ .Values.config.kubernetes.resyncInterval | quote }}
-      {{- if gt (len .Values.config.kubernetes.appNamespaces) 0 }}
-      app_namespaces:
-      {{- range .Values.config.kubernetes.appNamespaces }}
-      - {{ . | quote }}
-      {{- end }}
-      {{- end }}
 
       {{- if gt (len .Values.config.kubernetes.namespaceSelector) 0 }}
       namespace_selector:
@@ -55,12 +49,15 @@ data:
       watch_endpointslices: {{ .Values.config.kubernetes.watchEndpointSlices }}
       apisix_route_version: {{ .Values.config.kubernetes.apisixRouteVersion | quote }}
       enable_gateway_api: {{ .Values.config.kubernetes.enableGatewayAPI }}
+      apisix_version: {{ .Values.config.kubernetes.apiVersion | quote }}
+      plugin_metadata_cm: {{ .Values.config.kubernetes.pluginMetadataCM | quote }}
     apisix:
-      {{ if .Values.config.apisix.serviceFullname }}
+      admin_api_version: {{ .Values.config.apisix.adminAPIVersion | quote }}
+      {{- if .Values.config.apisix.serviceFullname }}
       default_cluster_base_url: http://{{ .Values.config.apisix.serviceFullname }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
       {{ else }}
       default_cluster_base_url: http://{{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{ .Values.clusterDomain }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
-      {{ end}}
+      {{- end}}
       default_cluster_admin_key: {{ .Values.config.apisix.adminKey | quote }}
       default_cluster_name: {{ .Values.config.apisix.clusterName | quote }}
 kind: ConfigMap
