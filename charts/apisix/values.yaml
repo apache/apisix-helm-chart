@@ -81,7 +81,7 @@ apisix:
     pullPolicy: IfNotPresent
     # -- Apache APISIX image tag
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 3.1.0-debian
+    tag: 2.15.1-debian
 
   # -- Use a `DaemonSet` or `Deployment`
   kind: Deployment
@@ -532,6 +532,9 @@ dashboard:
 
 ingress-controller:
   enabled: false
+  config:
+    apisix:
+      adminAPIVersion: "v2"
 
 vault:
   # -- Enable or disable the vault integration
