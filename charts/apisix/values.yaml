@@ -255,7 +255,7 @@ admin:
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     hosts:
-      - host: apisix.local
+      - host: apisix-admin.local
         paths:
           - "/apisix"
     tls: []
