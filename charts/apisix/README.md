@@ -47,6 +47,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | admin.credentials.viewer | string | `"4054f7cf07e344346cd3f287985e76a2"` | Apache APISIX admin API viewer role credentials |
 | admin.enabled | bool | `true` | Enable Admin API |
 | admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
+| admin.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix-admin.local","paths":["/apisix"]}],"tls":[]}` | Using ingress access Apache APISIX admin service |
+| admin.ingress.annotations | object | `{}` | Ingress annotations |
 | admin.port | int | `9180` | which port to use for Apache APISIX admin API |
 | admin.servicePort | int | `9180` | Service port to use for Apache APISIX admin API |
 | admin.type | string | `"ClusterIP"` | admin service type |
