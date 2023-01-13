@@ -60,16 +60,24 @@ spec:
         {{- if and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0)) }}
         {{- with .Values.gateway.stream }}
         {{- if (gt (len .tcp) 0) }}
-        {{- range $index, $port := .tcp }}
+        {{- range $index, $elem := .tcp }}
         - name: proxy-tcp-{{ $index | toString }}
-          containerPort: {{ $port }}
+          {{- if not (kindIs "map" $elem) }}
+          containerPort: {{ $elem | toString }}
+          {{- else }}
+          containerPort: {{ splitList ":" ($elem.addr | toString) | last }}
+          {{- end }}
           protocol: TCP
         {{- end }}
         {{- end }}
         {{- if (gt (len .udp) 0) }}
-        {{- range $index, $port := .udp }}
+        {{- range $index, $elem := .udp }}
         - name: proxy-udp-{{ $index | toString }}
-          containerPort: {{ $port }}
+          {{- if not (kindIs "map" $elem) }}
+          containerPort: {{ $elem | toString }}
+          {{- else }}
+          containerPort: {{ splitList ":" ($elem.addr | toString) | last }}
+          {{- end }}
           protocol: UDP
         {{- end }}
         {{- end }}

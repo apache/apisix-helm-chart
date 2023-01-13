@@ -100,7 +100,12 @@ data:
         tcp:                        # TCP proxy port list
           {{- if gt (len .Values.gateway.stream.tcp) 0}}
           {{- range .Values.gateway.stream.tcp }}
+          {{- if kindIs "map" . }}
+          - addr: {{ .addr }}
+            tls: {{ .tls | default false }}
+          {{- else }}
           - {{ . }}
+          {{- end }}
           {{- end }}
           {{- else}}
           - 9100
@@ -110,7 +115,12 @@ data:
         udp:                        # UDP proxy port list
           {{- if gt (len .Values.gateway.stream.udp) 0}}
           {{- range .Values.gateway.stream.udp }}
-          - {{ . }}
+          {{- if kindIs "map" . }}
+          - addr: {{ .addr }}
+            tls: {{ .tls | default false }}
+          {{- else }}
+          - {{ .  }}
+          {{- end }}
           {{- end }}
           {{- else}}
           - 9200
