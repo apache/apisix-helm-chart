@@ -152,7 +152,7 @@ data:
         enable_access_log: {{ .Values.logs.enableAccessLog }}
         {{- if .Values.logs.enableAccessLog }}
         access_log: "{{ .Values.logs.accessLog }}"
-        access_log_format: "{{ .Values.logs.accessLogFormat }}"
+        access_log_format: '{{ .Values.logs.accessLogFormat }}'
         access_log_format_escape: {{ .Values.logs.accessLogFormatEscape }}
         {{- end }}
         keepalive_timeout: 60s         # timeout during which a keep-alive client connection will stay open on the server side.
