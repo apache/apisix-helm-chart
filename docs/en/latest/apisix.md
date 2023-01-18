@@ -31,6 +31,14 @@ helm repo update
 helm install apisix apisix/apisix --create-namespace  --namespace apisix
 ```
 
+### Start By One Line
+
+To quickly experience Apache APISIX related components like Apache APISIX Dashboard and Apache APISIX Ingress Controller. For a quick installation, start by one line:
+
+```shell
+helm repo add apisix https://charts.apiseven.com && helm repo update && helm upgrade --install apisix apisix/apisix --create-namespace  --namespace apisix --set dashboard.enabled=true --set ingress-controller.enabled=true --set ingress-controller.config.apisix.serviceNamespace=apisix
+```
+
 :::note
 
 The latest APISIX Dashboard are not compatible with APISIX 3.x.
