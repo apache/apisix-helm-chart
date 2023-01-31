@@ -36,6 +36,11 @@ imagePullSecrets: []
 nameOverride: ""
 # -- String to fully override apisix-dashboard.fullname template
 fullnameOverride: ""
+# -- Override default labels assigned to Apache APISIX dashboard resource
+labelsOverride: {}
+# labelsOverride: 
+#   app.kubernetes.io/name: "{{ .Release.Name }}"
+#   app.kubernetes.io/instance: '{{ include "apisix-dashboard.name" . }}'
 
 serviceAccount:
   # -- Specifies whether a service account should be created
