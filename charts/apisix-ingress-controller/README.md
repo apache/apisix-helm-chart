@@ -142,7 +142,7 @@ The same for container level, you need to set:
 | imagePullSecrets | list | `[]` |  |
 | initContainer.image | string | `"busybox"` |  |
 | initContainer.tag | float | `1.28` |  |
-| labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX dashboard resource |
+| labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX ingress controller resource |
 | nameOverride | string | `""` | Default values for apisix-ingress-controller. This is a YAML-formatted file. Declare variables to be passed into your templates.  |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
