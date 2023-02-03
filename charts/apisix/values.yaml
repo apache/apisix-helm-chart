@@ -282,6 +282,7 @@ plugins:
   - fault-injection
   - file-logger
   - grpc-transcode
+  - grpc-web
   - hmac-auth
   - http-logger
   - ip-restriction
