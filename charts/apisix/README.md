@@ -137,6 +137,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.http | object | `{"containerPort":9080,"enabled":true,"servicePort":80}` | Apache APISIX service settings for http |
 | gateway.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"tls":[]}` | Using ingress access Apache APISIX service |
 | gateway.ingress.annotations | object | `{}` | Ingress annotations |
+| gateway.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
 | gateway.stream | object | `{"enabled":false,"only":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | gateway.tls | object | `{"certCAFilename":"","containerPort":9443,"enabled":false,"existingCASecret":"","http2":{"enabled":true},"servicePort":443,"sslProtocols":"TLSv1.2 TLSv1.3"}` | Apache APISIX service settings for tls |
 | gateway.tls.certCAFilename | string | `""` | Filename be used in the gateway.tls.existingCASecret |

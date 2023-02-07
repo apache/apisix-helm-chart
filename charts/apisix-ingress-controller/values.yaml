@@ -23,6 +23,12 @@ nameOverride: ""
 
 fullnameOverride: ""
 
+# -- Override default labels assigned to Apache APISIX ingress controller resource
+labelsOverride: {}
+# labelsOverride:
+#   app.kubernetes.io/name: "{{ .Release.Name }}"
+#   app.kubernetes.io/instance: '{{ include "apisix-ingress-controller.name" . }}'
+
 rbac:
   # -- Specifies whether RBAC resources should be created
   create: true
