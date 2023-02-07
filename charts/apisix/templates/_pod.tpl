@@ -108,6 +108,12 @@ spec:
           name: ssl
           subPath: {{ .Values.gateway.tls.certCAFilename }}
       {{- end }}
+
+      {{- if eq .Values.deployment.mode "control_plane" }}
+        - mountPath: /conf-server-ssl
+          name: conf-server-ssl
+      {{- end }}
+
       {{- if .Values.etcd.auth.tls.enabled }}
         - mountPath: /etcd-ssl
           name: etcd-ssl
@@ -164,6 +170,11 @@ spec:
     - secret:
         secretName: {{ .Values.etcd.auth.tls.existingSecret | quote }}
       name: etcd-ssl
+    {{- end }}
+    {{- if eq .Values.deployment.mode "control_plane" }}
+    - secret:
+        secretName: {{ .Values.deployment.controlPlane.certsSecret | quote }}
+      name: conf-server-ssl
     {{- end }}
     {{- if .Values.apisix.setIDFromPodUID }}
     - downwardAPI:

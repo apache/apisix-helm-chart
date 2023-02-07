@@ -185,11 +185,13 @@ deployment:
   controlPlane:
     # -- conf Server address
     confServerListen: "0.0.0.0:9280"
-    # -- conf Server CA cert
+    # -- secret name used by conf Server
+    certsSecret: ""
+    # -- conf Server CA cert name
     cert: ""
-    # -- conf Server cert key
+    # -- conf Server cert key name
     certKey: ""
-    # -- conf Server mTLS cert
+    # -- conf Server mTLS cert name
     clientCACert: ""
 
   # -- used for data_plane deployment mode
