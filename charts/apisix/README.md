@@ -47,6 +47,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | admin.credentials.viewer | string | `"4054f7cf07e344346cd3f287985e76a2"` | Apache APISIX admin API viewer role credentials |
 | admin.enabled | bool | `true` | Enable Admin API |
 | admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
+| admin.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix-admin.local","paths":["/apisix"]}],"tls":[]}` | Using ingress access Apache APISIX admin service |
+| admin.ingress.annotations | object | `{}` | Ingress annotations |
 | admin.port | int | `9180` | which port to use for Apache APISIX admin API |
 | admin.servicePort | int | `9180` | Service port to use for Apache APISIX admin API |
 | admin.type | string | `"ClusterIP"` | admin service type |
@@ -99,7 +101,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | customPlugins.plugins[0].configMap | object | `{"mounts":[{"key":"","path":""},{"key":"","path":""}],"name":""}` | plugin codes can be saved inside configmap object. |
 | customPlugins.plugins[0].configMap.mounts | list | `[{"key":"","path":""},{"key":"","path":""}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | customPlugins.plugins[0].configMap.name | string | `""` | name of configmap. |
-| dashboard.enabled | bool | `false` |  |
 | discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
 | discovery.registry | object | `{}` | Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281), and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery) |
 | dns.resolvers[0] | string | `"127.0.0.1"` |  |
@@ -137,6 +138,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.http.hostPort | int | `80` | Specify a host port and expose the HTTP port of Apache APISIX to it |   
 | gateway.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"tls":[]}` | Using ingress access Apache APISIX service |
 | gateway.ingress.annotations | object | `{}` | Ingress annotations |
+| gateway.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
 | gateway.stream | object | `{"enabled":false,"only":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | gateway.tls | object | `{"certCAFilename":"","containerPort":9443,"enabled":false,"existingCASecret":"","http2":{"enabled":true},"servicePort":443,"sslProtocols":"TLSv1.2 TLSv1.3"}` | Apache APISIX service settings for tls |
 | gateway.tls.hostPort | int | `443` |Specify a host port and expose the HTTPS port of Apache APISIX to it |   
@@ -145,7 +147,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.tls.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | gateway.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
-| ingress-controller.enabled | bool | `false` |  |
+| ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.tag | float | `1.28` | Init container tag |
 | logs.accessLog | string | `"/dev/stdout"` | Access log path |
@@ -161,7 +163,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | nginx.workerProcesses | string | `"auto"` |  |
 | nginx.workerRlimitNofile | string | `"20480"` |  |
 | pluginAttrs | object | `{}` | Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details |
-| plugins | list | `["api-breaker","authz-keycloak","basic-auth","batch-requests","consumer-restriction","cors","echo","fault-injection","file-logger","grpc-transcode","hmac-auth","http-logger","ip-restriction","ua-restriction","jwt-auth","kafka-logger","key-auth","limit-conn","limit-count","limit-req","node-status","openid-connect","authz-casbin","prometheus","proxy-cache","proxy-mirror","proxy-rewrite","redirect","referer-restriction","request-id","request-validation","response-rewrite","serverless-post-function","serverless-pre-function","sls-logger","syslog","tcp-logger","udp-logger","uri-blocker","wolf-rbac","zipkin","traffic-split","gzip","real-ip","ext-plugin-pre-req","ext-plugin-post-req"]` | APISIX plugins to be enabled |
+| plugins | list | `["api-breaker","authz-keycloak","basic-auth","batch-requests","consumer-restriction","cors","echo","fault-injection","file-logger","grpc-transcode","grpc-web","hmac-auth","http-logger","ip-restriction","ua-restriction","jwt-auth","kafka-logger","key-auth","limit-conn","limit-count","limit-req","node-status","openid-connect","authz-casbin","prometheus","proxy-cache","proxy-mirror","proxy-rewrite","redirect","referer-restriction","request-id","request-validation","response-rewrite","serverless-post-function","serverless-pre-function","sls-logger","syslog","tcp-logger","udp-logger","uri-blocker","wolf-rbac","zipkin","traffic-split","gzip","real-ip","ext-plugin-pre-req","ext-plugin-post-req"]` | APISIX plugins to be enabled |
 | rbac.create | bool | `false` |  |
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.create | bool | `false` |  |

@@ -222,7 +222,11 @@ gateway:
   #  - secretName: apisix-tls
   #    hosts:
   #      - chart-example.local
-
+  # -- Override default labels assigned to Apache APISIX gateway resources
+  labelsOverride: {}
+  # labelsOverride:
+  #   app.kubernetes.io/name: "{{ .Release.Name }}"
+  #   app.kubernetes.io/instance: '{{ include "apisix.name" . }}'
 admin:
   # -- Enable Admin API
   enabled: true
@@ -250,6 +254,22 @@ admin:
     # -- The client IP CIDR allowed to access Apache APISIX Admin API service.
     ipList:
       - 127.0.0.1/24
+  # -- Using ingress access Apache APISIX admin service
+  ingress:
+    enabled: false
+    # -- Ingress annotations
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: apisix-admin.local
+        paths:
+          - "/apisix"
+    tls: []
+  #  - secretName: apisix-tls
+  #    hosts:
+  #      - chart-example.local
 
 nginx:
   workerRlimitNofile: "20480"
@@ -270,6 +290,7 @@ plugins:
   - fault-injection
   - file-logger
   - grpc-transcode
+  - grpc-web
   - hmac-auth
   - http-logger
   - ip-restriction
@@ -531,11 +552,12 @@ etcd:
 
   replicaCount: 3
 
-dashboard:
-  enabled: false
-
+# -- Ingress controller configuration
 ingress-controller:
   enabled: false
+  config:
+    apisix:
+      adminAPIVersion: "v3"
 
 vault:
   # -- Enable or disable the vault integration

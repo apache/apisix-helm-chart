@@ -80,6 +80,7 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | ingress.enabled | bool | `false` | Set to true to enable ingress record generation |
 | ingress.hosts | list | `[{"host":"apisix-dashboard.local","paths":[]}]` | The list of hostnams to be covered with this ingress record |
 | ingress.tls | list | `[]` | Create TLS Secret |
+| labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX dashboard resource |
 | nameOverride | string | `""` | String to partially override apisix-dashboard.fullname template (will maintain the release name) |
 | nodeSelector | object | `{}` | Node labels for pod assignment |
 | podAnnotations | object | `{}` | Apache APISIX Dashboard Pod annotations |

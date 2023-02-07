@@ -62,8 +62,12 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "apisix-dashboard.selectorLabels" -}}
+{{- if .Values.labelsOverride }}
+{{- tpl (.Values.labelsOverride | toYaml) . }}
+{{- else }}
 app.kubernetes.io/name: {{ include "apisix-dashboard.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
 {{- end }}
 
 {{/*

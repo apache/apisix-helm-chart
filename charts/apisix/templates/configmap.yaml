@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- $isBeta := (semverCompare ">=2.99.0-0" .Values.apisix.image.tag) }}
-
 {{- if .Values.apisix.enabled }}
 apiVersion: v1
 kind: ConfigMap
@@ -89,40 +87,6 @@ data:
       #    disk_path: "/tmp/disk_cache_two"
       #    cache_levels: "1:2"
 
-      {{- if not $isBeta }}
-      config_center: etcd           # etcd: use etcd to store the config value
-                                    # yaml: fetch the config value from local yaml file `/your_path/conf/apisix.yaml`
-      allow_admin:                  # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
-      {{- if .Values.admin.allow.ipList }}
-      {{- range $ips := .Values.admin.allow.ipList }}
-        - {{ $ips }}
-      {{- end }}
-      {{- else }}
-        - 0.0.0.0/0
-      {{- end}}
-      {{- if or (index .Values "ingress-controller" "enabled") .Values.dashboard.enabled  }}
-        - 0.0.0.0/0
-      {{- end}}
-      #   - "::/64"
-      {{- if .Values.admin.enabled }}
-      port_admin: {{ .Values.admin.port }}
-      {{- end }}
-
-      # Default token when use API to call for Admin API.
-      # *NOTE*: Highly recommended to modify this value to protect APISIX's Admin API.
-      # Disabling this configuration item means that the Admin API does not
-      # require any authentication.
-      admin_key:
-        # admin: can everything for configuration data
-        - name: "admin"
-          key: {{ .Values.admin.credentials.admin }}
-          role: admin
-        # viewer: only can view configuration data
-        - name: "viewer"
-          key: {{ .Values.admin.credentials.viewer }}
-          role: viewer
-      {{- end }}
-
       router:
         http: {{ .Values.apisix.httpRouter }}  # radixtree_uri: match route by uri(base on radixtree)
                                     # radixtree_host_uri: match route by host + uri(base on radixtree)
@@ -136,7 +100,14 @@ data:
         tcp:                        # TCP proxy port list
           {{- if gt (len .Values.gateway.stream.tcp) 0}}
           {{- range .Values.gateway.stream.tcp }}
+          {{- if kindIs "map" . }}
+          - addr: {{ .addr }}
+          {{- if hasKey . "tls" }}
+            tls: {{ .tls }}
+          {{- end }}
+          {{- else }}
           - {{ . }}
+          {{- end }}
           {{- end }}
           {{- else}}
           - 9100
@@ -188,7 +159,7 @@ data:
         enable_access_log: {{ .Values.logs.enableAccessLog }}
         {{- if .Values.logs.enableAccessLog }}
         access_log: "{{ .Values.logs.accessLog }}"
-        access_log_format: "{{ .Values.logs.accessLogFormat }}"
+        access_log_format: '{{ .Values.logs.accessLogFormat }}'
         access_log_format_escape: {{ .Values.logs.accessLogFormatEscape }}
         {{- end }}
         keepalive_timeout: 60s         # timeout during which a keep-alive client connection will stay open on the server side.
@@ -224,38 +195,6 @@ data:
       {{- if .Values.configurationSnippet.stream }}
       stream_configuration_snippet: {{- toYaml .Values.configurationSnippet.stream | indent 6 }}
       {{- end }}
-
-    {{- if not $isBeta }}
-    etcd:
-    {{- if .Values.etcd.enabled }}
-      host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-        {{- if .Values.etcd.fullnameOverride }}
-        - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
-        {{- else }}
-        - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
-        {{- end}}
-    {{- else }}
-      host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-        {{- range $value := .Values.etcd.host }}
-        - "{{ $value }}"             # multiple etcd address
-        {{- end}}
-    {{- end }}
-      prefix: {{ .Values.etcd.prefix | quote }}    # apisix configurations prefix
-      timeout: {{ .Values.etcd.timeout }}    # 30 seconds
-      {{- if .Values.etcd.auth.rbac.create }}
-      user: {{ .Values.etcd.auth.rbac.user | quote }}
-      password: {{ .Values.etcd.auth.rbac.password | quote }}
-      {{- end }}
-      {{- if .Values.etcd.auth.tls.enabled }}
-      tls:
-        cert: "/etcd-ssl/{{ .Values.etcd.auth.tls.certFilename }}"
-        key: "/etcd-ssl/{{ .Values.etcd.auth.tls.certKeyFilename }}"
-        verify: {{ .Values.etcd.auth.tls.verify }}
-        {{- if .Values.etcd.auth.tls.sni }}
-        sni: "{{ .Values.etcd.auth.tls.sni }}"
-        {{- end }}
-      {{- end }}
-    {{- end }}
 
     {{- if .Values.discovery.enabled }}
     discovery:
@@ -310,7 +249,6 @@ data:
         {{- toYaml .Values.wasmPlugins.plugins | nindent 8 }}
     {{- end }}
 
-    {{- if $isBeta }}
     deployment:
       role: traditional
       role_traditional:
@@ -324,7 +262,7 @@ data:
         {{- else }}
           - 0.0.0.0/0
         {{- end}}
-        {{- if or (index .Values "ingress-controller" "enabled") .Values.dashboard.enabled  }}
+        {{- if (index .Values "ingress-controller" "enabled") }}
           - 0.0.0.0/0
         {{- end}}
         #   - "::/64"
@@ -373,6 +311,5 @@ data:
           verify: {{ .Values.etcd.auth.tls.verify }}
           sni: "{{ .Values.etcd.auth.tls.sni }}"
         {{- end }}
-    {{- end }}
     {{- end }}
 {{- end }}
