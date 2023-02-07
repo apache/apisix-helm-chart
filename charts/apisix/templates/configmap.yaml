@@ -45,7 +45,9 @@ data:
     {{- end }}
     {{- else }}
     apisix:    # universal configurations
+      {{- if not (eq .Values.deployment.mode "control_plane") }}
       node_listen: {{ .Values.gateway.http.containerPort }}    # APISIX listening port
+      {{- end }}
       enable_heartbeat: true
       enable_admin: {{ .Values.admin.enabled }}
       enable_admin_cors: {{ .Values.admin.cors }}
@@ -250,9 +252,24 @@ data:
     {{- end }}
 
     deployment:
-      role: traditional
+      role: .Values.deployment.mode
+
+      {{- if or (eq .Values.deployment.mode "traditional") (eq .Values.deployment.mode "control_plane") }}
+      {{- if eq .Values.deployment.mode "traditional" }}
       role_traditional:
         config_provider: etcd
+      {{- end }}
+
+      {{- if eq .Values.deployment.mode "control_plane" }}
+      role_control_plane:
+        config_provider: etcd
+        conf_server:
+          listen: {{ .Values.deployment.controlPlane.confServerListen }}
+          cert: "/usr/local/apisix/conf/ssl/{{ .Values.deployment.controlPlane.cert }}"
+          cert_key: "/usr/local/apisix/conf/ssl/{{ .Values.deployment.controlPlane.certKey }}"
+          client_ca_cert: "/usr/local/apisix/conf/ssl/{{ .Values.deployment.controlPlane.clientCACert }}"
+      {{- end }}
+
       admin:
         allow_admin:    # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
         {{- if .Values.admin.allow.ipList }}
@@ -284,6 +301,8 @@ data:
           - name: "viewer"
             key: {{ .Values.admin.credentials.viewer }}
             role: viewer
+
+      {{- if not (eq .Values.deployment.mode "data_plane") }}
       etcd:
       {{- if .Values.etcd.enabled }}
         host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
@@ -312,4 +331,18 @@ data:
           sni: "{{ .Values.etcd.auth.tls.sni }}"
         {{- end }}
     {{- end }}
+    {{- end }}
+      {{- end }}
+
+      {{- if eq .Values.deployment.mode "data_plane" }}
+      role_data_plane:
+        config_provider: control_plane
+        control_plane:
+          host:
+            {{- range $.Values.deployment.dataPlane.controlPlane.host }}
+            - {{ . | quote }}
+            {{- end }}
+          prefix: {{ .Values.deployment.dataPlane.controlPlane.prefix }}
+          timeout: {{ .Values.deployment.dataPlane.controlPlane.timeout }}
+      {{- end }}
 {{- end }}
