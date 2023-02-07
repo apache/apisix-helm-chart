@@ -79,6 +79,8 @@ spec:
         {{- end }}
         {{- end }}
         {{- end }}
+
+      {{- if ne .Values.deployment.role "control_plane" }}
       readinessProbe:
         failureThreshold: 6
         initialDelaySeconds: 10
@@ -87,6 +89,7 @@ spec:
         tcpSocket:
           port: {{ .Values.gateway.http.containerPort }}
         timeoutSeconds: 1
+      {{- end }}
       lifecycle:
         preStop:
           exec:
@@ -109,7 +112,7 @@ spec:
           subPath: {{ .Values.gateway.tls.certCAFilename }}
       {{- end }}
 
-      {{- if eq .Values.deployment.mode "control_plane" }}
+      {{- if eq .Values.deployment.role "control_plane" }}
         - mountPath: /conf-server-ssl
           name: conf-server-ssl
       {{- end }}
@@ -171,7 +174,7 @@ spec:
         secretName: {{ .Values.etcd.auth.tls.existingSecret | quote }}
       name: etcd-ssl
     {{- end }}
-    {{- if eq .Values.deployment.mode "control_plane" }}
+    {{- if eq .Values.deployment.role "control_plane" }}
     - secret:
         secretName: {{ .Values.deployment.controlPlane.certsSecret | quote }}
       name: conf-server-ssl

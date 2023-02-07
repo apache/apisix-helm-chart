@@ -184,7 +184,7 @@ deployment:
   # -- used for control_plane deployment mode
   controlPlane:
     # -- conf Server address
-    confServerListen: "0.0.0.0:9280"
+    confServerPort: "9280"
     # -- secret name used by conf Server
     certsSecret: ""
     # -- conf Server CA cert name

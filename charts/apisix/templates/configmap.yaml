@@ -45,7 +45,7 @@ data:
     {{- end }}
     {{- else }}
     apisix:    # universal configurations
-      {{- if not (eq .Values.deployment.mode "control_plane") }}
+      {{- if not (eq .Values.deployment.role "control_plane") }}
       node_listen: {{ .Values.gateway.http.containerPort }}    # APISIX listening port
       {{- end }}
       enable_heartbeat: true
@@ -264,10 +264,12 @@ data:
       role_control_plane:
         config_provider: etcd
         conf_server:
-          listen: {{ .Values.deployment.controlPlane.confServerListen }}
+          listen: 0.0.0.0:{{ .Values.deployment.controlPlane.confServerPort }}
           cert: "/conf-server-ssl/{{ .Values.deployment.controlPlane.cert }}"
           cert_key: "/conf-server-ssl/{{ .Values.deployment.controlPlane.certKey }}"
+          {{- if .Values.deployment.controlPlane.clientCACert }}
           client_ca_cert: "/conf-server-ssl/{{ .Values.deployment.controlPlane.clientCACert }}"
+          {{- end }}
       {{- end }}
 
       admin:
