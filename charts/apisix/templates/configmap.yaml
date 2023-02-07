@@ -252,9 +252,7 @@ data:
     {{- end }}
 
     deployment:
-
-      role: .Values.deployment.role
-
+      role: {{ .Values.deployment.role }}
       {{- if or (eq .Values.deployment.role "traditional") (eq .Values.deployment.role "control_plane") }}
 
       {{- if eq .Values.deployment.role "traditional" }}
