@@ -191,8 +191,6 @@ deployment:
     cert: ""
     # -- conf Server cert key name in certsSecret
     certKey: ""
-    # -- conf Server mTLS cert name in certsSecret
-    clientCACert: ""
 
   # -- used for data_plane deployment mode
   dataPlane:
@@ -203,6 +201,20 @@ deployment:
       prefix: "/apisix"
       # -- Timeout when the data plane connects to the control plane
       timeout: 30
+
+  # -- certs used for certificates in decoupled mode
+  certs:
+    # -- secret name used for decoupled mode
+    certsSecret: ""
+    # -- cert name in certsSecret
+    cert: ""
+    # -- cert key in certsSecret
+    cert_key: ""
+
+    # -- trusted_ca_cert name in certsSecret
+    mTLSCACertSecret: ""
+    # -- mTLS CA cert filename in mTLSCACertSecret
+    mTLSCACert: ""
 
 gateway:
   # -- Apache APISIX service type for user access itself
