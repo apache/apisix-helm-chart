@@ -187,11 +187,11 @@ deployment:
     confServerPort: "9280"
     # -- secret name used by conf Server
     certsSecret: ""
-    # -- conf Server CA cert name
+    # -- conf Server CA cert name in certsSecret
     cert: ""
-    # -- conf Server cert key name
+    # -- conf Server cert key name in certsSecret
     certKey: ""
-    # -- conf Server mTLS cert name
+    # -- conf Server mTLS cert name in certsSecret
     clientCACert: ""
 
   # -- used for data_plane deployment mode
@@ -202,7 +202,7 @@ deployment:
       # -- The prefix of the control_plane used by the data_plane
       prefix: "/apisix"
       # -- Timeout when the data plane connects to the control plane
-      timeout: "31"
+      timeout: 30
 
 gateway:
   # -- Apache APISIX service type for user access itself
