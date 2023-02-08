@@ -101,6 +101,18 @@ The command removes all the Kubernetes components associated with the chart and 
 | customPlugins.plugins[0].configMap | object | `{"mounts":[{"key":"","path":""},{"key":"","path":""}],"name":""}` | plugin codes can be saved inside configmap object. |
 | customPlugins.plugins[0].configMap.mounts | list | `[{"key":"","path":""},{"key":"","path":""}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | customPlugins.plugins[0].configMap.name | string | `""` | name of configmap. |
+| deployment.controlPlane | object | `{"cert":"","certKey":"","certsSecret":"","clientCACert":"","confServerPort":"9280"}` | used for control_plane deployment mode |
+| deployment.controlPlane.cert | string | `""` | conf Server CA cert name in certsSecret |
+| deployment.controlPlane.certKey | string | `""` | conf Server cert key name in certsSecret |
+| deployment.controlPlane.certsSecret | string | `""` | secret name used by conf Server |
+| deployment.controlPlane.clientCACert | string | `""` | conf Server mTLS cert name in certsSecret |
+| deployment.controlPlane.confServerPort | string | `"9280"` | conf Server address |
+| deployment.dataPlane | object | `{"controlPlane":{"host":[],"prefix":"/apisix","timeout":30}}` | used for data_plane deployment mode |
+| deployment.dataPlane.controlPlane.host | list | `[]` | The hosts of the control_plane used by the data_plane |
+| deployment.dataPlane.controlPlane.prefix | string | `"/apisix"` | The prefix of the control_plane used by the data_plane |
+| deployment.dataPlane.controlPlane.timeout | int | `30` | Timeout when the data plane connects to the control plane |
+| deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
+| deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
 | discovery.registry | object | `{}` | Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281), and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery) |
 | dns.resolvers[0] | string | `"127.0.0.1"` |  |

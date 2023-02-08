@@ -168,6 +168,42 @@ serviceAccount:
 rbac:
   create: false
 
+deployment:
+  # -- Apache APISIX deployment mode
+  # Optional: traditional, decoupled
+  #
+  # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
+  mode: traditional
+
+  # -- Deployment role
+  # Optional: traditional, data_plane, control_plane
+  #
+  # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
+  role: "traditional"
+
+  # -- used for control_plane deployment mode
+  controlPlane:
+    # -- conf Server address
+    confServerPort: "9280"
+    # -- secret name used by conf Server
+    certsSecret: ""
+    # -- conf Server CA cert name in certsSecret
+    cert: ""
+    # -- conf Server cert key name in certsSecret
+    certKey: ""
+    # -- conf Server mTLS cert name in certsSecret
+    clientCACert: ""
+
+  # -- used for data_plane deployment mode
+  dataPlane:
+    controlPlane:
+      # -- The hosts of the control_plane used by the data_plane
+      host: []
+      # -- The prefix of the control_plane used by the data_plane
+      prefix: "/apisix"
+      # -- Timeout when the data plane connects to the control plane
+      timeout: 30
+
 gateway:
   # -- Apache APISIX service type for user access itself
   type: NodePort
