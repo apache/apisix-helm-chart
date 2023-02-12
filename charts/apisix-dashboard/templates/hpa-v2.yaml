@@ -13,21 +13,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-
-{{- if and .Values.autoscaling.enabled (eq .Values.autoscaling.version "v2beta1") }}
-apiVersion: autoscaling/v2beta1
+{{- if and .Values.autoscaling.enabled (eq .Values.autoscaling.version "v2") }}
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "apisix-ingress-controller.fullname" . }}
+  name: {{ include "apisix-dashboard.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "apisix-ingress-controller.labels" . | nindent 4 }}
+    {{- include "apisix-dashboard.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "apisix-ingress-controller.fullname" . }}
+    name: {{ include "apisix-dashboard.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
@@ -35,12 +33,16 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
     {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}
