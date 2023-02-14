@@ -57,7 +57,7 @@ spec:
   {{- end }}
     protocol: TCP
   {{- end }}
-  {{- range .Values.gateway.http.appendContainerPort }}
+  {{- range .Values.gateway.http.additionalContainerPorts }}
   - name: apisix-gateway-{{ .port | toString }}
     port: {{ .port }}
     targetPort: {{ .port }}

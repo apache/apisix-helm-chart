@@ -151,8 +151,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | fullnameOverride | string | `""` |  |
 | gateway.externalIPs | list | `[]` |  |
 | gateway.externalTrafficPolicy | string | `"Cluster"` |  |
-| gateway.http | object | `{"containerPort":9080,"enabled":true,"servicePort":80,"appendContainerPort":[]}` | Apache APISIX service settings for http |
-| gateway.http.appendContainerPort | list | `[]`| Support multiple ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24) |
+| gateway.http | object | `{"containerPort":9080,"enabled":true,"servicePort":80,"additionalContainerPorts":[]}` | Apache APISIX service settings for http |
+| gateway.http.additionalContainerPorts | list | `[]`| Support multiple ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24) |
 | gateway.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"tls":[]}` | Using ingress access Apache APISIX service |
 | gateway.ingress.annotations | object | `{}` | Ingress annotations |
 | gateway.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |

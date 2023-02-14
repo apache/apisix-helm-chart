@@ -233,7 +233,7 @@ gateway:
     enabled: true
     servicePort: 80
     containerPort: 9080
-    appendContainerPort: []
+    additionalContainerPorts: []
       # - port: 9081
       #   enable_http2: true          # If not set, the default value is `false`.
       # - ip: 127.0.0.2               # Specific IP, If not set, the default value is `0.0.0.0`.

@@ -44,7 +44,7 @@ spec:
         - name: http
           containerPort: {{ .Values.gateway.http.containerPort }}
           protocol: TCP
-        {{- range .Values.gateway.http.appendContainerPort }}
+        {{- range .Values.gateway.http.additionalContainerPorts }}
         - name: http-{{ .port | toString }}
           containerPort: {{ .port }}
           protocol: TCP

@@ -48,10 +48,9 @@ data:
       {{- if not (eq .Values.deployment.role "control_plane") }}
       node_listen:    # APISIX listening port
         - {{ .Values.gateway.http.containerPort }}
-        {{- with .Values.gateway.http.appendContainerPort }}
+        {{- with .Values.gateway.http.additionalContainerPorts }}
         {{- toYaml . | nindent 8}}
         {{- end }}
-      {{- end }}
       {{- end }}
       enable_heartbeat: true
       enable_admin: {{ .Values.admin.enabled }}
