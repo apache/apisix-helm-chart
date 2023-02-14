@@ -154,7 +154,7 @@ resources: {}
 
 autoscaling:
   # -- Enable autoscaling for Apache APISIX Dashboard deployment
-  enabled: true
+  enabled: false
   # -- Minimum number of replicas to scale back
   minReplicas: 1
   # -- Maximum number of replicas to scale out
