@@ -54,11 +54,10 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| autoscaling.enabled | bool | `false` | Enable autoscaling for Apache APISIX Dashboard deployment |
+| autoscaling.enabled | bool | `true` | Enable autoscaling for Apache APISIX Dashboard deployment |
 | autoscaling.maxReplicas | int | `100` | Maximum number of replicas to scale out |
 | autoscaling.minReplicas | int | `1` | Minimum number of replicas to scale back |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization percentage |
-| autoscaling.version | string | `"v2"` | The hpa version. can be "v2beta1" or "v2", default is "v2" |
 | config.authentication.expireTime | int | `3600` | JWT token expire time, in second |
 | config.authentication.secret | string | `"secret"` | Secret for jwt token generation |
 | config.authentication.users | list | `[{"password":"admin","username":"admin"}]` | Specifies username and password for login manager api. |
