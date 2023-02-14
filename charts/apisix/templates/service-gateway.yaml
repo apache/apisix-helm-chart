@@ -57,6 +57,12 @@ spec:
   {{- end }}
     protocol: TCP
   {{- end }}
+  {{- range .Values.gateway.http.appendContainerPort }}
+  - name: apisix-gateway-{{ .port | toString }}
+    port: {{ .port }}
+    targetPort: {{ .port }}
+    protocol: TCP
+  {{- end }}
   {{- if or .Values.gateway.tls.enabled }}
   - name: apisix-gateway-tls
     port: {{ .Values.gateway.tls.servicePort }}
