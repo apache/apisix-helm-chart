@@ -54,7 +54,7 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| autoscaling.enabled | bool | `true` | Enable autoscaling for Apache APISIX Dashboard deployment |
+| autoscaling.enabled | bool | `false` | Enable autoscaling for Apache APISIX Dashboard deployment |
 | autoscaling.maxReplicas | int | `100` | Maximum number of replicas to scale out |
 | autoscaling.minReplicas | int | `1` | Minimum number of replicas to scale back |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization percentage |
