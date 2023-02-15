@@ -233,6 +233,7 @@ gateway:
     enabled: true
     servicePort: 80
     containerPort: 9080
+    # -- Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24)
     additionalContainerPorts: []
       # - port: 9081
       #   enable_http2: true          # If not set, the default value is `false`.
@@ -244,6 +245,7 @@ gateway:
     enabled: false
     servicePort: 443
     containerPort: 9443
+    # -- Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99)
     additionalContainerPorts: []
       # - ip: 127.0.0.3           # Specific IP, If not set, the default value is `0.0.0.0`.
       #   port: 9445
