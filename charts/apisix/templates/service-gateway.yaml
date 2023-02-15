@@ -72,6 +72,12 @@ spec:
   {{- end }}
     protocol: TCP
   {{- end }}
+  {{- range .Values.gateway.tls.additionalContainerPorts }}
+  - name: apisix-gateway-tls-{{ .port | toString }}
+    port: {{ .port }}
+    targetPort: {{ .port }}
+    protocol: TCP
+  {{- end }}
   {{- if and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0)) }}
   {{- with .Values.gateway.stream }}
   {{- if (gt (len .tcp) 0) }}

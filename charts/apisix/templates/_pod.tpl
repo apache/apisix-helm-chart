@@ -52,6 +52,11 @@ spec:
         - name: tls
           containerPort: {{ .Values.gateway.tls.containerPort }}
           protocol: TCP
+        {{- range .Values.gateway.tls.additionalContainerPorts }}
+        - name: tls-{{ .port | toString }}
+          containerPort: {{ .port }}
+          protocol: TCP
+        {{- end }}     
         {{- if .Values.admin.enabled }}
         - name: admin
           containerPort: {{ .Values.admin.port }}
