@@ -596,6 +596,9 @@ etcd:
 
   replicaCount: 3
 
+dashboard:
+  enabled: false
+
 # -- Ingress controller configuration
 ingress-controller:
   enabled: false

@@ -31,5 +31,5 @@ Currently, APISIX Ingress Controller automatically manipulates some APISIX resou
 
 |            | APISIX | APISIX Ingress | APISIX Dashboard |
 | :--------: | :----: | :------------: | :--------------: |
-| Chart v1.x |  v3.x  |      v1.x      |        -         |
+| Chart v1.x |  v3.x  |      v1.x      |       v3.x       |
 | Chart v0.x |  v2.x  |      v1.x      |       v2.x       |
