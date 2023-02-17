@@ -2,8 +2,11 @@ dependencies:
 - name: etcd
   repository: https://charts.bitnami.com/bitnami
   version: 8.3.4
+- name: apisix-dashboard
+  repository: https://charts.apiseven.com
+  version: 0.8.0
 - name: apisix-ingress-controller
   repository: https://charts.apiseven.com
   version: 0.11.3
-digest: sha256:ddc42ebc9def715f7555a1302cb088e765b2fc62803efbb603e8270b54e414c4
-generated: "2023-01-09T16:40:24.127724463+08:00"
+digest: sha256:7b70ad741c7bbad8c75f6a304732432119852a2afc2e9b06630ba15819fdc0fc
+generated: "2023-02-16T12:01:51.939303+08:00"
