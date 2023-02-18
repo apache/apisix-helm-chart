@@ -21,6 +21,11 @@ title: Apache APISIX Helm Chart
 #
 -->
 
+## Prerequisites
+
+- [Kubernetes 1.12+](https://kubernetes.io/docs/setup/)
+- [Helm v3.0+](https://helm.sh/docs/intro/quickstart/#install-helm)
+
 ## Install
 
 To install the chart with release name `apisix`:
