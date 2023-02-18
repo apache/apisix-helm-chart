@@ -39,10 +39,6 @@ To quickly experience Apache APISIX related components like Apache APISIX Dashbo
 helm repo add apisix https://charts.apiseven.com && helm repo update && helm upgrade --install apisix apisix/apisix --create-namespace  --namespace apisix --set dashboard.enabled=true --set ingress-controller.enabled=true --set ingress-controller.config.apisix.serviceNamespace=apisix
 ```
 
-:::note
-
-The latest APISIX Dashboard are not compatible with APISIX 3.x.
-
 ## Uninstall
 
 To uninstall/delete the `apisix` release:
