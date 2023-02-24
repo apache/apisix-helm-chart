@@ -44,9 +44,15 @@ spec:
         - name: http
           containerPort: {{ .Values.gateway.http.containerPort }}
           protocol: TCP
+          {{- if .Values.gateway.http.hostPort }}
+          hostPort: {{ .Values.gateway.http.hostPort }}
+          {{- end }}
         - name: tls
           containerPort: {{ .Values.gateway.tls.containerPort }}
           protocol: TCP
+          {{- if .Values.gateway.tls.hostPort }}
+          hostPort: {{ .Values.gateway.tls.hostPort }}
+          {{- end }}
         {{- if .Values.admin.enabled }}
         - name: admin
           containerPort: {{ .Values.admin.port }}

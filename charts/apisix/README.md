@@ -153,11 +153,13 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.externalIPs | list | `[]` |  |
 | gateway.externalTrafficPolicy | string | `"Cluster"` |  |
 | gateway.http | object | `{"containerPort":9080,"enabled":true,"servicePort":80}` | Apache APISIX service settings for http |
+| gateway.http.hostPort | int | `80` | Specify a host port and expose the HTTP port of Apache APISIX to it |   
 | gateway.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"tls":[]}` | Using ingress access Apache APISIX service |
 | gateway.ingress.annotations | object | `{}` | Ingress annotations |
 | gateway.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
 | gateway.stream | object | `{"enabled":false,"only":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | gateway.tls | object | `{"certCAFilename":"","containerPort":9443,"enabled":false,"existingCASecret":"","http2":{"enabled":true},"servicePort":443,"sslProtocols":"TLSv1.2 TLSv1.3"}` | Apache APISIX service settings for tls |
+| gateway.tls.hostPort | int | `443` |Specify a host port and expose the HTTPS port of Apache APISIX to it |   
 | gateway.tls.certCAFilename | string | `""` | Filename be used in the gateway.tls.existingCASecret |
 | gateway.tls.existingCASecret | string | `""` | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) |
 | gateway.tls.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
@@ -205,3 +207,4 @@ The command removes all the Kubernetes components associated with the chart and 
 | vault.token | string | `""` | The generated token from vault instance that can grant access to read data from the vault. |
 | wasmPlugins.enabled | bool | `false` | Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/) |
 | wasmPlugins.plugins | list | `[]` |  |
+
