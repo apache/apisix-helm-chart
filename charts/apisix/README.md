@@ -161,6 +161,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.tls.certCAFilename | string | `""` | Filename be used in the gateway.tls.existingCASecret |
 | gateway.tls.existingCASecret | string | `""` | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) |
 | gateway.tls.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
+| gateway.enabled | bool | `true` | if `deployment.mode=decoupled` and `deployment.role=control_plane` then `gateway.enabled=false` |
 | gateway.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
 | ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
