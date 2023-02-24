@@ -101,6 +101,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | customPlugins.plugins[0].configMap | object | `{"mounts":[{"key":"","path":""},{"key":"","path":""}],"name":""}` | plugin codes can be saved inside configmap object. |
 | customPlugins.plugins[0].configMap.mounts | list | `[{"key":"","path":""},{"key":"","path":""}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | customPlugins.plugins[0].configMap.name | string | `""` | name of configmap. |
+| dashboard.enabled | bool | `false` |  |
 | deployment.certs | object | `{"cert":"","cert_key":"","certsSecret":"","mTLSCACert":"","mTLSCACertSecret":""}` | certs used for certificates in decoupled mode |
 | deployment.certs.cert | string | `""` | cert name in certsSecret |
 | deployment.certs.cert_key | string | `""` | cert key in certsSecret |
