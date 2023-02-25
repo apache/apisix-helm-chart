@@ -16,11 +16,7 @@
 
 {{- if and .Values.apisix.enabled .Values.autoscaling.enabled }}
 
-{{- if .Capabilities.APIVersions.Has "autoscaling/v2" }}
-apiVersion: autoscaling/v2
-{{- else }}
-apiVersion: autoscaling/v2beta1
-{{- end}}
+apiVersion: autoscaling/{{ .Values.autoscaling.version }}
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "apisix.fullname" . }}
@@ -35,7 +31,7 @@ spec:
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
-  {{- if .Capabilities.APIVersions.Has "autoscaling/v2" }}
+  {{- if eq .Values.autoscaling.version "v2" }}
     {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:

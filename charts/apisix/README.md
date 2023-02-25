@@ -92,6 +92,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | autoscaling.minReplicas | int | `1` |  |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | autoscaling.targetMemoryUtilizationPercentage | int | `80` |  |
+| autoscaling.version | string | `"v2"` | HPA version, default v2 |
 | configurationSnippet | object | `{"httpAdmin":"","httpEnd":"","httpSrv":"","httpStart":"","main":"","stream":""}` | Custom configuration snippet. |
 | customPlugins | object | `{"enabled":false,"luaPath":"/opts/custom_plugins/?.lua","plugins":[{"attrs":{},"configMap":{"mounts":[{"key":"","path":""},{"key":"","path":""}],"name":""},"name":""}]}` | customPlugins allows you to mount your own HTTP plugins. |
 | customPlugins.enabled | bool | `false` | Whether to configure some custom plugins |

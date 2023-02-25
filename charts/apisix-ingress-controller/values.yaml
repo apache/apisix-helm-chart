@@ -147,6 +147,8 @@ initContainer:
 
 autoscaling:
   enabled: false
+  # -- HPA version, default v2
+  version: v2
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
