@@ -281,9 +281,6 @@ data:
         {{- else }}
           - 0.0.0.0/0
         {{- end}}
-        {{- if or (index .Values "ingress-controller" "enabled") .Values.dashboard.enabled  }}
-          - 0.0.0.0/0
-        {{- end}}
         #   - "::/64"
         {{- if .Values.admin.enabled }}
         admin_listen:
