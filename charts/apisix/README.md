@@ -153,6 +153,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.externalIPs | list | `[]` |  |
 | gateway.externalTrafficPolicy | string | `"Cluster"` |  |
 | gateway.http | object | `{"containerPort":9080,"enabled":true,"servicePort":80}` | Apache APISIX service settings for http |
+| gateway.http.nodePort | int | `not set` | In case a specific Node Port is to be set for the HTTP Service. In case it is not set (default case), a Node Port will be automatically allocated by the Kubernetes control plane from its Node Port range |
 | gateway.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"tls":[]}` | Using ingress access Apache APISIX service |
 | gateway.ingress.annotations | object | `{}` | Ingress annotations |
 | gateway.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
@@ -160,6 +161,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.tls | object | `{"certCAFilename":"","containerPort":9443,"enabled":false,"existingCASecret":"","http2":{"enabled":true},"servicePort":443,"sslProtocols":"TLSv1.2 TLSv1.3"}` | Apache APISIX service settings for tls |
 | gateway.tls.certCAFilename | string | `""` | Filename be used in the gateway.tls.existingCASecret |
 | gateway.tls.existingCASecret | string | `""` | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) |
+| gateway.tls.nodePort | int | `not set` | In case a specific Node Port is to be set for the TLS Service. In case it is not set (default case), a Node Port will be automatically allocated by the Kubernetes control plane from its Node Port range |
 | gateway.tls.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | gateway.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
