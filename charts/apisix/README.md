@@ -49,6 +49,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
 | admin.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix-admin.local","paths":["/apisix"]}],"tls":[]}` | Using ingress access Apache APISIX admin service |
 | admin.ingress.annotations | object | `{}` | Ingress annotations |
+| admin.ip | string | `0.0.0.0` | which ip to listen on for Apache APISIX admin API. Set to `"[::]"` when on IPv6 single stack |
 | admin.port | int | `9180` | which port to use for Apache APISIX admin API |
 | admin.servicePort | int | `9180` | Service port to use for Apache APISIX admin API |
 | admin.type | string | `"ClusterIP"` | admin service type |
