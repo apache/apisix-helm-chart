@@ -411,20 +411,18 @@ customPlugins:
   luaPath: "/opts/custom_plugins/?.lua"
   plugins:
     # -- plugin name.
-    - name: ""
+    - name: "plugin-name"
       # -- plugin attrs
       attrs: {}
       # -- plugin codes can be saved inside configmap object.
       configMap:
         # -- name of configmap.
-        name: ""
+        name: "configmap-name"
         # -- since keys in configmap is flat, mountPath allows to define the mount
         # path, so that plugin codes can be mounted hierarchically.
         mounts:
-          - key: ""
-            path: ""
-          - key: ""
-            path: ""
+          - key: "the-file-name"
+            path: "mount-path"
 
 updateStrategy: {}
   # type: RollingUpdate

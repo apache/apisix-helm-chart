@@ -224,7 +224,9 @@ data:
     {{- if .Values.plugins }}
     plugins:    # plugin list
     {{- range $plugin := .Values.plugins }}
+      {{- if ne $plugin "" }}
       - {{ $plugin }}
+      {{- end }}
     {{- end }}
     {{- if .Values.customPlugins.enabled }}
     {{- range $plugin := .Values.customPlugins.plugins }}
@@ -234,7 +236,9 @@ data:
     {{- end }}
     stream_plugins:
     {{- range $plugin := .Values.stream_plugins }}
+      {{- if ne $plugin "" }}
       - {{ $plugin }}
+      {{- end }}
     {{- end }}
 
     {{- if .Values.extPlugin.enabled }}

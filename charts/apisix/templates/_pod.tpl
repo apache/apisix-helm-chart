@@ -144,9 +144,11 @@ spec:
       {{- if .Values.customPlugins.enabled }}
       {{- range $plugin := .Values.customPlugins.plugins }}
       {{- range $mount := $plugin.configMap.mounts }}
+      {{- if ne $plugin.configMap.name "" }}
         - mountPath: {{ $mount.path }}
           name: plugin-{{ $plugin.configMap.name }}
           subPath: {{ $mount.key }}
+      {{- end }}
       {{- end }}
       {{- end }}
       {{- end }}
@@ -221,9 +223,11 @@ spec:
     {{- end }}
     {{- if .Values.customPlugins.enabled }}
     {{- range $plugin := .Values.customPlugins.plugins }}
+    {{- if ne $plugin.configMap.name "" }}
     - name: plugin-{{ $plugin.configMap.name }}
       configMap:
         name: {{ $plugin.configMap.name }}
+    {{- end }}
     {{- end }}
     {{- end }}
     {{- if .Values.apisix.luaModuleHook.enabled }}
