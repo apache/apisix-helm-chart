@@ -57,6 +57,12 @@ spec:
   {{- end }}
     protocol: TCP
   {{- end }}
+  {{- range .Values.gateway.http.additionalContainerPorts }}
+  - name: apisix-gateway-{{ .port | toString }}
+    port: {{ .port }}
+    targetPort: {{ .port }}
+    protocol: TCP
+  {{- end }}
   {{- if or .Values.gateway.tls.enabled }}
   - name: apisix-gateway-tls
     port: {{ .Values.gateway.tls.servicePort }}
@@ -65,6 +71,11 @@ spec:
     nodePort: {{ .Values.gateway.tls.nodePort }}
   {{- end }}
     protocol: TCP
+  {{- end }}
+  {{- range .Values.gateway.tls.additionalContainerPorts }}
+  - name: apisix-gateway-tls-{{ .port | toString }}
+    port: {{ .port }}
+    targetPort: {{ .port }}
   {{- end }}
   {{- if .Values.serviceMonitor.enabled }}
   - name: prometheus

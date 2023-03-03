@@ -46,7 +46,11 @@ data:
     {{- else }}
     apisix:    # universal configurations
       {{- if not (eq .Values.deployment.role "control_plane") }}
-      node_listen: {{ .Values.gateway.http.containerPort }}    # APISIX listening port
+      node_listen:    # APISIX listening port
+        - {{ .Values.gateway.http.containerPort }}
+        {{- with .Values.gateway.http.additionalContainerPorts }}
+        {{- toYaml . | nindent 8}}
+        {{- end }}
       {{- end }}
       enable_heartbeat: true
       enable_admin: {{ .Values.admin.enabled }}
@@ -137,6 +141,9 @@ data:
         listen:
           - port: {{ .Values.gateway.tls.containerPort }}
             enable_http2: {{ .Values.gateway.tls.http2.enabled }}
+          {{- with .Values.gateway.tls.additionalContainerPorts }}
+          {{- toYaml . | nindent 10}}
+          {{- end }}
         ssl_protocols: {{ .Values.gateway.tls.sslProtocols | quote }}
         ssl_ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"
         {{- if and .Values.gateway.tls.enabled .Values.gateway.tls.existingCASecret }}
