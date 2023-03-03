@@ -217,6 +217,7 @@ deployment:
     mTLSCACert: ""
 
 gateway:
+  enabled: true
   # -- Apache APISIX service type for user access itself
   type: NodePort
   # -- Setting how the Service route external traffic
@@ -233,11 +234,17 @@ gateway:
     enabled: true
     servicePort: 80
     containerPort: 9080
+    ## @param gateway.http.nodePort Port to bind to for NodePort service types
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+    # nodePort: "80"
   # -- Apache APISIX service settings for tls
   tls:
     enabled: false
     servicePort: 443
     containerPort: 9443
+    ## @param gateway.tls.nodePort Port to bind to for NodePort service types
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+    # nodePort: "443"
     # -- Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd)
     existingCASecret: ""
     # -- Filename be used in the gateway.tls.existingCASecret
