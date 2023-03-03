@@ -76,6 +76,7 @@ spec:
   - name: apisix-gateway-tls-{{ .port | toString }}
     port: {{ .port }}
     targetPort: {{ .port }}
+  {{- end }}
   {{- if .Values.serviceMonitor.enabled }}
   - name: prometheus
     port: {{ .Values.serviceMonitor.containerPort }}
