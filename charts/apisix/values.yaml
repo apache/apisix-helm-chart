@@ -573,6 +573,10 @@ etcd:
   host:
     # host or ip e.g. http://172.20.128.89:2379
     - http://etcd.host:2379
+  # -- if etcd.enabled is false, username for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead.
+  user: ""
+  # -- if etcd.enabled is false, password for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead.
+  password: ""
   # -- apisix configurations prefix
   prefix: "/apisix"
   # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
@@ -583,10 +587,8 @@ etcd:
     rbac:
       # -- No authentication by default. Switch to enable RBAC authentication
       create: false
-      # -- root username for etcd
-      user: ""
-      # -- root password for etcd
-      password: ""
+      # -- root password for etcd. Requires etcd.auth.rbac.create to be true.
+      rootPassword: ""
     tls:
       # -- enable etcd client certificate
       enabled: false
@@ -608,6 +610,18 @@ etcd:
 
 dashboard:
   enabled: false
+  config:
+    conf:
+      etcd:
+        # -- Supports defining multiple etcd host addresses for an etcd cluster
+        endpoints:
+          - apisix-etcd:2379
+        # -- apisix configurations prefix
+        prefix: "/apisix"
+        # -- Specifies etcd basic auth username if enable etcd auth
+        username: ~
+        # -- Specifies etcd basic auth password if enable etcd auth
+        password: ~
 
 # -- Ingress controller configuration
 ingress-controller:
