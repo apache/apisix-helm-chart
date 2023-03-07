@@ -608,6 +608,25 @@ etcd:
 
   replicaCount: 3
 
+  # -- enable persistence using persistent volume claims
+  persistence:
+    # -- enable etcd persistence [default: true]
+    enabled: true
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    # -- custom persistence storageclass setting
+    storageClass: "ebs-sc"
+    annotations: {}
+    # -- etcd persistent volume accessmodes
+    accessModes:
+      - ReadWriteOnce
+    # -- etcd pv size
+    size: 8Gi
+    selector: {}
+
 dashboard:
   enabled: false
   config:
