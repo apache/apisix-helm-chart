@@ -281,7 +281,7 @@ admin:
   #   - "143.231.0.0/16"
   # -- IPs for which nodes in the cluster will also accept traffic for the servic
   externalIPs: []
-  # -- which ip to listen on for Apache APISIX admin API
+  # -- which ip to listen on for Apache APISIX admin API. Set to `"[::]"` when on IPv6 single stack
   ip: 0.0.0.0
   # -- which port to use for Apache APISIX admin API
   port: 9180
