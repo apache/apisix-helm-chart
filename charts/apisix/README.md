@@ -101,6 +101,10 @@ The command removes all the Kubernetes components associated with the chart and 
 | customPlugins.plugins[0].configMap | object | `{"mounts":[{"key":"the-file-name","path":"mount-path"}],"name":"configmap-name"}` | plugin codes can be saved inside configmap object. |
 | customPlugins.plugins[0].configMap.mounts | list | `[{"key":"the-file-name","path":"mount-path"}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
+| dashboard.config.conf.etcd.endpoints | list | `["apisix-etcd:2379"]` | Supports defining multiple etcd host addresses for an etcd cluster |
+| dashboard.config.conf.etcd.password | string | `nil` | Specifies etcd basic auth password if enable etcd auth |
+| dashboard.config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
+| dashboard.config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |
 | dashboard.enabled | bool | `false` |  |
 | deployment.certs | object | `{"cert":"","cert_key":"","certsSecret":"","mTLSCACert":"","mTLSCACertSecret":""}` | certs used for certificates in decoupled mode |
 | deployment.certs.cert | string | `""` | cert name in certsSecret |
@@ -129,11 +133,10 @@ The command removes all the Kubernetes components associated with the chart and 
 | dns.resolvers[5] | string | `"8.8.8.8"` |  |
 | dns.timeout | int | `5` |  |
 | dns.validity | int | `30` |  |
-| etcd | object | `{"auth":{"rbac":{"create":false,"password":"","user":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"enabled":true,"host":["http://etcd.host:2379"],"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30}` | etcd configuration use the FQDN address or the IP of the etcd |
-| etcd.auth | object | `{"rbac":{"create":false,"password":"","user":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
+| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"enabled":true,"host":["http://etcd.host:2379"],"password":"","prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30,"user":""}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd.auth | object | `{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
 | etcd.auth.rbac.create | bool | `false` | No authentication by default. Switch to enable RBAC authentication |
-| etcd.auth.rbac.password | string | `""` | root password for etcd |
-| etcd.auth.rbac.user | string | `""` | root username for etcd |
+| etcd.auth.rbac.rootPassword | string | `""` | root password for etcd. Requires etcd.auth.rbac.create to be true. |
 | etcd.auth.tls.certFilename | string | `""` | etcd client cert filename using in etcd.auth.tls.existingSecret |
 | etcd.auth.tls.certKeyFilename | string | `""` | etcd client cert key filename using in etcd.auth.tls.existingSecret |
 | etcd.auth.tls.enabled | bool | `false` | enable etcd client certificate |
@@ -142,8 +145,10 @@ The command removes all the Kubernetes components associated with the chart and 
 | etcd.auth.tls.verify | bool | `true` | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd |
 | etcd.enabled | bool | `true` | install etcd(v3) by default, set false if do not want to install etcd(v3) together |
 | etcd.host | list | `["http://etcd.host:2379"]` | if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379. |
+| etcd.password | string | `""` | if etcd.enabled is false, password for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead. |
 | etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | etcd.timeout | int | `30` | Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster |
+| etcd.user | string | `""` | if etcd.enabled is false, username for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead. |
 | extPlugin.cmd | list | `["/path/to/apisix-plugin-runner/runner","run"]` | the command and its arguements to run as a subprocess |
 | extPlugin.enabled | bool | `false` | Enable External Plugins. See [external plugin](https://apisix.apache.org/docs/apisix/next/external-plugin/) |
 | extraInitContainers | list | `[]` | Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail. |
