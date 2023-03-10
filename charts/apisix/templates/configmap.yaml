@@ -298,7 +298,7 @@ data:
         #   - "::/64"
         {{- if .Values.admin.enabled }}
         admin_listen:
-          ip: 0.0.0.0
+          ip: {{ .Values.admin.ip }}
           port: {{ .Values.admin.port }}
         {{- end }}
         # Default token when use API to call for Admin API.
