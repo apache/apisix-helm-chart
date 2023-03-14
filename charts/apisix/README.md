@@ -134,7 +134,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | dns.resolvers[5] | string | `"8.8.8.8"` |  |
 | dns.timeout | int | `5` |  |
 | dns.validity | int | `30` |  |
-| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"enabled":true,"host":["http://etcd.host:2379"],"password":"","prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30,"user":""}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"enabled":true,"host":["http://etcd.host:2379"],"password":"","persistence":{"accessModes":["ReadWriteOnce"],"annotations":{},"enabled":true,"selector":{},"size":"8Gi","storageClass":""},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30,"user":""}` | etcd configuration use the FQDN address or the IP of the etcd |
 | etcd.auth | object | `{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
 | etcd.auth.rbac.create | bool | `false` | No authentication by default. Switch to enable RBAC authentication |
 | etcd.auth.rbac.rootPassword | string | `""` | root password for etcd. Requires etcd.auth.rbac.create to be true. |
@@ -147,6 +147,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | etcd.enabled | bool | `true` | install etcd(v3) by default, set false if do not want to install etcd(v3) together |
 | etcd.host | list | `["http://etcd.host:2379"]` | if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379. |
 | etcd.password | string | `""` | if etcd.enabled is false, password for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead. |
+| etcd.persistence | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"enabled":true,"selector":{},"size":"8Gi","storageClass":""}` | enable persistence using persistent volume claims |
+| etcd.persistence.accessModes | list | `["ReadWriteOnce"]` | etcd persistent volume accessmodes |
+| etcd.persistence.enabled | bool | `true` | enable etcd persistence [default: true] |
+| etcd.persistence.size | string | `"8Gi"` | etcd pv size |
+| etcd.persistence.storageClass | string | `""` | custom persistence storageclass setting |
 | etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | etcd.timeout | int | `30` | Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster |
 | etcd.user | string | `""` | if etcd.enabled is false, username for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead. |
