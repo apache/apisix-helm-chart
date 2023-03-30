@@ -60,6 +60,14 @@ clusterDomain: cluster.local
 service:
   port: 80
 
+admission:
+  # -- webhook can verify crd resources, default is false
+  enabled: false
+  # -- webhook service port, default is 8443
+  port: 8443
+  # -- webhook service name, default is "webhook"
+  webhookSvc: "webhook"
+
 config:
   # -- the error log level, default is info, optional values are: debug, info, warn, error, panic, fatal
   logLevel: "info"

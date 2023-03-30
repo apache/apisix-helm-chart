@@ -57,6 +57,10 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
+        - name: admission
+          secret:
+            secretName: webhook-certs
+            optional: true
       initContainers:
         - name: wait-apisix-admin
           image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
@@ -81,6 +85,9 @@ spec:
             - name: http
               containerPort: {{ (.Values.config.httpListen | split ":")._1 }}
               protocol: TCP
+            - name: https
+              containerPort: {{ (.Values.config.httpsListen | split ":")._1 }}
+              protocol: TCP
           livenessProbe:
             httpGet:
               path: /healthz
@@ -94,6 +101,9 @@ spec:
           volumeMounts:
             - mountPath: /ingress-apisix/conf
               name: configuration
+            - mountPath: /etc/webhook/certs
+              name: admission
+              readOnly: true
           env:
           - name: POD_NAMESPACE
             valueFrom:

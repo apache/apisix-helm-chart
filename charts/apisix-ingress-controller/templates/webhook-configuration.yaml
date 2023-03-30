@@ -1,0 +1,137 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{/* 
+  If the user does not have cert-manager and is not providing a secret with the certificates, the chart needs to generate the secret 
+*/}}
+{{- $webhookSvc := .Values.admission.webhookSvc }}
+{{- $nameSvc := (printf "%s.%s" $webhookSvc .Release.Namespace) }}
+{{- $ca := genCA "ingress-apisix-ca" 365 }}
+{{- $cert := genSignedCert (printf "%s.svc" $nameSvc) nil (list $webhookSvc (printf "%s.svc" $nameSvc) (printf "%s.pod" $nameSvc) (printf "%s.svc.cluster.local" $nameSvc) (printf "%s.pod.cluster.local" $nameSvc)) 365 $ca }}
+
+---
+{{- if .Values.admission.enabled }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: webhook-certs
+  namespace: {{ .Release.Namespace }}
+type: Opaque
+data:
+  cert.pem: {{ $cert.Cert | b64enc }}
+  key.pem: {{ $cert.Key | b64enc }}
+{{- end }}
+
+---
+{{- if .Values.admission.enabled }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: apisix-validation-webhooks
+webhooks:
+  - name: apisixroute-validator-webhook.apisix.apache.org
+    admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: webhook
+        namespace: {{ .Release.Namespace }}
+        port: {{ .Values.admission.port }}
+        path: "/validation/apisixroutes"
+      caBundle: {{ $cert.Cert | b64enc }}
+    rules:
+      - apiGroups: 
+          - "apisix.apache.org"
+        apiVersions: 
+          - "*"
+        operations:
+          - "CREATE"
+          - "UPDATE"
+        resources: 
+          - "apisixroutes"
+    timeoutSeconds: 30
+    failurePolicy: Fail
+    sideEffects: None    
+  - name: apisixupstream-validator-webhook.apisix.apache.org
+    admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: webhook
+        namespace: {{ .Release.Namespace }}
+        port: {{ .Values.admission.port }}
+        path: "/validation/apisixupstreams"
+      caBundle: {{ $cert.Cert | b64enc }}
+    rules:
+      - apiGroups: 
+          - "apisix.apache.org"
+        apiVersions: 
+          - "*"
+        operations:
+          - "CREATE"
+          - "UPDATE"
+        resources: 
+          - "apisixupstreams"
+    timeoutSeconds: 30
+    failurePolicy: Fail
+    sideEffects: None    
+  - name: apisixconsumer-validator-webhook.apisix.apache.org
+    admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: webhook
+        namespace: {{ .Release.Namespace }}
+        port: {{ .Values.admission.port }}
+        path: "/validation/apisixconsumers"
+      caBundle: {{ $cert.Cert | b64enc }}
+    rules:
+      - apiGroups: 
+          - "apisix.apache.org"
+        apiVersions: 
+          - "*"
+        operations:
+          - "CREATE"
+          - "UPDATE"
+        resources: 
+          - "apisixconsumers"
+    timeoutSeconds: 30
+    failurePolicy: Fail
+    sideEffects: None
+  - name: apisixtls-validator-webhook.apisix.apache.org
+    admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: webhook
+        namespace: {{ .Release.Namespace }}
+        port: {{ .Values.admission.port }}
+        path: "/validation/apisixtlses"
+      caBundle: {{ $cert.Cert | b64enc }}
+    rules:
+      - apiGroups: 
+          - "apisix.apache.org"
+        apiVersions: 
+          - "*"
+        operations:
+          - "CREATE"
+          - "UPDATE"
+        resources: 
+          - "apisixtlses"
+    timeoutSeconds: 30
+    failurePolicy: Fail
+    sideEffects: None    
+{{- end }}
