@@ -1192,6 +1192,28 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: 1.6.0
+    created: "2023-03-30T02:06:58.01342098Z"
+    description: Apache APISIX Ingress Controller for Kubernetes
+    digest: 7b509c88ff72a4585ed35ca7ae56a8e175e6e8e8f63ca508d13433ff948d0036
+    icon: https://apache.org/logos/res/apisix/apisix.png
+    keywords:
+    - ingress
+    - apisix
+    - nginx
+    - crd
+    maintainers:
+    - name: tao12345666333
+    name: apisix-ingress-controller
+    sources:
+    - https://github.com/apache/apisix-helm-chart
+    type: application
+    urls:
+    - https://github.com/apache/apisix-helm-chart/releases/download/apisix-ingress-controller-0.11.4/apisix-ingress-controller-0.11.4.tgz
+    version: 0.11.4
+  - annotations:
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: 1.6.0
     created: "2022-12-30T10:10:01.164317412Z"
     description: Apache APISIX Ingress Controller for Kubernetes
     digest: 23f2eb7e95ac3c84acf95d797e774020c33a12a81383f8378a7249bd4b8cadb4
@@ -1490,4 +1512,4 @@ entries:
     urls:
     - https://github.com/apache/apisix-helm-chart/releases/download/apisix-ingress-controller-0.6.0/apisix-ingress-controller-0.6.0.tgz
     version: 0.6.0
-generated: "2023-03-22T10:03:11.296539824Z"
+generated: "2023-03-30T02:06:58.013724478Z"
