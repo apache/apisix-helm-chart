@@ -21,6 +21,12 @@ title: Apache APISIX Dashboard Helm Chart
 #
 -->
 
+## Prerequisites
+
+- [Kubernetes 1.12+](https://kubernetes.io/docs/setup/)
+- [Apache APISIX](https://apisix.apache.org/docs/apisix/installation-guide/)
+- [Helm v3.0+](https://helm.sh/docs/intro/quickstart/#install-helm)
+
 ## Install
 
 To install the chart with release name `apisix-dashboard`:
