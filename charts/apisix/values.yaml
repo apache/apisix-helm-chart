@@ -342,6 +342,7 @@ plugins:
   - authz-keycloak
   - basic-auth
   - batch-requests
+  - body-transformer
   - consumer-restriction
   - cors
   - echo
