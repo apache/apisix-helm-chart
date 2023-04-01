@@ -47,7 +47,7 @@ webhooks:
       - v1
     clientConfig:
       service:
-        name: webhook
+        name: {{ .Values.admission.webhookSvc }}
         namespace: {{ .Release.Namespace }}
         port: {{ .Values.admission.port }}
         path: "/validation/apisixroutes"
@@ -70,7 +70,7 @@ webhooks:
       - v1
     clientConfig:
       service:
-        name: webhook
+        name: {{ .Values.admission.webhookSvc }}
         namespace: {{ .Release.Namespace }}
         port: {{ .Values.admission.port }}
         path: "/validation/apisixupstreams"
@@ -93,7 +93,7 @@ webhooks:
       - v1
     clientConfig:
       service:
-        name: webhook
+        name: {{ .Values.admission.webhookSvc }}
         namespace: {{ .Release.Namespace }}
         port: {{ .Values.admission.port }}
         path: "/validation/apisixconsumers"
@@ -116,7 +116,7 @@ webhooks:
       - v1
     clientConfig:
       service:
-        name: webhook
+        name: {{ .Values.admission.webhookSvc }}
         namespace: {{ .Release.Namespace }}
         port: {{ .Values.admission.port }}
         path: "/validation/apisixtlses"
