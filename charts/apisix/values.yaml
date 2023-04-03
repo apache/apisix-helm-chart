@@ -68,9 +68,12 @@ apisix:
   # - radixtree_uri_with_parameter: match route by uri with parameters
   httpRouter: radixtree_uri
 
+  # -- Enable Proxy Protocol
   proxyProtocol:
-    enabled: true
+    enabled: false
+    # -- The port with proxy protocol for http, it differs from node_listen and admin_listen.
     listenHttpPort: 9181
+    # -- The port with proxy protocol for https
     listenHttpsPort: 9182
 
   # -- Enable full customized config.yaml
@@ -263,17 +266,27 @@ gateway:
       enabled: true
     # -- TLS protocols allowed to use.
     sslProtocols: "TLSv1.2 TLSv1.3"
+  # -- Proxy Protocol Configuration
   proxyProtocol:
+    # -- If you enable proxy protocol, you must use this port to receive http request with proxy protocol
     http:
       enabled: false
+      # - Specify NodePort (only if gateway.type is NodePort)
+      # nodePort:
+      # - Define a Service Port on which the gateway is listening
       servicePort: 9181
+      # - Gateway Service Port to use as target
       containerPort: 9181
+    # -- The port with proxy protocol for https
     https:
       enabled: false
+      # - Specify NodePort (only if gateway.type is NodePort)
+      #nodePort:
+      # - Define a Service Port on which the gateway is listening
       servicePort: 9182
+      # - Gateway Service Port to use as target
       containerPort: 9182
   # -- Apache APISIX service settings for stream. L4 proxy (TCP/UDP)
-  # L4 proxy (TCP/UDP)
   stream:
     enabled: false
     only: false
