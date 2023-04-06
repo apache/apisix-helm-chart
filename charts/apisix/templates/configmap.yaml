@@ -234,11 +234,13 @@ data:
     {{- end }}
     {{- end }}
     {{- end }}
+    {{- if .Values.stream_plugins }}
     stream_plugins:
     {{- range $plugin := .Values.stream_plugins }}
       {{- if ne $plugin "" }}
       - {{ $plugin }}
       {{- end }}
+    {{- end }}
     {{- end }}
 
     {{- if .Values.extPlugin.enabled }}

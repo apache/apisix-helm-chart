@@ -187,7 +187,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | nginx.workerProcesses | string | `"auto"` |  |
 | nginx.workerRlimitNofile | string | `"20480"` |  |
 | pluginAttrs | object | `{}` | Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details |
-| plugins | list | `["api-breaker","authz-keycloak","basic-auth","batch-requests","body-transformer","consumer-restriction","cors","echo","fault-injection","file-logger","grpc-transcode","grpc-web","hmac-auth","http-logger","ip-restriction","ua-restriction","jwt-auth","kafka-logger","key-auth","limit-conn","limit-count","limit-req","node-status","openid-connect","authz-casbin","prometheus","proxy-cache","proxy-mirror","proxy-rewrite","redirect","referer-restriction","request-id","request-validation","response-rewrite","serverless-post-function","serverless-pre-function","sls-logger","syslog","tcp-logger","udp-logger","uri-blocker","wolf-rbac","zipkin","traffic-split","gzip","real-ip","ext-plugin-pre-req","ext-plugin-post-req"]` | APISIX plugins to be enabled |
+| plugins | list | `[]` | Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
 | rbac.create | bool | `false` |  |
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.create | bool | `false` |  |
@@ -202,9 +202,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serviceMonitor.name | string | `""` | name of the serviceMonitor, by default, it is the same as the apisix fullname |
 | serviceMonitor.namespace | string | `""` | namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix |
 | serviceMonitor.path | string | `"/apisix/prometheus/metrics"` | path of the metrics endpoint |
-| stream_plugins[0] | string | `"mqtt-proxy"` |  |
-| stream_plugins[1] | string | `"ip-restriction"` |  |
-| stream_plugins[2] | string | `"limit-conn"` |  |
+| stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
 | updateStrategy | object | `{}` |  |
 | vault.enabled | bool | `false` | Enable or disable the vault integration |
 | vault.host | string | `""` | The host address where the vault server is running. |
