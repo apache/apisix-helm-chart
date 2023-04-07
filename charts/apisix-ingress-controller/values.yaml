@@ -48,7 +48,7 @@ replicaCount: 1
 image:
   repository: apache/apisix-ingress-controller
   pullPolicy: IfNotPresent
-  tag: "1.6.0"
+  tag: "1.6.1"
 
 podAnnotations: {}
 

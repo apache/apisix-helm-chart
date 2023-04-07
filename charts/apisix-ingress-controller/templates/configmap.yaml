@@ -32,7 +32,7 @@ data:
     {{- end }}
     {{- end }}
     enable_profiling: {{ .Values.config.enableProfiling }}
-    apisix-resource-sync-interval: {{ .Values.config.apisixResourceSyncInterval }}
+    apisix_resource_sync_interval: {{ .Values.config.apisixResourceSyncInterval }}
     kubernetes:
       kubeconfig: {{ .Values.config.kubernetes.kubeconfig | quote }}
       resync_interval: {{ .Values.config.kubernetes.resyncInterval | quote }}
