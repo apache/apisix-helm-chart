@@ -40,6 +40,20 @@ spec:
       {{- if .Values.apisix.extraEnvVars }}
       {{- include "apisix.tplvalues.render" (dict "value" .Values.apisix.extraEnvVars "context" $) | nindent 8 }}
       {{- end }}
+
+      {{- if .Values.admin.credentials.secretName }}
+        - name: APISIX_ADMIN_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.admin.credentials.secretName }}
+              key: admin
+        - name: APISIX_VIEWER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.admin.credentials.secretName }}
+              key: viewer
+      {{- end }}
+
       ports:
         - name: http
           containerPort: {{ .Values.gateway.http.containerPort }}
