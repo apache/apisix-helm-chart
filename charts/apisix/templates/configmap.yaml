@@ -208,8 +208,12 @@ data:
     {{- if .Values.discovery.enabled }}
     discovery:
       {{- range $key, $value := .Values.discovery.registry }}
+      {{- if $value }}
       {{ $key }}:
         {{- include "apisix.tplvalues.render" (dict "value" $value "context" $) | nindent 8 }}
+      {{- else }}
+      {{ $key }}: {}
+      {{- end }}
       {{- end }}
     {{- end }}
 
