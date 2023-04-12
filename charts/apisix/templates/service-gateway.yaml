@@ -29,6 +29,9 @@ metadata:
     app.kubernetes.io/service: apisix-gateway
 spec:
   type: {{ .Values.gateway.type }}
+  {{- if .Values.gateway.clusterIP }}
+  clusterIP: {{ .Values.gateway.clusterIP }}
+  {{- end }}
   externalTrafficPolicy: {{ .Values.gateway.externalTrafficPolicy }}
   {{- if eq .Values.gateway.type "LoadBalancer" }}
   {{- if .Values.gateway.loadBalancerIP }}

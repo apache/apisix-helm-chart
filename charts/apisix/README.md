@@ -157,6 +157,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | extraVolumeMounts | list | `[]` | Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. |
 | extraVolumes | list | `[]` | Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. |
 | fullnameOverride | string | `""` |  |
+| gateway.clusterIP | string | `""` |  |
 | gateway.externalIPs | list | `[]` |  |
 | gateway.externalTrafficPolicy | string | `"Cluster"` |  |
 | gateway.http | object | `{"additionalContainerPorts":[],"containerPort":9080,"enabled":true,"servicePort":80}` | Apache APISIX service settings for http |
