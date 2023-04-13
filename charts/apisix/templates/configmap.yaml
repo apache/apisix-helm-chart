@@ -287,16 +287,16 @@ data:
 
       admin:
         allow_admin:    # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
+        {{- $ipList := list "0.0.0.0/0" -}}
         {{- if .Values.admin.allow.ipList }}
-        {{- range $ips := .Values.admin.allow.ipList }}
+        {{- $ipList = .Values.admin.allow.ipList -}}
+        {{- end }}
+        {{- if and (or (index .Values "ingress-controller" "enabled") .Values.dashboard.enabled) (not (has "0.0.0.0/0" $ipList)) }}
+        {{- $ipList = concat $ipList ( list "127.0.0.1/32" "10.0.0.0/8" "172.16.0.0/12" "192.168.0.0/16" ) | uniq -}}
+        {{- end}}
+        {{- range $ips := $ipList }}
           - {{ $ips }}
         {{- end }}
-        {{- else }}
-          - 0.0.0.0/0
-        {{- end}}
-        {{- if or (index .Values "ingress-controller" "enabled") .Values.dashboard.enabled  }}
-          - 0.0.0.0/0
-        {{- end}}
         #   - "::/64"
         {{- if .Values.admin.enabled }}
         admin_listen:
