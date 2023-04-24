@@ -281,7 +281,7 @@ gateway:
     https:
       enabled: false
       # - Specify NodePort (only if gateway.type is NodePort)
-      #nodePort:
+      # nodePort:
       # - Define a Service Port on which the gateway is listening
       servicePort: 9182
       # - Gateway Service Port to use as target
