@@ -75,6 +75,8 @@ apisix:
     listenHttpPort: 9181
     # -- The port with proxy protocol for https
     listenHttpsPort: 9182
+    # -- Enable the proxy protocol to the upstream server
+    upstream: true
 
   # -- Enable full customized config.yaml
   enableCustomizedConfig: false

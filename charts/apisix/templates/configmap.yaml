@@ -70,14 +70,14 @@ data:
       enable_server_tokens: {{ .Values.apisix.enableServerTokens }} # Whether the APISIX version number should be shown in Server header
 
       {{- if .Values.apisix.proxyProtocol.enabled }}
-      proxy_protocol:                 # Proxy Protocol configuration
-        listen_http_port: {{ .Values.apisix.proxyProtocol.listenHttpPort }}        # The port with proxy protocol for http, it differs from node_listen and port_admin.
-                                      # This port can only receive http request with proxy protocol, but node_listen & port_admin
-                                      # can only receive http request. If you enable proxy protocol, you must use this port to
-                                      # receive http request with proxy protocol
-        listen_https_port: {{ .Values.apisix.proxyProtocol.listenHttpsPort }}       # The port with proxy protocol for https
-        enable_tcp_pp: {{ .Values.apisix.proxyProtocol.enabled }}           # Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option
-      #  enable_tcp_pp_to_upstream: true # Enables the proxy protocol to the upstream server
+      proxy_protocol:                                                          # Proxy Protocol configuration
+        listen_http_port: {{ .Values.apisix.proxyProtocol.listenHttpPort }}    # The port with proxy protocol for http, it differs from node_listen and port_admin.
+                                                                               # This port can only receive http request with proxy protocol, but node_listen & port_admin
+                                                                               # can only receive http request. If you enable proxy protocol, you must use this port to
+                                                                               # receive http request with proxy protocol
+        listen_https_port: {{ .Values.apisix.proxyProtocol.listenHttpsPort }}  # The port with proxy protocol for https
+        enable_tcp_pp: {{ .Values.apisix.proxyProtocol.enabled }}              # Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option
+        enable_tcp_pp_to_upstream: {{ .Values.apisix.proxyProtocol.upstream }} # Enable the proxy protocol to the upstream server
       {{- end }}
 
       proxy_cache:                         # Proxy Caching configuration
