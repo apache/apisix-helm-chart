@@ -66,7 +66,7 @@ apisix:
   # - radixtree_uri: match route by uri(base on radixtree)
   # - radixtree_host_uri: match route by host + uri(base on radixtree)
   # - radixtree_uri_with_parameter: match route by uri with parameters
-  httpRouter: radixtree_uri
+  httpRouter: radixtree_host_uri
 
   # -- Enable full customized config.yaml
   enableCustomizedConfig: false

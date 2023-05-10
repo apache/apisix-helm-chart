@@ -63,7 +63,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.enabled | bool | `true` | Enable or disable Apache APISIX itself Set it to false and ingress-controller.enabled=true will deploy only ingress-controller |
 | apisix.extraEnvVars | list | `[]` | extraEnvVars An array to add extra env vars e.g: extraEnvVars:   - name: FOO     value: "bar"   - name: FOO2     valueFrom:       secretKeyRef:         name: SECRET_NAME         key: KEY |
 | apisix.hostNetwork | bool | `false` |  |
-| apisix.httpRouter | string | `"radixtree_uri"` | Defines how apisix handles routing: - radixtree_uri: match route by uri(base on radixtree) - radixtree_host_uri: match route by host + uri(base on radixtree) - radixtree_uri_with_parameter: match route by uri with parameters |
+| apisix.httpRouter | string | `"radixtree_host_uri"` | Defines how apisix handles routing: - radixtree_uri: match route by uri(base on radixtree) - radixtree_host_uri: match route by host + uri(base on radixtree) - radixtree_uri_with_parameter: match route by uri with parameters |
 | apisix.image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | apisix.image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
 | apisix.image.tag | string | `"3.3.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
