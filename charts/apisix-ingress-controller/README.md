@@ -109,6 +109,7 @@ The same for container level, you need to set:
 | autoscaling.maxReplicas | int | `100` |  |
 | autoscaling.minReplicas | int | `1` |  |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
+| autoscaling.version | string | `"v2"` | HPA version, the value is "v2" or "v2beta1", default "v2" |
 | clusterDomain | string | `"cluster.local"` |  |
 | config.apisix | object | `{"adminAPIVersion":"v2","adminKey":"edd1c9f034335f136f87ad84b625c8f1","clusterName":"default","serviceName":"apisix-admin","serviceNamespace":"ingress-apisix","servicePort":9180}` | APISIX related configurations. |
 | config.apisix.adminAPIVersion | string | `"v2"` | the APISIX admin API version. can be "v2" or "v3", default is "v2". |
@@ -138,7 +139,7 @@ The same for container level, you need to set:
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"apache/apisix-ingress-controller"` |  |
-| image.tag | string | `"1.6.0"` |  |
+| image.tag | string | `"1.6.1"` |  |
 | imagePullSecrets | list | `[]` |  |
 | initContainer.image | string | `"busybox"` |  |
 | initContainer.tag | float | `1.28` |  |

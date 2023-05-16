@@ -155,6 +155,8 @@ resources: {}
 autoscaling:
   # -- Enable autoscaling for Apache APISIX Dashboard deployment
   enabled: false
+  # -- HPA version, the value is "v2" or "v2beta1", default "v2"
+  version: v2
   # -- Minimum number of replicas to scale back
   minReplicas: 1
   # -- Maximum number of replicas to scale out

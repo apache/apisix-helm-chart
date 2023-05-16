@@ -42,8 +42,9 @@ The command removes all the Kubernetes components associated with the chart and 
 |-----|------|---------|-------------|
 | admin.allow.ipList | list | `["127.0.0.1/24"]` | The client IP CIDR allowed to access Apache APISIX Admin API service. |
 | admin.cors | bool | `true` | Admin API support CORS response headers |
-| admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
+| admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretName":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
 | admin.credentials.admin | string | `"edd1c9f034335f136f87ad84b625c8f1"` | Apache APISIX admin API admin role credentials |
+| admin.credentials.secretName | string | `""` | The APISIX Helm chart supports storing user credentials in a secret. The secret needs to contain two keys, admin and viewer, with their respective values set. |
 | admin.credentials.viewer | string | `"4054f7cf07e344346cd3f287985e76a2"` | Apache APISIX admin API viewer role credentials |
 | admin.enabled | bool | `true` | Enable Admin API |
 | admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
@@ -62,10 +63,10 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.enabled | bool | `true` | Enable or disable Apache APISIX itself Set it to false and ingress-controller.enabled=true will deploy only ingress-controller |
 | apisix.extraEnvVars | list | `[]` | extraEnvVars An array to add extra env vars e.g: extraEnvVars:   - name: FOO     value: "bar"   - name: FOO2     valueFrom:       secretKeyRef:         name: SECRET_NAME         key: KEY |
 | apisix.hostNetwork | bool | `false` |  |
-| apisix.httpRouter | string | `"radixtree_uri"` | Defines how apisix handles routing: - radixtree_uri: match route by uri(base on radixtree) - radixtree_host_uri: match route by host + uri(base on radixtree) - radixtree_uri_with_parameter: match route by uri with parameters |
+| apisix.httpRouter | string | `"radixtree_host_uri"` | Defines how apisix handles routing: - radixtree_uri: match route by uri(base on radixtree) - radixtree_host_uri: match route by host + uri(base on radixtree) - radixtree_uri_with_parameter: match route by uri with parameters |
 | apisix.image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | apisix.image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| apisix.image.tag | string | `"3.2.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| apisix.image.tag | string | `"3.3.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | apisix.kind | string | `"Deployment"` | Use a `DaemonSet` or `Deployment` |
 | apisix.luaModuleHook | object | `{"configMapRef":{"mounts":[{"key":"","path":""}],"name":""},"enabled":false,"hookPoint":"","luaPath":""}` | Whether to add a custom lua module |
 | apisix.luaModuleHook.configMapRef | object | `{"mounts":[{"key":"","path":""}],"name":""}` | configmap that stores the codes |
@@ -98,6 +99,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | autoscaling.minReplicas | int | `1` |  |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | autoscaling.targetMemoryUtilizationPercentage | int | `80` |  |
+| autoscaling.version | string | `"v2"` | HPA version, the value is "v2" or "v2beta1", default "v2" |
 | configurationSnippet | object | `{"httpAdmin":"","httpEnd":"","httpSrv":"","httpStart":"","main":"","stream":""}` | Custom configuration snippet. |
 | customPlugins | object | `{"enabled":false,"luaPath":"/opts/custom_plugins/?.lua","plugins":[{"attrs":{},"configMap":{"mounts":[{"key":"the-file-name","path":"mount-path"}],"name":"configmap-name"},"name":"plugin-name"}]}` | customPlugins allows you to mount your own HTTP plugins. |
 | customPlugins.enabled | bool | `false` | Whether to configure some custom plugins |
@@ -195,7 +197,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | nginx.workerProcesses | string | `"auto"` |  |
 | nginx.workerRlimitNofile | string | `"20480"` |  |
 | pluginAttrs | object | `{}` | Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details |
-| plugins | list | `["api-breaker","authz-keycloak","basic-auth","batch-requests","body-transformer","consumer-restriction","cors","echo","fault-injection","file-logger","grpc-transcode","grpc-web","hmac-auth","http-logger","ip-restriction","ua-restriction","jwt-auth","kafka-logger","key-auth","limit-conn","limit-count","limit-req","node-status","openid-connect","authz-casbin","prometheus","proxy-cache","proxy-mirror","proxy-rewrite","redirect","referer-restriction","request-id","request-validation","response-rewrite","serverless-post-function","serverless-pre-function","sls-logger","syslog","tcp-logger","udp-logger","uri-blocker","wolf-rbac","zipkin","traffic-split","gzip","real-ip","ext-plugin-pre-req","ext-plugin-post-req"]` | APISIX plugins to be enabled |
+| plugins | list | `[]` | Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
 | rbac.create | bool | `false` |  |
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.create | bool | `false` |  |
@@ -210,9 +212,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serviceMonitor.name | string | `""` | name of the serviceMonitor, by default, it is the same as the apisix fullname |
 | serviceMonitor.namespace | string | `""` | namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix |
 | serviceMonitor.path | string | `"/apisix/prometheus/metrics"` | path of the metrics endpoint |
-| stream_plugins[0] | string | `"mqtt-proxy"` |  |
-| stream_plugins[1] | string | `"ip-restriction"` |  |
-| stream_plugins[2] | string | `"limit-conn"` |  |
+| stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
 | updateStrategy | object | `{}` |  |
 | vault.enabled | bool | `false` | Enable or disable the vault integration |
 | vault.host | string | `""` | The host address where the vault server is running. |

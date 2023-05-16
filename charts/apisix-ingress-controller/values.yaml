@@ -48,7 +48,7 @@ replicaCount: 1
 image:
   repository: apache/apisix-ingress-controller
   pullPolicy: IfNotPresent
-  tag: "1.6.0"
+  tag: "1.6.1"
 
 podAnnotations: {}
 
@@ -147,6 +147,8 @@ initContainer:
 
 autoscaling:
   enabled: false
+  # -- HPA version, the value is "v2" or "v2beta1", default "v2"
+  version: v2
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80

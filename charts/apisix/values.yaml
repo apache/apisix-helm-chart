@@ -66,7 +66,7 @@ apisix:
   # - radixtree_uri: match route by uri(base on radixtree)
   # - radixtree_host_uri: match route by host + uri(base on radixtree)
   # - radixtree_uri_with_parameter: match route by uri with parameters
-  httpRouter: radixtree_uri
+  httpRouter: radixtree_host_uri
 
   # -- Enable Proxy Protocol
   proxyProtocol:
@@ -93,7 +93,7 @@ apisix:
     pullPolicy: IfNotPresent
     # -- Apache APISIX image tag
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 3.2.0-debian
+    tag: 3.3.0-debian
 
   # -- Use a `DaemonSet` or `Deployment`
   kind: Deployment
@@ -340,6 +340,10 @@ admin:
     # -- Apache APISIX admin API viewer role credentials
     viewer: 4054f7cf07e344346cd3f287985e76a2
 
+    # -- The APISIX Helm chart supports storing user credentials in a secret.
+    # The secret needs to contain two keys, admin and viewer, with their respective values set.
+    secretName: ""
+
   allow:
     # -- The client IP CIDR allowed to access Apache APISIX Admin API service.
     ipList:
@@ -368,60 +372,10 @@ nginx:
   enableCPUAffinity: true
   envs: []
 
-# -- APISIX plugins to be enabled
-plugins:
-  - api-breaker
-  - authz-keycloak
-  - basic-auth
-  - batch-requests
-  - body-transformer
-  - consumer-restriction
-  - cors
-  - echo
-  - fault-injection
-  - file-logger
-  - grpc-transcode
-  - grpc-web
-  - hmac-auth
-  - http-logger
-  - ip-restriction
-  - ua-restriction
-  - jwt-auth
-  - kafka-logger
-  - key-auth
-  - limit-conn
-  - limit-count
-  - limit-req
-  - node-status
-  - openid-connect
-  - authz-casbin
-  - prometheus
-  - proxy-cache
-  - proxy-mirror
-  - proxy-rewrite
-  - redirect
-  - referer-restriction
-  - request-id
-  - request-validation
-  - response-rewrite
-  - serverless-post-function
-  - serverless-pre-function
-  - sls-logger
-  - syslog
-  - tcp-logger
-  - udp-logger
-  - uri-blocker
-  - wolf-rbac
-  - zipkin
-  - traffic-split
-  - gzip
-  - real-ip
-  - ext-plugin-pre-req
-  - ext-plugin-post-req
-stream_plugins:
-  - mqtt-proxy
-  - ip-restriction
-  - limit-conn
+# -- Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml)
+plugins: []
+# -- Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml)
+stream_plugins: []
 
 # -- Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details
 pluginAttrs: {}
@@ -558,6 +512,8 @@ initContainer:
 
 autoscaling:
   enabled: false
+  # -- HPA version, the value is "v2" or "v2beta1", default "v2"
+  version: v2
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
