@@ -258,6 +258,8 @@ gateway:
       enabled: true
     # -- TLS protocols allowed to use.
     sslProtocols: "TLSv1.2 TLSv1.3"
+    # -- Define sni to fallback if none is presented by client
+    fallbackSni: "" 
   # -- Apache APISIX service settings for stream. L4 proxy (TCP/UDP)
   stream:
     enabled: false
