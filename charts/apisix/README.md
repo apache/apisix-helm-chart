@@ -182,7 +182,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.tag | float | `1.28` | Init container tag |
 | kind | string | `"Deployment"` | Use a `DaemonSet` or `Deployment` |
-| metrics | object | `{"serviceMonitor":{"annotations":{},"create":false,"interval":"15s","labels":{},"name":"","namespace":""}}` | Observability configuration. |
+| metrics | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"15s","labels":{},"name":"","namespace":""}}` | Observability configuration. |
 | metrics.serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
 | metrics.serviceMonitor.enabled | bool | `false` | Enable or disable Apache APISIX serviceMonitor |
 | metrics.serviceMonitor.interval | string | `"15s"` | interval at which metrics should be scraped |
