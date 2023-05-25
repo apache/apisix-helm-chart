@@ -14,71 +14,70 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.apisix.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "apisix.fullname" . }}-gateway
   namespace: {{ .Release.Namespace }}
   annotations:
-    {{- range $key, $value := .Values.gateway.annotations }}
+    {{- range $key, $value := .Values.service.annotations }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
     app.kubernetes.io/service: apisix-gateway
 spec:
-  type: {{ .Values.gateway.type }}
-  externalTrafficPolicy: {{ .Values.gateway.externalTrafficPolicy }}
-  {{- if eq .Values.gateway.type "LoadBalancer" }}
-  {{- if .Values.gateway.loadBalancerIP }}
-  loadBalancerIP: {{ .Values.gateway.loadBalancerIP }}
+  type: {{ .Values.service.type }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- if eq .Values.service.type "LoadBalancer" }}
+  {{- if .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
   {{- end }}
-  {{- if .Values.gateway.loadBalancerSourceRanges }}
+  {{- if .Values.service.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:
-  {{- range $cidr := .Values.gateway.loadBalancerSourceRanges }}
+  {{- range $cidr := .Values.service.loadBalancerSourceRanges }}
   - {{ $cidr }}
   {{- end }}
   {{- end }}
   {{- end }}
-  {{- if gt (len .Values.gateway.externalIPs) 0 }}
+  {{- if gt (len .Values.service.externalIPs) 0 }}
   externalIPs:
-  {{- range $ip := .Values.gateway.externalIPs }}
+  {{- range $ip := .Values.service.externalIPs }}
   - {{ $ip }}
   {{- end }}
   {{- end }}
   ports:
-  {{- if .Values.gateway.http.enabled }}
+  {{- if .Values.service.http.enabled }}
   - name: apisix-gateway
-    port: {{ .Values.gateway.http.servicePort }}
-    targetPort: {{ .Values.gateway.http.containerPort }}
-  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.http.nodePort))) }}
-    nodePort: {{ .Values.gateway.http.nodePort }}
+    port: {{ .Values.service.http.servicePort }}
+    targetPort: {{ .Values.service.http.containerPort }}
+  {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.http.nodePort))) }}
+    nodePort: {{ .Values.service.http.nodePort }}
   {{- end }}
     protocol: TCP
   {{- end }}
-  {{- range .Values.gateway.http.additionalContainerPorts }}
+  {{- range .Values.service.http.additionalContainerPorts }}
   - name: apisix-gateway-{{ .port | toString }}
     port: {{ .port }}
     targetPort: {{ .port }}
     protocol: TCP
   {{- end }}
-  {{- if or .Values.gateway.tls.enabled }}
+  {{- if or .Values.apisix.ssl.enabled }}
   - name: apisix-gateway-tls
-    port: {{ .Values.gateway.tls.servicePort }}
-    targetPort: {{ .Values.gateway.tls.containerPort }}
-  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.tls.nodePort))) }}
-    nodePort: {{ .Values.gateway.tls.nodePort }}
+    port: {{ .Values.service.tls.servicePort }}
+    targetPort: {{ .Values.apisix.ssl.containerPort }}
+  {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.tls.nodePort))) }}
+    nodePort: {{ .Values.service.tls.nodePort }}
   {{- end }}
     protocol: TCP
   {{- end }}
-  {{- range .Values.gateway.tls.additionalContainerPorts }}
+  {{- range .Values.apisix.ssl.additionalContainerPorts }}
   - name: apisix-gateway-tls-{{ .port | toString }}
     port: {{ .port }}
     targetPort: {{ .port }}
   {{- end }}
-  {{- if and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0)) }}
-  {{- with .Values.gateway.stream }}
+  {{- if and .Values.service.stream.enabled (or (gt (len .Values.service.stream.tcp) 0) (gt (len .Values.service.stream.udp) 0)) }}
+  {{- with .Values.service.stream }}
   {{- if (gt (len .tcp) 0) }}
   {{- range $index, $port := .tcp }}
   - name: proxy-tcp-{{ $index | toString }}
@@ -105,4 +104,3 @@ spec:
   {{- end }}
   selector:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
-{{- end }}

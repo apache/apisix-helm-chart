@@ -2,8 +2,8 @@
 metadata:
   annotations:
     checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-    {{- if .Values.apisix.podAnnotations }}
-    {{- range $key, $value := $.Values.apisix.podAnnotations }}
+    {{- if .Values.podAnnotations }}
+    {{- range $key, $value := $.Values.podAnnotations }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
     {{- end }}
@@ -17,72 +17,72 @@ spec:
     {{- end }}
   {{- end }}
   serviceAccountName: {{ include "apisix.serviceAccountName" . }}
-  {{- with .Values.apisix.podSecurityContext }}
+  {{- with .Values.podSecurityContext }}
   securityContext: 
     {{- . | toYaml | nindent 4 }}
   {{- end }}
-  {{- with .Values.apisix.priorityClassName }}
+  {{- with .Values.priorityClassName }}
   priorityClassName: {{ . }}
   {{- end }}
   containers:
     - name: {{ .Chart.Name }}
-      {{- with .Values.apisix.securityContext }}
+      {{- with .Values.securityContext }}
       securityContext:
         {{- . | toYaml | nindent 8 }}
       {{- end }}
-      image: "{{ .Values.apisix.image.repository }}:{{ default .Chart.AppVersion .Values.apisix.image.tag }}"
-      imagePullPolicy: {{ .Values.apisix.image.pullPolicy }}
+      image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
       env:
-      {{- if .Values.apisix.timezone }}
+      {{- if .Values.timezone }}
         - name: TZ
-          value: {{ .Values.apisix.timezone }}
+          value: {{ .Values.timezone }}
       {{- end }}
-      {{- if .Values.apisix.extraEnvVars }}
-      {{- include "apisix.tplvalues.render" (dict "value" .Values.apisix.extraEnvVars "context" $) | nindent 8 }}
+      {{- if .Values.extraEnvVars }}
+      {{- include "apisix.tplvalues.render" (dict "value" .Values.extraEnvVars "context" $) | nindent 8 }}
       {{- end }}
 
-      {{- if .Values.admin.credentials.secretName }}
+      {{- if .Values.apisix.admin.credentials.secretName }}
         - name: APISIX_ADMIN_KEY
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.admin.credentials.secretName }}
+              name: {{ .Values.apisix.admin.credentials.secretName }}
               key: admin
         - name: APISIX_VIEWER_KEY
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.admin.credentials.secretName }}
+              name: {{ .Values.apisix.admin.credentials.secretName }}
               key: viewer
       {{- end }}
 
       ports:
         - name: http
-          containerPort: {{ .Values.gateway.http.containerPort }}
+          containerPort: {{ .Values.service.http.containerPort }}
           protocol: TCP
-        {{- range .Values.gateway.http.additionalContainerPorts }}
+        {{- range .Values.service.http.additionalContainerPorts }}
         - name: http-{{ .port | toString }}
           containerPort: {{ .port }}
           protocol: TCP
         {{- end }}     
         - name: tls
-          containerPort: {{ .Values.gateway.tls.containerPort }}
+          containerPort: {{ .Values.apisix.ssl.containerPort }}
           protocol: TCP
-        {{- range .Values.gateway.tls.additionalContainerPorts }}
+        {{- range .Values.apisix.ssl.additionalContainerPorts }}
         - name: tls-{{ .port | toString }}
           containerPort: {{ .port }}
           protocol: TCP
         {{- end }}     
-        {{- if .Values.admin.enabled }}
+        {{- if .Values.apisix.admin.enabled }}
         - name: admin
-          containerPort: {{ .Values.admin.port }}
+          containerPort: {{ .Values.apisix.admin.port }}
           protocol: TCP
         {{- end }}
-        {{- if .Values.serviceMonitor.enabled }}
+        {{- if .Values.apisix.prometheus.enabled }}
         - name: prometheus
-          containerPort: {{ .Values.serviceMonitor.containerPort }}
+          containerPort: {{ .Values.apisix.prometheus.containerPort }}
           protocol: TCP
         {{- end }}
-        {{- if and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0)) }}
-        {{- with .Values.gateway.stream }}
+        {{- if and .Values.service.stream.enabled (or (gt (len .Values.service.stream.tcp) 0) (gt (len .Values.service.stream.udp) 0)) }}
+        {{- with .Values.service.stream }}
         {{- if (gt (len .tcp) 0) }}
         {{- range $index, $port := .tcp }}
         - name: proxy-tcp-{{ $index | toString }}
@@ -104,14 +104,14 @@ spec:
         {{- end }}
         {{- end }}
 
-      {{- if ne .Values.deployment.role "control_plane" }}
+      {{- if ne .Values.apisix.deployment.role "control_plane" }}
       readinessProbe:
         failureThreshold: 6
         initialDelaySeconds: 10
         periodSeconds: 10
         successThreshold: 1
         tcpSocket:
-          port: {{ .Values.gateway.http.containerPort }}
+          port: {{ .Values.service.http.containerPort }}
         timeoutSeconds: 1
       {{- end }}
       lifecycle:
@@ -130,23 +130,23 @@ spec:
         - mountPath: /usr/local/apisix/conf/config.yaml
           name: apisix-config
           subPath: config.yaml
-      {{- if and .Values.gateway.tls.enabled .Values.gateway.tls.existingCASecret }}
-        - mountPath: /usr/local/apisix/conf/ssl/{{ .Values.gateway.tls.certCAFilename }}
+      {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
+        - mountPath: /usr/local/apisix/conf/ssl/{{ .Values.apisix.ssl.certCAFilename }}
           name: ssl
-          subPath: {{ .Values.gateway.tls.certCAFilename }}
+          subPath: {{ .Values.apisix.ssl.certCAFilename }}
       {{- end }}
 
-      {{- if and (eq .Values.deployment.role "control_plane") .Values.deployment.controlPlane.certsSecret }}
+      {{- if and (eq .Values.apisix.deployment.role "control_plane") .Values.apisix.deployment.controlPlane.certsSecret }}
         - mountPath: /conf-server-ssl
           name: conf-server-ssl
       {{- end }}
 
-      {{- if and (eq .Values.deployment.mode "decoupled") .Values.deployment.certs.mTLSCACertSecret }}
+      {{- if and (eq .Values.apisix.deployment.mode "decoupled") .Values.apisix.deployment.certs.mTLSCACertSecret }}
         - mountPath: /conf-ca-ssl
           name: conf-ca-ssl
       {{- end }}
 
-      {{- if and (eq .Values.deployment.mode "decoupled") .Values.deployment.certs.certsSecret }}
+      {{- if and (eq .Values.apisix.deployment.mode "decoupled") .Values.apisix.deployment.certs.certsSecret }}
         - mountPath: /conf-client-ssl
           name: conf-client-ssl
       {{- end }}
@@ -155,8 +155,8 @@ spec:
         - mountPath: /etcd-ssl
           name: etcd-ssl
       {{- end }}
-      {{- if .Values.customPlugins.enabled }}
-      {{- range $plugin := .Values.customPlugins.plugins }}
+      {{- if .Values.apisix.customPlugins.enabled }}
+      {{- range $plugin := .Values.apisix.customPlugins.plugins }}
       {{- range $mount := $plugin.configMap.mounts }}
       {{- if ne $plugin.configMap.name "" }}
         - mountPath: {{ $mount.path }}
@@ -177,12 +177,12 @@ spec:
       {{- toYaml .Values.extraVolumeMounts | nindent 8 }}
       {{- end }}
       resources:
-      {{- toYaml .Values.apisix.resources | nindent 8 }}
-  {{- if .Values.apisix.hostNetwork }}
+      {{- toYaml .Values.resources | nindent 8 }}
+  {{- if .Values.hostNetwork }}
   hostNetwork: true
   dnsPolicy: ClusterFirstWithHostNet
   {{- end }}
-  hostNetwork: {{ .Values.apisix.hostNetwork }}
+  hostNetwork: {{ .Values.hostNetwork }}
   initContainers:
     {{- if .Values.etcd.enabled }}
     - name: wait-etcd
@@ -200,9 +200,9 @@ spec:
     - configMap:
         name: {{ include "apisix.fullname" . }}
       name: apisix-config
-    {{- if and .Values.gateway.tls.enabled .Values.gateway.tls.existingCASecret }}
+    {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
     - secret:
-        secretName: {{ .Values.gateway.tls.existingCASecret | quote }}
+        secretName: {{ .Values.apisix.ssl.existingCASecret | quote }}
       name: ssl
     {{- end }}
     {{- if .Values.etcd.auth.tls.enabled }}
@@ -210,21 +210,21 @@ spec:
         secretName: {{ .Values.etcd.auth.tls.existingSecret | quote }}
       name: etcd-ssl
     {{- end }}
-    {{- if and (eq .Values.deployment.role "control_plane") .Values.deployment.controlPlane.certsSecret }}
+    {{- if and (eq .Values.apisix.deployment.role "control_plane") .Values.apisix.deployment.controlPlane.certsSecret }}
     - secret:
-        secretName: {{ .Values.deployment.controlPlane.certsSecret | quote }}
+        secretName: {{ .Values.apisix.deployment.controlPlane.certsSecret | quote }}
       name: conf-server-ssl
     {{- end }}
 
-    {{- if and (eq .Values.deployment.mode "decoupled") .Values.deployment.certs.mTLSCACertSecret }}
+    {{- if and (eq .Values.apisix.deployment.mode "decoupled") .Values.apisix.deployment.certs.mTLSCACertSecret }}
     - secret:
-        secretName: {{ .Values.deployment.certs.mTLSCACertSecret | quote }}
+        secretName: {{ .Values.apisix.deployment.certs.mTLSCACertSecret | quote }}
       name: conf-ca-ssl
     {{- end }}
 
-    {{- if and (eq .Values.deployment.mode "decoupled") .Values.deployment.certs.certsSecret }}
+    {{- if and (eq .Values.apisix.deployment.mode "decoupled") .Values.apisix.deployment.certs.certsSecret }}
     - secret:
-        secretName: {{ .Values.deployment.certs.certsSecret | quote }}
+        secretName: {{ .Values.apisix.deployment.certs.certsSecret | quote }}
       name: conf-client-ssl
     {{- end }}
     {{- if .Values.apisix.setIDFromPodUID }}
@@ -235,8 +235,8 @@ spec:
               fieldPath: metadata.uid
       name: id
     {{- end }}
-    {{- if .Values.customPlugins.enabled }}
-    {{- range $plugin := .Values.customPlugins.plugins }}
+    {{- if .Values.apisix.customPlugins.enabled }}
+    {{- range $plugin := .Values.apisix.customPlugins.plugins }}
     {{- if ne $plugin.configMap.name "" }}
     - name: plugin-{{ $plugin.configMap.name }}
       configMap:
@@ -252,15 +252,15 @@ spec:
     {{- if .Values.extraVolumes }}
     {{- toYaml .Values.extraVolumes | nindent 4 }}
     {{- end }}
-  {{- with .Values.apisix.nodeSelector }}
+  {{- with .Values.nodeSelector }}
   nodeSelector:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.apisix.affinity }}
+  {{- with .Values.affinity }}
   affinity:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.apisix.tolerations }}
+  {{- with .Values.tolerations }}
   tolerations:
     {{- toYaml . | nindent 4 }}
   {{- end }}

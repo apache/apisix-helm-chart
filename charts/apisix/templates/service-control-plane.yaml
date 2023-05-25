@@ -13,14 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{- if and (eq .Values.deployment.mode "decoupled") (eq .Values.deployment.role "control_plane") }}
+{{- if and (eq .Values.apisix.deployment.mode "decoupled") (eq .Values.apisix.deployment.role "control_plane") }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "apisix.fullname" . }}-control-plane
   namespace: {{ .Release.Namespace }}
   annotations:
-    {{- range $key, $value := .Values.admin.annotations }}
+    {{- range $key, $value := .Values.apisix.admin.annotations }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}
   labels:
@@ -30,8 +30,8 @@ spec:
   type: "ClusterIP"
   ports:
   - name: apisix-control-plane
-    port: {{ .Values.deployment.controlPlane.confServerPort }}
-    targetPort: {{ .Values.deployment.controlPlane.confServerPort }}
+    port: {{ .Values.apisix.deployment.controlPlane.confServerPort }}
+    targetPort: {{ .Values.apisix.deployment.controlPlane.confServerPort }}
     protocol: TCP
   selector:
     {{- include "apisix.selectorLabels" . | nindent 4 }}

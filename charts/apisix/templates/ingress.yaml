@@ -14,12 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if (and .Values.apisix.enabled .Values.gateway.ingress.enabled) -}}
+{{- if (.Values.ingress.enabled) -}}
 {{- $fullName := include "apisix.fullname" . -}}
-{{- $svcPort := .Values.gateway.http.servicePort -}}
-{{- if and .Values.gateway.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.gateway.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.gateway.ingress.annotations "kubernetes.io/ingress.class" .Values.gateway.ingress.className}}
+{{- $svcPort := .Values.service.http.servicePort -}}
+{{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.Version }}
@@ -34,17 +34,17 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
-  {{- with .Values.gateway.ingress.annotations }}
+  {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.gateway.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.gateway.ingress.className }}
+  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
-  {{- if .Values.gateway.ingress.tls }}
+  {{- if .Values.ingress.tls }}
   tls:
-    {{- range .Values.gateway.ingress.tls }}
+    {{- range .Values.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -53,7 +53,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.gateway.ingress.hosts }}
+    {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:

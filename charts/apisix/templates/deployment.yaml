@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{- if and (.Values.apisix.enabled) (eq .Values.apisix.kind "Deployment") }}
+{{- if (eq .Values.kind "Deployment") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,7 +23,7 @@ metadata:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
 {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.apisix.replicaCount }}
+  replicas: {{ .Values.replicaCount }}
 {{- end }}
   selector:
     matchLabels:

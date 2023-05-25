@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{- if .Values.serviceMonitor.enabled}}
+{{- if .Values.apisix.prometheus.enabled}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -26,8 +26,8 @@ spec:
   type: ClusterIP
   ports:
   - name: prometheus
-    port: {{ .Values.serviceMonitor.containerPort }}
-    targetPort: {{ .Values.serviceMonitor.containerPort }}
+    port: {{ .Values.apisix.prometheus.containerPort }}
+    targetPort: {{ .Values.apisix.prometheus.containerPort }}
     protocol: TCP
   selector:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
