@@ -184,7 +184,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | kind | string | `"Deployment"` | Use a `DaemonSet` or `Deployment` |
 | metrics | object | `{"serviceMonitor":{"annotations":{},"create":false,"interval":"15s","labels":{},"name":"","namespace":""}}` | Observability configuration. |
 | metrics.serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
-| metrics.serviceMonitor.create | bool | `false` | Enable or disable Apache APISIX serviceMonitor |
+| metrics.serviceMonitor.enabled | bool | `false` | Enable or disable Apache APISIX serviceMonitor |
 | metrics.serviceMonitor.interval | string | `"15s"` | interval at which metrics should be scraped |
 | metrics.serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
 | metrics.serviceMonitor.name | string | `""` | name of the serviceMonitor, by default, it is the same as the apisix fullname |

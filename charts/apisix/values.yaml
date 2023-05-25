@@ -211,7 +211,7 @@ ingress:
 metrics:
   serviceMonitor:
     # -- Enable or disable Apache APISIX serviceMonitor
-    create: false
+    enabled: false
     # -- namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix
     namespace: ""
     # -- name of the serviceMonitor, by default, it is the same as the apisix fullname
