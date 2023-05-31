@@ -157,6 +157,16 @@ apisix:
   #         key: KEY
   extraEnvVars: []
 
+  # -- Set the readinessProbe for Apache APISIX pods
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    tcpSocket:
+      port: &gatewayHttpContainerPort 9080
+    timeoutSeconds: 1
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -232,7 +242,7 @@ gateway:
   http:
     enabled: true
     servicePort: 80
-    containerPort: 9080
+    containerPort: *gatewayHttpContainerPort
     # -- Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24)
     additionalContainerPorts: []
       # - port: 9081

@@ -106,13 +106,7 @@ spec:
 
       {{- if ne .Values.deployment.role "control_plane" }}
       readinessProbe:
-        failureThreshold: 6
-        initialDelaySeconds: 10
-        periodSeconds: 10
-        successThreshold: 1
-        tcpSocket:
-          port: {{ .Values.gateway.http.containerPort }}
-        timeoutSeconds: 1
+      {{- toYaml .Values.apisix.readinessProbe | nindent 8 }}
       {{- end }}
       lifecycle:
         preStop:
