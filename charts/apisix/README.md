@@ -83,13 +83,13 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
 | apisix.podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
 | apisix.priorityClassName | string | `""` | Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods |
+| apisix.readinessProbe | object | `{"failureThreshold":6,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":9080},"timeoutSeconds":1}` | Set the readinessProbe for Apache APISIX pods |
 | apisix.replicaCount | int | `1` | kind is DaemonSet, replicaCount not become effective |
 | apisix.resources | object | `{}` | Set pod resource requests & limits |
 | apisix.securityContext | object | `{}` | Set the securityContext for Apache APISIX container |
 | apisix.setIDFromPodUID | bool | `false` | Use Pod metadata.uid as the APISIX id. |
 | apisix.timezone | string | `""` | timezone is the timezone where apisix uses. For example: "UTC" or "Asia/Shanghai" This value will be set on apisix container's environment variable TZ. You may need to set the timezone to be consistent with your local time zone, otherwise the apisix's logs may used to retrieve event maybe in wrong timezone. |
 | apisix.tolerations | list | `[]` | List of node taints to tolerate |
-| apisix.readinessProbe | object | `{"failureThreshold": 6, "initialDelaySeconds": 10, "periodSeconds": 10, "successThreshold": 1, "tcpSocket": {"port": 9080}, "timeoutSeconds": 1}` | Set the readinessProbe for Apache APISIX pods. |
 | autoscaling.enabled | bool | `false` |  |
 | autoscaling.maxReplicas | int | `100` |  |
 | autoscaling.minReplicas | int | `1` |  |
