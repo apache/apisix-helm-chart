@@ -139,6 +139,12 @@ config:
     # -- the APISIX admin API version. can be "v2" or "v3", default is "v2".
     adminAPIVersion: "v2"
 
+    # -- The APISIX Helm chart supports storing user credentials in a secret.
+    # The secret needs to contain a single key for admin token with key adminKey by default.
+    secretName: ""
+    # -- Name of the admin token key in the secret, overrides the default key name "adminKey"
+    secretAdminKey: ""
+
 resources: {}
 
 initContainer:

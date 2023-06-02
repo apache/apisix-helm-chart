@@ -103,6 +103,13 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          {{- if .Values.config.apisix.secretName }}
+          - name: APISIX_ADMIN_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.config.apisix.secretName | quote }}
+                key: {{ include "apisix-ingress-controller.credentials.secretAdminKey" . }}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
