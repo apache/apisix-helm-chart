@@ -339,18 +339,18 @@ data:
           {{- end}}
       {{- else }}
         host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-          {{- range $value := .Values.etcd.host }}
+          {{- range $value := .Values.externalEtcd.host }}
           - "{{ $value }}"             # multiple etcd address
           {{- end}}
       {{- end }}
         prefix: {{ .Values.etcd.prefix | quote }}    # configuration prefix in etcd
         timeout: {{ .Values.etcd.timeout }}    # 30 seconds
-        {{- if and (not .Values.etcd.enabled) .Values.etcd.user }}
-        user: {{ .Values.etcd.user | quote }}
-        password: {{ .Values.etcd.password | quote }}
+        {{- if and (not .Values.etcd.enabled) .Values.externalEtcd.user }}
+        user: {{ .Values.externalEtcd.user | quote }}
+        password: "{{ print "${{ APISIX_ETCD_PASSWORD }}" }}"
         {{- else if and .Values.etcd.enabled .Values.etcd.auth.rbac.create }}
         user: "root"
-        password: {{ .Values.etcd.auth.rbac.rootPassword | quote }}
+        password: "{{ print "${{APISIX_ETCD_PASSWORD}}" }}"
         {{- end }}
         {{- if .Values.etcd.auth.tls.enabled }}
         tls:

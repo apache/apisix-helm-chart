@@ -31,9 +31,9 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: 3.3.0-debian
 
-# -- Use a `DaemonSet` or `Deployment`
-kind: Deployment
-# -- kind is DaemonSet, replicaCount not become effective
+# -- set false to use `Deployment`, set true to use `DaemonSet`
+useDaemonSet: false
+# -- if useDaemonSet is true or autoscaling.enabled is true, replicaCount not become effective
 replicaCount: 1
 
 # -- Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods
@@ -542,19 +542,28 @@ apisix:
             - key: "the-file-name"
               path: "mount-path"
 
+# -- external etcd configuration. If etcd.enabled is false, these configuration will be used.
+externalEtcd:
+  # -- if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379.
+  host:
+    # host or ip e.g. http://172.20.128.89:2379
+    - http://etcd.host:2379
+  # -- if etcd.enabled is false, user for external etcd. Set empty to disable authentication
+  user: root
+  # -- if etcd.enabled is true, use etcd.auth.rbac.rootPassword instead.
+  # -- if etcd.enabled is false and externalEtcd.existingSecret is not empty, the password should store in the corresponding secret
+  # -- if etcd.enabled is false and externalEtcd.existingSecret is empty, externalEtcd.password is the passsword for external etcd.
+  password: ""
+  # -- if externalEtcd.existingSecret is the name of secret containing the external etcd password
+  existingSecret: ""
+  # -- externalEtcd.secretPasswordKey Key inside the secret containing the external etcd password
+  secretPasswordKey: "etcd-root-password"
+
 # -- etcd configuration
 # use the FQDN address or the IP of the etcd
 etcd:
   # -- install etcd(v3) by default, set false if do not want to install etcd(v3) together
   enabled: true
-  # -- if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379.
-  host:
-    # host or ip e.g. http://172.20.128.89:2379
-    - http://etcd.host:2379
-  # -- if etcd.enabled is false, username for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead.
-  user: ""
-  # -- if etcd.enabled is false, password for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead.
-  password: ""
   # -- apisix configurations prefix
   prefix: "/apisix"
   # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
