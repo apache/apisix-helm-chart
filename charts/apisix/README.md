@@ -150,7 +150,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | dashboard.config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | dashboard.config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |
 | dashboard.enabled | bool | `false` |  |
-| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"enabled":true,"host":["http://etcd.host:2379"],"password":"","prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30,"user":""}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"enabled":true,"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30}` | etcd configuration use the FQDN address or the IP of the etcd |
 | etcd.auth | object | `{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
 | etcd.auth.rbac.create | bool | `false` | No authentication by default. Switch to enable RBAC authentication |
 | etcd.auth.rbac.rootPassword | string | `""` | root password for etcd. Requires etcd.auth.rbac.create to be true. |
@@ -161,11 +161,14 @@ The command removes all the Kubernetes components associated with the chart and 
 | etcd.auth.tls.sni | string | `""` | specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. |
 | etcd.auth.tls.verify | bool | `true` | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd |
 | etcd.enabled | bool | `true` | install etcd(v3) by default, set false if do not want to install etcd(v3) together |
-| etcd.host | list | `["http://etcd.host:2379"]` | if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379. |
-| etcd.password | string | `""` | if etcd.enabled is false, password for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead. |
 | etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | etcd.timeout | int | `30` | Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster |
-| etcd.user | string | `""` | if etcd.enabled is false, username for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead. |
+| externalEtcd | object | `{"existingSecret":"","host":["http://etcd.host:2379"],"password":"","secretPasswordKey":"etcd-root-password","user":"root"}` | external etcd configuration. If etcd.enabled is false, these configuration will be used. |
+| externalEtcd.existingSecret | string | `""` | if externalEtcd.existingSecret is the name of secret containing the external etcd password |
+| externalEtcd.host | list | `["http://etcd.host:2379"]` | if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379. |
+| externalEtcd.password | string | `""` | if etcd.enabled is false and externalEtcd.existingSecret is empty, externalEtcd.password is the passsword for external etcd. |
+| externalEtcd.secretPasswordKey | string | `"etcd-root-password"` | externalEtcd.secretPasswordKey Key inside the secret containing the external etcd password |
+| externalEtcd.user | string | `"root"` | if etcd.enabled is false, user for external etcd. Set empty to disable authentication |
 | extraEnvVars | list | `[]` | extraEnvVars An array to add extra env vars e.g: extraEnvVars:   - name: FOO     value: "bar"   - name: FOO2     valueFrom:       secretKeyRef:         name: SECRET_NAME         key: KEY |
 | extraInitContainers | list | `[]` | Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail. |
 | extraVolumeMounts | list | `[]` | Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. |
@@ -181,7 +184,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | ingress.annotations | object | `{}` | Ingress annotations |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.tag | float | `1.28` | Init container tag |
-| kind | string | `"Deployment"` | Use a `DaemonSet` or `Deployment` |
 | metrics | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"15s","labels":{},"name":"","namespace":""}}` | Observability configuration. |
 | metrics.serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
 | metrics.serviceMonitor.enabled | bool | `false` | Enable or disable Apache APISIX serviceMonitor |
@@ -199,7 +201,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
 | priorityClassName | string | `""` | Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods |
 | rbac.create | bool | `false` |  |
-| replicaCount | int | `1` | kind is DaemonSet, replicaCount not become effective |
+| replicaCount | int | `1` | if useDaemonSet is true or autoscaling.enabled is true, replicaCount not become effective |
 | resources | object | `{}` | Set pod resource requests & limits |
 | securityContext | object | `{}` | Set the securityContext for Apache APISIX container |
 | service.externalIPs | list | `[]` |  |
@@ -216,3 +218,4 @@ The command removes all the Kubernetes components associated with the chart and 
 | timezone | string | `""` | timezone is the timezone where apisix uses. For example: "UTC" or "Asia/Shanghai" This value will be set on apisix container's environment variable TZ. You may need to set the timezone to be consistent with your local time zone, otherwise the apisix's logs may used to retrieve event maybe in wrong timezone. |
 | tolerations | list | `[]` | List of node taints to tolerate |
 | updateStrategy | object | `{}` |  |
+| useDaemonSet | bool | `false` | set false to use `Deployment`, set true to use `DaemonSet` |
