@@ -45,13 +45,13 @@ spec:
         - name: APISIX_ADMIN_KEY
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.admin.credentials.secretName }}
-              key: admin
+              name: {{ .Values.admin.credentials.secretName | quote }}
+              key: {{ include "apisix.admin.credentials.secretAdminKey" . }}
         - name: APISIX_VIEWER_KEY
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.admin.credentials.secretName }}
-              key: viewer
+              name: {{ .Values.admin.credentials.secretName | quote }}
+              key: {{ include "apisix.admin.credentials.secretViewerKey" . }}
       {{- end }}
 
       ports:
