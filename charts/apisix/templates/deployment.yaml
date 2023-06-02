@@ -90,7 +90,7 @@ spec:
                   key: viewer
           {{- end }}
 
-          {{- if or (and .Values.etcd.enabled .Values.etcd.auth.rbac.create) (.Values.externalEtcd.user) }}
+          {{- if or (and .Values.etcd.enabled .Values.etcd.auth.rbac.create) (and (not .Values.etcd.enabled) .Values.externalEtcd.user) }}
             - name: APISIX_ETCD_PASSWORD
               valueFrom:
                 secretKeyRef:
