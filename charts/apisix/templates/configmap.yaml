@@ -346,13 +346,7 @@ data:
       {{- end }}
         prefix: {{ .Values.etcd.prefix | quote }}    # configuration prefix in etcd
         timeout: {{ .Values.etcd.timeout }}    # 30 seconds
-        {{- if and (not .Values.etcd.enabled) .Values.etcd.user }}
-        user: {{ .Values.etcd.user | quote }}
-        password: {{ .Values.etcd.password | quote }}
-        {{- else if and .Values.etcd.enabled .Values.etcd.auth.rbac.create }}
-        user: "root"
-        password: {{ .Values.etcd.auth.rbac.rootPassword | quote }}
-        {{- end }}
+        {{- include "apisix.etcd.credentials.config" . | nindent 8 }}
         {{- if .Values.etcd.auth.tls.enabled }}
         tls:
           cert: "/etcd-ssl/{{ .Values.etcd.auth.tls.certFilename }}"
