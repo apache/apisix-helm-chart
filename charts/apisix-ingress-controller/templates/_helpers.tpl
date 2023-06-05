@@ -90,8 +90,8 @@ Create the name of the service account to use
 Key to use to fetch admin token from secret
 */}}
 {{- define "apisix-ingress-controller.credentials.secretAdminKey" -}}
-{{- if .Values.config.apisix.secretAdminKey }}
-{{- .Values.config.apisix.secretAdminKey }}
+{{- if .Values.config.apisix.existingSecretAdminKeyKey }}
+{{- .Values.config.apisix.existingSecretAdminKeyKey }}
 {{- else }}
 {{- "adminKey" }}
 {{- end }}
