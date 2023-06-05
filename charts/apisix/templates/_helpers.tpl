@@ -153,7 +153,7 @@ Configuration of user and password for etcd
 {{- if .Values.etcd.existingSecret }}
 user: "${{"{{"}}APISIX_ETCD_USER{{"}}"}}"
 password: "${{"{{"}}APISIX_ETCD_PASSWORD{{"}}"}}"
-{{- else }}
+{{- else if .Values.etcd.user }}
 user: {{ .Values.etcd.user | quote }}
 password: {{ .Values.etcd.password | quote }}
 {{- end }}
