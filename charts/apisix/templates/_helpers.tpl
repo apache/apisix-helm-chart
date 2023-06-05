@@ -157,7 +157,7 @@ password: "${{"{{"}}APISIX_ETCD_PASSWORD{{"}}"}}"
 user: {{ .Values.etcd.user | quote }}
 password: {{ .Values.etcd.password | quote }}
 {{- end }}
-{{- else }}
+{{- else if .Values.etcd.auth.rbac.create }}
 {{- if .Values.etcd.auth.rbac.existingSecret }}
 user: "root"
 password: "${{"{{"}}APISIX_ETCD_PASSWORD{{"}}"}}"
