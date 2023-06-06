@@ -154,7 +154,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | etcd.user | string | `""` | if etcd.enabled is false, username for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead. |
 | extPlugin.cmd | list | `["/path/to/apisix-plugin-runner/runner","run"]` | the command and its arguements to run as a subprocess |
 | extPlugin.enabled | bool | `false` | Enable External Plugins. See [external plugin](https://apisix.apache.org/docs/apisix/next/external-plugin/) |
-| extraInitContainers | list | `[]` | Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail. |
+| extraInitContainers | list | `[{"command":["/bin/sh","-c","sysctl -w net.core.somaxconn=65535\nsysctl -w net.ipv4.ip_local_port_range=\"1024 65535\"\nsysctl -w net.ipv4.tcp_max_syn_backlog=8192\nsysctl -w fs.file-max=1048576\nsysctl -w fs.inotify.max_user_instances=16384\nsysctl -w fs.inotify.max_user_watches=524288\nsysctl -w fs.inotify.max_queued_events=16384\n"],"image":"busybox:1.28","name":"init-sysctl","securityContext":{"privileged":true}}]` | Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail. |
 | extraVolumeMounts | list | `[]` | Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. |
 | extraVolumes | list | `[]` | Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. |
 | fullnameOverride | string | `""` |  |
