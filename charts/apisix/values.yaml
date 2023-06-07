@@ -396,7 +396,22 @@ extraVolumeMounts: []
 #   readOnly: true
 
 # -- Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail.
-extraInitContainers: []
+extraInitContainers:
+  - name: init-sysctl
+    image: busybox:1.28
+    command:
+      - /bin/sh
+      - -c
+      - |
+        sysctl -w net.core.somaxconn=65535
+        sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+        sysctl -w net.ipv4.tcp_max_syn_backlog=8192
+        sysctl -w fs.file-max=1048576
+        sysctl -w fs.inotify.max_user_instances=16384
+        sysctl -w fs.inotify.max_user_watches=524288
+        sysctl -w fs.inotify.max_queued_events=16384
+    securityContext:
+      privileged: true
 # - name: init-myservice
 #   image: busybox:1.28
 #   command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
