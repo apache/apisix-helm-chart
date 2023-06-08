@@ -13,44 +13,44 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{ if (and .Values.apisix.enabled .Values.admin.enabled) }}
+{{ if (.Values.apisix.admin.enabled) }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "apisix.fullname" . }}-admin
   namespace: {{ .Release.Namespace }}
   annotations:
-    {{- range $key, $value := .Values.admin.annotations }}
+    {{- range $key, $value := .Values.apisix.admin.annotations }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
     app.kubernetes.io/service: apisix-admin
 spec:
-  type: {{ .Values.admin.type }}
-  {{- if eq .Values.admin.type "LoadBalancer" }}
-  {{- if .Values.admin.loadBalancerIP }}
-  loadBalancerIP: {{ .Values.admin.loadBalancerIP }}
+  type: {{ .Values.apisix.admin.type }}
+  {{- if eq .Values.apisix.admin.type "LoadBalancer" }}
+  {{- if .Values.apisix.admin.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.apisix.admin.loadBalancerIP }}
   {{- end }}
-  {{- if .Values.admin.loadBalancerSourceRanges }}
+  {{- if .Values.apisix.admin.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:
-  {{- range $cidr := .Values.admin.loadBalancerSourceRanges }}
+  {{- range $cidr := .Values.apisix.admin.loadBalancerSourceRanges }}
   - {{ $cidr }}
   {{- end }}
   {{- end }}
   {{- end }}
-  {{- if gt (len .Values.admin.externalIPs) 0 }}
+  {{- if gt (len .Values.apisix.admin.externalIPs) 0 }}
   externalIPs:
-  {{- range $ip := .Values.admin.externalIPs }}
+  {{- range $ip := .Values.apisix.admin.externalIPs }}
   - {{ $ip }}
   {{- end }}
   {{- end }}
   ports:
   - name: apisix-admin
-    port: {{ .Values.admin.servicePort }}
-    targetPort: {{ .Values.admin.port }}
-  {{- if (and (eq .Values.admin.type "NodePort") (not (empty .Values.admin.nodePort))) }}
-    nodePort: {{ .Values.admin.nodePort }}
+    port: {{ .Values.apisix.admin.servicePort }}
+    targetPort: {{ .Values.apisix.admin.port }}
+  {{- if (and (eq .Values.apisix.admin.type "NodePort") (not (empty .Values.apisix.admin.nodePort))) }}
+    nodePort: {{ .Values.apisix.admin.nodePort }}
   {{- end }}
     protocol: TCP
   selector:

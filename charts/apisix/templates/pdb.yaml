@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if (and .Values.apisix.enabled .Values.apisix.podDisruptionBudget.enabled) }}
+{{- if (.Values.podDisruptionBudget.enabled) }}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
@@ -23,10 +23,10 @@ metadata:
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
-{{- if .Values.apisix.podDisruptionBudget.minAvailable }}
-  minAvailable: {{ .Values.apisix.podDisruptionBudget.minAvailable }}
+{{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
 {{- else }}
-  maxUnavailable: {{ .Values.apisix.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 {{- end }}
   selector:
     matchLabels:
