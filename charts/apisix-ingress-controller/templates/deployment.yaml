@@ -104,7 +104,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
           {{- if .Values.config.apisix.existingSecret }}
-          - name: APISIX_ADMIN_KEY
+          - name: DEFAULT_CLUSTER_ADMIN_KEY
             valueFrom:
               secretKeyRef:
                 name: {{ .Values.config.apisix.existingSecret | quote }}
