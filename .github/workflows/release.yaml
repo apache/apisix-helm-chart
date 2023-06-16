@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - legacy
+      - dev
 
 jobs:
   release:
