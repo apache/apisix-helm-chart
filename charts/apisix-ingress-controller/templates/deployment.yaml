@@ -75,6 +75,8 @@ spec:
             - ingress
             - --config-path
             - /ingress-apisix/conf/config.yaml
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
