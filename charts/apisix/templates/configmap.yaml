@@ -317,7 +317,7 @@ data:
           # admin: can everything for configuration data
           - name: "admin"
             {{- if .Values.admin.credentials.secretName }}
-            key: "{{"{{"}}APISIX_ADMIN_KEY{{"}}"}}"
+            key: ${{"{{"}}APISIX_ADMIN_KEY{{"}}"}}
             {{- else }}
             key: {{ .Values.admin.credentials.admin }}
             {{- end }}
@@ -325,7 +325,7 @@ data:
           # viewer: only can view configuration data
           - name: "viewer"
             {{- if .Values.admin.credentials.secretName }}
-            key: "{{"{{"}}APISIX_VIEWER_KEY{{"}}"}}"
+            key: ${{"{{"}}APISIX_VIEWER_KEY{{"}}"}}
             {{- else }}
             key: {{ .Values.admin.credentials.viewer }}
             {{- end }}

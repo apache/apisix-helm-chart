@@ -42,9 +42,11 @@ The command removes all the Kubernetes components associated with the chart and 
 |-----|------|---------|-------------|
 | admin.allow.ipList | list | `["127.0.0.1/24"]` | The client IP CIDR allowed to access Apache APISIX Admin API service. |
 | admin.cors | bool | `true` | Admin API support CORS response headers |
-| admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretName":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
+| admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
 | admin.credentials.admin | string | `"edd1c9f034335f136f87ad84b625c8f1"` | Apache APISIX admin API admin role credentials |
+| admin.credentials.secretAdminKey | string | `""` | Name of the admin role key in the secret, overrides the default key name "admin" |
 | admin.credentials.secretName | string | `""` | The APISIX Helm chart supports storing user credentials in a secret. The secret needs to contain two keys, admin and viewer, with their respective values set. |
+| admin.credentials.secretViewerKey | string | `""` | Name of the viewer role key in the secret, overrides the default key name "viewer" |
 | admin.credentials.viewer | string | `"4054f7cf07e344346cd3f287985e76a2"` | Apache APISIX admin API viewer role credentials |
 | admin.enabled | bool | `true` | Enable Admin API |
 | admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
@@ -88,6 +90,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.proxyProtocol.listenHttpsPort | int | `9182` | The port with proxy protocol for https |
 | apisix.proxyProtocol.tcp | bool | `true` | Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option |
 | apisix.proxyProtocol.upstream | bool | `true` | Enable the proxy protocol to the upstream server |
+| apisix.readinessProbe | object | `{"failureThreshold":6,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":9080},"timeoutSeconds":1}` | Set the readinessProbe for Apache APISIX pods |
 | apisix.replicaCount | int | `1` | kind is DaemonSet, replicaCount not become effective |
 | apisix.resources | object | `{}` | Set pod resource requests & limits |
 | apisix.securityContext | object | `{}` | Set the securityContext for Apache APISIX container |
@@ -159,7 +162,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | etcd.user | string | `""` | if etcd.enabled is false, username for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead. |
 | extPlugin.cmd | list | `["/path/to/apisix-plugin-runner/runner","run"]` | the command and its arguements to run as a subprocess |
 | extPlugin.enabled | bool | `false` | Enable External Plugins. See [external plugin](https://apisix.apache.org/docs/apisix/next/external-plugin/) |
-| extraInitContainers | list | `[]` | Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail. |
+| extraInitContainers | list | `[{"command":["/bin/sh","-c","sysctl -w net.core.somaxconn=65535\nsysctl -w net.ipv4.ip_local_port_range=\"1024 65535\"\nsysctl -w net.ipv4.tcp_max_syn_backlog=8192\nsysctl -w fs.file-max=1048576\nsysctl -w fs.inotify.max_user_instances=16384\nsysctl -w fs.inotify.max_user_watches=524288\nsysctl -w fs.inotify.max_queued_events=16384\n"],"image":"busybox:1.28","name":"init-sysctl","securityContext":{"privileged":true}}]` | Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail. |
 | extraVolumeMounts | list | `[]` | Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. |
 | extraVolumes | list | `[]` | Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. |
 | fullnameOverride | string | `""` |  |
