@@ -113,6 +113,28 @@ Scheme to use while connecting etcd
 {{- end }}
 
 {{/*
+Key to use to fetch admin token from secret
+*/}}
+{{- define "apisix.admin.credentials.secretAdminKey" -}}
+{{- if .Values.admin.credentials.secretAdminKey }}
+{{- .Values.admin.credentials.secretAdminKey }}
+{{- else }}
+{{- "admin" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Key to use to fetch viewer token from secret
+*/}}
+{{- define "apisix.admin.credentials.secretViewerKey" -}}
+{{- if .Values.admin.credentials.secretViewerKey }}
+{{- .Values.admin.credentials.secretViewerKey }}
+{{- else }}
+{{- "viewer" }}
+{{- end }}
+{{- end }}
+
+{{/*
 Key to use to fetch username for external etcd from secret
 */}}
 {{- define "apisix.etcd.credentials.userKey" -}}

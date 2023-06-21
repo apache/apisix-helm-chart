@@ -157,6 +157,16 @@ apisix:
   #         key: KEY
   extraEnvVars: []
 
+  # -- Set the readinessProbe for Apache APISIX pods
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    tcpSocket:
+      port: &gatewayHttpContainerPort 9080
+    timeoutSeconds: 1
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -232,7 +242,7 @@ gateway:
   http:
     enabled: true
     servicePort: 80
-    containerPort: 9080
+    containerPort: *gatewayHttpContainerPort
     # -- Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24)
     additionalContainerPorts: []
       # - port: 9081
@@ -311,6 +321,10 @@ admin:
     # -- The APISIX Helm chart supports storing user credentials in a secret.
     # The secret needs to contain two keys, admin and viewer, with their respective values set.
     secretName: ""
+    # -- Name of the admin role key in the secret, overrides the default key name "admin"
+    secretAdminKey: ""
+    # -- Name of the viewer role key in the secret, overrides the default key name "viewer"
+    secretViewerKey: ""
 
   allow:
     # -- The client IP CIDR allowed to access Apache APISIX Admin API service.
@@ -396,7 +410,22 @@ extraVolumeMounts: []
 #   readOnly: true
 
 # -- Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail.
-extraInitContainers: []
+extraInitContainers:
+  - name: init-sysctl
+    image: busybox:1.28
+    command:
+      - /bin/sh
+      - -c
+      - |
+        sysctl -w net.core.somaxconn=65535
+        sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+        sysctl -w net.ipv4.tcp_max_syn_backlog=8192
+        sysctl -w fs.file-max=1048576
+        sysctl -w fs.inotify.max_user_instances=16384
+        sysctl -w fs.inotify.max_user_watches=524288
+        sysctl -w fs.inotify.max_queued_events=16384
+    securityContext:
+      privileged: true
 # - name: init-myservice
 #   image: busybox:1.28
 #   command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
