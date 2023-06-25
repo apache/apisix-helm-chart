@@ -103,6 +103,13 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          {{- if .Values.config.apisix.existingSecret }}
+          - name: DEFAULT_CLUSTER_ADMIN_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.config.apisix.existingSecret | quote }}
+                key: {{ include "apisix-ingress-controller.credentials.secretAdminKey" . }}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
