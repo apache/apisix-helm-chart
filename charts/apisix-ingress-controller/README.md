@@ -111,8 +111,10 @@ The same for container level, you need to set:
 | autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | autoscaling.version | string | `"v2"` | HPA version, the value is "v2" or "v2beta1", default "v2" |
 | clusterDomain | string | `"cluster.local"` |  |
-| config.apisix | object | `{"adminAPIVersion":"v2","adminKey":"edd1c9f034335f136f87ad84b625c8f1","clusterName":"default","serviceName":"apisix-admin","serviceNamespace":"ingress-apisix","servicePort":9180}` | APISIX related configurations. |
+| config.apisix | object | `{"adminAPIVersion":"v2","adminKey":"edd1c9f034335f136f87ad84b625c8f1","clusterName":"default","existingSecret":"","existingSecretAdminKeyKey":"","serviceName":"apisix-admin","serviceNamespace":"ingress-apisix","servicePort":9180}` | APISIX related configurations. |
 | config.apisix.adminAPIVersion | string | `"v2"` | the APISIX admin API version. can be "v2" or "v3", default is "v2". |
+| config.apisix.existingSecret | string | `""` | The APISIX Helm chart supports storing user credentials in a secret. The secret needs to contain a single key for admin token with key adminKey by default. |
+| config.apisix.existingSecretAdminKeyKey | string | `""` | Name of the admin token key in the secret, overrides the default key name "adminKey" |
 | config.apisix.serviceName | string | `"apisix-admin"` | Enabling this value, overrides serviceName and serviceNamespace. serviceFullname: "apisix-admin.apisix.svc.local" |
 | config.apisixResourceSyncInterval | string | `"1h"` | Default interval for synchronizing Kubernetes resources to APISIX |
 | config.certFile | string | `"/etc/webhook/certs/cert.pem"` | the TLS certificate file path. |

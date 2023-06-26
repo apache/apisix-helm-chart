@@ -75,6 +75,8 @@ spec:
             - ingress
             - --config-path
             - /ingress-apisix/conf/config.yaml
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -103,6 +105,13 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          {{- if .Values.config.apisix.existingSecret }}
+          - name: DEFAULT_CLUSTER_ADMIN_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.config.apisix.existingSecret | quote }}
+                key: {{ include "apisix-ingress-controller.credentials.secretAdminKey" . }}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

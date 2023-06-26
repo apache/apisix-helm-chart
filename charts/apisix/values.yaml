@@ -280,6 +280,8 @@ gateway:
       enabled: true
     # -- TLS protocols allowed to use.
     sslProtocols: "TLSv1.2 TLSv1.3"
+    # -- Define SNI to fallback if none is presented by client
+    fallbackSNI: ""
   # -- Proxy Protocol Configuration
   proxyProtocol:
     # -- If you enable proxy protocol, you must use this port to receive http request with proxy protocol
