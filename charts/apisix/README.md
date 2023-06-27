@@ -85,6 +85,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
 | apisix.podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
 | apisix.priorityClassName | string | `""` | Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods |
+| apisix.proxyProtocol | object | `{"enabled":false,"listenHttpPort":9181,"listenHttpsPort":9182,"tcp":true,"upstream":true}` | Enable Proxy Protocol |
+| apisix.proxyProtocol.listenHttpPort | int | `9181` | The port with proxy protocol for http, it differs from node_listen and admin_listen. |
+| apisix.proxyProtocol.listenHttpsPort | int | `9182` | The port with proxy protocol for https |
+| apisix.proxyProtocol.tcp | bool | `true` | Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option |
+| apisix.proxyProtocol.upstream | bool | `true` | Enable the proxy protocol to the upstream server |
 | apisix.readinessProbe | object | `{"failureThreshold":6,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":9080},"timeoutSeconds":1}` | Set the readinessProbe for Apache APISIX pods |
 | apisix.replicaCount | int | `1` | kind is DaemonSet, replicaCount not become effective |
 | apisix.resources | object | `{}` | Set pod resource requests & limits |
@@ -168,6 +173,9 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"tls":[]}` | Using ingress access Apache APISIX service |
 | gateway.ingress.annotations | object | `{}` | Ingress annotations |
 | gateway.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
+| gateway.proxyProtocol | object | `{"http":{"containerPort":9181,"enabled":false,"servicePort":9181},"https":{"containerPort":9182,"enabled":false,"servicePort":9182}}` | Proxy Protocol Configuration |
+| gateway.proxyProtocol.http | object | `{"containerPort":9181,"enabled":false,"servicePort":9181}` | If you enable proxy protocol, you must use this port to receive http request with proxy protocol |
+| gateway.proxyProtocol.https | object | `{"containerPort":9182,"enabled":false,"servicePort":9182}` | The port with proxy protocol for https |
 | gateway.stream | object | `{"enabled":false,"only":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | gateway.tls | object | `{"additionalContainerPorts":[],"certCAFilename":"","containerPort":9443,"enabled":false,"existingCASecret":"","fallbackSNI":"","http2":{"enabled":true},"servicePort":443,"sslProtocols":"TLSv1.2 TLSv1.3"}` | Apache APISIX service settings for tls |
 | gateway.tls.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |
