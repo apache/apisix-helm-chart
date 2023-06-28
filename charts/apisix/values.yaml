@@ -387,7 +387,7 @@ nginx:
   workerProcesses: auto
   enableCPUAffinity: true
   envs: []
-  # allow customize meta in nginx_config section
+  # -- allow customize meta in `nginx_config` section
   meta: |
     lua_shared_dict:
       prometheus-metrics: 15m
