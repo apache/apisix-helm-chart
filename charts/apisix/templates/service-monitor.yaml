@@ -31,7 +31,7 @@ metadata:
 spec:
   namespaceSelector:
     matchNames:
-    - {{ .Values.serviceMonitor.namespace | default .Release.Namespace }}
+    - {{ .Release.Namespace }}
   selector:
     matchLabels:
       {{- include "apisix.labels" . | nindent 6 }}
