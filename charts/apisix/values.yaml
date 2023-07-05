@@ -21,6 +21,12 @@ global:
   #   - other-registry-secrets
   # -- Global Docker registry secret names as an array
   imagePullSecrets: []
+  # -- Secrets to be created with apisix
+  secrets: []
+    # - name: secret-name
+    #   values:
+    #     - name: secret-key
+    #       value: secret=value
 
 apisix:
   # -- Enable or disable Apache APISIX itself
