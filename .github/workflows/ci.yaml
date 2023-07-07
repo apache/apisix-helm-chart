@@ -10,7 +10,7 @@ on:
 jobs:
 
   helm_docs:
-    name: Generate Helm Docs
+    name: Check the Helm Docs format
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
