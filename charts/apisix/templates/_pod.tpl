@@ -53,6 +53,25 @@ spec:
               name: {{ .Values.admin.credentials.secretName | quote }}
               key: {{ include "apisix.admin.credentials.secretViewerKey" . }}
       {{- end }}
+      {{- if and (not .Values.etcd.enabled) .Values.etcd.existingSecret }}
+        - name: APISIX_ETCD_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.etcd.existingSecret | quote }}
+              key: {{ include "apisix.etcd.credentials.userKey" . }}
+        - name: APISIX_ETCD_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.etcd.existingSecret | quote }}
+              key: {{ include "apisix.etcd.credentials.passwordKey" . }} 
+      {{- end }}
+      {{- if and .Values.etcd.enabled .Values.etcd.auth.rbac.existingSecret }}
+        - name: APISIX_ETCD_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.etcd.auth.rbac.existingSecret | quote }}
+              key: {{ include "apisix.etcd.auth.rbac.passwordKey" . }} 
+      {{- end }}
 
       ports:
         - name: http

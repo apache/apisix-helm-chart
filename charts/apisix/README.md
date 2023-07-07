@@ -144,9 +144,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | dns.resolvers[5] | string | `"8.8.8.8"` |  |
 | dns.timeout | int | `5` |  |
 | dns.validity | int | `30` |  |
-| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"enabled":true,"host":["http://etcd.host:2379"],"password":"","prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30,"user":""}` | etcd configuration use the FQDN address or the IP of the etcd |
-| etcd.auth | object | `{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
+| etcd | object | `{"auth":{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"enabled":true,"existingSecret":"","existingSecretPasswordKey":"","existingSecretUserKey":"","host":["http://etcd.host:2379"],"password":"","prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30,"user":""}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd.auth | object | `{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
 | etcd.auth.rbac.create | bool | `false` | No authentication by default. Switch to enable RBAC authentication |
+| etcd.auth.rbac.existingSecret | string | `""` | Name of the existing secret containing credentials for the root user |
+| etcd.auth.rbac.existingSecretPasswordKey | string | `""` | Name of key containing password to be retrieved from the existing secret |
 | etcd.auth.rbac.rootPassword | string | `""` | root password for etcd. Requires etcd.auth.rbac.create to be true. |
 | etcd.auth.tls.certFilename | string | `""` | etcd client cert filename using in etcd.auth.tls.existingSecret |
 | etcd.auth.tls.certKeyFilename | string | `""` | etcd client cert key filename using in etcd.auth.tls.existingSecret |
@@ -155,6 +157,9 @@ The command removes all the Kubernetes components associated with the chart and 
 | etcd.auth.tls.sni | string | `""` | specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. |
 | etcd.auth.tls.verify | bool | `true` | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd |
 | etcd.enabled | bool | `true` | install etcd(v3) by default, set false if do not want to install etcd(v3) together |
+| etcd.existingSecret | string | `""` | Name of the existing secret containing user and password for external etcd, overrides etcd.user and etcd.password |
+| etcd.existingSecretPasswordKey | string | `""` | Name of key containing password to be retrieved from the existing secret, has a value of password by default |
+| etcd.existingSecretUserKey | string | `""` | Name of key containing username to be retrieved from the existing secret, has a value of user by default |
 | etcd.host | list | `["http://etcd.host:2379"]` | if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379. |
 | etcd.password | string | `""` | if etcd.enabled is false, password for external etcd. If etcd.enabled is true, use etcd.auth.rbac.rootPassword instead. |
 | etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
@@ -185,6 +190,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.tls.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | gateway.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
+| global.secrets | list | `[]` | Secrets to be created with apisix |
 | ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.tag | float | `1.28` | Init container tag |

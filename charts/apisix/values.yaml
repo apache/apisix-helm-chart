@@ -21,6 +21,12 @@ global:
   #   - other-registry-secrets
   # -- Global Docker registry secret names as an array
   imagePullSecrets: []
+  # -- Secrets to be created with apisix
+  secrets: []
+    # - name: secret-name
+    #   values:
+    #     - name: secret-key
+    #       value: secret=value
 
 apisix:
   # -- Enable or disable Apache APISIX itself
@@ -603,6 +609,12 @@ etcd:
   prefix: "/apisix"
   # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
   timeout: 30
+  # -- Name of the existing secret containing user and password for external etcd, overrides etcd.user and etcd.password
+  existingSecret: ""
+  # -- Name of key containing username to be retrieved from the existing secret, has a value of user by default
+  existingSecretUserKey: ""
+  # -- Name of key containing password to be retrieved from the existing secret, has a value of password by default
+  existingSecretPasswordKey: ""
 
   # -- if etcd.enabled is true, set more values of bitnami/etcd helm chart
   auth:
@@ -611,6 +623,10 @@ etcd:
       create: false
       # -- root password for etcd. Requires etcd.auth.rbac.create to be true.
       rootPassword: ""
+      # -- Name of the existing secret containing credentials for the root user
+      existingSecret: ""
+      # -- Name of key containing password to be retrieved from the existing secret
+      existingSecretPasswordKey: ""
     tls:
       # -- enable etcd client certificate
       enabled: false
