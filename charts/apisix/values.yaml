@@ -29,7 +29,7 @@ image:
   pullPolicy: IfNotPresent
   # -- Apache APISIX image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 3.3.0-debian
+  tag: 3.4.0-debian
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
