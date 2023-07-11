@@ -89,6 +89,17 @@ config:
       username: ~
       # -- Specifies etcd basic auth password if enable etcd auth
       password: ~
+      tls:
+        # -- Enable tls when connecting to an etce cluster with TLS enabled
+        enabled: false
+        # -- Name of existing Secret object that contains certs fot TLS authentication
+        existingSecret: ""
+        # -- Name of CA file in secret
+        caFile: "ca.crt"
+        # -- Name of cert file in secret
+        certFile: "tls.crt"
+        # -- Name of key file in secret
+        keyFile: "tls.key"
     log:
       # -- Error log level.
       # Supports levels, lower to higher: debug, info, warn, error, panic, fatal

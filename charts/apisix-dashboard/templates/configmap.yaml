@@ -41,6 +41,12 @@ data:
         {{- if .password }}
         password: {{ .password }}
         {{- end }}
+        {{- if .tls.enabled }}
+        mtls:
+          ca_file: {{ printf "/etcd-certs/%s" .tls.caFile }}
+          cert_file: {{ printf "/etcd-certs/%s" .tls.certFile }}
+          key_file: {{ printf "/etcd-certs/%s" .tls.keyFile }}
+        {{- end }}
       {{- end }}
       {{- with .log }}
       log:
