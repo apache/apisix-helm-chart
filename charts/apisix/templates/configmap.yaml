@@ -163,6 +163,8 @@ data:
       worker_rlimit_nofile: {{ default "20480" .Values.nginx.workerRlimitNofile }}  # the number of files a worker process can open, should be larger than worker_connections
       event:
         worker_connections: {{ default "10620" .Values.nginx.workerConnections  }}
+      meta:
+        {{- .Values.nginx.meta | nindent 8 }}
       {{- with .Values.nginx.envs }}
       envs:
       {{- range $env := . }}

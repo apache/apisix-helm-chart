@@ -393,6 +393,10 @@ nginx:
   workerProcesses: auto
   enableCPUAffinity: true
   envs: []
+  # -- allow customize meta in `nginx_config` section
+  meta: |
+    lua_shared_dict:
+      prometheus-metrics: 15m
 
 # -- Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml)
 plugins: []

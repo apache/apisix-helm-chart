@@ -203,6 +203,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | nameOverride | string | `""` |  |
 | nginx.enableCPUAffinity | bool | `true` |  |
 | nginx.envs | list | `[]` |  |
+| nginx.meta | string | `"lua_shared_dict:\n  prometheus-metrics: 15m\n"` | allow customize meta in `nginx_config` section |
 | nginx.workerConnections | string | `"10620"` |  |
 | nginx.workerProcesses | string | `"auto"` |  |
 | nginx.workerRlimitNofile | string | `"20480"` |  |
