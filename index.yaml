@@ -1251,6 +1251,19 @@ entries:
   apisix-dashboard:
   - apiVersion: v2
     appVersion: 3.0.0
+    created: "2023-07-12T01:13:23.232456381Z"
+    description: A Helm chart for Apache APISIX Dashboard
+    digest: bd0bfb55a4b7d1e82d85179363db2849f048c8a17ff9124dd1683816da845cb1
+    icon: https://apache.org/logos/res/apisix/apisix.png
+    maintainers:
+    - name: tao12345666333
+    name: apisix-dashboard
+    type: application
+    urls:
+    - https://github.com/apache/apisix-helm-chart/releases/download/apisix-dashboard-0.8.1/apisix-dashboard-0.8.1.tgz
+    version: 0.8.1
+  - apiVersion: v2
+    appVersion: 3.0.0
     created: "2023-02-16T02:58:19.219463185Z"
     description: A Helm chart for Apache APISIX Dashboard
     digest: 5b0d235c444fe7a5fd536bc02426caa2ea082f6ac173eba90a8953cddc3aec2b
@@ -1770,4 +1783,4 @@ entries:
     urls:
     - https://github.com/apache/apisix-helm-chart/releases/download/apisix-ingress-controller-0.6.0/apisix-ingress-controller-0.6.0.tgz
     version: 0.6.0
-generated: "2023-07-10T07:12:19.977269938Z"
+generated: "2023-07-12T01:13:23.232911993Z"
