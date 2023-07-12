@@ -126,5 +126,5 @@ spec:
       {{- end }}
       {{- with .Values.topologySpreadConstraints }}
       topologySpreadConstraints:
-        {{- toYaml . | nindent 8 }}
+        {{- tpl (. | toYaml) $ | nindent 8 }}
       {{- end }}

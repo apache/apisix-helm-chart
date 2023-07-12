@@ -279,6 +279,6 @@ spec:
   {{- end }}
   {{- with .Values.apisix.topologySpreadConstraints }}
   topologySpreadConstraints:
-    {{- toYaml . | nindent 4 }}
+    {{- tpl (. | toYaml) $ | nindent 4 }}
   {{- end }}
 {{- end -}}
