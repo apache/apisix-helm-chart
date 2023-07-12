@@ -165,6 +165,10 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+# -- Update strategy for apisix deployment
+updateStrategy: {}
+  # type: RollingUpdate
+
 # -- Node labels for pod assignment
 nodeSelector: {}
 

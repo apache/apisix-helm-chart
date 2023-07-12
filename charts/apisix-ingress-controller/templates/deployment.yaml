@@ -28,6 +28,9 @@ spec:
   selector:
     matchLabels:
       {{- include "apisix-ingress-controller.selectorLabels" . | nindent 6 }}
+  {{- with .Values.updateStrategy }}
+  strategy: {{ toYaml . | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       annotations:
