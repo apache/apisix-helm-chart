@@ -595,6 +595,9 @@ serviceMonitor:
   labels: {}
   # -- @param serviceMonitor.annotations ServiceMonitor annotations
   annotations: {}
+  # -- @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion.
+  # ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs
+  metricRelabelings: {}
 
 # -- etcd configuration
 # use the FQDN address or the IP of the etcd
