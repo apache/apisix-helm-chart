@@ -160,7 +160,7 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-# -- Update strategy for apisix deployment
+# -- Update strategy for apisix ingress controller deployment
 updateStrategy: {}
   # type: RollingUpdate
 
