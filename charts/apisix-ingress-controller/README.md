@@ -164,3 +164,4 @@ The same for container level, you need to set:
 | serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
 | serviceMonitor.metricRelabelings | object | `{}` | @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion. ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs |
 | tolerations | list | `[]` |  |
+| updateStrategy | object | `{}` | Update strategy for apisix ingress controller deployment |
