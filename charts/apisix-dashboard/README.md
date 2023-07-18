@@ -63,8 +63,8 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | config.authentication.secret | string | `"secret"` | Secret for jwt token generation |
 | config.authentication.users | list | `[{"password":"admin","username":"admin"}]` | Specifies username and password for login manager api. |
 | config.conf.etcd.endpoints | list | `["apisix-etcd:2379"]` | Supports defining multiple etcd host addresses for an etcd cluster |
-| config.conf.etcd.existingSecret | string | `""` | Specifies a secret to be mounted on /etc/etcd for mtls usage |
 | config.conf.etcd.mtls | object | `{}` |  |
+| config.conf.etcd.mtlsExistingSecret | string | `""` | Specifies a secret to be mounted on /etc/etcd for mtls usage |
 | config.conf.etcd.password | string | `nil` | Specifies etcd basic auth password if enable etcd auth |
 | config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |

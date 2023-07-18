@@ -91,7 +91,7 @@ config:
       password: ~
 
       # -- Specifies a secret to be mounted on /etc/etcd for mtls usage
-      existingSecret: ""
+      mtlsExistingSecret: ""
 
       # MTLS configuration used for external etcd instances
       mtls:
