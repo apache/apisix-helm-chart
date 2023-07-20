@@ -167,8 +167,10 @@ updateStrategy: {}
 nodeSelector: {}
 tolerations: []
 
-# -- namespace: "ingress-apisix"
+#  namespace: "ingress-apisix"
 
+# -- Enable creating ServiceMonitor objects for Prometheus operator.
+# Requires Prometheus operator v0.38.0 or higher.
 serviceMonitor:
   enabled: false
   namespace: "monitoring"
