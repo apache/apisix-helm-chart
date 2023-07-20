@@ -41,6 +41,10 @@ data:
         {{- if .password }}
         password: {{ .password }}
         {{- end }}
+        {{- if .mtls }}
+        mtls:
+          {{- toYaml .mtls | nindent 10 }}
+        {{- end }}
       {{- end }}
       {{- with .log }}
       log:

@@ -77,10 +77,19 @@ spec:
             - mountPath: /usr/local/apisix-dashboard/conf/conf.yaml
               name: apisix-dashboard-config
               subPath: conf.yaml
+          {{- if .Values.config.conf.etcd.mtlsExistingSecret }}
+            - mountPath: /etc/etcd
+              name: etcd-config
+          {{- end}}
       volumes:
         - configMap:
             name: {{ include "apisix-dashboard.fullname" . }}
           name: apisix-dashboard-config
+      {{- if .Values.config.conf.etcd.mtlsExistingSecret }}
+        - secret:
+            secretName: {{ .Values.config.conf.etcd.mtlsExistingSecret }}
+          name: etcd-config
+      {{- end}}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
