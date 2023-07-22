@@ -105,6 +105,9 @@ The same for container level, you need to set:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| admission.enabled | bool | `false` | webhook can verify crd resources, default is false |
+| admission.port | int | `8443` | webhook service port, default is 8443 |
+| admission.webhookSvc | string | `"webhook"` | webhook service name, default is "webhook" |
 | autoscaling.enabled | bool | `false` |  |
 | autoscaling.maxReplicas | int | `100` |  |
 | autoscaling.minReplicas | int | `1` |  |
