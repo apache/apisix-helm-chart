@@ -442,6 +442,7 @@ customPlugins:
           - key: "the-file-name"
             path: "mount-path"
 
+# -- Update strategy for apisix deployment
 updateStrategy: {}
   # type: RollingUpdate
 

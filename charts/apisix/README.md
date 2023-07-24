@@ -226,7 +226,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serviceMonitor.namespace | string | `""` | namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix |
 | serviceMonitor.path | string | `"/apisix/prometheus/metrics"` | path of the metrics endpoint |
 | stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
-| updateStrategy | object | `{}` |  |
+| updateStrategy | object | `{}` | Update strategy for apisix deployment |
 | vault.enabled | bool | `false` | Enable or disable the vault integration |
 | vault.host | string | `""` | The host address where the vault server is running. |
 | vault.prefix | string | `""` | Prefix allows you to better enforcement of policies. |
