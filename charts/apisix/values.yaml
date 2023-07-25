@@ -156,7 +156,7 @@ apisix:
   # -- Set affinity for Apache APISIX deploy
   affinity: {}
   # -- Topology Spread Constraints for pod assignment spread across your cluster among failure-domains
-  # <br /> ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
   topologySpreadConstraints: []
 
   # -- timezone is the timezone where apisix uses.
