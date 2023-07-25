@@ -188,5 +188,5 @@ tolerations: []
 affinity: {}
 
 # -- Topology Spread Constraints for pod assignment spread across your cluster among failure-domains
-# <br /> ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+# ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
 topologySpreadConstraints: []
