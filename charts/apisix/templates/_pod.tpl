@@ -2,10 +2,8 @@
 metadata:
   annotations:
     checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-    {{- if .Values.apisix.podAnnotations }}
-    {{- range $key, $value := $.Values.apisix.podAnnotations }}
-    {{ $key }}: {{ $value | quote }}
-    {{- end }}
+    {{- with .Values.apisix.podAnnotations }}
+      {{ tpl (toYaml .) $ | nindent 4}}
     {{- end }}
   labels:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
