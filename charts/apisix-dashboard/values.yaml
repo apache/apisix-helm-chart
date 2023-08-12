@@ -99,6 +99,8 @@ config:
         # key_file: /etc/etcd/server-client.key
         # cert_file: /etc/etcd/server-client.crt
         # ca_file: /etc/etcd/server-ca.crt
+        # sni: ""
+        # skipverify: false
     log:
       # -- Error log level.
       # Supports levels, lower to higher: debug, info, warn, error, panic, fatal
