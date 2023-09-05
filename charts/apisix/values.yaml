@@ -99,7 +99,7 @@ apisix:
     pullPolicy: IfNotPresent
     # -- Apache APISIX image tag
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 3.4.1-debian
+    tag: 3.5.0-debian
 
   # -- Use a `DaemonSet` or `Deployment`
   kind: Deployment
@@ -314,7 +314,6 @@ gateway:
   # -- Apache APISIX service settings for stream. L4 proxy (TCP/UDP)
   stream:
     enabled: false
-    only: false
     tcp: []
     udp: []
   # -- Using ingress access Apache APISIX service
