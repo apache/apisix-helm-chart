@@ -97,10 +97,20 @@ data:
                                     # radixtree_host_uri: match route by host + uri(base on radixtree)
                                     # radixtree_uri_with_parameter: match route by uri with parameters
         ssl: 'radixtree_sni'        # radixtree_sni: match route by SNI(base on radixtree)
+      
+      {{- $proxy_mode := "" }}
+      {{- if and .Values.service.stream.enabled .Values.service.http.enabled }}
+        {{- $proxy_mode = "http&stream" }}
+      {{- else if .Values.service.http.enabled }}
+        {{- $proxy_mode = "http" }}
+      {{- else if .Values.service.stream.enabled }}
+        {{- $proxy_mode = "stream" }}
+      {{- end }}
+
+      proxy_mode: {{ $proxy_mode }}
 
       {{- if or (index .Values "ingress-controller" "enabled") (and .Values.service.stream.enabled (or (gt (len .Values.service.stream.tcp) 0) (gt (len .Values.service.stream.udp) 0))) }}
       stream_proxy:                 # TCP/UDP proxy
-        only: {{ .Values.service.stream.only }}
         {{- if or (index .Values "ingress-controller" "enabled") (gt (len .Values.service.stream.tcp) 0) }}
         tcp:                        # TCP proxy port list
           {{- if gt (len .Values.service.stream.tcp) 0}}
