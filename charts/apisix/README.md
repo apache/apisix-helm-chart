@@ -178,7 +178,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | hostNetwork | bool | `false` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.4.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.5.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |
@@ -209,7 +209,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | service.http | object | `{"additionalContainerPorts":[],"containerPort":9080,"enabled":true,"servicePort":80}` | Apache APISIX service settings for http |
 | service.http.additionalContainerPorts | list | `[]` | Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24) |
 | service.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
-| service.stream | object | `{"enabled":false,"only":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
+| service.stream | object | `{"enabled":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | service.tls | object | `{"servicePort":443}` | Apache APISIX service settings for tls |
 | service.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | serviceAccount.annotations | object | `{}` |  |
