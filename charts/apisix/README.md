@@ -68,7 +68,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.httpRouter | string | `"radixtree_host_uri"` | Defines how apisix handles routing: - radixtree_uri: match route by uri(base on radixtree) - radixtree_host_uri: match route by host + uri(base on radixtree) - radixtree_uri_with_parameter: match route by uri with parameters |
 | apisix.image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | apisix.image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| apisix.image.tag | string | `"3.4.1-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| apisix.image.tag | string | `"3.5.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | apisix.kind | string | `"Deployment"` | Use a `DaemonSet` or `Deployment` |
 | apisix.luaModuleHook | object | `{"configMapRef":{"mounts":[{"key":"","path":""}],"name":""},"enabled":false,"hookPoint":"","luaPath":""}` | Whether to add a custom lua module |
 | apisix.luaModuleHook.configMapRef | object | `{"mounts":[{"key":"","path":""}],"name":""}` | configmap that stores the codes |
@@ -182,7 +182,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | gateway.proxyProtocol | object | `{"http":{"containerPort":9181,"enabled":false,"servicePort":9181},"https":{"containerPort":9182,"enabled":false,"servicePort":9182}}` | Proxy Protocol Configuration |
 | gateway.proxyProtocol.http | object | `{"containerPort":9181,"enabled":false,"servicePort":9181}` | If you enable proxy protocol, you must use this port to receive http request with proxy protocol |
 | gateway.proxyProtocol.https | object | `{"containerPort":9182,"enabled":false,"servicePort":9182}` | The port with proxy protocol for https |
-| gateway.stream | object | `{"enabled":false,"only":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
+| gateway.stream | object | `{"enabled":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | gateway.tls | object | `{"additionalContainerPorts":[],"certCAFilename":"","containerPort":9443,"enabled":false,"existingCASecret":"","fallbackSNI":"","http2":{"enabled":true},"servicePort":443,"sslProtocols":"TLSv1.2 TLSv1.3"}` | Apache APISIX service settings for tls |
 | gateway.tls.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |
 | gateway.tls.certCAFilename | string | `""` | Filename be used in the gateway.tls.existingCASecret |
