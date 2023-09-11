@@ -1,401 +1,422 @@
-#
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  labels:
+    apisix.apache.org/app: ingress-apisix
   name: apisixconsumers.apisix.apache.org
 spec:
   group: apisix.apache.org
-  scope: Namespaced
   names:
-    plural: apisixconsumers
-    singular: apisixconsumer
     kind: ApisixConsumer
+    plural: apisixconsumers
     shortNames:
       - ac
+    singular: apisixconsumer
   preserveUnknownFields: false
+  scope: Namespaced
   versions:
-    - name: v2beta3
+    - deprecated: true
+      name: v2beta3
+      schema:
+        openAPIV3Schema:
+          properties:
+            spec:
+              properties:
+                authParameter:
+                  oneOf:
+                    - required:
+                        - basicAuth
+                    - required:
+                        - keyAuth
+                    - required:
+                        - wolfRBAC
+                    - required:
+                        - jwtAuth
+                    - required:
+                        - hmacAuth
+                  properties:
+                    basicAuth:
+                      oneOf:
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
+                      properties:
+                        secretRef:
+                          properties:
+                            name:
+                              minLength: 1
+                              type: string
+                          required:
+                            - name
+                          type: object
+                        value:
+                          properties:
+                            password:
+                              minLength: 1
+                              type: string
+                            username:
+                              minLength: 1
+                              type: string
+                          required:
+                            - username
+                            - password
+                          type: object
+                      type: object
+                    hmacAuth:
+                      oneOf:
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
+                      properties:
+                        secretRef:
+                          properties:
+                            name:
+                              minLength: 1
+                              type: string
+                          required:
+                            - name
+                          type: object
+                        value:
+                          properties:
+                            access_key:
+                              type: string
+                            algorithm:
+                              type: string
+                            clock_skew:
+                              type: integer
+                            encode_uri_params:
+                              type: boolean
+                            keep_headers:
+                              type: boolean
+                            max_req_body:
+                              type: integer
+                            secret_key:
+                              type: string
+                            signed_headers:
+                              items:
+                                type: string
+                              type: array
+                            validate_request_body:
+                              type: boolean
+                          required:
+                            - access_key
+                            - secret_key
+                          type: object
+                      type: object
+                    jwtAuth:
+                      oneOf:
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
+                      properties:
+                        secretRef:
+                          properties:
+                            name:
+                              minLength: 1
+                              type: string
+                          required:
+                            - name
+                          type: object
+                        value:
+                          properties:
+                            algorithm:
+                              default: HS256
+                              type: string
+                            base64_secret:
+                              default: false
+                              type: boolean
+                            exp:
+                              default: 86400
+                              type: integer
+                            key:
+                              minLength: 1
+                              type: string
+                            lifetime_grace_period:
+                              default: 0
+                              type: integer
+                            private_key:
+                              type: string
+                            public_key:
+                              type: string
+                            secret:
+                              type: string
+                          required:
+                            - key
+                          type: object
+                      type: object
+                    keyAuth:
+                      oneOf:
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
+                      properties:
+                        secretRef:
+                          properties:
+                            name:
+                              minLength: 1
+                              type: string
+                          required:
+                            - name
+                          type: object
+                        value:
+                          properties:
+                            key:
+                              minLength: 1
+                              type: string
+                          required:
+                            - key
+                          type: object
+                      type: object
+                    wolfRBAC:
+                      oneOf:
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
+                      properties:
+                        secretRef:
+                          properties:
+                            name:
+                              minLength: 1
+                              type: string
+                          required:
+                            - name
+                          type: object
+                        value:
+                          properties:
+                            appid:
+                              type: string
+                            header_prefix:
+                              type: string
+                            server:
+                              type: string
+                          type: object
+                      type: object
+                  type: object
+              required:
+                - authParameter
+              type: object
+          type: object
       served: true
       storage: false
       subresources:
         status: {}
+    - name: v2
       schema:
         openAPIV3Schema:
-          type: object
           properties:
             spec:
-              type: object
-              required:
-                - authParameter
               properties:
                 authParameter:
-                  type: object
                   oneOf:
-                    - required: ["basicAuth"]
-                    - required: ["keyAuth"]
-                    - required: ["wolfRBAC"]
-                    - required: ["jwtAuth"]
-                    - required: ["hmacAuth"]
+                    - required:
+                        - basicAuth
+                    - required:
+                        - keyAuth
+                    - required:
+                        - wolfRBAC
+                    - required:
+                        - jwtAuth
+                    - required:
+                        - hmacAuth
+                    - required:
+                        - ldapAuth
                   properties:
                     basicAuth:
-                      type: object
                       oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
                       properties:
-                        value:
-                          type: object
+                        secretRef:
                           properties:
-                            username:
-                              type: string
+                            name:
                               minLength: 1
+                              type: string
+                          required:
+                            - name
+                          type: object
+                        value:
+                          properties:
                             password:
-                              type: string
                               minLength: 1
+                              type: string
+                            username:
+                              minLength: 1
+                              type: string
                           required:
                             - username
                             - password
-                        secretRef:
                           type: object
-                          properties:
-                            name:
-                              type: string
-                              minLength: 1
-                          required:
-                            - name
-                    keyAuth:
                       type: object
+                    hmacAuth:
                       oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
                       properties:
-                        value:
-                          type: object
-                          properties:
-                            key:
-                              type: string
-                              minLength: 1
-                          required:
-                            - key
                         secretRef:
-                          type: object
                           properties:
                             name:
-                              type: string
                               minLength: 1
+                              type: string
                           required:
                             - name
+                          type: object
+                        value:
+                          properties:
+                            access_key:
+                              type: string
+                            algorithm:
+                              type: string
+                            clock_skew:
+                              type: integer
+                            encode_uri_params:
+                              type: boolean
+                            keep_headers:
+                              type: boolean
+                            max_req_body:
+                              type: integer
+                            secret_key:
+                              type: string
+                            signed_headers:
+                              items:
+                                type: string
+                              type: array
+                            validate_request_body:
+                              type: boolean
+                          required:
+                            - access_key
+                            - secret_key
+                          type: object
+                      type: object
                     jwtAuth:
-                      type: object
                       oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
                       properties:
-                        value:
-                          type: object
+                        secretRef:
                           properties:
-                            key:
-                              type: string
+                            name:
                               minLength: 1
-                            secret:
                               type: string
-                            public_key:
+                          required:
+                            - name
+                          type: object
+                        value:
+                          properties:
+                            algorithm:
+                              default: HS256
                               type: string
+                            base64_secret:
+                              default: false
+                              type: boolean
+                            exp:
+                              default: 86400
+                              type: integer
+                            key:
+                              minLength: 1
+                              type: string
+                            lifetime_grace_period:
+                              default: 0
+                              type: integer
                             private_key:
                               type: string
-                            algorithm:
-                              type: string
-                              default: HS256
-                            exp:
-                              type: integer
-                              default: 86400
-                            base64_secret:
-                              type: boolean
-                              default: false
-                            lifetime_grace_period:
-                              type: integer
-                              default: 0
-                          required:
-                            - key
-                        secretRef:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                              minLength: 1
-                          required:
-                            - name
-                    wolfRBAC:
-                      type: object
-                      oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
-                      properties:
-                        value:
-                          type: object
-                          properties:
-                            server:
-                              type: string
-                            appid:
-                              type: string
-                            header_prefix:
-                              type: string
-                        secretRef:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                              minLength: 1
-                          required:
-                            - name
-                    hmacAuth:
-                      type: object
-                      oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
-                      properties:
-                        value:
-                          type: object
-                          properties:
-                            access_key:
-                              type: string
-                            secret_key:
-                              type: string
-                            algorithm:
-                              type: string
-                            clock_skew:
-                              type: integer
-                            signed_headers:
-                              type: array
-                              items:
-                                type: string
-                            keep_headers:
-                              type: boolean
-                            encode_uri_params:
-                              type: boolean
-                            validate_request_body:
-                              type: boolean
-                            max_req_body:
-                              type: integer
-                          required:
-                            - access_key
-                            - secret_key
-                        secretRef:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                              minLength: 1
-                          required:
-                            - name
-    - name: v2
-      served: true
-      storage: true
-      subresources:
-        status: {}
-      schema:
-        openAPIV3Schema:
-          type: object
-          properties:
-            spec:
-              type: object
-              required:
-                - authParameter
-              properties:
-                ingressClassName:
-                  type: string
-                authParameter:
-                  type: object
-                  oneOf:
-                    - required: ["basicAuth"]
-                    - required: ["keyAuth"]
-                    - required: ["wolfRBAC"]
-                    - required: ["jwtAuth"]
-                    - required: ["hmacAuth"]
-                    - required: ["ldapAuth"]
-                  properties:
-                    basicAuth:
-                      type: object
-                      oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
-                      properties:
-                        value:
-                          type: object
-                          properties:
-                            username:
-                              type: string
-                              minLength: 1
-                            password:
-                              type: string
-                              minLength: 1
-                          required:
-                            - username
-                            - password
-                        secretRef:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                              minLength: 1
-                          required:
-                            - name
-                    keyAuth:
-                      type: object
-                      oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
-                      properties:
-                        value:
-                          type: object
-                          properties:
-                            key:
-                              type: string
-                              minLength: 1
-                          required:
-                            - key
-                        secretRef:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                              minLength: 1
-                          required:
-                            - name
-                    jwtAuth:
-                      type: object
-                      oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
-                      properties:
-                        value:
-                          type: object
-                          properties:
-                            key:
-                              type: string
-                              minLength: 1
-                            secret:
-                              type: string
                             public_key:
                               type: string
-                            algorithm:
+                            secret:
                               type: string
-                              default: HS256
-                            exp:
-                              type: integer
-                              default: 86400
-                            base64_secret:
-                              type: boolean
-                              default: false
-                            lifetime_grace_period:
-                              type: integer
-                              default: 0
                           required:
                             - key
-                        secretRef:
                           type: object
-                          properties:
-                            name:
-                              type: string
-                              minLength: 1
-                          required:
-                            - name
-                    wolfRBAC:
                       type: object
+                    keyAuth:
                       oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
                       properties:
-                        value:
-                          type: object
-                          properties:
-                            server:
-                              type: string
-                            appid:
-                              type: string
-                            header_prefix:
-                              type: string
                         secretRef:
-                          type: object
                           properties:
                             name:
-                              type: string
                               minLength: 1
+                              type: string
                           required:
                             - name
-                    hmacAuth:
+                          type: object
+                        value:
+                          properties:
+                            key:
+                              minLength: 1
+                              type: string
+                          required:
+                            - key
+                          type: object
                       type: object
-                      oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
-                      properties:
-                        value:
-                          type: object
-                          properties:
-                            access_key:
-                              type: string
-                            secret_key:
-                              type: string
-                            algorithm:
-                              type: string
-                            clock_skew:
-                              type: integer
-                            signed_headers:
-                              type: array
-                              items:
-                                type: string
-                            keep_headers:
-                              type: boolean
-                            encode_uri_params:
-                              type: boolean
-                            validate_request_body:
-                              type: boolean
-                            max_req_body:
-                              type: integer
-                          required:
-                            - access_key
-                            - secret_key
-                        secretRef:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                              minLength: 1
-                          required:
-                            - name
                     ldapAuth:
-                      type: object
                       oneOf:
-                        - required: ["value"]
-                        - required: ["secretRef"]
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
                       properties:
-                        value:
+                        secretRef:
+                          properties:
+                            name:
+                              minLength: 1
+                              type: string
+                          required: null
                           type: object
+                        value:
                           properties:
                             user_dn:
                               type: string
                           required:
                             - user_dn
-                        secretRef:
                           type: object
+                      type: object
+                    wolfRBAC:
+                      oneOf:
+                        - required:
+                            - value
+                        - required:
+                            - secretRef
+                      properties:
+                        secretRef:
                           properties:
                             name:
-                              type: string
                               minLength: 1
-                          required: null
+                              type: string
+                          required:
+                            - name
+                          type: object
+                        value:
+                          properties:
+                            appid:
+                              type: string
+                            header_prefix:
+                              type: string
+                            server:
+                              type: string
+                          type: object
+                      type: object
+                  type: object
+                ingressClassName:
+                  type: string
+              required:
+                - authParameter
+              type: object
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
