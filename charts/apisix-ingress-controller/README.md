@@ -142,7 +142,7 @@ The same for container level, you need to set:
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"apache/apisix-ingress-controller"` |  |
-| image.tag | string | `"1.6.1"` |  |
+| image.tag | string | `"1.7.0"` |  |
 | imagePullSecrets | list | `[]` |  |
 | initContainer.image | string | `"busybox"` |  |
 | initContainer.tag | float | `1.28` |  |
