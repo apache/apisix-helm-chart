@@ -35,7 +35,9 @@ spec:
     {{- if .Values.serviceMonitor.interval }}
     interval: {{ .Values.serviceMonitor.interval }}
     {{- end }}
-    metricRelabelings: {{ .Values.serviceMonitor.metricRelabelings }}
+    {{- with .Values.serviceMonitor.metricRelabelings }}
+    metricRelabelings: {{ toYaml . | nindent 6 }}
+    {{- end }}
   namespaceSelector:
     matchNames:
     - {{ template "apisix-ingress-controller.namespace" . }}
