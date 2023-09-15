@@ -41,5 +41,7 @@ spec:
     targetPort: prometheus
     path: {{ .Values.serviceMonitor.path }}
     interval: {{ .Values.serviceMonitor.interval }}
-    metricRelabelings: {{ .Values.serviceMonitor.metricRelabelings }}
+    {{- with .Values.serviceMonitor.metricRelabelings }}
+    metricRelabelings: {{ toYaml . | nindent 6 }}
+    {{- end }}
 {{- end }}
