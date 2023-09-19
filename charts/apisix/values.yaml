@@ -86,6 +86,12 @@ apisix:
     # -- Enable the proxy protocol to the upstream server
     upstream: true
 
+  # -- Enable Data Encryption
+  data_encryption:
+    enabled: false
+    # -- An array of 16 character strings used to encrypt/decrypt fields with AES-128-CBC
+    keyring: []
+
   # -- Enable full customized config.yaml
   enableCustomizedConfig: false
   # -- If apisix.enableCustomizedConfig is true, full customized config.yaml.
