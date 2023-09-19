@@ -168,7 +168,10 @@ data:
       {{- if .Values.apisix.data_encryption.enabled }}
       data_encryption:
         enable: true
-        keyring: {{ .Values.apisix.data_encryption.keyring }}
+        keyring:
+        {{- range .Values.apisix.data_encryption.keyring }}
+        - {{ . }}
+        {{ end }}
       {{- end }}
 
     nginx_config:    # config for render the template to genarate nginx.conf
