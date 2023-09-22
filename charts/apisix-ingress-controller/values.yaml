@@ -61,6 +61,17 @@ service:
   port: 80
 
 config:
+  etcdserver:
+    # -- Enable etcd server or not, default is false.
+    enabled: false
+    image:
+      # -- Apache APISIX image repository
+      repository: apache/apisix
+      # -- Apache APISIX image pull policy
+      pullPolicy: IfNotPresent
+      # -- Apache APISIX image tag
+      # Overrides the image tag whose default is the chart appVersion.
+      tag: 3.5.0-debian
   # -- the error log level, default is info, optional values are: debug, info, warn, error, panic, fatal
   logLevel: "info"
   # -- the output file path of error log, default is stderr, when

@@ -60,6 +60,12 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
+      {{ if .Values.config.etcdserver.enabled }}
+        - name: apisix-config
+          configMap:
+            name: {{ .Release.Name }}-gw-configmap
+      {{ end }}
+      {{ if not .Values.config.etcdserver.enabled }}
       initContainers:
         - name: wait-apisix-admin
           image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
@@ -71,13 +77,14 @@ spec:
 
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+      {{ end }}
       containers:
         - name: {{ .Chart.Name }}
           command:
             - /ingress-apisix/apisix-ingress-controller
             - ingress
             - --config-path
-            - /ingress-apisix/conf/config.yaml
+            - /ingress-apisix/mount-conf/config.yaml
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -86,6 +93,11 @@ spec:
             - name: http
               containerPort: {{ (.Values.config.httpListen | split ":")._1 }}
               protocol: TCP
+            {{ if .Values.config.etcdserver.enabled }}
+            - name: etcd
+              containerPort: 12379
+              protocol: TCP
+            {{ end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -97,7 +109,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - mountPath: /ingress-apisix/conf
+            - mountPath: /ingress-apisix/mount-conf
               name: configuration
           env:
           - name: POD_NAMESPACE
@@ -115,6 +127,26 @@ spec:
                 name: {{ .Values.config.apisix.existingSecret | quote }}
                 key: {{ include "apisix-ingress-controller.credentials.secretAdminKey" . }}
           {{- end }}
+        {{ if .Values.config.etcdserver.enabled }}
+        - name: apisix
+          image: "{{ .Values.config.etcdserver.image.repository }}:{{ .Values.config.etcdserver.image.tag }}"
+          imagePullPolicy: {{ .Values.config.etcdserver.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 9080
+              protocol: TCP
+            - name: http-admin
+              containerPort: 9180
+              protocol: TCP
+            - name: https
+              containerPort: 9443
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: apisix-config
+              mountPath: /usr/local/apisix/conf/config.yaml
+              subPath: config.yaml
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
