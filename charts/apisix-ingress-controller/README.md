@@ -120,6 +120,10 @@ The same for container level, you need to set:
 | config.apisixResourceSyncInterval | string | `"1h"` | Default interval for synchronizing Kubernetes resources to APISIX |
 | config.certFile | string | `"/etc/webhook/certs/cert.pem"` | the TLS certificate file path. |
 | config.enableProfiling | bool | `true` | enable profiling via web interfaces host:port/debug/pprof, default is true. |
+| config.etcdserver.enabled | bool | `false` | Enable etcd server or not, default is false. |
+| config.etcdserver.image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
+| config.etcdserver.image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
+| config.etcdserver.image.tag | string | `"3.5.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | config.httpListen | string | `":8080"` | the HTTP Server listen address, default is ":8080" |
 | config.httpsListen | string | `":8443"` | the HTTPS Server listen address, default is ":8443" |
 | config.ingressPublishService | string | `""` | the controller will use the Endpoint of this Service to update the status information of the Ingress resource. The format is "namespace/svc-name" to solve the situation that the data plane and the controller are not deployed in the same namespace. |
