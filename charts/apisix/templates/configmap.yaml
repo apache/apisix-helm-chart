@@ -165,6 +165,15 @@ data:
         fallback_sni: {{ .Values.gateway.tls.fallbackSNI | quote }}
         {{- end }}
 
+      {{- if .Values.apisix.data_encryption.enabled }}
+      data_encryption:
+        enable: true
+        keyring:
+        {{- range .Values.apisix.data_encryption.keyring }}
+        - {{ . }}
+        {{ end }}
+      {{- end }}
+
     nginx_config:    # config for render the template to genarate nginx.conf
       error_log: "{{ .Values.logs.errorLog }}"
       error_log_level: "{{ .Values.logs.errorLogLevel }}"    # warn,error
