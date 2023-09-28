@@ -196,6 +196,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | global.secrets | list | `[]` | Secrets to be created with apisix |
 | ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
 | initContainer.image | string | `"busybox"` | Init container image |
+| initContainer.securityContext | object | `{}` | Set the securityContext for the init container |
 | initContainer.tag | float | `1.28` | Init container tag |
 | logs.accessLog | string | `"/dev/stdout"` | Access log path |
 | logs.accessLogFormat | string | `"$remote_addr - $remote_user [$time_local] $http_host \\\"$request\\\" $status $body_bytes_sent $request_time \\\"$http_referer\\\" \\\"$http_user_agent\\\" $upstream_addr $upstream_status $upstream_response_time \\\"$upstream_scheme://$upstream_host$upstream_uri\\\""` | Access log format |

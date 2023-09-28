@@ -559,6 +559,14 @@ initContainer:
   image: busybox
   # -- Init container tag
   tag: 1.28
+  # -- Set the securityContext for the init container
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
 
 autoscaling:
   enabled: false
