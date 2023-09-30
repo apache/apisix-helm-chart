@@ -141,6 +141,9 @@ spec:
         - mountPath: /usr/local/apisix/conf/config.yaml
           name: apisix-config
           subPath: config.yaml
+        - mountPath: /usr/local/apisix/conf/debug.yaml
+          name: apisix-config
+          subPath: debug.yaml
       {{- if and .Values.gateway.tls.enabled .Values.gateway.tls.existingCASecret }}
         - mountPath: /usr/local/apisix/conf/ssl/{{ .Values.gateway.tls.certCAFilename }}
           name: ssl
