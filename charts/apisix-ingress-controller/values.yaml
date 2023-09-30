@@ -182,8 +182,10 @@ affinity: {}
 # ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
 topologySpreadConstraints: []
 
-# -- namespace: "ingress-apisix"
+#  namespace: "ingress-apisix"
 
+# -- Enable creating ServiceMonitor objects for Prometheus operator.
+# Requires Prometheus operator v0.38.0 or higher.
 serviceMonitor:
   enabled: false
   namespace: "monitoring"
