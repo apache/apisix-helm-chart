@@ -703,3 +703,27 @@ vault:
   token: ""
   # -- Prefix allows you to better enforcement of policies.
   prefix: ""
+
+debug:
+  # -- Enable or disable basic debuging
+  basic:
+    enable: false
+
+  # -- HTTP filter settings
+  http_filter:
+    enable: false
+
+  hook_conf:
+    enable: false
+    name: hook_phase
+    log_level: warn
+    is_print_input_args: true
+    is_print_return_value: true
+
+    # -- Required module name
+    hook_phase:
+      apisix:                       
+      - http_access_phase
+      - http_header_filter_phase
+      - http_body_filter_phase
+      - http_log_phase
