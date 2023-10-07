@@ -70,7 +70,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.httpRouter | string | `"radixtree_host_uri"` | Defines how apisix handles routing: - radixtree_uri: match route by uri(base on radixtree) - radixtree_host_uri: match route by host + uri(base on radixtree) - radixtree_uri_with_parameter: match route by uri with parameters |
 | apisix.image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | apisix.image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| apisix.image.tag | string | `"3.5.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| apisix.image.tag | string | `"3.6.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | apisix.kind | string | `"Deployment"` | Use a `DaemonSet` or `Deployment` |
 | apisix.luaModuleHook | object | `{"configMapRef":{"mounts":[{"key":"","path":""}],"name":""},"enabled":false,"hookPoint":"","luaPath":""}` | Whether to add a custom lua module |
 | apisix.luaModuleHook.configMapRef | object | `{"mounts":[{"key":"","path":""}],"name":""}` | configmap that stores the codes |
@@ -120,21 +120,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | dashboard.config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | dashboard.config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |
 | dashboard.enabled | bool | `false` |  |
-| deployment.certs | object | `{"cert":"","cert_key":"","certsSecret":"","mTLSCACert":"","mTLSCACertSecret":""}` | certs used for certificates in decoupled mode |
-| deployment.certs.cert | string | `""` | cert name in certsSecret |
-| deployment.certs.cert_key | string | `""` | cert key in certsSecret |
-| deployment.certs.certsSecret | string | `""` | secret name used for decoupled mode |
-| deployment.certs.mTLSCACert | string | `""` | mTLS CA cert filename in mTLSCACertSecret |
-| deployment.certs.mTLSCACertSecret | string | `""` | trusted_ca_cert name in certsSecret |
-| deployment.controlPlane | object | `{"cert":"","certKey":"","certsSecret":"","confServerPort":"9280"}` | used for control_plane deployment mode |
-| deployment.controlPlane.cert | string | `""` | conf Server CA cert name in certsSecret |
-| deployment.controlPlane.certKey | string | `""` | conf Server cert key name in certsSecret |
-| deployment.controlPlane.certsSecret | string | `""` | secret name used by conf Server |
-| deployment.controlPlane.confServerPort | string | `"9280"` | conf Server address |
-| deployment.dataPlane | object | `{"controlPlane":{"host":[],"prefix":"/apisix","timeout":30}}` | used for data_plane deployment mode |
-| deployment.dataPlane.controlPlane.host | list | `[]` | The hosts of the control_plane used by the data_plane |
-| deployment.dataPlane.controlPlane.prefix | string | `"/apisix"` | The prefix of the control_plane used by the data_plane |
-| deployment.dataPlane.controlPlane.timeout | int | `30` | Timeout when the data plane connects to the control plane |
 | deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
