@@ -306,13 +306,6 @@ data:
       {{- if eq .Values.deployment.role "control_plane" }}
       role_control_plane:
         config_provider: etcd
-        conf_server:
-          listen: 0.0.0.0:{{ .Values.deployment.controlPlane.confServerPort }}
-          cert: "/conf-server-ssl/{{ .Values.deployment.controlPlane.cert }}"
-          cert_key: "/conf-server-ssl/{{ .Values.deployment.controlPlane.certKey }}"
-          {{- if .Values.deployment.certs.mTLSCACertSecret }}
-          client_ca_cert: "/conf-ca-ssl/{{ .Values.deployment.certs.mTLSCACert }}"
-          {{- end }}
       {{- end }}
 
       admin:
@@ -386,25 +379,7 @@ data:
 
       {{- if eq .Values.deployment.role "data_plane" }}
       role_data_plane:
-        config_provider: control_plane
-        control_plane:
-          host:
-            {{- range $.Values.deployment.dataPlane.controlPlane.host }}
-            - {{ . | quote }}
-            {{- end }}
-          prefix: {{ .Values.deployment.dataPlane.controlPlane.prefix }}
-          timeout: {{ .Values.deployment.dataPlane.controlPlane.timeout }}
-      {{- end }}
-
-      {{- if eq .Values.deployment.mode "decoupled"}}
-      {{- if .Values.deployment.certs.certsSecret }}
-      certs:
-        cert: "/conf-client-ssl/{{ .Values.deployment.certs.cert }}"
-        cert_key: "/conf-client-ssl/{{ .Values.deployment.certs.cert_key }}"
-        {{- if .Values.deployment.certs.mTLSCACertSecret }}
-        trusted_ca_cert: "/conf-ca-ssl/{{ .Values.deployment.certs.mTLSCACert }}"
-        {{- end }}
-      {{- end }}
+        config_provider: etcd
       {{- end }}
 
 {{- end }}
