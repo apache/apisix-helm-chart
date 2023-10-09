@@ -385,6 +385,8 @@ apisix:
     workerConnections: "10620"
     workerProcesses: auto
     enableCPUAffinity: true
+    # -- Timeout during which a keep-alive client connection will stay open on the server side.
+    keepaliveTimeout: 60s
     envs: []
     # access log and error log configuration
     logs:
