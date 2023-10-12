@@ -214,6 +214,7 @@ securityContext: {}
 gateway:
   type: NodePort
   externalTrafficPolicy: Cluster
+  # annotations:
   externalIPs: []
   nginx:
     workerRlimitNofile: "20480"

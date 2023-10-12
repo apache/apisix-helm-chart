@@ -3,6 +3,10 @@ kind: Service
 metadata:
   name: {{ include "apisix-ingress-controller.fullname" . }}-apisix-gateway
   namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- range $key, $value := .Values.gateway.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
   labels:
     {{- include "apisix-ingress-controller.labels" . | nindent 4 }}
 spec:
