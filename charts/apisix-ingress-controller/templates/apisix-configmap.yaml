@@ -51,6 +51,13 @@ data:
         udp:
           - 9200
 
+    nginx_config:
+      error_log: "{{ .Values.nginx.errorLog }}"
+      error_log_level: "{{ .Values.nginx.errorLogLevel }}"    # warn,error
+      worker_processes: "{{ .Values.nginx.workerProcesses }}"
+      worker_rlimit_nofile: {{ .Values.nginx.workerRlimitNofile }}  # the number of files a worker process can open, should be larger than worker_connections
+      event:
+        worker_connections: {{ default "10620" .Values.nginx.workerConnections  }}
 
     plugins:                          # plugin list (sorted by priority)
       - real-ip                        # priority: 23000

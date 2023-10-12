@@ -210,3 +210,14 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
+
+gateway:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  externalIPs: []
+  nginx:
+    workerRlimitNofile: "20480"
+    workerConnections: "10620"
+    workerProcesses: auto
+    errorLog: stderr
+    errorLogLevel: warn

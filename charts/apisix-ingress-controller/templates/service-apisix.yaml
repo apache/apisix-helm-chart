@@ -17,4 +17,16 @@ spec:
       targetPort: 9443
   selector:
     {{- include "apisix-ingress-controller.selectorLabels" . | nindent 4 }}
-  type: NodePort
+  type: {{ .Values.gateway.type }}
+  externalTrafficPolicy: {{ .Values.gateway.externalTrafficPolicy }}
+  {{- if eq .Values.gateway.type "LoadBalancer" }}
+  {{- if .Values.gateway.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.gateway.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.gateway.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+  {{- range $cidr := .Values.gateway.loadBalancerSourceRanges }}
+  - {{ $cidr }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
