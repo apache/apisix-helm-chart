@@ -57,7 +57,7 @@ data:
       worker_processes: "{{ .Values.gateway.nginx.workerProcesses }}"
       worker_rlimit_nofile: {{ .Values.gateway.nginx.workerRlimitNofile }}  # the number of files a worker process can open, should be larger than worker_connections
       event:
-        worker_connections: {{ default "10620" .Values.gateway.nginx.workerConnections  }}
+        worker_connections: {{ .Values.gateway.nginx.workerConnections  }}
 
     plugins:                          # plugin list (sorted by priority)
       - real-ip                        # priority: 23000
