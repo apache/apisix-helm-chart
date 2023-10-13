@@ -63,21 +63,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.customPlugins.plugins[0].configMap | object | `{"mounts":[{"key":"the-file-name","path":"mount-path"}],"name":"configmap-name"}` | plugin codes can be saved inside configmap object. |
 | apisix.customPlugins.plugins[0].configMap.mounts | list | `[{"key":"the-file-name","path":"mount-path"}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
-| apisix.deployment.certs | object | `{"cert":"","cert_key":"","certsSecret":"","mTLSCACert":"","mTLSCACertSecret":""}` | certs used for certificates in decoupled mode |
-| apisix.deployment.certs.cert | string | `""` | cert name in certsSecret |
-| apisix.deployment.certs.cert_key | string | `""` | cert key in certsSecret |
-| apisix.deployment.certs.certsSecret | string | `""` | secret name used for decoupled mode |
-| apisix.deployment.certs.mTLSCACert | string | `""` | mTLS CA cert filename in mTLSCACertSecret |
-| apisix.deployment.certs.mTLSCACertSecret | string | `""` | trusted_ca_cert name in certsSecret |
-| apisix.deployment.controlPlane | object | `{"cert":"","certKey":"","certsSecret":"","confServerPort":"9280"}` | used for control_plane deployment mode |
-| apisix.deployment.controlPlane.cert | string | `""` | conf Server CA cert name in certsSecret |
-| apisix.deployment.controlPlane.certKey | string | `""` | conf Server cert key name in certsSecret |
-| apisix.deployment.controlPlane.certsSecret | string | `""` | secret name used by conf Server |
-| apisix.deployment.controlPlane.confServerPort | string | `"9280"` | conf Server address |
-| apisix.deployment.dataPlane | object | `{"controlPlane":{"host":[],"prefix":"/apisix","timeout":30}}` | used for data_plane deployment mode |
-| apisix.deployment.dataPlane.controlPlane.host | list | `[]` | The hosts of the control_plane used by the data_plane |
-| apisix.deployment.dataPlane.controlPlane.prefix | string | `"/apisix"` | The prefix of the control_plane used by the data_plane |
-| apisix.deployment.dataPlane.controlPlane.timeout | int | `30` | Timeout when the data plane connects to the control plane |
 | apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
@@ -181,7 +166,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | hostNetwork | bool | `false` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.5.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.6.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |
