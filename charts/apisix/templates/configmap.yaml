@@ -289,13 +289,6 @@ data:
       {{- if eq .Values.apisix.deployment.role "control_plane" }}
       role_control_plane:
         config_provider: etcd
-        conf_server:
-          listen: 0.0.0.0:{{ .Values.apisix.deployment.controlPlane.confServerPort }}
-          cert: "/conf-server-ssl/{{ .Values.apisix.deployment.controlPlane.cert }}"
-          cert_key: "/conf-server-ssl/{{ .Values.apisix.deployment.controlPlane.certKey }}"
-          {{- if .Values.apisix.deployment.certs.mTLSCACertSecret }}
-          client_ca_cert: "/conf-ca-ssl/{{ .Values.apisix.deployment.certs.mTLSCACert }}"
-          {{- end }}
       {{- end }}
 
       admin:
@@ -375,23 +368,5 @@ data:
 
       {{- if eq .Values.apisix.deployment.role "data_plane" }}
       role_data_plane:
-        config_provider: control_plane
-        control_plane:
-          host:
-            {{- range $.Values.apisix.deployment.dataPlane.controlPlane.host }}
-            - {{ . | quote }}
-            {{- end }}
-          prefix: {{ .Values.apisix.deployment.dataPlane.controlPlane.prefix }}
-          timeout: {{ .Values.apisix.deployment.dataPlane.controlPlane.timeout }}
-      {{- end }}
-
-      {{- if eq .Values.apisix.deployment.mode "decoupled"}}
-      {{- if .Values.apisix.deployment.certs.certsSecret }}
-      certs:
-        cert: "/conf-client-ssl/{{ .Values.apisix.deployment.certs.cert }}"
-        cert_key: "/conf-client-ssl/{{ .Values.apisix.deployment.certs.cert_key }}"
-        {{- if .Values.apisix.deployment.certs.mTLSCACertSecret }}
-        trusted_ca_cert: "/conf-ca-ssl/{{ .Values.apisix.deployment.certs.mTLSCACert }}"
-        {{- end }}
-      {{- end }}
+        config_provider: etcd
       {{- end }}

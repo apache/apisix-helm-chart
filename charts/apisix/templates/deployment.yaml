@@ -180,21 +180,6 @@ spec:
               subPath: {{ .Values.apisix.ssl.certCAFilename }}
           {{- end }}
 
-          {{- if and (eq .Values.apisix.deployment.role "control_plane") .Values.apisix.deployment.controlPlane.certsSecret }}
-            - mountPath: /conf-server-ssl
-              name: conf-server-ssl
-          {{- end }}
-
-          {{- if and (eq .Values.apisix.deployment.mode "decoupled") .Values.apisix.deployment.certs.mTLSCACertSecret }}
-            - mountPath: /conf-ca-ssl
-              name: conf-ca-ssl
-          {{- end }}
-
-          {{- if and (eq .Values.apisix.deployment.mode "decoupled") .Values.apisix.deployment.certs.certsSecret }}
-            - mountPath: /conf-client-ssl
-              name: conf-client-ssl
-          {{- end }}
-
           {{- if .Values.etcd.auth.tls.enabled }}
             - mountPath: /etcd-ssl
               name: etcd-ssl
@@ -257,23 +242,7 @@ spec:
             secretName: {{ .Values.etcd.auth.tls.existingSecret | quote }}
           name: etcd-ssl
         {{- end }}
-        {{- if and (eq .Values.apisix.deployment.role "control_plane") .Values.apisix.deployment.controlPlane.certsSecret }}
-        - secret:
-            secretName: {{ .Values.apisix.deployment.controlPlane.certsSecret | quote }}
-          name: conf-server-ssl
-        {{- end }}
 
-        {{- if and (eq .Values.apisix.deployment.mode "decoupled") .Values.apisix.deployment.certs.mTLSCACertSecret }}
-        - secret:
-            secretName: {{ .Values.apisix.deployment.certs.mTLSCACertSecret | quote }}
-          name: conf-ca-ssl
-        {{- end }}
-
-        {{- if and (eq .Values.apisix.deployment.mode "decoupled") .Values.apisix.deployment.certs.certsSecret }}
-        - secret:
-            secretName: {{ .Values.apisix.deployment.certs.certsSecret | quote }}
-          name: conf-client-ssl
-        {{- end }}
         {{- if .Values.apisix.setIDFromPodUID }}
         - downwardAPI:
             items:

@@ -29,7 +29,7 @@ image:
   pullPolicy: IfNotPresent
   # -- Apache APISIX image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 3.5.0-debian
+  tag: 3.6.0-debian
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
@@ -302,41 +302,6 @@ apisix:
     #
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     role: "traditional"
-
-    # -- used for control_plane deployment mode
-    controlPlane:
-      # -- conf Server address
-      confServerPort: "9280"
-      # -- secret name used by conf Server
-      certsSecret: ""
-      # -- conf Server CA cert name in certsSecret
-      cert: ""
-      # -- conf Server cert key name in certsSecret
-      certKey: ""
-
-    # -- used for data_plane deployment mode
-    dataPlane:
-      controlPlane:
-        # -- The hosts of the control_plane used by the data_plane
-        host: []
-        # -- The prefix of the control_plane used by the data_plane
-        prefix: "/apisix"
-        # -- Timeout when the data plane connects to the control plane
-        timeout: 30
-
-    # -- certs used for certificates in decoupled mode
-    certs:
-      # -- secret name used for decoupled mode
-      certsSecret: ""
-      # -- cert name in certsSecret
-      cert: ""
-      # -- cert key in certsSecret
-      cert_key: ""
-
-      # -- trusted_ca_cert name in certsSecret
-      mTLSCACertSecret: ""
-      # -- mTLS CA cert filename in mTLSCACertSecret
-      mTLSCACert: ""
 
   admin:
     # -- Enable Admin API
