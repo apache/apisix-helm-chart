@@ -180,7 +180,7 @@ data:
         access_log_format: '{{ .Values.apisix.nginx.logs.accessLogFormat }}'
         access_log_format_escape: {{ .Values.apisix.nginx.logs.accessLogFormatEscape }}
         {{- end }}
-        keepalive_timeout: 60s         # timeout during which a keep-alive client connection will stay open on the server side.
+        keepalive_timeout: {{ .Values.apisix.nginx.keepaliveTimeout | quote }}
         client_header_timeout: 60s     # timeout for reading client request header, then 408 (Request Time-out) error is returned to the client
         client_body_timeout: 60s       # timeout for reading client request body, then 408 (Request Time-out) error is returned to the client
         send_timeout: 10s              # timeout for transmitting a response to the client.then the connection is closed
