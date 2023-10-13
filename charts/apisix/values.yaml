@@ -200,6 +200,8 @@ service:
 # -- Using ingress access Apache APISIX service
 ingress:
   enabled: false
+  # -- (number) Service port to send traffic. Defaults to `service.http.servicePort`.
+  servicePort:
   # -- Ingress annotations
   annotations: {}
     # kubernetes.io/ingress.class: nginx
