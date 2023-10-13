@@ -108,6 +108,9 @@ extraEnvVars: []
 updateStrategy: {}
   # type: RollingUpdate
 
+# -- Additional Kubernetes resources to deploy with the release.
+extraDeploy: []
+
 # -- Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail.
 extraVolumes: []
 # - name: extras
