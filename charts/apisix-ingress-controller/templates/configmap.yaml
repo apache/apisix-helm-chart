@@ -24,7 +24,11 @@ data:
     key_file: {{ .Values.config.keyFile | quote }}
     http_listen: {{ .Values.config.httpListen | quote }}
     https_listen: {{ .Values.config.httpsListen | quote }}
+    {{- if and (eq .Values.config.ingressPublishService "") (.Values.config.etcdserver.enabled)  }}
+    ingress_publish_service: {{ .Release.Namespace }}/{{ include "apisix-ingress-controller.fullname" . }}-apisix-gateway
+    {{- else }}
     ingress_publish_service: {{ .Values.config.ingressPublishService | quote }}
+    {{- end }}
     {{- if gt (len .Values.config.ingressStatusAddress) 0 }}
     ingress_status_address:
     {{- range .Values.config.ingressStatusAddress }}
