@@ -144,6 +144,14 @@ The same for container level, you need to set:
 | config.logOutput | string | `"stderr"` | the output file path of error log, default is stderr, when the file path is "stderr" or "stdout", logs are marshalled plainly, which is more readable for human; otherwise logs are marshalled in JSON format, which can be parsed by programs easily. |
 | config.pluginMetadataCM | string | `""` | Pluginmetadata in APISIX can be controlled through ConfigMap. default is "" |
 | fullnameOverride | string | `""` |  |
+| gateway.externalIPs | list | `[]` |  |
+| gateway.externalTrafficPolicy | string | `"Cluster"` |  |
+| gateway.nginx.errorLog | string | `"stderr"` | Nginx error logs path |
+| gateway.nginx.errorLogLevel | string | `"warn"` | Nginx error logs level |
+| gateway.nginx.workerConnections | string | `"10620"` | Nginx worker connections |
+| gateway.nginx.workerProcesses | string | `"auto"` | Nginx worker processes |
+| gateway.nginx.workerRlimitNofile | string | `"20480"` | Nginx workerRlimitNoFile |
+| gateway.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"apache/apisix-ingress-controller"` |  |
 | image.tag | string | `"1.7.0"` |  |
