@@ -22,8 +22,9 @@ spec:
   selector:
     {{- include "apisix-ingress-controller.selectorLabels" . | nindent 4 }}
   type: {{ .Values.gateway.type }} # LoadBalancer or NodePort
-  {{- if .Values.gateway.externalTrafficPolicy }} # Cluster or Local
+  {{- if or (eq .Values.gateway.type "LoadBalancer") (eq .Values.gateway.type "NodePort") }}
   externalTrafficPolicy: {{ .Values.gateway.externalTrafficPolicy }}
+  {{- end }}
   {{- if eq .Values.gateway.type "LoadBalancer" }}
   {{- if .Values.gateway.loadBalancerIP }}
   loadBalancerIP: {{ .Values.gateway.loadBalancerIP }} # specify load balancer ip by user
@@ -34,5 +35,10 @@ spec:
   - {{ $cidr }}
   {{- end }}
   {{- end }}
+  {{- end }}
+  {{- if gt (len .Values.gateway.externalIPs) 0 }}
+  externalIPs:
+  {{- range $ip := .Values.gateway.externalIPs }}
+  - {{ $ip }}
   {{- end }}
   {{- end }}

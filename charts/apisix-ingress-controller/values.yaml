@@ -215,6 +215,10 @@ gateway:
   type: NodePort
   externalTrafficPolicy: Cluster
   # annotations:
+  #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
+  # loadBalancerIP: a.b.c.d
+  # loadBalancerSourceRanges:
+  #   - "143.231.0.0/16"
   externalIPs: []
   nginx:
     workerRlimitNofile: "20480"
