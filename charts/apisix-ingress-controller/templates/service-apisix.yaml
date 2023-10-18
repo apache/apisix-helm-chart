@@ -29,11 +29,10 @@ spec:
   loadBalancerIP: {{ .Values.gateway.loadBalancerIP }} # specify load balancer ip by user
   {{- end }}
   {{- if .Values.gateway.loadBalancerSourceRanges }}
-  {{- end }}
-  {{- if .Values.gateway.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:
   {{- range $cidr := .Values.gateway.loadBalancerSourceRanges }}
   - {{ $cidr }}
+  {{- end }}
   {{- end }}
   {{- end }}
   {{- end }}
