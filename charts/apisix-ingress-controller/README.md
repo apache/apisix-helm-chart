@@ -129,7 +129,7 @@ The same for container level, you need to set:
 | config.ingressPublishService | string | `""` | the controller will use the Endpoint of this Service to update the status information of the Ingress resource. The format is "namespace/svc-name" to solve the situation that the data plane and the controller are not deployed in the same namespace. |
 | config.ingressStatusAddress | list | `[]` |  |
 | config.keyFile | string | `"/etc/webhook/certs/key.pem"` | the TLS key file path. |
-| config.kubernetes | object | `{"apiVersion":"apisix.apache.org/v2","apisixRouteVersion":"apisix.apache.org/v2","electionId":"ingress-apisix-leader","enableGatewayAPI":false,"ingressClass":"apisix","ingressVersion":"networking/v1","kubeconfig":"","namespaceSelector":[""],"pluginMetadataCM":"","resyncInterval":"6h","watchEndpointSlices":false}` | Kubernetes related configurations. |
+| config.kubernetes | object | `{"apiVersion":"apisix.apache.org/v2","apisixRouteVersion":"apisix.apache.org/v2","electionId":"ingress-apisix-leader","enableGatewayAPI":false,"ingressClass":"apisix","ingressVersion":"networking/v1","kubeconfig":"","namespaceSelector":[""],"resyncInterval":"6h","watchEndpointSlices":false}` | Kubernetes related configurations. |
 | config.kubernetes.apiVersion | string | `"apisix.apache.org/v2"` | the resource API version, support "apisix.apache.org/v2beta3" and "apisix.apache.org/v2". default is "apisix.apache.org/v2" |
 | config.kubernetes.apisixRouteVersion | string | `"apisix.apache.org/v2"` | the supported apisixroute api group version, can be "apisix.apache.org/v2" "apisix.apache.org/v2beta3" or "apisix.apache.org/v2beta2" |
 | config.kubernetes.electionId | string | `"ingress-apisix-leader"` | the election id for the controller leader campaign, only the leader will watch and delivery resource changes, other instances (as candidates) stand by. |
@@ -138,11 +138,11 @@ The same for container level, you need to set:
 | config.kubernetes.ingressVersion | string | `"networking/v1"` | the supported ingress api group version, can be "networking/v1beta1", "networking/v1" (for Kubernetes version v1.19.0 or higher), and "extensions/v1beta1", default is "networking/v1". |
 | config.kubernetes.kubeconfig | string | `""` | the Kubernetes configuration file path, default is "", so the in-cluster configuration will be used. |
 | config.kubernetes.namespaceSelector | list | `[""]` | namespace_selector represent basis for selecting managed namespaces. the field is support since version 1.4.0 For example, "apisix.ingress=watching", so ingress will watching the namespaces which labels "apisix.ingress=watching" |
-| config.kubernetes.pluginMetadataCM | string | `""` | Pluginmetadata in APISIX can be controlled through ConfigMap. default is "" |
 | config.kubernetes.resyncInterval | string | `"6h"` | how long should apisix-ingress-controller re-synchronizes with Kubernetes, default is 6h, |
 | config.kubernetes.watchEndpointSlices | bool | `false` | whether to watch EndpointSlices rather than Endpoints. |
 | config.logLevel | string | `"info"` | the error log level, default is info, optional values are: debug, info, warn, error, panic, fatal |
 | config.logOutput | string | `"stderr"` | the output file path of error log, default is stderr, when the file path is "stderr" or "stdout", logs are marshalled plainly, which is more readable for human; otherwise logs are marshalled in JSON format, which can be parsed by programs easily. |
+| config.pluginMetadataCM | string | `""` | Pluginmetadata in APISIX can be controlled through ConfigMap. default is "" |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"apache/apisix-ingress-controller"` |  |
