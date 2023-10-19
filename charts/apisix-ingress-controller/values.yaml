@@ -98,6 +98,8 @@ config:
   enableProfiling: true
   # -- Default interval for synchronizing Kubernetes resources to APISIX
   apisixResourceSyncInterval: "1h"
+  # -- Pluginmetadata in APISIX can be controlled through ConfigMap. default is ""
+  pluginMetadataCM: ""
   # -- Kubernetes related configurations.
   kubernetes:
     # -- the Kubernetes configuration file path, default is "", so the in-cluster
@@ -135,8 +137,7 @@ config:
     # -- the resource API version, support "apisix.apache.org/v2beta3" and "apisix.apache.org/v2".
     # default is "apisix.apache.org/v2"
     apiVersion: "apisix.apache.org/v2"
-    # -- Pluginmetadata in APISIX can be controlled through ConfigMap. default is ""
-    pluginMetadataCM: ""
+
 
   # -- APISIX related configurations.
   apisix:
