@@ -109,7 +109,7 @@ config:
       accessLog:
         # -- Error log path
         filePath: /dev/stdout
-
+    plugins: []
   authentication:
     # -- Secret for jwt token generation
     secret: secret
