@@ -158,6 +158,9 @@ data:
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
         ssl_trusted_certificate: "/usr/local/apisix/conf/ssl/{{ .Values.apisix.ssl.certCAFilename }}"
         {{- end }}
+        {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.fallbackSNI }}
+        fallback_sni: {{ .Values.apisix.ssl.fallbackSNI | quote }}
+        {{- end }}
 
     nginx_config:    # config for render the template to genarate nginx.conf
       error_log: "{{ .Values.apisix.nginx.logs.errorLog }}"

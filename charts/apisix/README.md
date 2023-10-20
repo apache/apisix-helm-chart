@@ -115,6 +115,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.ssl.containerPort | int | `9443` |  |
 | apisix.ssl.enabled | bool | `false` |  |
 | apisix.ssl.existingCASecret | string | `""` | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) |
+| apisix.ssl.fallbackSNI | string | `""` | Define SNI to fallback if none is presented by client |
 | apisix.ssl.http2.enabled | bool | `true` |  |
 | apisix.ssl.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
