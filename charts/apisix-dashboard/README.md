@@ -73,6 +73,8 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | config.conf.log.accessLog.filePath | string | `"/dev/stdout"` | Error log path |
 | config.conf.log.errorLog | object | `{"filePath":"/dev/stderr","level":"warn"}` | Error log level. Supports levels, lower to higher: debug, info, warn, error, panic, fatal |
 | config.conf.log.errorLog.filePath | string | `"/dev/stderr"` | Access log path |
+| config.conf.plugins | list | `[]` |  |
+| config.schema.configMapRef | object | `{}` |  |
 | fullnameOverride | string | `""` | String to fully override apisix-dashboard.fullname template |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX Dashboard image pull policy |
 | image.repository | string | `"apache/apisix-dashboard"` | Apache APISIX Dashboard image repository |
