@@ -71,6 +71,10 @@ securityContext: {}
   # runAsUser: 1000
 
 config:
+  schema: 
+    configMapRef: {}
+      # name: apisix-dashboard-schema
+      # key: schema.json
   conf:
     listen:
       # -- The address on which the Manager API should listen.
