@@ -212,6 +212,7 @@ securityContext: {}
   # runAsUser: 1000
 
 gateway:
+  # -- Apache APISIX service type for user access itself
   type: NodePort
   externalTrafficPolicy: Cluster
   # annotations:
@@ -219,10 +220,17 @@ gateway:
   # loadBalancerIP: a.b.c.d
   # loadBalancerSourceRanges:
   #   - "143.231.0.0/16"
+  # -- load balancer ips
   externalIPs: []
   nginx:
+    # -- Nginx workerRlimitNoFile
     workerRlimitNofile: "20480"
+    # -- Nginx worker connections
     workerConnections: "10620"
+    # -- Nginx worker processes
     workerProcesses: auto
+    # -- Nginx error logs path
     errorLog: stderr
+    # -- Nginx error logs level
     errorLogLevel: warn
+    
