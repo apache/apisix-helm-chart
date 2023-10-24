@@ -2,10 +2,8 @@
 metadata:
   annotations:
     checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-    {{- if .Values.apisix.podAnnotations }}
-    {{- range $key, $value := $.Values.apisix.podAnnotations }}
-    {{ $key }}: {{ $value | quote }}
-    {{- end }}
+    {{- with .Values.apisix.podAnnotations }}
+      {{ tpl (toYaml .) $ | nindent 4}}
     {{- end }}
   labels:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
@@ -45,13 +43,32 @@ spec:
         - name: APISIX_ADMIN_KEY
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.admin.credentials.secretName }}
-              key: admin
+              name: {{ .Values.admin.credentials.secretName | quote }}
+              key: {{ include "apisix.admin.credentials.secretAdminKey" . }}
         - name: APISIX_VIEWER_KEY
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.admin.credentials.secretName }}
-              key: viewer
+              name: {{ .Values.admin.credentials.secretName | quote }}
+              key: {{ include "apisix.admin.credentials.secretViewerKey" . }}
+      {{- end }}
+      {{- if and (not .Values.etcd.enabled) .Values.etcd.existingSecret }}
+        - name: APISIX_ETCD_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.etcd.existingSecret | quote }}
+              key: {{ include "apisix.etcd.credentials.userKey" . }}
+        - name: APISIX_ETCD_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.etcd.existingSecret | quote }}
+              key: {{ include "apisix.etcd.credentials.passwordKey" . }} 
+      {{- end }}
+      {{- if and .Values.etcd.enabled .Values.etcd.auth.rbac.existingSecret }}
+        - name: APISIX_ETCD_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.etcd.auth.rbac.existingSecret | quote }}
+              key: {{ include "apisix.etcd.auth.rbac.passwordKey" . }} 
       {{- end }}
 
       ports:
@@ -106,13 +123,7 @@ spec:
 
       {{- if ne .Values.deployment.role "control_plane" }}
       readinessProbe:
-        failureThreshold: 6
-        initialDelaySeconds: 10
-        periodSeconds: 10
-        successThreshold: 1
-        tcpSocket:
-          port: {{ .Values.gateway.http.containerPort }}
-        timeoutSeconds: 1
+      {{- toYaml .Values.apisix.readinessProbe | nindent 8 }}
       {{- end }}
       lifecycle:
         preStop:
@@ -134,21 +145,6 @@ spec:
         - mountPath: /usr/local/apisix/conf/ssl/{{ .Values.gateway.tls.certCAFilename }}
           name: ssl
           subPath: {{ .Values.gateway.tls.certCAFilename }}
-      {{- end }}
-
-      {{- if and (eq .Values.deployment.role "control_plane") .Values.deployment.controlPlane.certsSecret }}
-        - mountPath: /conf-server-ssl
-          name: conf-server-ssl
-      {{- end }}
-
-      {{- if and (eq .Values.deployment.mode "decoupled") .Values.deployment.certs.mTLSCACertSecret }}
-        - mountPath: /conf-ca-ssl
-          name: conf-ca-ssl
-      {{- end }}
-
-      {{- if and (eq .Values.deployment.mode "decoupled") .Values.deployment.certs.certsSecret }}
-        - mountPath: /conf-client-ssl
-          name: conf-client-ssl
       {{- end }}
 
       {{- if .Values.etcd.auth.tls.enabled }}
@@ -192,6 +188,11 @@ spec:
       {{ else }}
       command: ['sh', '-c', "until nc -z {{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
       {{- end }}
+      {{- with .Values.initContainer.securityContext }}
+      securityContext:
+        {{- . | toYaml | nindent 8 }}
+      {{- end }}
+
     {{- end }}
     {{- if .Values.extraInitContainers }}
     {{- toYaml .Values.extraInitContainers | nindent 4 }}
@@ -209,23 +210,6 @@ spec:
     - secret:
         secretName: {{ .Values.etcd.auth.tls.existingSecret | quote }}
       name: etcd-ssl
-    {{- end }}
-    {{- if and (eq .Values.deployment.role "control_plane") .Values.deployment.controlPlane.certsSecret }}
-    - secret:
-        secretName: {{ .Values.deployment.controlPlane.certsSecret | quote }}
-      name: conf-server-ssl
-    {{- end }}
-
-    {{- if and (eq .Values.deployment.mode "decoupled") .Values.deployment.certs.mTLSCACertSecret }}
-    - secret:
-        secretName: {{ .Values.deployment.certs.mTLSCACertSecret | quote }}
-      name: conf-ca-ssl
-    {{- end }}
-
-    {{- if and (eq .Values.deployment.mode "decoupled") .Values.deployment.certs.certsSecret }}
-    - secret:
-        secretName: {{ .Values.deployment.certs.certsSecret | quote }}
-      name: conf-client-ssl
     {{- end }}
     {{- if .Values.apisix.setIDFromPodUID }}
     - downwardAPI:
@@ -263,5 +247,9 @@ spec:
   {{- with .Values.apisix.tolerations }}
   tolerations:
     {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.apisix.topologySpreadConstraints }}
+  topologySpreadConstraints:
+    {{- tpl (. | toYaml) $ | nindent 4 }}
   {{- end }}
 {{- end -}}

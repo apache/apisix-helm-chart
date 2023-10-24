@@ -58,10 +58,13 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | autoscaling.maxReplicas | int | `100` | Maximum number of replicas to scale out |
 | autoscaling.minReplicas | int | `1` | Minimum number of replicas to scale back |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization percentage |
+| autoscaling.version | string | `"v2"` | HPA version, the value is "v2" or "v2beta1", default "v2" |
 | config.authentication.expireTime | int | `3600` | JWT token expire time, in second |
 | config.authentication.secret | string | `"secret"` | Secret for jwt token generation |
 | config.authentication.users | list | `[{"password":"admin","username":"admin"}]` | Specifies username and password for login manager api. |
 | config.conf.etcd.endpoints | list | `["apisix-etcd:2379"]` | Supports defining multiple etcd host addresses for an etcd cluster |
+| config.conf.etcd.mtls | object | `{}` |  |
+| config.conf.etcd.mtlsExistingSecret | string | `""` | Specifies a secret to be mounted on /etc/etcd for mtls usage |
 | config.conf.etcd.password | string | `nil` | Specifies etcd basic auth password if enable etcd auth |
 | config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |
@@ -95,3 +98,5 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | tolerations | list | `[]` | Tolerations for pod assignment |
+| topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
+| updateStrategy | object | `{}` | Update strategy for apisix dashboard deployment |

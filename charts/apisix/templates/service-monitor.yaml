@@ -35,10 +35,13 @@ spec:
   selector:
     matchLabels:
       {{- include "apisix.labels" . | nindent 6 }}
-      app.kubernetes.io/service: apisix-gateway
+      app.kubernetes.io/service: apisix-prometheus-metrics
   endpoints:
   - scheme: http
     targetPort: prometheus
     path: {{ .Values.serviceMonitor.path }}
     interval: {{ .Values.serviceMonitor.interval }}
+    {{- with .Values.serviceMonitor.metricRelabelings }}
+    metricRelabelings: {{ toYaml . | nindent 6 }}
+    {{- end }}
 {{- end }}

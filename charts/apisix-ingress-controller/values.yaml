@@ -48,7 +48,7 @@ replicaCount: 1
 image:
   repository: apache/apisix-ingress-controller
   pullPolicy: IfNotPresent
-  tag: "1.6.1"
+  tag: "1.7.0"
 
 podAnnotations: {}
 
@@ -61,6 +61,17 @@ service:
   port: 80
 
 config:
+  etcdserver:
+    # -- Enable etcd server or not, default is false.
+    enabled: false
+    image:
+      # -- Apache APISIX image repository
+      repository: apache/apisix
+      # -- Apache APISIX image pull policy
+      pullPolicy: IfNotPresent
+      # -- Apache APISIX image tag
+      # Overrides the image tag whose default is the chart appVersion.
+      tag: 3.5.0-debian
   # -- the error log level, default is info, optional values are: debug, info, warn, error, panic, fatal
   logLevel: "info"
   # -- the output file path of error log, default is stderr, when
@@ -87,6 +98,8 @@ config:
   enableProfiling: true
   # -- Default interval for synchronizing Kubernetes resources to APISIX
   apisixResourceSyncInterval: "1h"
+  # -- Pluginmetadata in APISIX can be controlled through ConfigMap. default is ""
+  pluginMetadataCM: ""
   # -- Kubernetes related configurations.
   kubernetes:
     # -- the Kubernetes configuration file path, default is "", so the in-cluster
@@ -124,8 +137,7 @@ config:
     # -- the resource API version, support "apisix.apache.org/v2beta3" and "apisix.apache.org/v2".
     # default is "apisix.apache.org/v2"
     apiVersion: "apisix.apache.org/v2"
-    # -- Pluginmetadata in APISIX can be controlled through ConfigMap. default is ""
-    pluginMetadataCM: ""
+
 
   # -- APISIX related configurations.
   apisix:
@@ -139,6 +151,12 @@ config:
     # -- the APISIX admin API version. can be "v2" or "v3", default is "v2".
     adminAPIVersion: "v2"
 
+    # -- The APISIX Helm chart supports storing user credentials in a secret.
+    # The secret needs to contain a single key for admin token with key adminKey by default.
+    existingSecret: ""
+    # -- Name of the admin token key in the secret, overrides the default key name "adminKey"
+    existingSecretAdminKeyKey: ""
+
 resources: {}
 
 initContainer:
@@ -147,16 +165,28 @@ initContainer:
 
 autoscaling:
   enabled: false
+  # -- HPA version, the value is "v2" or "v2beta1", default "v2"
+  version: v2
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+# -- Update strategy for apisix ingress controller deployment
+updateStrategy: {}
+  # type: RollingUpdate
+
 nodeSelector: {}
 tolerations: []
+affinity: {}
+# -- Topology Spread Constraints for pod assignment spread across your cluster among failure-domains
+# ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+topologySpreadConstraints: []
 
-# -- namespace: "ingress-apisix"
+#  namespace: "ingress-apisix"
 
+# -- Enable creating ServiceMonitor objects for Prometheus operator.
+# Requires Prometheus operator v0.38.0 or higher.
 serviceMonitor:
   enabled: false
   namespace: "monitoring"
@@ -165,6 +195,9 @@ serviceMonitor:
   labels: {}
   # -- @param serviceMonitor.annotations ServiceMonitor annotations
   annotations: {}
+  # -- @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion.
+  # ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs
+  metricRelabelings: {}
 
 
 podSecurityContext: {}

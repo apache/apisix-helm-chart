@@ -21,6 +21,12 @@ global:
   #   - other-registry-secrets
   # -- Global Docker registry secret names as an array
   imagePullSecrets: []
+  # -- Secrets to be created with apisix
+  secrets: []
+    # - name: secret-name
+    #   values:
+    #     - name: secret-key
+    #       value: secret=value
 
 apisix:
   # -- Enable or disable Apache APISIX itself
@@ -66,7 +72,25 @@ apisix:
   # - radixtree_uri: match route by uri(base on radixtree)
   # - radixtree_host_uri: match route by host + uri(base on radixtree)
   # - radixtree_uri_with_parameter: match route by uri with parameters
-  httpRouter: radixtree_uri
+  httpRouter: radixtree_host_uri
+
+  # -- Enable Proxy Protocol
+  proxyProtocol:
+    enabled: false
+    # -- The port with proxy protocol for http, it differs from node_listen and admin_listen.
+    listenHttpPort: 9181
+    # -- The port with proxy protocol for https
+    listenHttpsPort: 9182
+    # -- Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option
+    tcp: true
+    # -- Enable the proxy protocol to the upstream server
+    upstream: true
+
+  # -- Enable Data Encryption
+  data_encryption:
+    enabled: false
+    # -- An array of 16 character strings used to encrypt/decrypt fields with AES-128-CBC
+    keyring: []
 
   # -- Enable full customized config.yaml
   enableCustomizedConfig: false
@@ -81,7 +105,7 @@ apisix:
     pullPolicy: IfNotPresent
     # -- Apache APISIX image tag
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 3.2.0-debian
+    tag: 3.6.0-debian
 
   # -- Use a `DaemonSet` or `Deployment`
   kind: Deployment
@@ -137,6 +161,9 @@ apisix:
   tolerations: []
   # -- Set affinity for Apache APISIX deploy
   affinity: {}
+  # -- Topology Spread Constraints for pod assignment spread across your cluster among failure-domains
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+  topologySpreadConstraints: []
 
   # -- timezone is the timezone where apisix uses.
   # For example: "UTC" or "Asia/Shanghai"
@@ -156,6 +183,16 @@ apisix:
   #         name: SECRET_NAME
   #         key: KEY
   extraEnvVars: []
+
+  # -- Set the readinessProbe for Apache APISIX pods
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    tcpSocket:
+      port: &gatewayHttpContainerPort 9080
+    timeoutSeconds: 1
 
 nameOverride: ""
 fullnameOverride: ""
@@ -181,41 +218,6 @@ deployment:
   # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
   role: "traditional"
 
-  # -- used for control_plane deployment mode
-  controlPlane:
-    # -- conf Server address
-    confServerPort: "9280"
-    # -- secret name used by conf Server
-    certsSecret: ""
-    # -- conf Server CA cert name in certsSecret
-    cert: ""
-    # -- conf Server cert key name in certsSecret
-    certKey: ""
-
-  # -- used for data_plane deployment mode
-  dataPlane:
-    controlPlane:
-      # -- The hosts of the control_plane used by the data_plane
-      host: []
-      # -- The prefix of the control_plane used by the data_plane
-      prefix: "/apisix"
-      # -- Timeout when the data plane connects to the control plane
-      timeout: 30
-
-  # -- certs used for certificates in decoupled mode
-  certs:
-    # -- secret name used for decoupled mode
-    certsSecret: ""
-    # -- cert name in certsSecret
-    cert: ""
-    # -- cert key in certsSecret
-    cert_key: ""
-
-    # -- trusted_ca_cert name in certsSecret
-    mTLSCACertSecret: ""
-    # -- mTLS CA cert filename in mTLSCACertSecret
-    mTLSCACert: ""
-
 gateway:
   # -- Apache APISIX service type for user access itself
   type: NodePort
@@ -232,7 +234,7 @@ gateway:
   http:
     enabled: true
     servicePort: 80
-    containerPort: 9080
+    containerPort: *gatewayHttpContainerPort
     # -- Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24)
     additionalContainerPorts: []
       # - port: 9081
@@ -258,10 +260,31 @@ gateway:
       enabled: true
     # -- TLS protocols allowed to use.
     sslProtocols: "TLSv1.2 TLSv1.3"
+    # -- Define SNI to fallback if none is presented by client
+    fallbackSNI: ""
+  # -- Proxy Protocol Configuration
+  proxyProtocol:
+    # -- If you enable proxy protocol, you must use this port to receive http request with proxy protocol
+    http:
+      enabled: false
+      # - Specify NodePort (only if gateway.type is NodePort)
+      # nodePort:
+      # - Define a Service Port on which the gateway is listening
+      servicePort: 9181
+      # - Gateway Service Port to use as target
+      containerPort: 9181
+    # -- The port with proxy protocol for https
+    https:
+      enabled: false
+      # - Specify NodePort (only if gateway.type is NodePort)
+      # nodePort:
+      # - Define a Service Port on which the gateway is listening
+      servicePort: 9182
+      # - Gateway Service Port to use as target
+      containerPort: 9182
   # -- Apache APISIX service settings for stream. L4 proxy (TCP/UDP)
   stream:
     enabled: false
-    only: false
     tcp: []
     udp: []
   # -- Using ingress access Apache APISIX service
@@ -311,6 +334,10 @@ admin:
     # -- The APISIX Helm chart supports storing user credentials in a secret.
     # The secret needs to contain two keys, admin and viewer, with their respective values set.
     secretName: ""
+    # -- Name of the admin role key in the secret, overrides the default key name "admin"
+    secretAdminKey: ""
+    # -- Name of the viewer role key in the secret, overrides the default key name "viewer"
+    secretViewerKey: ""
 
   allow:
     # -- The client IP CIDR allowed to access Apache APISIX Admin API service.
@@ -339,6 +366,10 @@ nginx:
   workerProcesses: auto
   enableCPUAffinity: true
   envs: []
+  # -- allow customize meta in `nginx_config` section
+  meta: |
+    lua_shared_dict:
+      prometheus-metrics: 15m
 
 # -- Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml)
 plugins: []
@@ -381,6 +412,7 @@ customPlugins:
           - key: "the-file-name"
             path: "mount-path"
 
+# -- Update strategy for apisix deployment
 updateStrategy: {}
   # type: RollingUpdate
 
@@ -396,7 +428,22 @@ extraVolumeMounts: []
 #   readOnly: true
 
 # -- Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail.
-extraInitContainers: []
+extraInitContainers:
+  - name: init-sysctl
+    image: busybox:1.28
+    command:
+      - /bin/sh
+      - -c
+      - |
+        sysctl -w net.core.somaxconn=65535
+        sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+        sysctl -w net.ipv4.tcp_max_syn_backlog=8192
+        sysctl -w fs.file-max=1048576
+        sysctl -w fs.inotify.max_user_instances=16384
+        sysctl -w fs.inotify.max_user_watches=524288
+        sysctl -w fs.inotify.max_queued_events=16384
+    securityContext:
+      privileged: true
 # - name: init-myservice
 #   image: busybox:1.28
 #   command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
@@ -477,9 +524,19 @@ initContainer:
   image: busybox
   # -- Init container tag
   tag: 1.28
+  # -- Set the securityContext for the init container
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
 
 autoscaling:
   enabled: false
+  # -- HPA version, the value is "v2" or "v2beta1", default "v2"
+  version: v2
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
@@ -520,6 +577,9 @@ serviceMonitor:
   labels: {}
   # -- @param serviceMonitor.annotations ServiceMonitor annotations
   annotations: {}
+  # -- @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion.
+  # ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs
+  metricRelabelings: []
 
 # -- etcd configuration
 # use the FQDN address or the IP of the etcd
@@ -538,6 +598,12 @@ etcd:
   prefix: "/apisix"
   # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
   timeout: 30
+  # -- Name of the existing secret containing user and password for external etcd, overrides etcd.user and etcd.password
+  existingSecret: ""
+  # -- Name of key containing username to be retrieved from the existing secret, has a value of user by default
+  existingSecretUserKey: ""
+  # -- Name of key containing password to be retrieved from the existing secret, has a value of password by default
+  existingSecretPasswordKey: ""
 
   # -- if etcd.enabled is true, set more values of bitnami/etcd helm chart
   auth:
@@ -546,6 +612,10 @@ etcd:
       create: false
       # -- root password for etcd. Requires etcd.auth.rbac.create to be true.
       rootPassword: ""
+      # -- Name of the existing secret containing credentials for the root user
+      existingSecret: ""
+      # -- Name of key containing password to be retrieved from the existing secret
+      existingSecretPasswordKey: ""
     tls:
       # -- enable etcd client certificate
       enabled: false

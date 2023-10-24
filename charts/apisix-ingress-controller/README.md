@@ -105,23 +105,31 @@ The same for container level, you need to set:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| affinity | object | `{}` |  |
 | autoscaling.enabled | bool | `false` |  |
 | autoscaling.maxReplicas | int | `100` |  |
 | autoscaling.minReplicas | int | `1` |  |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
+| autoscaling.version | string | `"v2"` | HPA version, the value is "v2" or "v2beta1", default "v2" |
 | clusterDomain | string | `"cluster.local"` |  |
-| config.apisix | object | `{"adminAPIVersion":"v2","adminKey":"edd1c9f034335f136f87ad84b625c8f1","clusterName":"default","serviceName":"apisix-admin","serviceNamespace":"ingress-apisix","servicePort":9180}` | APISIX related configurations. |
+| config.apisix | object | `{"adminAPIVersion":"v2","adminKey":"edd1c9f034335f136f87ad84b625c8f1","clusterName":"default","existingSecret":"","existingSecretAdminKeyKey":"","serviceName":"apisix-admin","serviceNamespace":"ingress-apisix","servicePort":9180}` | APISIX related configurations. |
 | config.apisix.adminAPIVersion | string | `"v2"` | the APISIX admin API version. can be "v2" or "v3", default is "v2". |
+| config.apisix.existingSecret | string | `""` | The APISIX Helm chart supports storing user credentials in a secret. The secret needs to contain a single key for admin token with key adminKey by default. |
+| config.apisix.existingSecretAdminKeyKey | string | `""` | Name of the admin token key in the secret, overrides the default key name "adminKey" |
 | config.apisix.serviceName | string | `"apisix-admin"` | Enabling this value, overrides serviceName and serviceNamespace. serviceFullname: "apisix-admin.apisix.svc.local" |
 | config.apisixResourceSyncInterval | string | `"1h"` | Default interval for synchronizing Kubernetes resources to APISIX |
 | config.certFile | string | `"/etc/webhook/certs/cert.pem"` | the TLS certificate file path. |
 | config.enableProfiling | bool | `true` | enable profiling via web interfaces host:port/debug/pprof, default is true. |
+| config.etcdserver.enabled | bool | `false` | Enable etcd server or not, default is false. |
+| config.etcdserver.image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
+| config.etcdserver.image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
+| config.etcdserver.image.tag | string | `"3.5.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | config.httpListen | string | `":8080"` | the HTTP Server listen address, default is ":8080" |
 | config.httpsListen | string | `":8443"` | the HTTPS Server listen address, default is ":8443" |
 | config.ingressPublishService | string | `""` | the controller will use the Endpoint of this Service to update the status information of the Ingress resource. The format is "namespace/svc-name" to solve the situation that the data plane and the controller are not deployed in the same namespace. |
 | config.ingressStatusAddress | list | `[]` |  |
 | config.keyFile | string | `"/etc/webhook/certs/key.pem"` | the TLS key file path. |
-| config.kubernetes | object | `{"apiVersion":"apisix.apache.org/v2","apisixRouteVersion":"apisix.apache.org/v2","electionId":"ingress-apisix-leader","enableGatewayAPI":false,"ingressClass":"apisix","ingressVersion":"networking/v1","kubeconfig":"","namespaceSelector":[""],"pluginMetadataCM":"","resyncInterval":"6h","watchEndpointSlices":false}` | Kubernetes related configurations. |
+| config.kubernetes | object | `{"apiVersion":"apisix.apache.org/v2","apisixRouteVersion":"apisix.apache.org/v2","electionId":"ingress-apisix-leader","enableGatewayAPI":false,"ingressClass":"apisix","ingressVersion":"networking/v1","kubeconfig":"","namespaceSelector":[""],"resyncInterval":"6h","watchEndpointSlices":false}` | Kubernetes related configurations. |
 | config.kubernetes.apiVersion | string | `"apisix.apache.org/v2"` | the resource API version, support "apisix.apache.org/v2beta3" and "apisix.apache.org/v2". default is "apisix.apache.org/v2" |
 | config.kubernetes.apisixRouteVersion | string | `"apisix.apache.org/v2"` | the supported apisixroute api group version, can be "apisix.apache.org/v2" "apisix.apache.org/v2beta3" or "apisix.apache.org/v2beta2" |
 | config.kubernetes.electionId | string | `"ingress-apisix-leader"` | the election id for the controller leader campaign, only the leader will watch and delivery resource changes, other instances (as candidates) stand by. |
@@ -130,15 +138,15 @@ The same for container level, you need to set:
 | config.kubernetes.ingressVersion | string | `"networking/v1"` | the supported ingress api group version, can be "networking/v1beta1", "networking/v1" (for Kubernetes version v1.19.0 or higher), and "extensions/v1beta1", default is "networking/v1". |
 | config.kubernetes.kubeconfig | string | `""` | the Kubernetes configuration file path, default is "", so the in-cluster configuration will be used. |
 | config.kubernetes.namespaceSelector | list | `[""]` | namespace_selector represent basis for selecting managed namespaces. the field is support since version 1.4.0 For example, "apisix.ingress=watching", so ingress will watching the namespaces which labels "apisix.ingress=watching" |
-| config.kubernetes.pluginMetadataCM | string | `""` | Pluginmetadata in APISIX can be controlled through ConfigMap. default is "" |
 | config.kubernetes.resyncInterval | string | `"6h"` | how long should apisix-ingress-controller re-synchronizes with Kubernetes, default is 6h, |
 | config.kubernetes.watchEndpointSlices | bool | `false` | whether to watch EndpointSlices rather than Endpoints. |
 | config.logLevel | string | `"info"` | the error log level, default is info, optional values are: debug, info, warn, error, panic, fatal |
 | config.logOutput | string | `"stderr"` | the output file path of error log, default is stderr, when the file path is "stderr" or "stdout", logs are marshalled plainly, which is more readable for human; otherwise logs are marshalled in JSON format, which can be parsed by programs easily. |
+| config.pluginMetadataCM | string | `""` | Pluginmetadata in APISIX can be controlled through ConfigMap. default is "" |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"apache/apisix-ingress-controller"` |  |
-| image.tag | string | `"1.6.1"` |  |
+| image.tag | string | `"1.7.0"` |  |
 | imagePullSecrets | list | `[]` |  |
 | initContainer.image | string | `"busybox"` |  |
 | initContainer.tag | float | `1.28` |  |
@@ -156,7 +164,10 @@ The same for container level, you need to set:
 | serviceAccount.automountServiceAccountToken | bool | `true` | Whether automounting API credentials for a service account |
 | serviceAccount.create | bool | `true` | Specifies whether a ServiceAccount should be created |
 | serviceAccount.name | string | `""` | The name of the ServiceAccount to use. If not set and create is true, a name is generated using the fullname template |
-| serviceMonitor | object | `{"annotations":{},"enabled":false,"interval":"15s","labels":{},"namespace":"monitoring"}` | namespace: "ingress-apisix" |
+| serviceMonitor | object | `{"annotations":{},"enabled":false,"interval":"15s","labels":{},"metricRelabelings":{},"namespace":"monitoring"}` | Enable creating ServiceMonitor objects for Prometheus operator. Requires Prometheus operator v0.38.0 or higher. |
 | serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
 | serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
+| serviceMonitor.metricRelabelings | object | `{}` | @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion. ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs |
 | tolerations | list | `[]` |  |
+| topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
+| updateStrategy | object | `{}` | Update strategy for apisix ingress controller deployment |

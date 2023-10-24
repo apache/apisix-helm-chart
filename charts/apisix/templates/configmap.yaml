@@ -69,14 +69,16 @@ data:
       enable_ipv6: {{ .Values.apisix.enableIPv6 }} # Enable nginx IPv6 resolver
       enable_server_tokens: {{ .Values.apisix.enableServerTokens }} # Whether the APISIX version number should be shown in Server header
 
-      # proxy_protocol:                   # Proxy Protocol configuration
-      #   listen_http_port: 9181          # The port with proxy protocol for http, it differs from node_listen and admin_listen.
-      #                                   # This port can only receive http request with proxy protocol, but node_listen & admin_listen
-      #                                   # can only receive http request. If you enable proxy protocol, you must use this port to
-      #                                   # receive http request with proxy protocol
-      #   listen_https_port: 9182         # The port with proxy protocol for https
-      #   enable_tcp_pp: true             # Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option
-      #   enable_tcp_pp_to_upstream: true # Enables the proxy protocol to the upstream server
+      {{- if .Values.apisix.proxyProtocol.enabled }}
+      proxy_protocol:                                                          # Proxy Protocol configuration
+        listen_http_port: {{ .Values.apisix.proxyProtocol.listenHttpPort }}    # The port with proxy protocol for http, it differs from node_listen and port_admin.
+                                                                               # This port can only receive http request with proxy protocol, but node_listen & port_admin
+                                                                               # can only receive http request. If you enable proxy protocol, you must use this port to
+                                                                               # receive http request with proxy protocol
+        listen_https_port: {{ .Values.apisix.proxyProtocol.listenHttpsPort }}  # The port with proxy protocol for https
+        enable_tcp_pp: {{ .Values.apisix.proxyProtocol.tcp }}                  # Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option
+        enable_tcp_pp_to_upstream: {{ .Values.apisix.proxyProtocol.upstream }} # Enable the proxy protocol to the upstream server
+      {{- end }}
 
       proxy_cache:                         # Proxy Caching configuration
         cache_ttl: 10s                     # The default caching time if the upstream does not specify the cache time
@@ -99,9 +101,19 @@ data:
                                     # radixtree_uri_with_parameter: match route by uri with parameters
         ssl: 'radixtree_sni'        # radixtree_sni: match route by SNI(base on radixtree)
 
+      {{- $proxy_mode := "" }}
+      {{- if and .Values.gateway.stream.enabled .Values.gateway.http.enabled }}
+        {{- $proxy_mode = "http&stream" }}
+      {{- else if .Values.gateway.http.enabled }}
+        {{- $proxy_mode = "http" }}
+      {{- else if .Values.gateway.stream.enabled }}
+        {{- $proxy_mode = "stream" }}
+      {{- end }}
+
+      proxy_mode: {{ $proxy_mode }}
+
       {{- if or (index .Values "ingress-controller" "enabled") (and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0))) }}
       stream_proxy:                 # TCP/UDP proxy
-        only: {{ .Values.gateway.stream.only }}
         {{- if or (index .Values "ingress-controller" "enabled") (gt (len .Values.gateway.stream.tcp) 0) }}
         tcp:                        # TCP proxy port list
           {{- if gt (len .Values.gateway.stream.tcp) 0}}
@@ -149,6 +161,18 @@ data:
         {{- if and .Values.gateway.tls.enabled .Values.gateway.tls.existingCASecret }}
         ssl_trusted_certificate: "/usr/local/apisix/conf/ssl/{{ .Values.gateway.tls.certCAFilename }}"
         {{- end }}
+        {{- if and .Values.gateway.tls.enabled .Values.gateway.tls.fallbackSNI }}
+        fallback_sni: {{ .Values.gateway.tls.fallbackSNI | quote }}
+        {{- end }}
+
+      {{- if .Values.apisix.data_encryption.enabled }}
+      data_encryption:
+        enable: true
+        keyring:
+        {{- range .Values.apisix.data_encryption.keyring }}
+        - {{ . }}
+        {{ end }}
+      {{- end }}
 
     nginx_config:    # config for render the template to genarate nginx.conf
       error_log: "{{ .Values.logs.errorLog }}"
@@ -158,6 +182,8 @@ data:
       worker_rlimit_nofile: {{ default "20480" .Values.nginx.workerRlimitNofile }}  # the number of files a worker process can open, should be larger than worker_connections
       event:
         worker_connections: {{ default "10620" .Values.nginx.workerConnections  }}
+      meta:
+        {{- .Values.nginx.meta | nindent 8 }}
       {{- with .Values.nginx.envs }}
       envs:
       {{- range $env := . }}
@@ -208,8 +234,12 @@ data:
     {{- if .Values.discovery.enabled }}
     discovery:
       {{- range $key, $value := .Values.discovery.registry }}
+      {{- if $value }}
       {{ $key }}:
         {{- include "apisix.tplvalues.render" (dict "value" $value "context" $) | nindent 8 }}
+      {{- else }}
+      {{ $key }}: {}
+      {{- end }}
       {{- end }}
     {{- end }}
 
@@ -276,13 +306,6 @@ data:
       {{- if eq .Values.deployment.role "control_plane" }}
       role_control_plane:
         config_provider: etcd
-        conf_server:
-          listen: 0.0.0.0:{{ .Values.deployment.controlPlane.confServerPort }}
-          cert: "/conf-server-ssl/{{ .Values.deployment.controlPlane.cert }}"
-          cert_key: "/conf-server-ssl/{{ .Values.deployment.controlPlane.certKey }}"
-          {{- if .Values.deployment.certs.mTLSCACertSecret }}
-          client_ca_cert: "/conf-ca-ssl/{{ .Values.deployment.certs.mTLSCACert }}"
-          {{- end }}
       {{- end }}
 
       admin:
@@ -311,7 +334,7 @@ data:
           # admin: can everything for configuration data
           - name: "admin"
             {{- if .Values.admin.credentials.secretName }}
-            key: "{{"{{"}}APISIX_ADMIN_KEY{{"}}"}}"
+            key: ${{"{{"}}APISIX_ADMIN_KEY{{"}}"}}
             {{- else }}
             key: {{ .Values.admin.credentials.admin }}
             {{- end }}
@@ -319,7 +342,7 @@ data:
           # viewer: only can view configuration data
           - name: "viewer"
             {{- if .Values.admin.credentials.secretName }}
-            key: "{{"{{"}}APISIX_VIEWER_KEY{{"}}"}}"
+            key: ${{"{{"}}APISIX_VIEWER_KEY{{"}}"}}
             {{- else }}
             key: {{ .Values.admin.credentials.viewer }}
             {{- end }}
@@ -342,13 +365,7 @@ data:
       {{- end }}
         prefix: {{ .Values.etcd.prefix | quote }}    # configuration prefix in etcd
         timeout: {{ .Values.etcd.timeout }}    # 30 seconds
-        {{- if and (not .Values.etcd.enabled) .Values.etcd.user }}
-        user: {{ .Values.etcd.user | quote }}
-        password: {{ .Values.etcd.password | quote }}
-        {{- else if and .Values.etcd.enabled .Values.etcd.auth.rbac.create }}
-        user: "root"
-        password: {{ .Values.etcd.auth.rbac.rootPassword | quote }}
-        {{- end }}
+        {{- include "apisix.etcd.credentials.config" . | nindent 8 }}
         {{- if .Values.etcd.auth.tls.enabled }}
         tls:
           cert: "/etcd-ssl/{{ .Values.etcd.auth.tls.certFilename }}"
@@ -362,25 +379,7 @@ data:
 
       {{- if eq .Values.deployment.role "data_plane" }}
       role_data_plane:
-        config_provider: control_plane
-        control_plane:
-          host:
-            {{- range $.Values.deployment.dataPlane.controlPlane.host }}
-            - {{ . | quote }}
-            {{- end }}
-          prefix: {{ .Values.deployment.dataPlane.controlPlane.prefix }}
-          timeout: {{ .Values.deployment.dataPlane.controlPlane.timeout }}
-      {{- end }}
-
-      {{- if eq .Values.deployment.mode "decoupled"}}
-      {{- if .Values.deployment.certs.certsSecret }}
-      certs:
-        cert: "/conf-client-ssl/{{ .Values.deployment.certs.cert }}"
-        cert_key: "/conf-client-ssl/{{ .Values.deployment.certs.cert_key }}"
-        {{- if .Values.deployment.certs.mTLSCACertSecret }}
-        trusted_ca_cert: "/conf-ca-ssl/{{ .Values.deployment.certs.mTLSCACert }}"
-        {{- end }}
-      {{- end }}
+        config_provider: etcd
       {{- end }}
 
 {{- end }}

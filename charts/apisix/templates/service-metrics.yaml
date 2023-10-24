@@ -13,26 +13,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{- if and (eq .Values.deployment.mode "decoupled") (eq .Values.deployment.role "control_plane") }}
+{{- if .Values.serviceMonitor.enabled}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "apisix.fullname" . }}-control-plane
+  name: {{ include "apisix.fullname" . }}-prometheus-metrics
   namespace: {{ .Release.Namespace }}
-  annotations:
-    {{- range $key, $value := .Values.admin.annotations }}
-      {{ $key }}: {{ $value | quote }}
-    {{- end }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
-    app.kubernetes.io/service: apisix-control-plane
+    app.kubernetes.io/service: apisix-prometheus-metrics
 spec:
-  type: "ClusterIP"
+  type: ClusterIP
   ports:
-  - name: apisix-control-plane
-    port: {{ .Values.deployment.controlPlane.confServerPort }}
-    targetPort: {{ .Values.deployment.controlPlane.confServerPort }}
+  - name: prometheus
+    port: {{ .Values.serviceMonitor.containerPort }}
+    targetPort: {{ .Values.serviceMonitor.containerPort }}
     protocol: TCP
   selector:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
-{{ end }}
+{{- end }}

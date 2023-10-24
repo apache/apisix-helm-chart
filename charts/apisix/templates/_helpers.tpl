@@ -111,3 +111,81 @@ Scheme to use while connecting etcd
 {{- "http" }}
 {{- end }}
 {{- end }}
+
+{{/*
+Key to use to fetch admin token from secret
+*/}}
+{{- define "apisix.admin.credentials.secretAdminKey" -}}
+{{- if .Values.admin.credentials.secretAdminKey }}
+{{- .Values.admin.credentials.secretAdminKey }}
+{{- else }}
+{{- "admin" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Key to use to fetch viewer token from secret
+*/}}
+{{- define "apisix.admin.credentials.secretViewerKey" -}}
+{{- if .Values.admin.credentials.secretViewerKey }}
+{{- .Values.admin.credentials.secretViewerKey }}
+{{- else }}
+{{- "viewer" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Key to use to fetch username for external etcd from secret
+*/}}
+{{- define "apisix.etcd.credentials.userKey" -}}
+{{- if .Values.etcd.existingSecretUserKey }}
+{{- .Values.etcd.existingSecretUserKey | quote }}
+{{- else }}
+{{- "user" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Key to use to fetch password for external etcd from secret
+*/}}
+{{- define "apisix.etcd.credentials.passwordKey" -}}
+{{- if .Values.etcd.existingSecretPasswordKey }}
+{{- .Values.etcd.existingSecretPasswordKey | quote }}
+{{- else }}
+{{- "password" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Key to use to fetch root password for rbac
+*/}}
+{{- define "apisix.etcd.auth.rbac.passwordKey" -}}
+{{- if .Values.etcd.auth.rbac.existingSecretPasswordKey }}
+{{- .Values.etcd.auth.rbac.existingSecretPasswordKey | quote }}
+{{- else }}
+{{- "etcd-root-password" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Configuration of user and password for etcd
+*/}}
+{{- define "apisix.etcd.credentials.config" -}}
+{{- if not .Values.etcd.enabled }}
+{{- if .Values.etcd.existingSecret }}
+user: "${{"{{"}}APISIX_ETCD_USER{{"}}"}}"
+password: "${{"{{"}}APISIX_ETCD_PASSWORD{{"}}"}}"
+{{- else if .Values.etcd.user }}
+user: {{ .Values.etcd.user | quote }}
+password: {{ .Values.etcd.password | quote }}
+{{- end }}
+{{- else if .Values.etcd.auth.rbac.create }}
+{{- if .Values.etcd.auth.rbac.existingSecret }}
+user: "root"
+password: "${{"{{"}}APISIX_ETCD_PASSWORD{{"}}"}}"
+{{- else }}
+user: "root"
+password: {{ .Values.etcd.auth.rbac.rootPassword | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

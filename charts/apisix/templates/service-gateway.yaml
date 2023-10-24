@@ -32,7 +32,9 @@ spec:
   {{- if .Values.gateway.clusterIP }}
   clusterIP: {{ .Values.gateway.clusterIP }}
   {{- end }}
+  {{- if or (eq .Values.gateway.type "LoadBalancer") (eq .Values.gateway.type "NodePort") }}
   externalTrafficPolicy: {{ .Values.gateway.externalTrafficPolicy }}
+  {{- end }}
   {{- if eq .Values.gateway.type "LoadBalancer" }}
   {{- if .Values.gateway.loadBalancerIP }}
   loadBalancerIP: {{ .Values.gateway.loadBalancerIP }}
@@ -80,10 +82,22 @@ spec:
     port: {{ .port }}
     targetPort: {{ .port }}
   {{- end }}
-  {{- if .Values.serviceMonitor.enabled }}
-  - name: prometheus
-    port: {{ .Values.serviceMonitor.containerPort }}
-    targetPort: {{ .Values.serviceMonitor.containerPort }}
+  {{- if or .Values.gateway.proxyProtocol.http.enabled }}
+  - name: apisix-gateway-pp-http
+    port: {{ .Values.gateway.proxyProtocol.http.servicePort }}
+    targetPort: {{ .Values.gateway.proxyProtocol.http.containerPort }}
+  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.proxyProtocol.http.nodePort))) }}
+    nodePort: {{ .Values.gateway.proxyProtocol.http.nodePort }}
+  {{- end }}
+    protocol: TCP
+  {{- end }}
+  {{- if or .Values.gateway.proxyProtocol.https.enabled }}
+  - name: apisix-gateway-pp-https
+    port: {{ .Values.gateway.proxyProtocol.https.servicePort }}
+    targetPort: {{ .Values.gateway.proxyProtocol.https.containerPort }}
+  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.proxyProtocol.https.nodePort))) }}
+    nodePort: {{ .Values.gateway.proxyProtocol.https.nodePort }}
+  {{- end }}
     protocol: TCP
   {{- end }}
   {{- if and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0)) }}
