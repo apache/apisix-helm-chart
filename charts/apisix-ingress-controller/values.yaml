@@ -210,7 +210,6 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
-
 gateway:
   # -- Apache APISIX service type for user access itself
   type: NodePort
@@ -233,4 +232,3 @@ gateway:
     errorLog: stderr
     # -- Nginx error logs level
     errorLogLevel: warn
-    
