@@ -65,7 +65,9 @@ data:
           password: {{ .password }}
         {{- end }}
     {{- end }}
+    {{- with .Values.config.conf.plugins }}
     plugins:
-      {{- range .Values.config.conf.plugins }}
+      {{- range . }}
       - {{ . }}
       {{- end }}
+    {{- end }}
