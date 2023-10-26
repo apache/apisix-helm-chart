@@ -71,8 +71,10 @@ securityContext: {}
   # runAsUser: 1000
 
 config:
-  schema: 
-    configMapRef: {}
+  schema:
+    # -- Overrides APISIX Dashboard schema.json 
+    # by mounting configMap containing schema.json
+    configMap: {}
       # name: apisix-dashboard-schema
       # key: schema.json
   conf:
@@ -113,6 +115,7 @@ config:
       accessLog:
         # -- Error log path
         filePath: /dev/stdout
+    # -- Overrides plugins in the APISIX Dashboard conf
     plugins: []
   authentication:
     # -- Secret for jwt token generation
