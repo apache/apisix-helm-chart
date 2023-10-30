@@ -81,6 +81,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.luaModuleHook.luaPath | string | `""` | extend lua_package_path to load third party code |
 | apisix.nodeSelector | object | `{}` | Node labels for Apache APISIX pod assignment |
 | apisix.podAnnotations | object | `{}` | Annotations to add to each pod |
+| apisix.podLabels | object | `{}` | Labels to add to each pod |
 | apisix.podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |
 | apisix.podDisruptionBudget.enabled | bool | `false` | Enable or disable podDisruptionBudget |
 | apisix.podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
