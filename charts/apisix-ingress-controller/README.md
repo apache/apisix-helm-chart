@@ -151,6 +151,15 @@ The same for container level, you need to set:
 | gateway.nginx.workerConnections | string | `"10620"` | Nginx worker connections |
 | gateway.nginx.workerProcesses | string | `"auto"` | Nginx worker processes |
 | gateway.nginx.workerRlimitNofile | string | `"20480"` | Nginx workerRlimitNoFile |
+| gateway.tls.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |
+| gateway.tls.certCAFilename | string | `""` | Filename be used in the gateway.tls.existingCASecret |
+| gateway.tls.containerPort | int | `9443` |  |
+| gateway.tls.enabled | bool | `false` |  |
+| gateway.tls.existingCASecret | string | `""` | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) |
+| gateway.tls.fallbackSNI | string | `""` | Define SNI to fallback if none is presented by client |
+| gateway.tls.http2.enabled | bool | `true` |  |
+| gateway.tls.servicePort | int | `443` |  |
+| gateway.tls.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | gateway.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"apache/apisix-ingress-controller"` |  |
@@ -161,6 +170,7 @@ The same for container level, you need to set:
 | labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX ingress controller resource |
 | nameOverride | string | `""` | Default values for apisix-ingress-controller. This is a YAML-formatted file. Declare variables to be passed into your templates.  |
 | nodeSelector | object | `{}` |  |
+| plugins | list | `[]` | Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
 | priorityClassName | string | `""` |  |
