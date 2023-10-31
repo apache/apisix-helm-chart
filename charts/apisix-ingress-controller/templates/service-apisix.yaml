@@ -17,8 +17,8 @@ spec:
       targetPort: 9080
     - name: https
       protocol: TCP
-      port: 443
-      targetPort: 9443
+      port: {{ .Values.gateway.tls.servicePort }}
+      targetPort: {{ .Values.gateway.tls.containerPort }}
   selector:
     {{- include "apisix-ingress-controller.selectorLabels" . | nindent 4 }}
   type: {{ .Values.gateway.type }} # LoadBalancer or NodePort
