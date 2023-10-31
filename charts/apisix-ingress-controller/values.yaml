@@ -232,3 +232,24 @@ gateway:
     errorLog: stderr
     # -- Nginx error logs level
     errorLogLevel: warn
+  tls:
+    enabled: false
+    servicePort: 443
+    containerPort: 9443
+    # -- Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99)
+    additionalContainerPorts: []
+      # - ip: 127.0.0.3           # Specific IP, If not set, the default value is `0.0.0.0`.
+      #   port: 9445
+      #   enable_http2: true
+    # -- Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd)
+    existingCASecret: ""
+    # -- Filename be used in the gateway.tls.existingCASecret
+    certCAFilename: ""
+    http2:
+      enabled: true
+    # -- TLS protocols allowed to use.
+    sslProtocols: "TLSv1.2 TLSv1.3"
+    # -- Define SNI to fallback if none is presented by client
+    fallbackSNI: ""
+# -- Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml)
+plugins: []
