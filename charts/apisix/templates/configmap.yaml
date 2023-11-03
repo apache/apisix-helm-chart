@@ -298,7 +298,7 @@ data:
         config_provider: etcd
       {{- end }}
 
-      {{- if not (eq .Values.deployment.role "data_plane") }}
+      {{- if not (eq .Values.apisix.deployment.role "data_plane") }}
       admin:
         allow_admin:    # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
         {{- if .Values.apisix.admin.allow.ipList }}
