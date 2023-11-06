@@ -72,7 +72,7 @@ securityContext: {}
 
 config:
   schema:
-    # -- Overrides APISIX Dashboard schema.json 
+    # -- Overrides APISIX Dashboard schema.json
     # by mounting configMap containing schema.json
     configMap: {}
       # name: apisix-dashboard-schema
