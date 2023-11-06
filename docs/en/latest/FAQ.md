@@ -42,16 +42,17 @@ helm install apisix apisix/apisix \
 Helm chart does not provide a direct way to deploy Apache APISIX running in standalone mode. You can install it in the following manner.
 
 Create a `deploy.yaml` with the following content.
+It is recommended using same Linux distribution as is used by the Helm Chart, which currently is debian.
 
 <Tabs
-  groupId="version"
-  defaultValue="3.0.0-beta"
-  values={[
-    {label: '3.0.0-beta', value: '3.0.0-beta'},
-    {label: '2.15', value: '2.15'},
-  ]}>
+groupId="version"
+defaultValue="3.1.0-debian"
+values={[
+{label: '3.1.0-centos', value: '3.1.0-centos'},
+{label: '3.1.0-debian', value: '3.1.0-debian'},
+]}>
 
-<TabItem value="3.0.0-beta">
+<TabItem value="3.1.0-centos">
 
 ```yaml
 # deploy.yaml
@@ -118,7 +119,7 @@ spec:
             tcpSocket:
               port: 9080
             timeoutSeconds: 2
-          image: "apache/apisix:2.99.0-centos"
+          image: "apache/apisix:3.1.0-centos"
           imagePullPolicy: IfNotPresent
           name: apisix-deployment
           # Create a soft link to link the apisix.yaml file in the mount directory to /usr/local/apisix/conf/apisix.yaml.
@@ -167,7 +168,7 @@ spec:
 
 </TabItem>
 
-<TabItem value="2.15">
+<TabItem value="3.1.0-debian">
 
 ```yaml
 # deploy.yaml
@@ -216,7 +217,7 @@ spec:
         app: apisix-deployment
     spec:
       terminationGracePeriodSeconds: 0
-      containers: 
+      containers:
         - livenessProbe:
             failureThreshold: 3
             initialDelaySeconds: 1
@@ -233,7 +234,7 @@ spec:
             tcpSocket:
               port: 9080
             timeoutSeconds: 2
-          image: "apache/apisix:2.15.0-alpine"
+          image: "apache/apisix:3.1.0-debian"
           imagePullPolicy: IfNotPresent
           name: apisix-deployment
           # Create a soft link to link the apisix.yaml file in the mount directory to /usr/local/apisix/conf/apisix.yaml.
