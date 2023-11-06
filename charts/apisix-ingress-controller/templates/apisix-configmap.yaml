@@ -58,6 +58,23 @@ data:
       worker_rlimit_nofile: {{ .Values.gateway.nginx.workerRlimitNofile }}  # the number of files a worker process can open, should be larger than worker_connections
       event:
         worker_connections: {{ .Values.gateway.nginx.workerConnections  }}
+    
+    ssl:
+        enable: {{ .Values.gateway.tls.enabled }}
+        listen:
+          - port: {{ .Values.gateway.tls.containerPort }}
+            enable_http2: {{ .Values.gateway.tls.http2.enabled }}
+          {{- with .Values.gateway.tls.additionalContainerPorts }}
+          {{- toYaml . | nindent 10}}
+          {{- end }}
+        ssl_protocols: {{ .Values.gateway.tls.sslProtocols | quote }}
+        ssl_ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"
+        {{- if and .Values.gateway.tls.enabled .Values.gateway.tls.existingCASecret }}
+        ssl_trusted_certificate: "/usr/local/apisix/conf/ssl/{{ .Values.gateway.tls.certCAFilename }}"
+        {{- end }}
+        {{- if and .Values.gateway.tls.enabled .Values.gateway.tls.fallbackSNI }}
+        fallback_sni: {{ .Values.gateway.tls.fallbackSNI | quote }}
+        {{- end }}
 
     plugins:                          # plugin list (sorted by priority)
       - real-ip                        # priority: 23000

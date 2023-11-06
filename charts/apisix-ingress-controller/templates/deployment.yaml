@@ -140,7 +140,7 @@ spec:
               containerPort: 9180
               protocol: TCP
             - name: https
-              containerPort: 9443
+              containerPort: {{ .Values.gateway.tls.containerPort }}
               protocol: TCP
             {{- if .Values.serviceMonitor.enabled }}
             - containerPort: 9091
