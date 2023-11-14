@@ -308,6 +308,13 @@ data:
       {{- end }}
 
       {{- if eq .Values.deployment.role "data_plane" }}
+      {{- if eq .Values.deployment.mode "standalone" }}
+      role_data_plane:
+        config_provider: yaml
+      {{- else }}
+      role_data_plane:
+       config_provider: etcd
+      {{- end }}
       role_data_plane:
         config_provider: etcd
       {{- end }}
