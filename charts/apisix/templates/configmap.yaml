@@ -55,7 +55,6 @@ data:
       enable_heartbeat: true
       {{- if eq .Values.deployment.mode "standalone" }}
       enable_admin: false
-      config_center: yaml
       {{ else }}
       enable_admin: {{ .Values.admin.enabled }}
       {{- end }}
@@ -312,16 +311,10 @@ data:
         config_provider: etcd
       {{- end }}
 
+ 
       {{- if eq .Values.deployment.role "data_plane" }}
-      {{- if eq .Values.deployment.mode "standalone" }}
       role_data_plane:
-        config_provider: yaml
-      {{- else }}
-      role_data_plane:
-       config_provider: etcd
-      {{- end }}
-      role_data_plane:
-        config_provider: etcd
+        config_provider: {{- eq .Values.deployment.mode "standalone" | ternary "yaml" "etcd" | indent 1 }}
       {{- end }}
 
       {{- if not (eq .Values.deployment.role "data_plane") }}
