@@ -360,30 +360,30 @@ data:
       {{- end }}
       {{- if not (eq .Values.deployment.mode "standalone")}}
       etcd:
-        {{- if .Values.etcd.enabled }}
-          host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-            {{- if .Values.etcd.fullnameOverride }}
-            - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
-            {{- else }}
-            - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
-            {{- end}}
-        {{- else }}
-          host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-            {{- range $value := .Values.etcd.host }}
-            - "{{ $value }}"             # multiple etcd address
-            {{- end}}
+      {{- if .Values.etcd.enabled }}
+        host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
+          {{- if .Values.etcd.fullnameOverride }}
+          - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
+          {{- else }}
+          - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
+          {{- end}}
+      {{- else }}
+        host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
+          {{- range $value := .Values.etcd.host }}
+          - "{{ $value }}"             # multiple etcd address
+          {{- end}}
+      {{- end }}
+        prefix: {{ .Values.etcd.prefix | quote }}    # configuration prefix in etcd
+        timeout: {{ .Values.etcd.timeout }}    # 30 seconds
+        {{- include "apisix.etcd.credentials.config" . | nindent 8 }}
+        {{- if .Values.etcd.auth.tls.enabled }}
+        tls:
+          cert: "/etcd-ssl/{{ .Values.etcd.auth.tls.certFilename }}"
+          key: "/etcd-ssl/{{ .Values.etcd.auth.tls.certKeyFilename }}"
+          verify: {{ .Values.etcd.auth.tls.verify }}
+          sni: "{{ .Values.etcd.auth.tls.sni }}"
         {{- end }}
-          prefix: {{ .Values.etcd.prefix | quote }}    # configuration prefix in etcd
-          timeout: {{ .Values.etcd.timeout }}    # 30 seconds
-          {{- include "apisix.etcd.credentials.config" . | nindent 8 }}
-          {{- if .Values.etcd.auth.tls.enabled }}
-          tls:
-            cert: "/etcd-ssl/{{ .Values.etcd.auth.tls.certFilename }}"
-            key: "/etcd-ssl/{{ .Values.etcd.auth.tls.certKeyFilename }}"
-            verify: {{ .Values.etcd.auth.tls.verify }}
-            sni: "{{ .Values.etcd.auth.tls.sni }}"
-          {{- end }}
-        {{- end }}
+      {{- end }}
       {{- end }}
 
       
