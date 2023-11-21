@@ -53,7 +53,11 @@ data:
         {{- end }}
       {{- end }}
       enable_heartbeat: true
+      {{- if eq .Values.deployment.mode "standalone" }}
+      enable_admin: false
+      {{ else }}
       enable_admin: {{ .Values.admin.enabled }}
+      {{- end }}
       enable_admin_cors: {{ .Values.admin.cors }}
       enable_debug: false
       {{- if or .Values.customPlugins.enabled .Values.apisix.luaModuleHook.enabled }}
@@ -307,9 +311,10 @@ data:
         config_provider: etcd
       {{- end }}
 
+ 
       {{- if eq .Values.deployment.role "data_plane" }}
       role_data_plane:
-        config_provider: etcd
+        config_provider: {{- eq .Values.deployment.mode "standalone" | ternary "yaml" "etcd" | indent 1 }}
       {{- end }}
 
       {{- if not (eq .Values.deployment.role "data_plane") }}
@@ -353,7 +358,7 @@ data:
             {{- end }}
             role: viewer
       {{- end }}
-
+      {{- if not (eq .Values.deployment.mode "standalone")}}
       etcd:
       {{- if .Values.etcd.enabled }}
         host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
@@ -378,6 +383,7 @@ data:
           verify: {{ .Values.etcd.auth.tls.verify }}
           sni: "{{ .Values.etcd.auth.tls.sni }}"
         {{- end }}
+      {{- end }}
       {{- end }}
 
       

@@ -29,6 +29,9 @@ spec:
         {{- . | toYaml | nindent 8 }}
       {{- end }}
       image: "{{ .Values.apisix.image.repository }}:{{ default .Chart.AppVersion .Values.apisix.image.tag }}"
+      {{- if eq .Values.deployment.mode "standalone" }}
+      command: ["sh", "-c","ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && /docker-entrypoint.sh docker-start"]
+      {{- end }}
       imagePullPolicy: {{ .Values.apisix.image.pullPolicy }}
       env:
       {{- if .Values.apisix.timezone }}
@@ -133,6 +136,10 @@ spec:
               - -c
               - "sleep 30"
       volumeMounts:
+      {{- if eq .Values.deployment.mode "standalone" }}
+        - mountPath: /apisix-config
+          name: apisix-admin
+      {{- end }}
       {{- if .Values.apisix.setIDFromPodUID }}
         - mountPath: /usr/local/apisix/conf/apisix.uid
           name: id
@@ -198,6 +205,11 @@ spec:
     {{- toYaml .Values.extraInitContainers | nindent 4 }}
     {{- end }}
   volumes:
+    {{- if eq .Values.deployment.mode "standalone" }}
+    - configMap:
+        name: apisix.yaml
+      name: apisix-admin
+    {{- end }}
     - configMap:
         name: {{ include "apisix.fullname" . }}
       name: apisix-config

@@ -120,7 +120,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | dashboard.config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | dashboard.config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |
 | dashboard.enabled | bool | `false` |  |
-| deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
+| deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
 | discovery.registry | object | `{}` | Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281), and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery) |

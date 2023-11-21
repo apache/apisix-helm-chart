@@ -207,7 +207,7 @@ rbac:
 
 deployment:
   # -- Apache APISIX deployment mode
-  # Optional: traditional, decoupled
+  # Optional: traditional, decoupled, standalone
   #
   # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
   mode: traditional
