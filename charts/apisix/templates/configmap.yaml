@@ -295,7 +295,7 @@ data:
 
       {{- if eq .Values.apisix.deployment.role "data_plane" }}
       role_data_plane:
-        config_provider: etcd
+        config_provider: {{- eq .Values.apisix.deployment.mode "standalone" | ternary "yaml" "etcd" | indent 1 }}
       {{- end }}
 
       {{- if not (eq .Values.apisix.deployment.role "data_plane") }}
@@ -339,7 +339,7 @@ data:
             {{- end }}
             role: viewer
       {{- end }}
-
+      {{- if not (eq .Values.apisix.deployment.mode "standalone")}}
       etcd:
       {{- if .Values.etcd.enabled }}
         host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
@@ -370,5 +370,6 @@ data:
           verify: {{ .Values.etcd.auth.tls.verify }}
           sni: "{{ .Values.etcd.auth.tls.sni }}"
         {{- end }}
+      {{- end }}
       {{- end }}
      

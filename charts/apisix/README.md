@@ -63,7 +63,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.customPlugins.plugins[0].configMap | object | `{"mounts":[{"key":"the-file-name","path":"mount-path"}],"name":"configmap-name"}` | plugin codes can be saved inside configmap object. |
 | apisix.customPlugins.plugins[0].configMap.mounts | list | `[{"key":"the-file-name","path":"mount-path"}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
-| apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
+| apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
 | apisix.discovery.registry | object | `{}` | Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281), and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery) |
