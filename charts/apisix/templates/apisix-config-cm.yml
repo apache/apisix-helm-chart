@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if eq .Values.deployment.mode "standalone" }}
+{{- if eq .Values.apisix.deployment.mode "standalone" }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
