@@ -630,6 +630,17 @@ etcd:
       # -- specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset.
       sni: ""
 
+    # -- ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    # -- added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+      runAsNonRoot: true
+      privileged: false
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+
   service:
     port: 2379
 
