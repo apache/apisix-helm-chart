@@ -132,9 +132,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | dns.resolvers[5] | string | `"8.8.8.8"` |  |
 | dns.timeout | int | `5` |  |
 | dns.validity | int | `30` |  |
-| etcd | object | `{"auth":{"containerSecurityContext":{"enabled":false},"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"enabled":true,"existingSecret":"","existingSecretPasswordKey":"","existingSecretUserKey":"","host":["http://etcd.host:2379"],"password":"","prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30,"user":""}` | etcd configuration use the FQDN address or the IP of the etcd |
-| etcd.auth | object | `{"containerSecurityContext":{"enabled":false},"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
-| etcd.auth.containerSecurityContext | object | `{"enabled":false}` | added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19 |
+| etcd | object | `{"auth":{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"containerSecurityContext":{"enabled":false},"enabled":true,"existingSecret":"","existingSecretPasswordKey":"","existingSecretUserKey":"","host":["http://etcd.host:2379"],"password":"","prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30,"user":""}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd.auth | object | `{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
 | etcd.auth.rbac.create | bool | `false` | No authentication by default. Switch to enable RBAC authentication |
 | etcd.auth.rbac.existingSecret | string | `""` | Name of the existing secret containing credentials for the root user |
 | etcd.auth.rbac.existingSecretPasswordKey | string | `""` | Name of key containing password to be retrieved from the existing secret |
@@ -145,6 +144,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | etcd.auth.tls.existingSecret | string | `""` | name of the secret contains etcd client cert |
 | etcd.auth.tls.sni | string | `""` | specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. |
 | etcd.auth.tls.verify | bool | `true` | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd |
+| etcd.containerSecurityContext | object | `{"enabled":false}` | added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19 |
 | etcd.enabled | bool | `true` | install etcd(v3) by default, set false if do not want to install etcd(v3) together |
 | etcd.existingSecret | string | `""` | Name of the existing secret containing user and password for external etcd, overrides etcd.user and etcd.password |
 | etcd.existingSecretPasswordKey | string | `""` | Name of key containing password to be retrieved from the existing secret, has a value of password by default |
