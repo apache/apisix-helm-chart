@@ -4,9 +4,9 @@ dependencies:
   version: 8.7.7
 - name: apisix-dashboard
   repository: https://charts.apiseven.com
-  version: 0.8.0
+  version: 0.8.1
 - name: apisix-ingress-controller
   repository: https://charts.apiseven.com
-  version: 0.12.2
-digest: sha256:d796c61733f13b9cbda63e399b389e3bba6cd23f825300ccc01c940c378f6b36
-generated: "2023-11-23T11:03:39.086963003Z"
+  version: 0.13.0
+digest: sha256:6ca1fc0eb06fef4d4502a3153ed77c9cd5a382ebe65e676791afe4272ac7c796
+generated: "2023-12-14T20:21:52.603033345+02:00"
