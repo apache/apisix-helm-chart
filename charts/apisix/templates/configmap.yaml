@@ -216,6 +216,9 @@ data:
           {{ $dict.name }}: {{ $dict.size }}
         {{- end }}
         {{- end }}
+        {{- if .Values.apisix.luaSharedDictsOverride }}
+        lua_shared_dict: {{- toYaml .Values.apisix.luaSharedDictsOverride | nindent 10 }}
+        {{- end }}
       {{- if .Values.configurationSnippet.main }}
       main_configuration_snippet: {{- toYaml .Values.configurationSnippet.main | indent 6 }}
       {{- end }}
