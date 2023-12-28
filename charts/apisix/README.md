@@ -57,7 +57,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | admin.servicePort | int | `9180` | Service port to use for Apache APISIX admin API |
 | admin.type | string | `"ClusterIP"` | admin service type |
 | apisix.affinity | object | `{}` | Set affinity for Apache APISIX deploy |
-| apisix.customLuaSharedDicts | list | `[]` | Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict |
+| apisix.customLuaSharedDicts | list | `[]` | Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L48-L51) to learn the format of a shared dict |
 | apisix.customizedConfig | object | `{}` | If apisix.enableCustomizedConfig is true, full customized config.yaml. Please note that other settings about APISIX config will be ignored |
 | apisix.data_encryption | object | `{"enabled":false,"keyring":[]}` | Enable Data Encryption |
 | apisix.data_encryption.keyring | list | `[]` | An array of 16 character strings used to encrypt/decrypt fields with AES-128-CBC |
@@ -79,6 +79,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.luaModuleHook.configMapRef.name | string | `""` | Name of the ConfigMap where the lua module codes store |
 | apisix.luaModuleHook.hookPoint | string | `""` | the hook module which will be used to inject third party code into APISIX use the lua require style like: "module.say_hello" |
 | apisix.luaModuleHook.luaPath | string | `""` | extend lua_package_path to load third party code |
+| apisix.luaSharedDictsOverride | object | `{}` | Overrides [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings, click [here](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L258) to view the default values. |
 | apisix.nodeSelector | object | `{}` | Node labels for Apache APISIX pod assignment |
 | apisix.podAnnotations | object | `{}` | Annotations to add to each pod |
 | apisix.podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |
