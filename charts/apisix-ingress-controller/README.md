@@ -152,6 +152,7 @@ The same for container level, you need to set:
 | gateway.nginx.workerConnections | string | `"10620"` | Nginx worker connections |
 | gateway.nginx.workerProcesses | string | `"auto"` | Nginx worker processes |
 | gateway.nginx.workerRlimitNofile | string | `"20480"` | Nginx workerRlimitNoFile |
+| gateway.resources | object | `{}` |  |
 | gateway.securityContext | object | `{}` |  |
 | gateway.tls.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |
 | gateway.tls.certCAFilename | string | `""` | Filename be used in the gateway.tls.existingCASecret |
