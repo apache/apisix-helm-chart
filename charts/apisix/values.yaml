@@ -52,6 +52,16 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
+# -- Set the readinessProbe for Apache APISIX pods
+readinessProbe:
+  failureThreshold: 6
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  successThreshold: 1
+  tcpSocket:
+    port: &apisixServiceHttpContainerPort 9080
+  timeoutSeconds: 1
+
 # -- See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details
 podDisruptionBudget:
   # -- Enable or disable podDisruptionBudget
@@ -173,7 +183,7 @@ service:
   http:
     enabled: true
     servicePort: 80
-    containerPort: 9080
+    containerPort: *apisixServiceHttpContainerPort
     # -- Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24)
     additionalContainerPorts: []
       # - port: 9081
