@@ -71,6 +71,19 @@ securityContext: {}
   # runAsUser: 1000
 
 config:
+  # -- Describe an existing Kubernetes Secret with config params to be merged with the main config section
+  # Useful to provide fields which contain credentials that should be secret
+  # Syntax is the same as fields: config.conf and config.authentication.
+  # For example, the key 'conf.authentication.credentials.yaml' inside Secret 'apisix-dashboard'
+  # could contain the following syntax:
+  # authentication:
+  #   users:
+  #     - username: admin
+  #       password: password
+  mergedConfigSecret: {}
+  #name: "apisix-dashboard"
+  #key: "conf.authentication.credentials.yaml"
+
   schema:
     # -- Overrides APISIX Dashboard schema.json
     # by mounting configMap containing schema.json
@@ -97,7 +110,7 @@ config:
       password: ~
 
       # -- Specifies a secret to be mounted on /etc/etcd for mtls usage
-      mtlsExistingSecret: ""
+      mtls_existing_secret: ""
 
       # MTLS configuration used for external etcd instances
       mtls:
@@ -108,20 +121,20 @@ config:
     log:
       # -- Error log level.
       # Supports levels, lower to higher: debug, info, warn, error, panic, fatal
-      errorLog:
+      error_log:
         level: warn
         # -- Access log path
-        filePath: /dev/stderr
-      accessLog:
+        file_path: /dev/stderr
+      access_log:
         # -- Error log path
-        filePath: /dev/stdout
+        file_ath: /dev/stdout
     # -- Overrides plugins in the APISIX Dashboard conf
     plugins: []
   authentication:
     # -- Secret for jwt token generation
     secret: secret
     # -- JWT token expire time, in second
-    expireTime: 3600
+    expire_time: 3600
     # -- Specifies username and password for login manager api.
     users:
       - username: admin

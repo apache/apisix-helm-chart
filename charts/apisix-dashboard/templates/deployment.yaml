@@ -53,12 +53,42 @@ spec:
       serviceAccountName: {{ include "apisix-dashboard.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{/* Merge config and secret only when the user needs it */}}
+      {{- if and .Values.config.mergedConfigSecret.name .Values.config.mergedConfigSecret.key }}
+      initContainers:
+        - name: config-builder
+          image: mikefarah/yq
+          command: [ "/bin/sh" ]
+          args:
+            - -c
+            - |
+              yq '. *= load("/tmp/conf.yaml")' {{ printf "/tmp/%s" .Values.config.mergedConfigSecret.key }} > /usr/local/apisix-dashboard/alternative-conf/conf.yaml
+          volumeMounts:
+            - mountPath: /tmp/conf.yaml
+              name: apisix-dashboard-config
+              subPath: conf.yaml
+            - mountPath: {{ printf "/tmp/%s" .Values.config.mergedConfigSecret.key | quote }}
+              name: apisix-dashboard-credentials
+              subPath: {{ .Values.config.mergedConfigSecret.key | quote }}
+            - mountPath: /usr/local/apisix-dashboard/alternative-conf/
+              name: config-data
+
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /usr/local/apisix-dashboard/manager-api
+
+          {{/* Use alternative config file when configuration merge is performed*/}}
+          {{- if and .Values.config.mergedConfigSecret.name .Values.config.mergedConfigSecret.key }}
+          args:
+            - --config
+            - /usr/local/apisix-dashboard/alternative-conf/conf.yaml
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.config.conf.listen.port }}
@@ -86,6 +116,11 @@ spec:
             - mountPath: /etc/etcd
               name: etcd-config
           {{- end}}
+          {{/* Config merge is performed so load the config into another directory */}}
+          {{- if and .Values.config.mergedConfigSecret.name .Values.config.mergedConfigSecret.key }}
+            - mountPath: /usr/local/apisix-dashboard/alternative-conf/
+              name: config-data
+          {{- end }}
       volumes:
         - configMap:
             name: {{ include "apisix-dashboard.fullname" . }}
@@ -100,6 +135,14 @@ spec:
             secretName: {{ .Values.config.conf.etcd.mtlsExistingSecret }}
           name: etcd-config
       {{- end}}
+      {{/* Config merge is performed so TODO */}}
+      {{- if and .Values.config.mergedConfigSecret.name .Values.config.mergedConfigSecret.key }}
+        - name: apisix-dashboard-credentials
+          secret:
+            secretName: {{ .Values.config.mergedConfigSecret.name }}
+        - name: config-data
+          emptyDir: {}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
