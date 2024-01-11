@@ -19,6 +19,10 @@ kind: Deployment
 metadata:
   name: {{ include "apisix-ingress-controller.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  annotations:
+  {{- range $key, $value := .Values.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
   labels:
     {{- include "apisix-ingress-controller.labels" . | nindent 4 }}
 spec:
