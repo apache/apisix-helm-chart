@@ -191,6 +191,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
 | priorityClassName | string | `""` | Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods |
 | rbac.create | bool | `false` |  |
+| readinessProbe | object | `{"failureThreshold":6,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"tcpSocket":{"port":9080},"timeoutSeconds":1}` | Set the readinessProbe for Apache APISIX pods |
 | replicaCount | int | `1` | if useDaemonSet is true or autoscaling.enabled is true, replicaCount not become effective |
 | resources | object | `{}` | Set pod resource requests & limits |
 | securityContext | object | `{}` | Set the securityContext for Apache APISIX container |
