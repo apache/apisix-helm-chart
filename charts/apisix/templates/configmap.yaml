@@ -198,6 +198,9 @@ data:
           {{ $dict.name }}: {{ $dict.size }}
         {{- end }}
         {{- end }}
+        {{- if .Values.apisix.nginx.luaSharedDictsOverride }}
+        lua_shared_dict: {{- toYaml .Values.apisix.nginx.luaSharedDictsOverride | nindent 10 }}
+        {{- end }}
       {{- if .Values.apisix.nginx.configurationSnippet.main }}
       main_configuration_snippet: {{- toYaml .Values.apisix.nginx.configurationSnippet.main | indent 6 }}
       {{- end }}
