@@ -148,6 +148,8 @@ spec:
               protocol: TCP
             {{- end }}
           resources: {}
+          securityContext:
+            {{- toYaml .Values.gateway.securityContext | nindent 12 }}
           volumeMounts:
             - name: apisix-config
               mountPath: /usr/local/apisix/conf/config.yaml
