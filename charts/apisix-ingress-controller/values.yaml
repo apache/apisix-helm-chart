@@ -235,6 +235,15 @@ gateway:
     errorLog: stderr
     # -- Nginx error logs level
     errorLogLevel: warn
+  securityContext: {}
+    # capabilities:
+    #   add:
+    #   - NET_BIND_SERVICE
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 636
   tls:
     enabled: false
     servicePort: 443
