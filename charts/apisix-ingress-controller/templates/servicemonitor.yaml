@@ -30,8 +30,9 @@ metadata:
   {{- end }}
 spec:
   endpoints:
-  - targetPort: http
+  - targetPort: prometheus
     scheme: http
+    path: /apisix/prometheus/metrics
     {{- if .Values.serviceMonitor.interval }}
     interval: {{ .Values.serviceMonitor.interval }}
     {{- end }}
