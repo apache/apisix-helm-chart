@@ -1,3 +1,4 @@
+{{- if .Values.config.etcdserver.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -40,5 +41,6 @@ spec:
   externalIPs:
   {{- range $ip := .Values.gateway.externalIPs }}
   - {{ $ip }}
+  {{- end }}
   {{- end }}
   {{- end }}

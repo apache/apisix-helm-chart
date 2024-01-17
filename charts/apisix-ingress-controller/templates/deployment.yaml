@@ -94,7 +94,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http
+            - name: http-controller
               containerPort: {{ (.Values.config.httpListen | split ":")._1 }}
               protocol: TCP
             {{ if .Values.config.etcdserver.enabled }}
@@ -146,7 +146,7 @@ spec:
             - name: https
               containerPort: {{ .Values.gateway.tls.containerPort }}
               protocol: TCP
-            {{- if .Values.serviceMonitor.enabled }}
+            {{- if .Values.gateway.serviceMonitor.enabled }}
             - containerPort: 9091
               name: prometheus
               protocol: TCP

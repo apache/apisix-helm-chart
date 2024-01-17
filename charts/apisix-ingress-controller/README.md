@@ -154,6 +154,11 @@ The same for container level, you need to set:
 | gateway.nginx.workerRlimitNofile | string | `"20480"` | Nginx workerRlimitNoFile |
 | gateway.resources | object | `{}` |  |
 | gateway.securityContext | object | `{}` |  |
+| gateway.serviceMonitor | object | `{"annotations":{},"enabled":false,"interval":"15s","labels":{},"metricRelabelings":{},"namespace":"monitoring","path":"/apisix/prometheus/metrics"}` | Create ServiceMonitor object for apisix gateway for Prometheus operator Requires Prometheus operator v0.38.0 or higher. |
+| gateway.serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
+| gateway.serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
+| gateway.serviceMonitor.metricRelabelings | object | `{}` | @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion. ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs |
+| gateway.serviceMonitor.path | string | `"/apisix/prometheus/metrics"` | @param serviceMonitor.path ServiceMonitor scrape path |
 | gateway.tls.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |
 | gateway.tls.certCAFilename | string | `""` | Filename be used in the gateway.tls.existingCASecret |
 | gateway.tls.containerPort | int | `9443` |  |
