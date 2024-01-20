@@ -215,3 +215,9 @@ initContainer:
 
 # -- Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail.
 extraInitContainers: []
+  # - name: your-image-name
+  #   image: your-image
+  #   imagePullPolicy: Always
+  #   ports:
+  #     - name: portname
+  #       containerPort: 1234
