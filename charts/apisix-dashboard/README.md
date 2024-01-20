@@ -75,6 +75,7 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | config.conf.log.errorLog.filePath | string | `"/dev/stderr"` | Access log path |
 | config.conf.plugins | list | `[]` | Overrides plugins in the APISIX Dashboard conf |
 | config.schema.configMap | object | `{}` | Overrides APISIX Dashboard schema.json by mounting configMap containing schema.json |
+| extraInitContainers | list | `[]` | Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail. |
 | fullnameOverride | string | `""` | String to fully override apisix-dashboard.fullname template |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX Dashboard image pull policy |
 | image.repository | string | `"apache/apisix-dashboard"` | Apache APISIX Dashboard image repository |
@@ -85,6 +86,10 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | ingress.enabled | bool | `false` | Set to true to enable ingress record generation |
 | ingress.hosts | list | `[{"host":"apisix-dashboard.local","paths":[]}]` | The list of hostnams to be covered with this ingress record |
 | ingress.tls | list | `[]` | Create TLS Secret |
+| initContainer | object | `{"image":"busybox","securityContext":{},"tag":1.28}` | Set initContainer for Apache APISIX Dashboard pods |
+| initContainer.image | string | `"busybox"` | Init container image |
+| initContainer.securityContext | object | `{}` | Set the securityContext for the init container |
+| initContainer.tag | float | `1.28` | Init container tag |
 | labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX dashboard resource |
 | nameOverride | string | `""` | String to partially override apisix-dashboard.fullname template (will maintain the release name) |
 | nodeSelector | object | `{}` | Node labels for pod assignment |

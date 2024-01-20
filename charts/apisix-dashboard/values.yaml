@@ -197,3 +197,21 @@ affinity: {}
 # -- Topology Spread Constraints for pod assignment spread across your cluster among failure-domains
 # ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
 topologySpreadConstraints: []
+
+# -- Set initContainer for Apache APISIX Dashboard pods
+initContainer:
+  # -- Init container image
+  image: busybox
+  # -- Init container tag
+  tag: 1.28
+  # -- Set the securityContext for the init container
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+# -- Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail.
+extraInitContainers: []
