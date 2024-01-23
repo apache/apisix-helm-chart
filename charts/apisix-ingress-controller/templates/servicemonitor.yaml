@@ -32,7 +32,7 @@ spec:
   endpoints:
   - targetPort: prometheus
     scheme: http
-    path: /apisix/prometheus/metrics
+    path: {{ .Values.serviceMonitor.path }}
     {{- if .Values.serviceMonitor.interval }}
     interval: {{ .Values.serviceMonitor.interval }}
     {{- end }}

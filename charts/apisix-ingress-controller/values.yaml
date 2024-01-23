@@ -193,6 +193,8 @@ topologySpreadConstraints: []
 serviceMonitor:
   enabled: false
   namespace: "monitoring"
+  # -- @param serviceMonitor.path ServiceMonitor scrape path
+  path: "/apisix/prometheus/metrics"
   interval: 15s
   # -- @param serviceMonitor.labels ServiceMonitor extra labels
   labels: {}

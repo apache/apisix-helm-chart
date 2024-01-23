@@ -183,10 +183,11 @@ The same for container level, you need to set:
 | serviceAccount.automountServiceAccountToken | bool | `true` | Whether automounting API credentials for a service account |
 | serviceAccount.create | bool | `true` | Specifies whether a ServiceAccount should be created |
 | serviceAccount.name | string | `""` | The name of the ServiceAccount to use. If not set and create is true, a name is generated using the fullname template |
-| serviceMonitor | object | `{"annotations":{},"enabled":false,"interval":"15s","labels":{},"metricRelabelings":{},"namespace":"monitoring"}` | Enable creating ServiceMonitor objects for Prometheus operator. Requires Prometheus operator v0.38.0 or higher. |
+| serviceMonitor | object | `{"annotations":{},"enabled":false,"interval":"15s","labels":{},"metricRelabelings":{},"namespace":"monitoring","path":"/apisix/prometheus/metrics"}` | Enable creating ServiceMonitor objects for Prometheus operator. Requires Prometheus operator v0.38.0 or higher. |
 | serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
 | serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
 | serviceMonitor.metricRelabelings | object | `{}` | @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion. ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs |
+| serviceMonitor.path | string | `"/apisix/prometheus/metrics"` | @param serviceMonitor.path ServiceMonitor scrape path |
 | tolerations | list | `[]` |  |
 | topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
 | updateStrategy | object | `{}` | Update strategy for apisix ingress controller deployment |
