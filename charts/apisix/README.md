@@ -191,7 +191,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | logs.errorLog | string | `"/dev/stderr"` | Error log path |
 | logs.errorLogLevel | string | `"warn"` | Error log level |
 | nameOverride | string | `""` |  |
-| nginx.enableCPUAffinity | bool | `true` |  |
+| nginx.enableCPUAffinity | bool | `false` |  |
 | nginx.envs | list | `[]` |  |
 | nginx.meta | string | `"lua_shared_dict:\n  prometheus-metrics: 15m\n"` | allow customize meta in `nginx_config` section |
 | nginx.workerConnections | string | `"10620"` |  |

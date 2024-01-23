@@ -364,7 +364,7 @@ nginx:
   workerRlimitNofile: "20480"
   workerConnections: "10620"
   workerProcesses: auto
-  enableCPUAffinity: true
+  enableCPUAffinity: false
   envs: []
   # -- allow customize meta in `nginx_config` section
   meta: |
