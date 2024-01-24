@@ -245,6 +245,13 @@ gateway:
     errorLog: stderr
     # -- Nginx error logs level
     errorLogLevel: warn
+  plugins:
+    opentelemetry:
+      enabled: false
+    skywalking:
+      enabled: false
+    zipkin:
+      enabled: true
   resources: {}
   securityContext: {}
     # capabilities:

@@ -82,9 +82,15 @@ data:
       - client-control                 # priority: 22000
       - proxy-control                  # priority: 21990
       - request-id                     # priority: 12015
+      {{- if .Values.gateway.plugins.zipkin.enabled }}
       - zipkin                         # priority: 12011
-      #- skywalking                    # priority: 12010
-      #- opentelemetry                 # priority: 12009
+      {{- end }}
+      {{- if .Values.gateway.plugins.skywalking.enabled }}
+      - skywalking                     # priority: 12010
+      {{- end }}
+      {{- if .Values.gateway.plugins.opentelemetry.enabled }}
+      - opentelemetry                  # priority: 12009
+      {{- end }}
       - ext-plugin-pre-req             # priority: 12000
       - fault-injection                # priority: 11000
       - mocking                        # priority: 10900
