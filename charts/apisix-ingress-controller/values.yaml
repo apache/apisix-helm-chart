@@ -245,6 +245,7 @@ gateway:
     errorLog: stderr
     # -- Nginx error logs level
     errorLogLevel: warn
+  resources: {}
   securityContext: {}
     # capabilities:
     #   add:
