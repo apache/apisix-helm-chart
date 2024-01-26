@@ -151,7 +151,8 @@ spec:
               name: prometheus
               protocol: TCP
             {{- end }}
-          resources: {}
+          resources:
+            {{- toYaml .Values.gateway.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.gateway.securityContext | nindent 12 }}
           volumeMounts:

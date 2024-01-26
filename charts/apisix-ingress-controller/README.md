@@ -152,6 +152,7 @@ The same for container level, you need to set:
 | gateway.nginx.workerConnections | string | `"10620"` | Nginx worker connections |
 | gateway.nginx.workerProcesses | string | `"auto"` | Nginx worker processes |
 | gateway.nginx.workerRlimitNofile | string | `"20480"` | Nginx workerRlimitNoFile |
+| gateway.resources | object | `{}` |  |
 | gateway.securityContext | object | `{}` |  |
 | gateway.tls.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |
 | gateway.tls.certCAFilename | string | `""` | Filename be used in the gateway.tls.existingCASecret |
@@ -173,6 +174,10 @@ The same for container level, you need to set:
 | nameOverride | string | `""` | Default values for apisix-ingress-controller. This is a YAML-formatted file. Declare variables to be passed into your templates.  |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
+| podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |
+| podDisruptionBudget.enabled | bool | `false` | Enable or disable podDisruptionBudget |
+| podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
+| podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
 | podSecurityContext | object | `{}` |  |
 | priorityClassName | string | `""` |  |
 | rbac.create | bool | `true` | Specifies whether RBAC resources should be created |
