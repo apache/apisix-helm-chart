@@ -15,8 +15,11 @@
 # limitations under the License.
 
 {{- if (.Values.podDisruptionBudget.enabled) }}
+{{ if semverCompare "<1.21-0" .Capabilities.KubeVersion.Version -}}
 apiVersion: policy/v1beta1
+{{- else -}}
 kind: PodDisruptionBudget
+{{- end }}
 metadata:
   name: {{ include "apisix.fullname" . }}
   namespace: {{ .Release.Namespace }}
