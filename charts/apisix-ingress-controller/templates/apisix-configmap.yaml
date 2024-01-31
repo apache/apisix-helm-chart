@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-{{ if .Values.config.etcdserver.enabled }}
+{{ if and .Values.gateway.enabled .Values.config.etcdserver.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

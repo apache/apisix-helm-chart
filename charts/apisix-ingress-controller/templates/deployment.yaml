@@ -64,7 +64,7 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
-      {{ if .Values.config.etcdserver.enabled }}
+      {{ if and .Values.gateway.enabled ( eq (.Values.replicaCount | int) 1 ) .Values.config.etcdserver.enabled }}
         - name: apisix-config
           configMap:
             name: {{ .Release.Name }}-gw-configmap
@@ -132,10 +132,10 @@ spec:
                 name: {{ .Values.config.apisix.existingSecret | quote }}
                 key: {{ include "apisix-ingress-controller.credentials.secretAdminKey" . }}
           {{- end }}
-        {{ if .Values.config.etcdserver.enabled }}
+        {{ if and .Values.gateway.enabled ( eq (.Values.replicaCount | int) 1 ) .Values.config.etcdserver.enabled }}
         - name: apisix
-          image: "{{ .Values.config.etcdserver.image.repository }}:{{ .Values.config.etcdserver.image.tag }}"
-          imagePullPolicy: {{ .Values.config.etcdserver.image.pullPolicy }}
+          image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
+          imagePullPolicy: {{ .Values.gateway.image.pullPolicy }}
           ports:
             - name: http
               containerPort: 9080

@@ -122,9 +122,6 @@ The same for container level, you need to set:
 | config.certFile | string | `"/etc/webhook/certs/cert.pem"` | the TLS certificate file path. |
 | config.enableProfiling | bool | `true` | enable profiling via web interfaces host:port/debug/pprof, default is true. |
 | config.etcdserver.enabled | bool | `false` | Enable etcd server or not, default is false. |
-| config.etcdserver.image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
-| config.etcdserver.image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| config.etcdserver.image.tag | string | `"3.5.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | config.httpListen | string | `":8080"` | the HTTP Server listen address, default is ":8080" |
 | config.httpsListen | string | `":8443"` | the HTTPS Server listen address, default is ":8443" |
 | config.ingressPublishService | string | `""` | the controller will use the Endpoint of this Service to update the status information of the Ingress resource. The format is "namespace/svc-name" to solve the situation that the data plane and the controller are not deployed in the same namespace. |
@@ -145,8 +142,12 @@ The same for container level, you need to set:
 | config.logOutput | string | `"stderr"` | the output file path of error log, default is stderr, when the file path is "stderr" or "stdout", logs are marshalled plainly, which is more readable for human; otherwise logs are marshalled in JSON format, which can be parsed by programs easily. |
 | config.pluginMetadataCM | string | `""` | Pluginmetadata in APISIX can be controlled through ConfigMap. default is "" |
 | fullnameOverride | string | `""` |  |
+| gateway.enabled | bool | `false` | Enable deploying APISIX gateway as sidecar |
 | gateway.externalIPs | list | `[]` | load balancer ips |
 | gateway.externalTrafficPolicy | string | `"Cluster"` |  |
+| gateway.image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
+| gateway.image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
+| gateway.image.tag | string | `"3.5.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | gateway.nginx.errorLog | string | `"stderr"` | Nginx error logs path |
 | gateway.nginx.errorLogLevel | string | `"warn"` | Nginx error logs level |
 | gateway.nginx.workerConnections | string | `"10620"` | Nginx worker connections |
