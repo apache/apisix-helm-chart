@@ -213,6 +213,8 @@ ingress:
     - host: apisix.local
       paths: []
   tls: []
+  # -- Path type for the Ingress rules.
+  pathType: ImplementationSpecific
 
 # -- Observability configuration.
 metrics:
