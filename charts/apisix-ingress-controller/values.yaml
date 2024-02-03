@@ -45,7 +45,6 @@ serviceAccount:
   # -- Whether automounting API credentials for a service account
   automountServiceAccountToken: true
 
-
 replicaCount: 1
 
 image:
@@ -67,14 +66,6 @@ config:
   etcdserver:
     # -- Enable etcd server or not, default is false.
     enabled: false
-    image:
-      # -- Apache APISIX image repository
-      repository: apache/apisix
-      # -- Apache APISIX image pull policy
-      pullPolicy: IfNotPresent
-      # -- Apache APISIX image tag
-      # Overrides the image tag whose default is the chart appVersion.
-      tag: 3.5.0-debian
   # -- the error log level, default is info, optional values are: debug, info, warn, error, panic, fatal
   logLevel: "info"
   # -- the output file path of error log, default is stderr, when
@@ -140,7 +131,6 @@ config:
     # -- the resource API version, support "apisix.apache.org/v2beta3" and "apisix.apache.org/v2".
     # default is "apisix.apache.org/v2"
     apiVersion: "apisix.apache.org/v2"
-
 
   # -- APISIX related configurations.
   apisix:
@@ -224,6 +214,16 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 gateway:
+  # -- Enable deploying APISIX gateway as sidecar
+  enabled: false
+  image:
+    # -- Apache APISIX image repository
+    repository: apache/apisix
+    # -- Apache APISIX image pull policy
+    pullPolicy: IfNotPresent
+    # -- Apache APISIX image tag
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: 3.5.0-debian
   # -- Apache APISIX service type for user access itself
   type: NodePort
   externalTrafficPolicy: Cluster

@@ -57,7 +57,7 @@ data:
       apisix_version: {{ .Values.config.kubernetes.apiVersion | quote }}
     apisix:
       admin_api_version: {{ .Values.config.apisix.adminAPIVersion | quote }}
-      {{- if .Values.config.etcdserver.enabled }}
+      {{- if and .Values.gateway.enabled .Values.config.etcdserver.enabled }}
       default_cluster_base_url: http://127.0.0.1:9180/apisix/admin
       {{ else }}
       {{- if .Values.config.apisix.serviceFullname }}

@@ -28,5 +28,11 @@ spec:
       targetPort: {{ (.Values.config.httpListen | split ":")._1 }}
       protocol: TCP
       name: http
+    {{- if and ( eq (.Values.replicaCount | int) 1 ) .Values.config.etcdserver.enabled }}
+    - port: 12379
+      targetPort: etcd
+      protocol: TCP
+      name: etcd
+    {{- end }}
   selector:
     {{- include "apisix-ingress-controller.selectorLabels" . | nindent 4 }}
