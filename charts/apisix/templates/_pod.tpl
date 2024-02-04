@@ -185,7 +185,6 @@ spec:
   hostNetwork: true
   dnsPolicy: ClusterFirstWithHostNet
   {{- end }}
-  hostNetwork: {{ .Values.apisix.hostNetwork }}
   initContainers:
     {{- if .Values.etcd.enabled }}
     - name: wait-etcd
