@@ -232,8 +232,9 @@ gateway:
   externalIPs: []
   # -- Expose the port on the container only (no config changes applied on apisix process)
   additionalContainerPorts: []
-  # - ip: 127.0.0.3           # Specific IP, If not set, the default value is `0.0.0.0`.
-  #   port: 9445
+  #   port: 9091
+  #   protocol: TCP
+  #  name: prometheus
   # -- Apache APISIX service settings for http
   http:
     enabled: true
