@@ -362,6 +362,12 @@ apisix:
     enableCPUAffinity: true
     # -- Timeout during which a keep-alive client connection will stay open on the server side.
     keepaliveTimeout: 60s
+    # -- Timeout for reading client request header, then 408 (Request Time-out) error is returned to the client.
+    clientHeaderTimeout: 60s
+    # -- Timeout for reading client request body, then 408 (Request Time-out) error is returned to the client.
+    clientBodyTimeout: 60s
+    # -- Timeout for transmitting a response to the client, then the connection is closed.
+    sendTimeout: 10s
     envs: []
     # access log and error log configuration
     logs:
