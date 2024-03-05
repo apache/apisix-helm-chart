@@ -234,6 +234,7 @@ gateway:
   #   - "143.231.0.0/16"
   # -- load balancer ips
   externalIPs: []
+  # enableServerTokens: false
   nginx:
     # -- Nginx workerRlimitNoFile
     workerRlimitNofile: "20480"
