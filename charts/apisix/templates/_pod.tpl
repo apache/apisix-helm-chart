@@ -7,6 +7,9 @@ metadata:
     {{- end }}
   labels:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
+    {{- with .Values.apisix.podLabels }}
+      {{ tpl (toYaml .) $ | nindent 4}}
+    {{- end }}
 spec:
   {{- with .Values.global.imagePullSecrets }}
   imagePullSecrets:

@@ -85,6 +85,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.podDisruptionBudget.enabled | bool | `false` | Enable or disable podDisruptionBudget |
 | apisix.podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
 | apisix.podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
+| apisix.podLabels | object | `{}` | Labels to add to each pod |
 | apisix.podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
 | apisix.priorityClassName | string | `""` | Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods |
 | apisix.proxyProtocol | object | `{"enabled":false,"listenHttpPort":9181,"listenHttpsPort":9182,"tcp":true,"upstream":true}` | Enable Proxy Protocol |
