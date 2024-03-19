@@ -28,9 +28,6 @@ spec:
   selector:
     matchLabels:
       {{- include "apisix-dashboard.selectorLabels" . | nindent 6 }}
-  {{- with .Values.updateStrategy }}
-  strategy: {{ toYaml . | nindent 4 }}
-  {{- end }}
   template:
     metadata:
       annotations:
@@ -77,29 +74,10 @@ spec:
             - mountPath: /usr/local/apisix-dashboard/conf/conf.yaml
               name: apisix-dashboard-config
               subPath: conf.yaml
-          {{- with .Values.config.schema.configMap }}
-            - mountPath: /usr/local/apisix-dashboard/conf/schema.json
-              name: schema-json
-              subPath: {{ .key }}
-          {{- end}}
-          {{- if .Values.config.conf.etcd.mtlsExistingSecret }}
-            - mountPath: /etc/etcd
-              name: etcd-config
-          {{- end}}
       volumes:
         - configMap:
             name: {{ include "apisix-dashboard.fullname" . }}
           name: apisix-dashboard-config
-      {{- with .Values.config.schema.configMap }}
-        - configMap:
-            name: {{ .name }}
-          name: schema-json
-      {{- end}}
-      {{- if .Values.config.conf.etcd.mtlsExistingSecret }}
-        - secret:
-            secretName: {{ .Values.config.conf.etcd.mtlsExistingSecret }}
-          name: etcd-config
-      {{- end}}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -111,8 +89,4 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.topologySpreadConstraints }}
-      topologySpreadConstraints:
-        {{- tpl (. | toYaml) $ | nindent 8 }}
       {{- end }}

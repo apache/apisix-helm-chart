@@ -29,9 +29,6 @@ labelsOverride: {}
 #   app.kubernetes.io/name: "{{ .Release.Name }}"
 #   app.kubernetes.io/instance: '{{ include "apisix-ingress-controller.name" . }}'
 
-# -- Add annotations to Apache APISIX ingress controller resource
-annotations: {}
-
 rbac:
   # -- Specifies whether RBAC resources should be created
   create: true
@@ -51,7 +48,7 @@ replicaCount: 1
 image:
   repository: apache/apisix-ingress-controller
   pullPolicy: IfNotPresent
-  tag: "1.8.0"
+  tag: "1.6.1"
 
 podAnnotations: {}
 
@@ -64,17 +61,6 @@ service:
   port: 80
 
 config:
-  etcdserver:
-    # -- Enable etcd server or not, default is false.
-    enabled: false
-    image:
-      # -- Apache APISIX image repository
-      repository: apache/apisix
-      # -- Apache APISIX image pull policy
-      pullPolicy: IfNotPresent
-      # -- Apache APISIX image tag
-      # Overrides the image tag whose default is the chart appVersion.
-      tag: 3.5.0-debian
   # -- the error log level, default is info, optional values are: debug, info, warn, error, panic, fatal
   logLevel: "info"
   # -- the output file path of error log, default is stderr, when
@@ -101,8 +87,6 @@ config:
   enableProfiling: true
   # -- Default interval for synchronizing Kubernetes resources to APISIX
   apisixResourceSyncInterval: "1h"
-  # -- Pluginmetadata in APISIX can be controlled through ConfigMap. default is ""
-  pluginMetadataCM: ""
   # -- Kubernetes related configurations.
   kubernetes:
     # -- the Kubernetes configuration file path, default is "", so the in-cluster
@@ -140,7 +124,8 @@ config:
     # -- the resource API version, support "apisix.apache.org/v2beta3" and "apisix.apache.org/v2".
     # default is "apisix.apache.org/v2"
     apiVersion: "apisix.apache.org/v2"
-
+    # -- Pluginmetadata in APISIX can be controlled through ConfigMap. default is ""
+    pluginMetadataCM: ""
 
   # -- APISIX related configurations.
   apisix:
@@ -153,12 +138,6 @@ config:
     clusterName: "default"
     # -- the APISIX admin API version. can be "v2" or "v3", default is "v2".
     adminAPIVersion: "v2"
-
-    # -- The APISIX Helm chart supports storing user credentials in a secret.
-    # The secret needs to contain a single key for admin token with key adminKey by default.
-    existingSecret: ""
-    # -- Name of the admin token key in the secret, overrides the default key name "adminKey"
-    existingSecretAdminKeyKey: ""
 
 resources: {}
 
@@ -175,21 +154,11 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-# -- Update strategy for apisix ingress controller deployment
-updateStrategy: {}
-  # type: RollingUpdate
-
 nodeSelector: {}
 tolerations: []
-affinity: {}
-# -- Topology Spread Constraints for pod assignment spread across your cluster among failure-domains
-# ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
-topologySpreadConstraints: []
 
-#  namespace: "ingress-apisix"
+# -- namespace: "ingress-apisix"
 
-# -- Enable creating ServiceMonitor objects for Prometheus operator.
-# Requires Prometheus operator v0.38.0 or higher.
 serviceMonitor:
   enabled: false
   namespace: "monitoring"
@@ -198,20 +167,7 @@ serviceMonitor:
   labels: {}
   # -- @param serviceMonitor.annotations ServiceMonitor annotations
   annotations: {}
-  # -- @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion.
-  # ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs
-  metricRelabelings: {}
 
-# -- See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details
-podDisruptionBudget:
-  # -- Enable or disable podDisruptionBudget
-  enabled: false
-  # -- Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget.
-  # See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget)
-  # for more details
-  minAvailable: 90%
-  # -- Set the maxUnavailable of podDisruptionBudget
-  maxUnavailable: 1
 
 podSecurityContext: {}
   # fsGroup: 2000
@@ -223,54 +179,3 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
-gateway:
-  # -- Apache APISIX service type for user access itself
-  type: NodePort
-  externalTrafficPolicy: Cluster
-  # annotations:
-  #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
-  # loadBalancerIP: a.b.c.d
-  # loadBalancerSourceRanges:
-  #   - "143.231.0.0/16"
-  # -- load balancer ips
-  externalIPs: []
-  nginx:
-    # -- Nginx workerRlimitNoFile
-    workerRlimitNofile: "20480"
-    # -- Nginx worker connections
-    workerConnections: "10620"
-    # -- Nginx worker processes
-    workerProcesses: auto
-    # -- Nginx error logs path
-    errorLog: stderr
-    # -- Nginx error logs level
-    errorLogLevel: warn
-  resources: {}
-  securityContext: {}
-    # capabilities:
-    #   add:
-    #   - NET_BIND_SERVICE
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 636
-  tls:
-    enabled: false
-    servicePort: 443
-    containerPort: 9443
-    # -- Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99)
-    additionalContainerPorts: []
-      # - ip: 127.0.0.3           # Specific IP, If not set, the default value is `0.0.0.0`.
-      #   port: 9445
-      #   enable_http2: true
-    # -- Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd)
-    existingCASecret: ""
-    # -- Filename be used in the gateway.tls.existingCASecret
-    certCAFilename: ""
-    http2:
-      enabled: true
-    # -- TLS protocols allowed to use.
-    sslProtocols: "TLSv1.2 TLSv1.3"
-    # -- Define SNI to fallback if none is presented by client
-    fallbackSNI: ""

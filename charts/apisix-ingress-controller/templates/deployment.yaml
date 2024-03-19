@@ -19,10 +19,6 @@ kind: Deployment
 metadata:
   name: {{ include "apisix-ingress-controller.fullname" . }}
   namespace: {{ .Release.Namespace }}
-  annotations:
-  {{- range $key, $value := .Values.annotations }}
-    {{ $key }}: {{ $value | quote }}
-  {{- end }}
   labels:
     {{- include "apisix-ingress-controller.labels" . | nindent 4 }}
 spec:
@@ -32,9 +28,6 @@ spec:
   selector:
     matchLabels:
       {{- include "apisix-ingress-controller.selectorLabels" . | nindent 6 }}
-  {{- with .Values.updateStrategy }}
-  strategy: {{ toYaml . | nindent 4 }}
-  {{- end }}
   template:
     metadata:
       annotations:
@@ -64,12 +57,6 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
-      {{ if .Values.config.etcdserver.enabled }}
-        - name: apisix-config
-          configMap:
-            name: {{ .Release.Name }}-gw-configmap
-      {{ end }}
-      {{ if not .Values.config.etcdserver.enabled }}
       initContainers:
         - name: wait-apisix-admin
           image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
@@ -81,7 +68,6 @@ spec:
 
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-      {{ end }}
       containers:
         - name: {{ .Chart.Name }}
           command:
@@ -89,19 +75,12 @@ spec:
             - ingress
             - --config-path
             - /ingress-apisix/conf/config.yaml
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
               containerPort: {{ (.Values.config.httpListen | split ":")._1 }}
               protocol: TCP
-            {{ if .Values.config.etcdserver.enabled }}
-            - name: etcd
-              containerPort: 12379
-              protocol: TCP
-            {{ end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -113,9 +92,8 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - mountPath: /ingress-apisix/conf/config.yaml
+            - mountPath: /ingress-apisix/conf
               name: configuration
-              subPath: config.yaml
           env:
           - name: POD_NAMESPACE
             valueFrom:
@@ -125,41 +103,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-          {{- if .Values.config.apisix.existingSecret }}
-          - name: DEFAULT_CLUSTER_ADMIN_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.config.apisix.existingSecret | quote }}
-                key: {{ include "apisix-ingress-controller.credentials.secretAdminKey" . }}
-          {{- end }}
-        {{ if .Values.config.etcdserver.enabled }}
-        - name: apisix
-          image: "{{ .Values.config.etcdserver.image.repository }}:{{ .Values.config.etcdserver.image.tag }}"
-          imagePullPolicy: {{ .Values.config.etcdserver.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: 9080
-              protocol: TCP
-            - name: http-admin
-              containerPort: 9180
-              protocol: TCP
-            - name: https
-              containerPort: {{ .Values.gateway.tls.containerPort }}
-              protocol: TCP
-            {{- if .Values.serviceMonitor.enabled }}
-            - containerPort: 9091
-              name: prometheus
-              protocol: TCP
-            {{- end }}
-          resources:
-            {{- toYaml .Values.gateway.resources | nindent 12 }}
-          securityContext:
-            {{- toYaml .Values.gateway.securityContext | nindent 12 }}
-          volumeMounts:
-            - name: apisix-config
-              mountPath: /usr/local/apisix/conf/config.yaml
-              subPath: config.yaml
-        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -167,12 +110,4 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.topologySpreadConstraints }}
-      topologySpreadConstraints:
-        {{- tpl (. | toYaml) $ | nindent 8 }}
       {{- end }}

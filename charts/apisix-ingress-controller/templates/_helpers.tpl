@@ -85,14 +85,3 @@ Create the name of the service account to use
 {{- define "apisix-ingress-controller.namespace" -}}
 {{- default .Release.Namespace .Values.namespace -}}
 {{- end -}}
-
-{{/*
-Key to use to fetch admin token from secret
-*/}}
-{{- define "apisix-ingress-controller.credentials.secretAdminKey" -}}
-{{- if .Values.config.apisix.existingSecretAdminKeyKey }}
-{{- .Values.config.apisix.existingSecretAdminKeyKey }}
-{{- else }}
-{{- "adminKey" }}
-{{- end }}
-{{- end }}

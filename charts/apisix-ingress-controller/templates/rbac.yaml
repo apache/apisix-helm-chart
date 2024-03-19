@@ -110,8 +110,6 @@ rules:
   - apiGroups:
       - gateway.networking.k8s.io
     resources:
-      - tcproutes
-      - udproutes
       - httproutes
       - tlsroutes
       - gateways
@@ -123,8 +121,6 @@ rules:
   - apiGroups:
       - gateway.networking.k8s.io
     resources:
-      - tcproutes/status
-      - udproutes/status
       - httproutes/status
       - tlsroutes/status
       - gateways/status

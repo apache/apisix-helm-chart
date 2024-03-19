@@ -31,5 +31,10 @@ Currently, APISIX Ingress Controller automatically manipulates some APISIX resou
 
 |            | APISIX | APISIX Ingress | APISIX Dashboard |
 | :--------: | :----: | :------------: | :--------------: |
+| Chart v2.x |  v3.x  |      v1.x      |       v3.x       |
 | Chart v1.x |  v3.x  |      v1.x      |       v3.x       |
 | Chart v0.x |  v2.x  |      v1.x      |       v2.x       |
+
+## Changelogs
+
+We have made numerous breaking changes to the APISIX Helm chart between v1.x and v2.x. If you wish to continue using or updating the v1.x, please utilize the `apisix/1.x` branch available in the repository.

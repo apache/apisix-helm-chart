@@ -63,8 +63,6 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | config.authentication.secret | string | `"secret"` | Secret for jwt token generation |
 | config.authentication.users | list | `[{"password":"admin","username":"admin"}]` | Specifies username and password for login manager api. |
 | config.conf.etcd.endpoints | list | `["apisix-etcd:2379"]` | Supports defining multiple etcd host addresses for an etcd cluster |
-| config.conf.etcd.mtls | object | `{}` |  |
-| config.conf.etcd.mtlsExistingSecret | string | `""` | Specifies a secret to be mounted on /etc/etcd for mtls usage |
 | config.conf.etcd.password | string | `nil` | Specifies etcd basic auth password if enable etcd auth |
 | config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |
@@ -73,8 +71,6 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | config.conf.log.accessLog.filePath | string | `"/dev/stdout"` | Error log path |
 | config.conf.log.errorLog | object | `{"filePath":"/dev/stderr","level":"warn"}` | Error log level. Supports levels, lower to higher: debug, info, warn, error, panic, fatal |
 | config.conf.log.errorLog.filePath | string | `"/dev/stderr"` | Access log path |
-| config.conf.plugins | list | `[]` | Overrides plugins in the APISIX Dashboard conf |
-| config.schema.configMap | object | `{}` | Overrides APISIX Dashboard schema.json by mounting configMap containing schema.json |
 | fullnameOverride | string | `""` | String to fully override apisix-dashboard.fullname template |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX Dashboard image pull policy |
 | image.repository | string | `"apache/apisix-dashboard"` | Apache APISIX Dashboard image repository |
@@ -100,5 +96,3 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | tolerations | list | `[]` | Tolerations for pod assignment |
-| topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
-| updateStrategy | object | `{}` | Update strategy for apisix dashboard deployment |
