@@ -37,4 +37,4 @@ Currently, APISIX Ingress Controller automatically manipulates some APISIX resou
 
 ## Changelogs
 
-We have made numerous broken changes to the APISIX Helm chart between v1.x and v2.x. If you wish to continue using or updating the v1.x, please utilize the `apisix/1.x` branch available in the repository.
+We have made numerous breaking changes to the APISIX Helm chart between v1.x and v2.x. If you wish to continue using or updating the v1.x, please utilize the `apisix/1.x` branch available in the repository.
