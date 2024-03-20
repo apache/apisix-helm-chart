@@ -157,6 +157,49 @@ serviceAccount:
 rbac:
   create: false
 
+
+control:
+  # -- Enable Control API
+  enabled: true
+  service:
+    # -- Control annotations
+    annotations: {}
+    # -- Control service type
+    type: ClusterIP
+    # loadBalancerIP: a.b.c.d
+    # loadBalancerSourceRanges:
+    #   - "143.231.0.0/16"
+    # -- IPs for which nodes in the cluster will also accept traffic for the servic
+    externalIPs: []
+
+    # -- NodePort (only if control.service.type is NodePort)
+    # nodePort: 32000
+
+    # -- which ip to listen on for Apache APISIX Control API
+    ip: "127.0.0.1"
+    # -- which port to use for Apache APISIX Control API
+    port: 9090
+    # -- Service port to use for Apache APISIX Control API
+    servicePort: 9090
+  # -- Using ingress access Apache APISIX Control service
+  ingress:
+    enabled: false
+    # -- Ingress annotations
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    # -- Ingress Class Name
+    # className: "nginx"
+    hosts:
+      - host: apisix-control.local
+        paths:
+          - "/*"
+    tls: []
+  #  - secretName: apisix-tls
+  #    hosts:
+  #      - chart-example.local
+
 service:
   # -- Apache APISIX service type for user access itself
   type: NodePort
