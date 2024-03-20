@@ -13,21 +13,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{- if and (.Values.apisix.enabled) (eq .Values.apisix.kind "DaemonSet") }}
-apiVersion: apps/v1
-kind: DaemonSet
+
+{{- if eq .Values.apisix.deployment.mode "standalone" }}
+kind: ConfigMap
+apiVersion: v1
 metadata:
-  name: {{ include "apisix.fullname" . }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "apisix.labels" . | nindent 4 }}
-spec:
-  selector:
-    matchLabels:
-      {{- include "apisix.selectorLabels" . | nindent 6 }}
-  {{- if .Values.updateStrategy }}
-  updateStrategy: {{ toYaml .Values.updateStrategy | nindent 4 }}
-  {{- end }}
-  template:
-  {{- include "apisix.podTemplate" . | nindent 4 }}
+  name: apisix.yaml
+data:
+  apisix.yaml: |
+    routes:
+    -
+      uri: /hi
+      upstream:
+        nodes:
+          "127.0.0.1:1980": 1
+        type: roundrobin
+    #END
 {{- end }}

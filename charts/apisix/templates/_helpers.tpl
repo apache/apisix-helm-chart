@@ -47,8 +47,8 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "apisix.selectorLabels" -}}
-{{- if .Values.gateway.labelsOverride }}
-{{- tpl (.Values.gateway.labelsOverride | toYaml) . }}
+{{- if .Values.service.labelsOverride }}
+{{- tpl (.Values.service.labelsOverride | toYaml) . }}
 {{- else }}
 app.kubernetes.io/name: {{ include "apisix.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
@@ -80,16 +80,16 @@ Usage:
 {{- end -}}
 
 {{- define "apisix.basePluginAttrs" -}}
-{{- if .Values.serviceMonitor.enabled }}
+{{- if .Values.apisix.prometheus.enabled }}
 prometheus:
   export_addr:
     ip: 0.0.0.0
-    port: {{ .Values.serviceMonitor.containerPort }}
-  export_uri: {{ .Values.serviceMonitor.path }}
-  metric_prefix: {{ .Values.serviceMonitor.metricPrefix }}
+    port: {{ .Values.apisix.prometheus.containerPort }}
+  export_uri: {{ .Values.apisix.prometheus.path }}
+  metric_prefix: {{ .Values.apisix.prometheus.metricPrefix }}
 {{- end }}
-{{- if .Values.customPlugins.enabled }}
-{{- range $plugin := .Values.customPlugins.plugins }}
+{{- if .Values.apisix.customPlugins.enabled }}
+{{- range $plugin := .Values.apisix.customPlugins.plugins }}
 {{- if $plugin.attrs }}
 {{ $plugin.name }}: {{- $plugin.attrs | toYaml | nindent 2 }}
 {{- end }}
@@ -98,7 +98,7 @@ prometheus:
 {{- end -}}
 
 {{- define "apisix.pluginAttrs" -}}
-{{- merge .Values.pluginAttrs (include "apisix.basePluginAttrs" . | fromYaml) | toYaml -}}
+{{- merge .Values.apisix.pluginAttrs (include "apisix.basePluginAttrs" . | fromYaml) | toYaml -}}
 {{- end -}}
 
 {{/*
@@ -113,79 +113,25 @@ Scheme to use while connecting etcd
 {{- end }}
 
 {{/*
-Key to use to fetch admin token from secret
+Return the name of etcd password secret
 */}}
-{{- define "apisix.admin.credentials.secretAdminKey" -}}
-{{- if .Values.admin.credentials.secretAdminKey }}
-{{- .Values.admin.credentials.secretAdminKey }}
-{{- else }}
-{{- "admin" }}
+{{- define "apisix.etcd.secretName" -}}
+{{- if and .Values.etcd.enabled .Values.etcd.auth.rbac.create }}
+{{- template "common.names.fullname" .Subcharts.etcd }}
+{{- else if .Values.externalEtcd.existingSecret }}
+{{- print .Values.externalEtcd.existingSecret }}
+{{- else if .Values.externalEtcd.user }}
+{{- printf "etcd-%s" (include "apisix.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
-{{- end }}
+{{- end -}}
 
 {{/*
-Key to use to fetch viewer token from secret
+Return the password key name of etcd secret
 */}}
-{{- define "apisix.admin.credentials.secretViewerKey" -}}
-{{- if .Values.admin.credentials.secretViewerKey }}
-{{- .Values.admin.credentials.secretViewerKey }}
+{{- define "apisix.etcd.secretPasswordKey" -}}
+{{- if .Values.etcd.enabled }}
+{{- print "etcd-root-password" }}
 {{- else }}
-{{- "viewer" }}
+{{- print .Values.externalEtcd.secretPasswordKey }}
 {{- end }}
-{{- end }}
-
-{{/*
-Key to use to fetch username for external etcd from secret
-*/}}
-{{- define "apisix.etcd.credentials.userKey" -}}
-{{- if .Values.etcd.existingSecretUserKey }}
-{{- .Values.etcd.existingSecretUserKey | quote }}
-{{- else }}
-{{- "user" }}
-{{- end }}
-{{- end }}
-
-{{/*
-Key to use to fetch password for external etcd from secret
-*/}}
-{{- define "apisix.etcd.credentials.passwordKey" -}}
-{{- if .Values.etcd.existingSecretPasswordKey }}
-{{- .Values.etcd.existingSecretPasswordKey | quote }}
-{{- else }}
-{{- "password" }}
-{{- end }}
-{{- end }}
-
-{{/*
-Key to use to fetch root password for rbac
-*/}}
-{{- define "apisix.etcd.auth.rbac.passwordKey" -}}
-{{- if .Values.etcd.auth.rbac.existingSecretPasswordKey }}
-{{- .Values.etcd.auth.rbac.existingSecretPasswordKey | quote }}
-{{- else }}
-{{- "etcd-root-password" }}
-{{- end }}
-{{- end }}
-
-{{/*
-Configuration of user and password for etcd
-*/}}
-{{- define "apisix.etcd.credentials.config" -}}
-{{- if not .Values.etcd.enabled }}
-{{- if .Values.etcd.existingSecret }}
-user: "${{"{{"}}APISIX_ETCD_USER{{"}}"}}"
-password: "${{"{{"}}APISIX_ETCD_PASSWORD{{"}}"}}"
-{{- else if .Values.etcd.user }}
-user: {{ .Values.etcd.user | quote }}
-password: {{ .Values.etcd.password | quote }}
-{{- end }}
-{{- else if .Values.etcd.auth.rbac.create }}
-{{- if .Values.etcd.auth.rbac.existingSecret }}
-user: "root"
-password: "${{"{{"}}APISIX_ETCD_PASSWORD{{"}}"}}"
-{{- else }}
-user: "root"
-password: {{ .Values.etcd.auth.rbac.rootPassword | quote }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{- end -}}
