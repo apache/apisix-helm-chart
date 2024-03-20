@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if (and .Values.apisix.enabled .Values.apisix.podDisruptionBudget.enabled) }}
+{{- if and .Values.podDisruptionBudget.enabled (or (and .Values.autoscaling.enabled (gt (.Values.autoscaling.minReplicas | int) 1)) (and (not .Values.autoscaling.enabled) (gt (.Values.replicaCount | int) 1))) }}
 {{ if semverCompare "<1.21-0" .Capabilities.KubeVersion.Version -}}
 apiVersion: policy/v1beta1
 {{- else -}}
@@ -22,17 +22,17 @@ apiVersion: policy/v1
 {{- end }}
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "apisix.fullname" . }}
+  name: {{ include "apisix-ingress-controller.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "apisix.labels" . | nindent 4 }}
+    {{- include "apisix-ingress-controller.labels" . | nindent 4 }}
 spec:
-{{- if .Values.apisix.podDisruptionBudget.minAvailable }}
-  minAvailable: {{ .Values.apisix.podDisruptionBudget.minAvailable }}
+{{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
 {{- else }}
-  maxUnavailable: {{ .Values.apisix.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 {{- end }}
   selector:
     matchLabels:
-{{- include "apisix.selectorLabels" . | nindent 6 }}
+{{- include "apisix-ingress-controller.selectorLabels" . | nindent 6 }}
 {{- end }}
