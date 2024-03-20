@@ -232,6 +232,11 @@ gateway:
   # annotations:
   #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
   externalIPs: []
+  # -- Expose the port on the container only (no config changes applied on apisix process)
+  additionalContainerPorts: []
+  #   port: 9091
+  #   protocol: TCP
+  #  name: prometheus
   # -- Apache APISIX service settings for http
   http:
     enabled: true

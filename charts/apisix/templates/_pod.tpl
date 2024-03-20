@@ -126,6 +126,11 @@ spec:
         {{- end }}
         {{- end }}
         {{- end }}
+        {{- range .Values.gateway.additionalContainerPorts }}
+        - name: {{ .name }}
+          containerPort: {{ .port }}
+          protocol: {{ .protocol }}
+        {{- end }}     
 
       {{- if ne .Values.deployment.role "control_plane" }}
       readinessProbe:
