@@ -71,6 +71,12 @@ securityContext: {}
   # runAsUser: 1000
 
 config:
+  schema:
+    # -- Overrides APISIX Dashboard schema.json
+    # by mounting configMap containing schema.json
+    configMap: {}
+      # name: apisix-dashboard-schema
+      # key: schema.json
   conf:
     listen:
       # -- The address on which the Manager API should listen.
@@ -89,6 +95,16 @@ config:
       username: ~
       # -- Specifies etcd basic auth password if enable etcd auth
       password: ~
+
+      # -- Specifies a secret to be mounted on /etc/etcd for mtls usage
+      mtlsExistingSecret: ""
+
+      # MTLS configuration used for external etcd instances
+      mtls:
+        {}
+        # key_file: /etc/etcd/server-client.key
+        # cert_file: /etc/etcd/server-client.crt
+        # ca_file: /etc/etcd/server-ca.crt
     log:
       # -- Error log level.
       # Supports levels, lower to higher: debug, info, warn, error, panic, fatal
@@ -99,7 +115,8 @@ config:
       accessLog:
         # -- Error log path
         filePath: /dev/stdout
-
+    # -- Overrides plugins in the APISIX Dashboard conf
+    plugins: []
   authentication:
     # -- Secret for jwt token generation
     secret: secret
@@ -165,6 +182,10 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+# -- Update strategy for apisix dashboard deployment
+updateStrategy: {}
+  # type: RollingUpdate
+
 # -- Node labels for pod assignment
 nodeSelector: {}
 
@@ -172,3 +193,7 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# -- Topology Spread Constraints for pod assignment spread across your cluster among failure-domains
+# ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+topologySpreadConstraints: []
