@@ -39,7 +39,7 @@ helm install apisix apisix/apisix \
 
 ### How to install Apache APISIX running in standalone mode?
 
-helm install apisix apisix/apisix  --set apisix.deployment.mode=standalone --set etcd.enabled=false --set apisix.deployment.role=data_plane
+helm install apisix apisix/apisix  --set deployment.mode=standalone --set etcd.enabled=false --set deployment.role=data_plane
 
 ### Why get 403 when I access Apache APISIX admin api?
 

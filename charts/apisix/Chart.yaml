@@ -31,7 +31,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.6.0
+version: 1.11.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -42,16 +42,16 @@ sources:
 
 dependencies:
   - name: etcd
-    version: 8.7.7
+    version: 9.7.3
     repository: https://charts.bitnami.com/bitnami
     condition: etcd.enabled
   - name: apisix-dashboard
-    version: 0.8.1
+    version: 0.8.2
     repository: https://charts.apiseven.com
     condition: dashboard.enabled
     alias: dashboard
   - name: apisix-ingress-controller
-    version: 0.13.0
+    version: 0.14.0
     repository: https://charts.apiseven.com
     condition: ingress-controller.enabled
     alias: ingress-controller

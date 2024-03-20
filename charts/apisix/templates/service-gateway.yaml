@@ -14,70 +14,91 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if .Values.apisix.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "apisix.fullname" . }}-gateway
   namespace: {{ .Release.Namespace }}
   annotations:
-    {{- range $key, $value := .Values.service.annotations }}
+    {{- range $key, $value := .Values.gateway.annotations }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
     app.kubernetes.io/service: apisix-gateway
 spec:
-  type: {{ .Values.service.type }}
-  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
-  {{- if eq .Values.service.type "LoadBalancer" }}
-  {{- if .Values.service.loadBalancerIP }}
-  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  type: {{ .Values.gateway.type }}
+  {{- if or (eq .Values.gateway.type "LoadBalancer") (eq .Values.gateway.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.gateway.externalTrafficPolicy }}
   {{- end }}
-  {{- if .Values.service.loadBalancerSourceRanges }}
+  {{- if eq .Values.gateway.type "LoadBalancer" }}
+  {{- if .Values.gateway.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.gateway.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.gateway.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:
-  {{- range $cidr := .Values.service.loadBalancerSourceRanges }}
+  {{- range $cidr := .Values.gateway.loadBalancerSourceRanges }}
   - {{ $cidr }}
   {{- end }}
   {{- end }}
   {{- end }}
-  {{- if gt (len .Values.service.externalIPs) 0 }}
+  {{- if gt (len .Values.gateway.externalIPs) 0 }}
   externalIPs:
-  {{- range $ip := .Values.service.externalIPs }}
+  {{- range $ip := .Values.gateway.externalIPs }}
   - {{ $ip }}
   {{- end }}
   {{- end }}
   ports:
-  {{- if .Values.service.http.enabled }}
+  {{- if .Values.gateway.http.enabled }}
   - name: apisix-gateway
-    port: {{ .Values.service.http.servicePort }}
-    targetPort: {{ .Values.service.http.containerPort }}
-  {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.http.nodePort))) }}
-    nodePort: {{ .Values.service.http.nodePort }}
+    port: {{ .Values.gateway.http.servicePort }}
+    targetPort: {{ .Values.gateway.http.containerPort }}
+  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.http.nodePort))) }}
+    nodePort: {{ .Values.gateway.http.nodePort }}
   {{- end }}
     protocol: TCP
   {{- end }}
-  {{- range .Values.service.http.additionalContainerPorts }}
+  {{- range .Values.gateway.http.additionalContainerPorts }}
   - name: apisix-gateway-{{ .port | toString }}
     port: {{ .port }}
     targetPort: {{ .port }}
     protocol: TCP
   {{- end }}
-  {{- if or .Values.apisix.ssl.enabled }}
+  {{- if or .Values.gateway.tls.enabled }}
   - name: apisix-gateway-tls
-    port: {{ .Values.service.tls.servicePort }}
-    targetPort: {{ .Values.apisix.ssl.containerPort }}
-  {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.tls.nodePort))) }}
-    nodePort: {{ .Values.service.tls.nodePort }}
+    port: {{ .Values.gateway.tls.servicePort }}
+    targetPort: {{ .Values.gateway.tls.containerPort }}
+  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.tls.nodePort))) }}
+    nodePort: {{ .Values.gateway.tls.nodePort }}
   {{- end }}
     protocol: TCP
   {{- end }}
-  {{- range .Values.apisix.ssl.additionalContainerPorts }}
+  {{- range .Values.gateway.tls.additionalContainerPorts }}
   - name: apisix-gateway-tls-{{ .port | toString }}
     port: {{ .port }}
     targetPort: {{ .port }}
   {{- end }}
-  {{- if and .Values.service.stream.enabled (or (gt (len .Values.service.stream.tcp) 0) (gt (len .Values.service.stream.udp) 0)) }}
-  {{- with .Values.service.stream }}
+  {{- if or .Values.gateway.proxyProtocol.http.enabled }}
+  - name: apisix-gateway-pp-http
+    port: {{ .Values.gateway.proxyProtocol.http.servicePort }}
+    targetPort: {{ .Values.gateway.proxyProtocol.http.containerPort }}
+  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.proxyProtocol.http.nodePort))) }}
+    nodePort: {{ .Values.gateway.proxyProtocol.http.nodePort }}
+  {{- end }}
+    protocol: TCP
+  {{- end }}
+  {{- if or .Values.gateway.proxyProtocol.https.enabled }}
+  - name: apisix-gateway-pp-https
+    port: {{ .Values.gateway.proxyProtocol.https.servicePort }}
+    targetPort: {{ .Values.gateway.proxyProtocol.https.containerPort }}
+  {{- if (and (eq .Values.gateway.type "NodePort") (not (empty .Values.gateway.proxyProtocol.https.nodePort))) }}
+    nodePort: {{ .Values.gateway.proxyProtocol.https.nodePort }}
+  {{- end }}
+    protocol: TCP
+  {{- end }}
+  {{- if and .Values.gateway.stream.enabled (or (gt (len .Values.gateway.stream.tcp) 0) (gt (len .Values.gateway.stream.udp) 0)) }}
+  {{- with .Values.gateway.stream }}
   {{- if (gt (len .tcp) 0) }}
   {{- range $index, $port := .tcp }}
   - name: proxy-tcp-{{ $index | toString }}
@@ -104,3 +125,4 @@ spec:
   {{- end }}
   selector:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
+{{- end }}
