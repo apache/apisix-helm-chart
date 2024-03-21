@@ -326,6 +326,8 @@ data:
           - name: "admin"
             {{- if .Values.apisix.admin.credentials.secretName }}
             key: ${{"{{"}}APISIX_ADMIN_KEY{{"}}"}}
+            {{- else if eq .Values.apisix.admin.credentials.admin "" }}
+            key: {{ randAlphaNum 32 }}
             {{- else }}
             key: {{ .Values.apisix.admin.credentials.admin }}
             {{- end }}
