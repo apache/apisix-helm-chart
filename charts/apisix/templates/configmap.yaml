@@ -59,6 +59,13 @@ data:
       extra_lua_path: {{ .Values.apisix.customPlugins.luaPath }};{{ .Values.apisix.luaModuleHook.luaPath }}
       {{- end }}
 
+      enable_control: {{ .Values.control.enabled }}
+      {{- if .Values.control.enabled }}
+      control:
+        ip: {{ default "127.0.0.1" .Values.control.service.ip }}
+        port: {{ default 9090 .Values.control.service.port }}
+      {{- end }}
+
       {{- if .Values.apisix.luaModuleHook.enabled }}
       lua_module_hook: {{ .Values.apisix.luaModuleHook.hookPoint | quote }}
       {{- end }}
