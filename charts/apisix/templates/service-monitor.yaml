@@ -18,15 +18,18 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ .Values.metrics.serviceMonitor.name | default (include "apisix.fullname" .) }}
+  name: {{ .Values.metrics.serviceMonitor.name | default "apisix-service-monitor" }}
   namespace: {{ .Values.metrics.serviceMonitor.namespace | default .Release.Namespace }}
   labels:
-    {{- include "apisix.labels" . | nindent 4 }}
     {{- if .Values.metrics.serviceMonitor.labels }}
     {{- toYaml .Values.metrics.serviceMonitor.labels | nindent 4 }}
     {{- end }}
   {{- if .Values.metrics.serviceMonitor.annotations }}
-  annotations: {{- toYaml .Values.metrics.serviceMonitor.annotations | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.metrics.serviceMonitor.annotations | nindent 4 }}
+    "helm.sh/hook": pre-install,post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
   {{- end }}
 spec:
   namespaceSelector:
@@ -34,8 +37,8 @@ spec:
     - {{ .Values.metrics.serviceMonitor.namespace | default .Release.Namespace }}
   selector:
     matchLabels:
-      {{- include "apisix.labels" . | nindent 6 }}
-      app.kubernetes.io/service: apisix-prometheus-metrics
+      app.kubernetes.io/name: {{ include "apisix.name" . }}
+      app.kubernetes.io/service: apisix-gateway
   endpoints:
   - scheme: http
     targetPort: prometheus
