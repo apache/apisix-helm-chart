@@ -14,19 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.metrics.serviceMonitor.enabled }}
+{{- if .Values.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ .Values.metrics.serviceMonitor.name | default "apisix-service-monitor" }}
-  namespace: {{ .Values.metrics.serviceMonitor.namespace | default .Release.Namespace }}
+  name: {{ .Values.serviceMonitor.name | default "apisix-service-monitor" }}
+  namespace: {{ .Values.serviceMonitor.namespace | default .Release.Namespace }}
   labels:
-    {{- if .Values.metrics.serviceMonitor.labels }}
-    {{- toYaml .Values.metrics.serviceMonitor.labels | nindent 4 }}
+    {{- if .Values.serviceMonitor.labels }}
+    {{- toYaml .Values.serviceMonitor.labels | nindent 4 }}
     {{- end }}
-  {{- if .Values.metrics.serviceMonitor.annotations }}
+  {{- if .Values.serviceMonitor.annotations }}
   annotations:
-    {{- toYaml .Values.metrics.serviceMonitor.annotations | nindent 4 }}
+    {{- toYaml .Values.serviceMonitor.annotations | nindent 4 }}
     "helm.sh/hook": pre-install,post-install
     "helm.sh/hook-weight": "-5"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
@@ -34,7 +34,7 @@ metadata:
 spec:
   namespaceSelector:
     matchNames:
-    - {{ .Values.metrics.serviceMonitor.namespace | default .Release.Namespace }}
+    - {{ .Values.serviceMonitor.namespace | default .Release.Namespace }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "apisix.name" . }}
@@ -42,6 +42,6 @@ spec:
   endpoints:
   - scheme: http
     targetPort: prometheus
-    path: {{ .Values.apisix.prometheus.path }}
-    interval: {{ .Values.metrics.serviceMonitor.interval }}
+    path: {{ .Values.serviceMonitor.path }}
+    interval: {{ .Values.serviceMonitor.interval }}
 {{- end }}
