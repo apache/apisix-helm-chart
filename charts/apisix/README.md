@@ -43,9 +43,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | affinity | object | `{}` | Set affinity for Apache APISIX deploy |
 | apisix.admin.allow.ipList | list | `["127.0.0.1/24"]` | The client IP CIDR allowed to access Apache APISIX Admin API service. |
 | apisix.admin.cors | bool | `true` | Admin API support CORS response headers |
-| apisix.admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretName":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
+| apisix.admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
 | apisix.admin.credentials.admin | string | `"edd1c9f034335f136f87ad84b625c8f1"` | Apache APISIX admin API admin role credentials |
+| apisix.admin.credentials.secretAdminKey | string | `""` | Name of the admin role key in the secret, overrides the default key name "admin" |
 | apisix.admin.credentials.secretName | string | `""` | The APISIX Helm chart supports storing user credentials in a secret. The secret needs to contain two keys, admin and viewer, with their respective values set. |
+| apisix.admin.credentials.secretViewerKey | string | `""` | Name of the viewer role key in the secret, overrides the default key name "viewer" |
 | apisix.admin.credentials.viewer | string | `"4054f7cf07e344346cd3f287985e76a2"` | Apache APISIX admin API viewer role credentials |
 | apisix.admin.enabled | bool | `true` | Enable Admin API |
 | apisix.admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |

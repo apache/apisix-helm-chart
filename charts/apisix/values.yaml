@@ -333,6 +333,10 @@ apisix:
       # -- The APISIX Helm chart supports storing user credentials in a secret.
       # The secret needs to contain two keys, admin and viewer, with their respective values set.
       secretName: ""
+      # -- Name of the admin role key in the secret, overrides the default key name "admin"
+      secretAdminKey: ""
+      # -- Name of the viewer role key in the secret, overrides the default key name "viewer"
+      secretViewerKey: ""
 
     allow:
       # -- The client IP CIDR allowed to access Apache APISIX Admin API service.
