@@ -39,7 +39,7 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- with .Values.podAnnotations }}
-          {{ tpl (toYaml .) $ | nindent 10 }}
+        {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       labels:
         {{- include "apisix.selectorLabels" . | nindent 8 }}
