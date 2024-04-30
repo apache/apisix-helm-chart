@@ -66,6 +66,7 @@ data:
       enable_dev_mode: false                       # Sets nginx worker_processes to 1 if set to true
       enable_reuseport: true                       # Enable nginx SO_REUSEPORT switch if set to true.
       enable_ipv6: {{ .Values.apisix.enableIPv6 }} # Enable nginx IPv6 resolver
+      enable_http2: {{ .Values.apisix.enableHTTP2 }}
       enable_server_tokens: {{ .Values.apisix.enableServerTokens }} # Whether the APISIX version number should be shown in Server header
 
       # proxy_protocol:                   # Proxy Protocol configuration
@@ -149,7 +150,7 @@ data:
         enable: {{ .Values.apisix.ssl.enabled }}
         listen:
           - port: {{ .Values.apisix.ssl.containerPort }}
-            enable_http2: {{ .Values.apisix.ssl.http2.enabled }}
+            enable_http3: {{ .Values.apisix.ssl.enableHTTP3 }}
           {{- with .Values.apisix.ssl.additionalContainerPorts }}
           {{- toYaml . | nindent 10}}
           {{- end }}
