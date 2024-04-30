@@ -77,6 +77,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.dns.resolvers[5] | string | `"8.8.8.8"` |  |
 | apisix.dns.timeout | int | `5` |  |
 | apisix.dns.validity | int | `30` |  |
+| apisix.enableHTTP2 | bool | `true` |  |
 | apisix.enableIPv6 | bool | `true` | Enable nginx IPv6 resolver |
 | apisix.enableServerTokens | bool | `true` | Whether the APISIX version number should be shown in Server header |
 | apisix.extPlugin.cmd | list | `["/path/to/apisix-plugin-runner/runner","run"]` | the command and its arguements to run as a subprocess |
@@ -115,10 +116,10 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.ssl.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |
 | apisix.ssl.certCAFilename | string | `""` | Filename be used in the apisix.ssl.existingCASecret |
 | apisix.ssl.containerPort | int | `9443` |  |
+| apisix.ssl.enableHTTP3 | bool | `false` |  |
 | apisix.ssl.enabled | bool | `false` |  |
 | apisix.ssl.existingCASecret | string | `""` | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) |
 | apisix.ssl.fallbackSNI | string | `""` | Define SNI to fallback if none is presented by client |
-| apisix.ssl.http2.enabled | bool | `true` |  |
 | apisix.ssl.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
 | apisix.vault.enabled | bool | `false` | Enable or disable the vault integration |
@@ -170,7 +171,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | hostNetwork | bool | `false` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.8.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.9.1-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |
