@@ -76,6 +76,24 @@ spec:
     port: {{ .port }}
     targetPort: {{ .port }}
   {{- end }}
+  {{- if or .Values.service.proxyProtocol.http.enabled }}
+  - name: apisix-gateway-pp-http
+    port: {{ .Values.service.proxyProtocol.http.servicePort }}
+    targetPort: {{ .Values.service.proxyProtocol.http.containerPort }}
+  {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.proxyProtocol.http.nodePort))) }}
+    nodePort: {{ .Values.service.proxyProtocol.http.nodePort }}
+  {{- end }}
+    protocol: TCP
+  {{- end }}
+  {{- if or .Values.service.proxyProtocol.https.enabled }}
+  - name: apisix-gateway-pp-https
+    port: {{ .Values.service.proxyProtocol.https.servicePort }}
+    targetPort: {{ .Values.service.proxyProtocol.https.containerPort }}
+  {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.proxyProtocol.https.nodePort))) }}
+    nodePort: {{ .Values.service.proxyProtocol.https.nodePort }}
+  {{- end }}
+    protocol: TCP
+  {{- end }}  
   {{- if and .Values.service.stream.enabled (or (gt (len .Values.service.stream.tcp) 0) (gt (len .Values.service.stream.udp) 0)) }}
   {{- with .Values.service.stream }}
   {{- if (gt (len .tcp) 0) }}
