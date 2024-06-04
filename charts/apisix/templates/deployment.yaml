@@ -38,10 +38,8 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- if .Values.podAnnotations }}
-        {{- range $key, $value := $.Values.podAnnotations }}
-        {{ $key }}: {{ $value | quote }}
-        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       labels:
         {{- include "apisix.selectorLabels" . | nindent 8 }}
@@ -85,12 +83,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.apisix.admin.credentials.secretName }}
-                  key: admin
+                  key: {{ include "apisix.admin.credentials.secretAdminKey" . }}
             - name: APISIX_VIEWER_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.apisix.admin.credentials.secretName }}
-                  key: viewer
+                  key: {{ include "apisix.admin.credentials.secretViewerKey" . }}
           {{- end }}
 
           {{- if or (and .Values.etcd.enabled .Values.etcd.auth.rbac.create) (and (not .Values.etcd.enabled) .Values.externalEtcd.user) }}

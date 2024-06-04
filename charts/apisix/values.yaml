@@ -333,6 +333,10 @@ apisix:
       # -- The APISIX Helm chart supports storing user credentials in a secret.
       # The secret needs to contain two keys, admin and viewer, with their respective values set.
       secretName: ""
+      # -- Name of the admin role key in the secret, overrides the default key name "admin"
+      secretAdminKey: ""
+      # -- Name of the viewer role key in the secret, overrides the default key name "viewer"
+      secretViewerKey: ""
 
     allow:
       # -- The client IP CIDR allowed to access Apache APISIX Admin API service.
@@ -565,6 +569,11 @@ etcd:
       verify: true
       # -- specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset.
       sni: ""
+
+  # -- ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  # -- added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19
+  containerSecurityContext:
+    enabled: false
 
   service:
     port: 2379

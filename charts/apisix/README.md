@@ -43,9 +43,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | affinity | object | `{}` | Set affinity for Apache APISIX deploy |
 | apisix.admin.allow.ipList | list | `["127.0.0.1/24"]` | The client IP CIDR allowed to access Apache APISIX Admin API service. |
 | apisix.admin.cors | bool | `true` | Admin API support CORS response headers |
-| apisix.admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretName":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
+| apisix.admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
 | apisix.admin.credentials.admin | string | `"edd1c9f034335f136f87ad84b625c8f1"` | Apache APISIX admin API admin role credentials |
+| apisix.admin.credentials.secretAdminKey | string | `""` | Name of the admin role key in the secret, overrides the default key name "admin" |
 | apisix.admin.credentials.secretName | string | `""` | The APISIX Helm chart supports storing user credentials in a secret. The secret needs to contain two keys, admin and viewer, with their respective values set. |
+| apisix.admin.credentials.secretViewerKey | string | `""` | Name of the viewer role key in the secret, overrides the default key name "viewer" |
 | apisix.admin.credentials.viewer | string | `"4054f7cf07e344346cd3f287985e76a2"` | Apache APISIX admin API viewer role credentials |
 | apisix.admin.enabled | bool | `true` | Enable Admin API |
 | apisix.admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
@@ -138,7 +140,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | dashboard.config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | dashboard.config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |
 | dashboard.enabled | bool | `false` |  |
-| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"enabled":true,"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"containerSecurityContext":{"enabled":false},"enabled":true,"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30}` | etcd configuration use the FQDN address or the IP of the etcd |
 | etcd.auth | object | `{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
 | etcd.auth.rbac.create | bool | `false` | No authentication by default. Switch to enable RBAC authentication |
 | etcd.auth.rbac.rootPassword | string | `""` | root password for etcd. Requires etcd.auth.rbac.create to be true. |
@@ -148,6 +150,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | etcd.auth.tls.existingSecret | string | `""` | name of the secret contains etcd client cert |
 | etcd.auth.tls.sni | string | `""` | specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. |
 | etcd.auth.tls.verify | bool | `true` | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd |
+| etcd.containerSecurityContext | object | `{"enabled":false}` | added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19 |
 | etcd.enabled | bool | `true` | install etcd(v3) by default, set false if do not want to install etcd(v3) together |
 | etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | etcd.timeout | int | `30` | Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster |
