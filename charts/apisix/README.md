@@ -211,5 +211,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | serviceAccount.name | string | `""` |  |
 | timezone | string | `""` | timezone is the timezone where apisix uses. For example: "UTC" or "Asia/Shanghai" This value will be set on apisix container's environment variable TZ. You may need to set the timezone to be consistent with your local time zone, otherwise the apisix's logs may used to retrieve event maybe in wrong timezone. |
 | tolerations | list | `[]` | List of node taints to tolerate |
+| topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
 | updateStrategy | object | `{}` |  |
 | useDaemonSet | bool | `false` | set false to use `Deployment`, set true to use `DaemonSet` |
