@@ -55,7 +55,6 @@ data:
         enable: {{ .Values.gateway.tls.enabled }}
         listen:
           - port: {{ .Values.gateway.tls.containerPort }}
-            enable_http2: {{ .Values.gateway.tls.http2.enabled }}
           {{- with .Values.gateway.tls.additionalContainerPorts }}
           {{- toYaml . | nindent 10}}
           {{- end }}

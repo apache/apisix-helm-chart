@@ -74,7 +74,7 @@ config:
       pullPolicy: IfNotPresent
       # -- Apache APISIX image tag
       # Overrides the image tag whose default is the chart appVersion.
-      tag: 3.5.0-debian
+      tag: 3.9.1-debian
   # -- the error log level, default is info, optional values are: debug, info, warn, error, panic, fatal
   logLevel: "info"
   # -- the output file path of error log, default is stderr, when
@@ -159,6 +159,7 @@ config:
     existingSecret: ""
     # -- Name of the admin token key in the secret, overrides the default key name "adminKey"
     existingSecretAdminKeyKey: ""
+    enable_http2: true
 
 resources: {}
 
@@ -268,8 +269,6 @@ gateway:
     existingCASecret: ""
     # -- Filename be used in the gateway.tls.existingCASecret
     certCAFilename: ""
-    http2:
-      enabled: true
     # -- TLS protocols allowed to use.
     sslProtocols: "TLSv1.2 TLSv1.3"
     # -- Define SNI to fallback if none is presented by client
