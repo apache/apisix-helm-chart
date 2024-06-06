@@ -72,8 +72,8 @@ data:
       default_cluster_admin_key: {{ .Values.config.apisix.adminKey | quote }}
       {{- end }}
       default_cluster_name: {{ .Values.config.apisix.clusterName | quote }}
-      {{- if .Values.config.apisix.enable_http2 }}
-      enable_http2: {{ .Values.config.apisix.enable_http2 }}
+      {{- if .Values.config.apisix.enableHTTP2 }}
+      enable_http2: {{ .Values.config.apisix.enableHTTP2 }}
       {{- end }}
     {{ if .Values.config.etcdserver.enabled }}
     etcdserver:

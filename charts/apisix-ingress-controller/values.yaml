@@ -159,7 +159,7 @@ config:
     existingSecret: ""
     # -- Name of the admin token key in the secret, overrides the default key name "adminKey"
     existingSecretAdminKeyKey: ""
-    enable_http2: true
+    enableHTTP2: true
 
 resources: {}
 
