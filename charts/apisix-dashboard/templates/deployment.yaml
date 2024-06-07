@@ -53,6 +53,17 @@ spec:
       serviceAccountName: {{ include "apisix-dashboard.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-etcd
+          image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
+          command: ['sh', '-c', 'IFS=","; for endpoint in {{ .Values.config.conf.etcd.endpoints }}; do endpoint=$(echo "$endpoint" | tr -d "[]"); until nc -z "$endpoint" && echo "SUCCESS"; do echo "waiting for etcd at $endpoint `date`"; sleep 2; done; done; unset IFS;']
+          {{- with .Values.initContainer.securityContext }}
+          securityContext:
+            {{- . | toYaml | nindent 8 }}
+          {{- end }}
+      {{- if .Values.extraInitContainers }}
+      {{- toYaml .Values.extraInitContainers | nindent 4 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
