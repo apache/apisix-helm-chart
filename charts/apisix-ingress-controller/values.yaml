@@ -159,7 +159,6 @@ config:
     existingSecret: ""
     # -- Name of the admin token key in the secret, overrides the default key name "adminKey"
     existingSecretAdminKeyKey: ""
-    enableHTTP2: true
 
 resources: {}
 
@@ -264,7 +263,6 @@ gateway:
     additionalContainerPorts: []
       # - ip: 127.0.0.3           # Specific IP, If not set, the default value is `0.0.0.0`.
       #   port: 9445
-      #   enable_http2: true
     # -- Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd)
     existingCASecret: ""
     # -- Filename be used in the gateway.tls.existingCASecret
