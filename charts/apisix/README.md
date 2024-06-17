@@ -67,6 +67,9 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
 | apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
+| apisix.deployment.standalone | object | `{"config":"routes:\n-\n  uri: /hi\n  upstream:\n    nodes:\n      \"127.0.0.1:1980\": 1\n    type: roundrobin\n","existingConfigMap":""}` | Standalone rules configuration  ref: https://apisix.apache.org/docs/apisix/deployment-modes/#standalone |
+| apisix.deployment.standalone.config | string | `"routes:\n-\n  uri: /hi\n  upstream:\n    nodes:\n      \"127.0.0.1:1980\": 1\n    type: roundrobin\n"` | Rules which are set to the default apisix.yaml configmap. If apisix.delpoyment.standalone.existingConfigMap is empty, these are used. |
+| apisix.deployment.standalone.existingConfigMap | string | `""` | Specifies the name of the ConfigMap that contains the rule configurations. The configuration must be set to the key named `apisix.yaml` in the configmap. |
 | apisix.discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
 | apisix.discovery.registry | object | `{}` | Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281), and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery) |
 | apisix.dns.resolvers[0] | string | `"127.0.0.1"` |  |
