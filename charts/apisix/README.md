@@ -172,9 +172,10 @@ The command removes all the Kubernetes components associated with the chart and 
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
 | image.tag | string | `"3.9.1-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
-| ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
+| ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"pathType":"ImplementationSpecific","servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |
+| ingress.pathType | string | `"ImplementationSpecific"` | Path type for the Ingress rules. |
 | ingress.servicePort | number | `nil` | Service port to send traffic. Defaults to `service.http.servicePort`. |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.tag | float | `1.28` | Init container tag |
