@@ -140,8 +140,8 @@ Return the password key name of etcd secret
 Key to use to fetch admin token from secret
 */}}
 {{- define "apisix.admin.credentials.secretAdminKey" -}}
-{{- if .Values.admin.credentials.secretAdminKey }}
-{{- .Values.admin.credentials.secretAdminKey }}
+{{- if .Values.apisix.admin.credentials.secretAdminKey }}
+{{- .Values.apisix.admin.credentials.secretAdminKey }}
 {{- else }}
 {{- "admin" }}
 {{- end }}
@@ -151,8 +151,8 @@ Key to use to fetch admin token from secret
 Key to use to fetch viewer token from secret
 */}}
 {{- define "apisix.admin.credentials.secretViewerKey" -}}
-{{- if .Values.admin.credentials.secretViewerKey }}
-{{- .Values.admin.credentials.secretViewerKey }}
+{{- if .Values.apisix.admin.credentials.secretViewerKey }}
+{{- .Values.apisix.admin.credentials.secretViewerKey }}
 {{- else }}
 {{- "viewer" }}
 {{- end }}
