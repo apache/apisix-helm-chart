@@ -1,0 +1,76 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{{- if (and .Values.control.enabled .Values.control.ingress.enabled) -}}
+{{- $fullName := include "apisix.fullname" . -}}
+{{- $svcPort := .Values.control.servicePort -}}
+{{- if and .Values.control.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.control.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.control.ingress.annotations "kubernetes.io/ingress.class" .Values.control.ingress.className}}
+  {{- end }}
+{{- end }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.Version }}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.Version }}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-control
+  labels:
+    {{- include "apisix.labels" . | nindent 4 }}
+  {{- with .Values.control.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and .Values.control.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.control.ingress.className }}
+  {{- end }}
+  {{- if .Values.control.ingress.tls }}
+  tls:
+    {{- range .Values.control.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.control.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ . }}
+            {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.Version }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ $fullName }}-control
+                port:
+                  number:  {{ $svcPort }}
+            {{- else }}
+            backend:
+              serviceName: {{ $fullName }}-control
+              servicePort: {{ $svcPort }}
+            {{- end }}
+          {{- end }}
+    {{- end }}
+  {{- end }}

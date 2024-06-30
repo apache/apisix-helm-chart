@@ -135,6 +135,16 @@ The command removes all the Kubernetes components associated with the chart and 
 | autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | autoscaling.targetMemoryUtilizationPercentage | int | `80` |  |
 | autoscaling.version | string | `"v2"` | HPA version, the value is "v2" or "v2beta1", default "v2" |
+| control.enabled | bool | `true` | Enable Control API |
+| control.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix-control.local","paths":["/*"]}],"tls":[]}` | Using ingress access Apache APISIX Control service |
+| control.ingress.annotations | object | `{}` | Ingress annotations |
+| control.ingress.hosts | list | `[{"host":"apisix-control.local","paths":["/*"]}]` | Ingress Class Name className: "nginx" |
+| control.service.annotations | object | `{}` | Control annotations |
+| control.service.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
+| control.service.ip | string | `"127.0.0.1"` | which ip to listen on for Apache APISIX Control API |
+| control.service.port | int | `9090` | which port to use for Apache APISIX Control API |
+| control.service.servicePort | int | `9090` | Service port to use for Apache APISIX Control API |
+| control.service.type | string | `"ClusterIP"` | Control service type |
 | dashboard.config.conf.etcd.endpoints | list | `["apisix-etcd:2379"]` | Supports defining multiple etcd host addresses for an etcd cluster |
 | dashboard.config.conf.etcd.password | string | `nil` | Specifies etcd basic auth password if enable etcd auth |
 | dashboard.config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
