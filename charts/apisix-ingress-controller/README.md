@@ -160,7 +160,6 @@ The same for container level, you need to set:
 | gateway.tls.enabled | bool | `false` |  |
 | gateway.tls.existingCASecret | string | `""` | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) |
 | gateway.tls.fallbackSNI | string | `""` | Define SNI to fallback if none is presented by client |
-| gateway.tls.http2.enabled | bool | `true` |  |
 | gateway.tls.servicePort | int | `443` |  |
 | gateway.tls.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | gateway.type | string | `"NodePort"` | Apache APISIX service type for user access itself |

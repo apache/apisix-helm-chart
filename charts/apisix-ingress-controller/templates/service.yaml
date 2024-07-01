@@ -28,5 +28,11 @@ spec:
       targetPort: {{ (.Values.config.httpListen | split ":")._1 }}
       protocol: TCP
       name: http
+      {{- if .Values.config.etcdserver.enabled }}
+    - port: 12379
+      targetPort: 12379
+      protocol: TCP
+      name: etcd
+      {{- end }}
   selector:
     {{- include "apisix-ingress-controller.selectorLabels" . | nindent 4 }}

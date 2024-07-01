@@ -74,7 +74,7 @@ config:
       pullPolicy: IfNotPresent
       # -- Apache APISIX image tag
       # Overrides the image tag whose default is the chart appVersion.
-      tag: 3.5.0-debian
+      tag: 3.9.1-debian
   # -- the error log level, default is info, optional values are: debug, info, warn, error, panic, fatal
   logLevel: "info"
   # -- the output file path of error log, default is stderr, when
@@ -263,13 +263,10 @@ gateway:
     additionalContainerPorts: []
       # - ip: 127.0.0.3           # Specific IP, If not set, the default value is `0.0.0.0`.
       #   port: 9445
-      #   enable_http2: true
     # -- Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd)
     existingCASecret: ""
     # -- Filename be used in the gateway.tls.existingCASecret
     certCAFilename: ""
-    http2:
-      enabled: true
     # -- TLS protocols allowed to use.
     sslProtocols: "TLSv1.2 TLSv1.3"
     # -- Define SNI to fallback if none is presented by client
