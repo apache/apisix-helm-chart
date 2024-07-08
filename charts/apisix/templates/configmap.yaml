@@ -195,10 +195,6 @@ data:
         {{- range $cidrs := .Values.apisix.nginx.realIp.fromIps }}
           - {{ $cidrs }}
         {{- end }}
-        {{- else }}
-          - 127.0.0.1
-          - 'unix:'
-        {{- end}}
         {{- if .Values.apisix.nginx.customLuaSharedDicts }}
         custom_lua_shared_dict:        # add custom shared cache to nginx.conf
         {{- range $dict := .Values.apisix.nginx.customLuaSharedDicts }}

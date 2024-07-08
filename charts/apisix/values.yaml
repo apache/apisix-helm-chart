@@ -371,7 +371,7 @@ apisix:
     keepaliveTimeout: 60s
     realIp:
       header: "X-Real-IP"
-      fromIps: []
+      fromIps: ["127.0.0.1", "unix:"]
     envs: []
     # access log and error log configuration
     logs:
