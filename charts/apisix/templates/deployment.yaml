@@ -126,6 +126,16 @@ spec:
               containerPort: {{ .Values.apisix.prometheus.containerPort }}
               protocol: TCP
             {{- end }}
+            {{- if .Values.service.proxyProtocol.http.enabled }}
+            - name: pp-http
+              containerPort: {{ .Values.service.proxyProtocol.http.containerPort }}
+              protocol: TCP
+            {{- end }}
+            {{- if .Values.service.proxyProtocol.https.enabled }}
+            - name: pp-https
+              containerPort: {{ .Values.service.proxyProtocol.https.containerPort }}
+              protocol: TCP
+            {{- end }}
             {{- if and .Values.service.stream.enabled (or (gt (len .Values.service.stream.tcp) 0) (gt (len .Values.service.stream.udp) 0)) }}
             {{- with .Values.service.stream }}
             {{- if (gt (len .tcp) 0) }}
