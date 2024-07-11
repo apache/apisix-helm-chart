@@ -14,19 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if eq .Values.apisix.deployment.mode "standalone" }}
+{{- if and (eq .Values.apisix.deployment.mode "standalone") (not .Values.apisix.deployment.standalone.existingConfigMap) }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: apisix.yaml
 data:
   apisix.yaml: |
-    routes:
-    -
-      uri: /hi
-      upstream:
-        nodes:
-          "127.0.0.1:1980": 1
-        type: roundrobin
+    {{- .Values.apisix.deployment.standalone.config | nindent 4 }}
     #END
 {{- end }}
