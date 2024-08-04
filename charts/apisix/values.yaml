@@ -441,12 +441,17 @@ apisix:
       stream: |
 
     # -- Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings,
-    # click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict
+    # click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L48-L51) to learn the format of a shared dict
     customLuaSharedDicts: []
       # - name: foo
       #   size: 10k
       # - name: bar
       #   size: 1m
+
+    # -- Overrides [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings,
+    # click [here](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L258) to view the default values.
+    luaSharedDictsOverride: {}
+      # prometheus-metrics: 100m
 
   discovery:
     # -- Enable or disable Apache APISIX integration service discovery
