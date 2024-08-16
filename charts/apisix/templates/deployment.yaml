@@ -121,6 +121,11 @@ spec:
               containerPort: {{ .Values.apisix.admin.port }}
               protocol: TCP
             {{- end }}
+            {{- if .Values.control.enabled }}
+            - name: control
+              containerPort: {{ .Values.control.service.port }}
+              protocol: TCP
+            {{- end }}
             {{- if .Values.apisix.prometheus.enabled }}
             - name: prometheus
               containerPort: {{ .Values.apisix.prometheus.containerPort }}
