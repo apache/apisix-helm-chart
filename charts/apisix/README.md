@@ -111,6 +111,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.prometheus.enabled | bool | `false` |  |
 | apisix.prometheus.metricPrefix | string | `"apisix_"` | prefix of the metrics |
 | apisix.prometheus.path | string | `"/apisix/prometheus/metrics"` | path of the metrics endpoint |
+| apisix.proxyProtocol | object | `{"enabled":false,"listenHttpPort":9181,"listenHttpsPort":9182,"tcp":true,"upstream":true}` | Enable Proxy Protocol |
+| apisix.proxyProtocol.listenHttpPort | int | `9181` | The port with proxy protocol for http, it differs from node_listen and admin_listen. |
+| apisix.proxyProtocol.listenHttpsPort | int | `9182` | The port with proxy protocol for https |
+| apisix.proxyProtocol.tcp | bool | `true` | Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option |
+| apisix.proxyProtocol.upstream | bool | `true` | Enable the proxy protocol to the upstream server |
 | apisix.router.http | string | `"radixtree_host_uri"` | Defines how apisix handles routing: - radixtree_uri: match route by uri(base on radixtree) - radixtree_host_uri: match route by host + uri(base on radixtree) - radixtree_uri_with_parameter: match route by uri with parameters |
 | apisix.setIDFromPodUID | bool | `false` | Use Pod metadata.uid as the APISIX id. |
 | apisix.ssl.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |
@@ -213,6 +218,9 @@ The command removes all the Kubernetes components associated with the chart and 
 | service.http | object | `{"additionalContainerPorts":[],"containerPort":9080,"enabled":true,"servicePort":80}` | Apache APISIX service settings for http |
 | service.http.additionalContainerPorts | list | `[]` | Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24) |
 | service.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
+| service.proxyProtocol | object | `{"http":{"containerPort":9181,"enabled":false,"servicePort":9181},"https":{"containerPort":9182,"enabled":false,"servicePort":9182}}` | Proxy Protocol Configuration |
+| service.proxyProtocol.http | object | `{"containerPort":9181,"enabled":false,"servicePort":9181}` | If you enable proxy protocol, you must use this port to receive http request with proxy protocol |
+| service.proxyProtocol.https | object | `{"containerPort":9182,"enabled":false,"servicePort":9182}` | The port with proxy protocol for https |
 | service.stream | object | `{"enabled":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | service.tls | object | `{"servicePort":443}` | Apache APISIX service settings for tls |
 | service.type | string | `"NodePort"` | Apache APISIX service type for user access itself |

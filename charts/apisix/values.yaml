@@ -189,6 +189,27 @@ service:
     servicePort: 443
     # nodePort: 4443
 
+  # -- Proxy Protocol Configuration
+  proxyProtocol:
+    # -- If you enable proxy protocol, you must use this port to receive http request with proxy protocol
+    http:
+      enabled: false
+      # - Specify NodePort (only if gateway.type is NodePort)
+      # nodePort:
+      # - Define a Service Port on which the gateway is listening
+      servicePort: 9181
+      # - Gateway Service Port to use as target
+      containerPort: 9181
+    # -- The port with proxy protocol for https
+    https:
+      enabled: false
+      # - Specify NodePort (only if gateway.type is NodePort)
+      # nodePort:
+      # - Define a Service Port on which the gateway is listening
+      servicePort: 9182
+      # - Gateway Service Port to use as target
+      containerPort: 9182
+
   # -- Apache APISIX service settings for stream. L4 proxy (TCP/UDP)
   stream:
     enabled: false
@@ -285,6 +306,18 @@ apisix:
 
   # -- Use Pod metadata.uid as the APISIX id.
   setIDFromPodUID: false
+
+  # -- Enable Proxy Protocol
+  proxyProtocol:
+    enabled: false
+    # -- The port with proxy protocol for http, it differs from node_listen and admin_listen.
+    listenHttpPort: 9181
+    # -- The port with proxy protocol for https
+    listenHttpsPort: 9182
+    # -- Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option
+    tcp: true
+    # -- Enable the proxy protocol to the upstream server
+    upstream: true
 
   # -- Whether to add a custom lua module
   luaModuleHook:
