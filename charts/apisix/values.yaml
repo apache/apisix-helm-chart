@@ -29,7 +29,7 @@ image:
   pullPolicy: IfNotPresent
   # -- Apache APISIX image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 3.9.1-debian
+  tag: 3.10.0-debian
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
@@ -216,6 +216,48 @@ ingress:
     - host: apisix.local
       paths: []
   tls: []
+
+control:
+  # -- Enable Control API
+  enabled: true
+  service:
+    # -- Control annotations
+    annotations: {}
+    # -- Control service type
+    type: ClusterIP
+    # loadBalancerIP: a.b.c.d
+    # loadBalancerSourceRanges:
+    #   - "143.231.0.0/16"
+    # -- IPs for which nodes in the cluster will also accept traffic for the servic
+    externalIPs: []
+
+    # -- NodePort (only if control.service.type is NodePort)
+    # nodePort: 32000
+
+    # -- which ip to listen on for Apache APISIX Control API
+    ip: "127.0.0.1"
+    # -- which port to use for Apache APISIX Control API
+    port: 9090
+    # -- Service port to use for Apache APISIX Control API
+    servicePort: 9090
+  # -- Using ingress access Apache APISIX Control service
+  ingress:
+    enabled: false
+    # -- Ingress annotations
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    # -- Ingress Class Name
+    # className: "nginx"
+    hosts:
+      - host: apisix-control.local
+        paths:
+          - "/*"
+    tls: []
+  #  - secretName: apisix-tls
+  #    hosts:
+  #      - chart-example.local
 
 # -- Observability configuration.
 metrics:
