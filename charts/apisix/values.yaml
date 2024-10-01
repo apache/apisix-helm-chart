@@ -308,6 +308,13 @@ apisix:
   ssl:
     enabled: false
     containerPort: 9443
+    # -- We need to change the Kubernetes Service target port independently from:
+    # --  - Nginx configuration
+    # --  - Container port
+    # -- This is useful while creating load-balancers in cloud providers, where the TLS is off-loaded
+    # -- and we need to send the requests from the external TLS port to the pod HTTP port, due to the node ports
+    # -- being automatically created based on the Kubernetes Service
+    serviceTargetPort: 9443
     # -- Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99)
     additionalContainerPorts: []
       # - ip: 127.0.0.3           # Specific IP, If not set, the default value is `0.0.0.0`.
