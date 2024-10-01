@@ -65,7 +65,7 @@ spec:
   {{- if or .Values.apisix.ssl.enabled }}
   - name: apisix-gateway-tls
     port: {{ .Values.service.tls.servicePort }}
-    targetPort: {{ .Values.apisix.ssl.containerPort }}
+    targetPort: {{ .Values.apisix.ssl.serviceTargetPort }}
   {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.tls.nodePort))) }}
     nodePort: {{ .Values.service.tls.nodePort }}
   {{- end }}
