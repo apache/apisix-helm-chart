@@ -181,7 +181,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | hostNetwork | bool | `false` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.10.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.11.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |
