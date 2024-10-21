@@ -45,11 +45,11 @@ data:
       {{- if gt (len .Values.config.kubernetes.namespaceSelector) 0 }}
       namespace_selector:
       {{- range .Values.config.kubernetes.namespaceSelector }}
-      - {{ . | quote }}
+      - {{ tpl . $ | quote }}
       {{- end }}
       {{- end }}
       election_id: {{ .Values.config.kubernetes.electionId | quote }}
-      ingress_class: {{ .Values.config.kubernetes.ingressClass | quote }}
+      ingress_class: {{ tpl .Values.config.kubernetes.ingressClass $ | quote }}
       ingress_version: {{ .Values.config.kubernetes.ingressVersion | quote }}
       watch_endpointslices: {{ .Values.config.kubernetes.watchEndpointSlices }}
       apisix_route_version: {{ .Values.config.kubernetes.apisixRouteVersion | quote }}
@@ -61,9 +61,9 @@ data:
       default_cluster_base_url: http://127.0.0.1:9180/apisix/admin
       {{ else }}
       {{- if .Values.config.apisix.serviceFullname }}
-      default_cluster_base_url: http://{{ .Values.config.apisix.serviceFullname }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
+      default_cluster_base_url: http://{{ tpl .Values.config.apisix.serviceFullname $ }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
       {{ else }}
-      default_cluster_base_url: http://{{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{ .Values.clusterDomain }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
+      default_cluster_base_url: http://{{ tpl .Values.config.apisix.serviceName $ }}.{{ tpl .Values.config.apisix.serviceNamespace $ }}.svc.{{ .Values.clusterDomain }}:{{ .Values.config.apisix.servicePort }}/apisix/admin
       {{- end}}
       {{- end }}
       {{- if .Values.config.apisix.existingSecret }}

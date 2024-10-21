@@ -76,7 +76,7 @@ spec:
           {{ if .Values.config.apisix.serviceFullname }}
           command: ['sh', '-c', "until nc -z {{ .Values.config.apisix.serviceFullname }} {{ .Values.config.apisix.servicePort }} ; do echo waiting for apisix-admin; sleep 2; done;"]
           {{ else }}
-          command: ['sh', '-c', "until nc -z {{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{ .Values.clusterDomain }} {{ .Values.config.apisix.servicePort }} ; do echo waiting for apisix-admin; sleep 2; done;"]
+          command: ['sh', '-c', "until nc -z {{ tpl .Values.config.apisix.serviceName $ }}.{{ tpl .Values.config.apisix.serviceNamespace $ }}.svc.{{ .Values.clusterDomain }} {{ .Values.config.apisix.servicePort }} ; do echo waiting for apisix-admin; sleep 2; done;"]
           {{ end}}
 
           securityContext:
@@ -129,7 +129,7 @@ spec:
           - name: DEFAULT_CLUSTER_ADMIN_KEY
             valueFrom:
               secretKeyRef:
-                name: {{ .Values.config.apisix.existingSecret | quote }}
+                name: {{ tpl .Values.config.apisix.existingSecret $ | quote }}
                 key: {{ include "apisix-ingress-controller.credentials.secretAdminKey" . }}
           {{- end }}
         {{ if .Values.config.etcdserver.enabled }}
