@@ -255,6 +255,21 @@ gateway:
     # readOnlyRootFilesystem: true
     # runAsNonRoot: true
     # runAsUser: 636
+  # -- Create ServiceMonitor object for apisix gateway for Prometheus operator
+  # Requires Prometheus operator v0.38.0 or higher.
+  serviceMonitor:
+    enabled: false
+    namespace: "monitoring"
+    # -- @param serviceMonitor.path ServiceMonitor scrape path
+    path: "/apisix/prometheus/metrics"
+    interval: 15s
+    # -- @param serviceMonitor.labels ServiceMonitor extra labels
+    labels: {}
+    # -- @param serviceMonitor.annotations ServiceMonitor annotations
+    annotations: {}
+    # -- @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion.
+    # ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs
+    metricRelabelings: {}
   tls:
     enabled: false
     servicePort: 443
