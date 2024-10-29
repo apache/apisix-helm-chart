@@ -41,6 +41,9 @@ data:
     apisix:
       enable_control: true
       enable_reuseport: true
+      {{- if and (not (eq .Values.gateway.enableServerTokens nil)) (hasKey .Values.gateway "enableServerTokens") }}
+      enable_server_tokens: {{ .Values.gateway.enableServerTokens }}
+      {{- end }}
 
       stream_proxy:
         only: false

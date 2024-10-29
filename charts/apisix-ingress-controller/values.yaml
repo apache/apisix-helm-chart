@@ -234,6 +234,9 @@ gateway:
   #   - "143.231.0.0/16"
   # -- load balancer ips
   externalIPs: []
+  # -- (bool) If set to true, shows APISIX version in the `Server` response header.
+  # @default -- true
+  enableServerTokens:
   nginx:
     # -- Nginx workerRlimitNoFile
     workerRlimitNofile: "20480"
