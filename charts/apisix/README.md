@@ -91,6 +91,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.luaModuleHook.configMapRef.name | string | `""` | Name of the ConfigMap where the lua module codes store |
 | apisix.luaModuleHook.hookPoint | string | `""` | the hook module which will be used to inject third party code into APISIX use the lua require style like: "module.say_hello" |
 | apisix.luaModuleHook.luaPath | string | `""` | extend lua_package_path to load third party code |
+| apisix.nginx.clientBodyTimeout | string | `"60s"` | Timeout for reading client request body, then 408 (Request Time-out) error is returned to the client. |
+| apisix.nginx.clientHeaderTimeout | string | `"60s"` | Timeout for reading client request header, then 408 (Request Time-out) error is returned to the client. |
 | apisix.nginx.configurationSnippet | object | `{"httpAdmin":"","httpEnd":"","httpSrv":"","httpStart":"","main":"","stream":""}` | Custom configuration snippet. |
 | apisix.nginx.customLuaSharedDicts | list | `[]` | Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict |
 | apisix.nginx.enableCPUAffinity | bool | `true` |  |
@@ -102,6 +104,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.logs.enableAccessLog | bool | `true` | Enable access log or not, default true |
 | apisix.nginx.logs.errorLog | string | `"/dev/stderr"` | Error log path |
 | apisix.nginx.logs.errorLogLevel | string | `"warn"` | Error log level |
+| apisix.nginx.sendTimeout | string | `"10s"` | Timeout for transmitting a response to the client, then the connection is closed. |
 | apisix.nginx.workerConnections | string | `"10620"` |  |
 | apisix.nginx.workerProcesses | string | `"auto"` |  |
 | apisix.nginx.workerRlimitNofile | string | `"20480"` |  |
