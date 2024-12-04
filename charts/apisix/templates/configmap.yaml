@@ -224,6 +224,11 @@ data:
       {{- if .Values.apisix.nginx.configurationSnippet.stream }}
       stream_configuration_snippet: {{- toYaml .Values.apisix.nginx.configurationSnippet.stream | indent 6 }}
       {{- end }}
+      {{- with .Values.apisix.nginx.prometheusSharedDictSize }}
+      meta:
+        lua_shared_dict:
+          prometheus-metrics: {{ . }}
+      {{- end }}
 
     {{- if .Values.apisix.discovery.enabled }}
     discovery:

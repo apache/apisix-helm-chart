@@ -448,6 +448,9 @@ apisix:
       # - name: bar
       #   size: 1m
 
+    # Set the size of prometheus-metrics shared dict
+    prometheusSharedDictSize: 15m
+
   discovery:
     # -- Enable or disable Apache APISIX integration service discovery
     enabled: false
