@@ -102,6 +102,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.logs.enableAccessLog | bool | `true` | Enable access log or not, default true |
 | apisix.nginx.logs.errorLog | string | `"/dev/stderr"` | Error log path |
 | apisix.nginx.logs.errorLogLevel | string | `"warn"` | Error log level |
+| apisix.nginx.prometheusSharedDictSize | string | `"15m"` | Set the size of prometheus-metrics shared dictionary |
 | apisix.nginx.workerConnections | string | `"10620"` |  |
 | apisix.nginx.workerProcesses | string | `"auto"` |  |
 | apisix.nginx.workerRlimitNofile | string | `"20480"` |  |
