@@ -448,7 +448,7 @@ apisix:
       # - name: bar
       #   size: 1m
 
-    # Set the size of prometheus-metrics shared dict
+    # -- Set the size of prometheus-metrics shared dictionary
     prometheusSharedDictSize: 15m
 
   discovery:
