@@ -530,6 +530,10 @@ apisix:
   plugins: []
   # -- Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml)
   stream_plugins: []
+  # -- Customize APISIX proxy_cache plugin settings.
+  proxy_cache:
+    # -- Customize additional cache zones. See [proxy_cache plugin](https://apisix.apache.org/docs/apisix/plugins/proxy-cache/#enable-plugin)
+    zones: []
 
   # -- Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details
   pluginAttrs: {}

@@ -99,13 +99,16 @@ data:
       #    disk_size: 1G
       #    disk_path: "/tmp/disk_cache_two"
       #    cache_levels: "1:2"
+      {{- if .Values.apisix.proxy_cache.zones }}
+        {{- toYaml .Values.apisix.proxy_cache.zones | nindent 8 }}
+      {{- end }}
 
       router:
         http: {{ .Values.apisix.router.http }}  # radixtree_uri: match route by uri(base on radixtree)
                                     # radixtree_host_uri: match route by host + uri(base on radixtree)
                                     # radixtree_uri_with_parameter: match route by uri with parameters
         ssl: 'radixtree_sni'        # radixtree_sni: match route by SNI(base on radixtree)
-      
+
       {{- $proxy_mode := "" }}
       {{- if and .Values.service.stream.enabled .Values.service.http.enabled }}
         {{- $proxy_mode = "http&stream" }}
