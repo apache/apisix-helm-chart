@@ -100,7 +100,10 @@ data:
       #    disk_path: "/tmp/disk_cache_two"
       #    cache_levels: "1:2"
       {{- if .Values.apisix.proxy_cache.zones }}
-        {{- toYaml .Values.apisix.proxy_cache.zones | nindent 8 }}
+        {{- $zones := toYaml .Values.apisix.proxy_cache.zones -}}
+        {{- if gt (len ($zones | fromYaml)) 0 }}
+          {{- $zones | nindent 8 }}
+        {{- end }}
       {{- end }}
 
       router:
