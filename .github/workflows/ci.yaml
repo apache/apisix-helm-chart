@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        k8s: ["v1.23.17@sha256:adf5a4187587e12c43c047e02bc7893b0f03889e31da7c2e3aa1b5fb92c7c8f4", "v1.24.15@sha256:dd8c7f5f4f2ff63680847e54e2569b601524f46bc1074041c6b016542676c10b"]
+        k8s: ["v1.23.17", "v1.24.15"]
 
     steps:
 
