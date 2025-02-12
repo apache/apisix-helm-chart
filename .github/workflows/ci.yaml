@@ -47,7 +47,7 @@ jobs:
         id: kind
         uses: ./.github/actions/setup-kind
         with:
-          version: v0.17.0
+          version: v0.18.0
           config: test/e2e/kind.yaml
           image: kindest/node:${{ matrix.k8s }}
 
