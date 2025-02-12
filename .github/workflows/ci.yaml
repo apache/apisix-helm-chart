@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        k8s: ["v1.23.17", "v1.24.15"]
+        k8s: ["v1.23.17", "v1.24.17"]
 
     steps:
 
@@ -47,7 +47,7 @@ jobs:
         id: kind
         uses: ./.github/actions/setup-kind
         with:
-          version: v0.18.0
+          version: v0.19.0
           config: test/e2e/kind.yaml
           image: kindest/node:${{ matrix.k8s }}
 
