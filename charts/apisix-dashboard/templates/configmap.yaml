@@ -33,7 +33,7 @@ data:
         prefix: {{ .prefix | quote }}
         endpoints:
           {{- range .endpoints }}
-          - {{ . }}
+          - {{ tpl . $ }}
           {{- end }}
         {{- if .username }}
         username: {{ .username }}

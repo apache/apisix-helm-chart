@@ -359,7 +359,7 @@ data:
       {{- else }}
         host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
           {{- range $value := .Values.externalEtcd.host }}
-          - "{{ $value }}"             # multiple etcd address
+          - "{{ tpl $value $ }}"             # multiple etcd address
           {{- end}}
       {{- end }}
         prefix: {{ .Values.etcd.prefix | quote }}    # configuration prefix in etcd

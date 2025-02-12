@@ -7,6 +7,6 @@ apiVersion: {{ .Values.config.kubernetes.ingressVersion }}
 {{- end }}
 kind: IngressClass
 metadata:
-  name: {{ .Values.config.kubernetes.ingressClass | quote }}
+  name: {{ tpl .Values.config.kubernetes.ingressClass $ | quote }}
 spec:
   controller: apisix.apache.org/apisix-ingress # fix: https://github.com/apache/apisix-ingress-controller/issues/1653

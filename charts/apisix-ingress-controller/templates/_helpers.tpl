@@ -19,7 +19,8 @@
 Expand the name of the chart.
 */}}
 {{- define "apisix-ingress-controller.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- $nameOverride := tpl .Values.nameOverride $ }}
+{{- default .Chart.Name $nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -28,10 +29,12 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "apisix-ingress-controller.fullname" -}}
-{{- if .Values.fullnameOverride }}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- $nameOverride := tpl .Values.nameOverride $ }}
+{{- $fullnameOverride := tpl .Values.fullnameOverride $ }}
+{{- if $fullnameOverride }}
+{{- $fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- $name := default .Chart.Name $nameOverride }}
 {{- if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
