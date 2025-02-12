@@ -17,11 +17,9 @@ spec:
     - additionalPrinterColumns:
         - jsonPath: .spec.http[].match.hosts
           name: Hosts
-          priority: 0
           type: string
         - jsonPath: .spec.http[].match.paths
           name: URIs
-          priority: 0
           type: string
         - jsonPath: .spec.http[].backends[].serviceName
           name: Target Service(HTTP)
@@ -37,7 +35,6 @@ spec:
           type: string
         - jsonPath: .metadata.creationTimestamp
           name: Age
-          priority: 0
           type: date
       name: v2beta3
       schema:
@@ -313,11 +310,9 @@ spec:
     - additionalPrinterColumns:
         - jsonPath: .spec.http[].match.hosts
           name: Hosts
-          priority: 0
           type: string
         - jsonPath: .spec.http[].match.paths
           name: URIs
-          priority: 0
           type: string
         - jsonPath: .spec.http[].backends[].serviceName
           name: Target Service(HTTP)
@@ -333,7 +328,6 @@ spec:
           type: string
         - jsonPath: .metadata.creationTimestamp
           name: Age
-          priority: 0
           type: date
       name: v2
       schema:
