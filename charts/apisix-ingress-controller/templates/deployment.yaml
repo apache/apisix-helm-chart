@@ -125,6 +125,13 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          {{- if .Values.timezone }}
+          - name: TZ
+            value: {{ .Values.timezone }}
+          {{- end }}
+          {{- if .Values.extraEnvVars }}
+          {{- include "apisix-ingress-controller.tplvalues.render" (dict "value" .Values.extraEnvVars "context" $) | nindent 10 }}
+          {{- end }}
           {{- if .Values.config.apisix.existingSecret }}
           - name: DEFAULT_CLUSTER_ADMIN_KEY
             valueFrom:
