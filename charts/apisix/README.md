@@ -102,6 +102,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.logs.enableAccessLog | bool | `true` | Enable access log or not, default true |
 | apisix.nginx.logs.errorLog | string | `"/dev/stderr"` | Error log path |
 | apisix.nginx.logs.errorLogLevel | string | `"warn"` | Error log level |
+| apisix.nginx.realIp.header | string | `"X-Real-IP"` | Defines the header to use for the nginx_realip_module |
+| apisix.nginx.realIp.fromIps | list | `["127.0.0.1", "unix:"]` | Defines trusted addresses for the nginx_realip_module |
 | apisix.nginx.workerConnections | string | `"10620"` |  |
 | apisix.nginx.workerProcesses | string | `"auto"` |  |
 | apisix.nginx.workerRlimitNofile | string | `"20480"` |  |
