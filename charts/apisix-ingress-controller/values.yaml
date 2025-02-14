@@ -119,6 +119,8 @@ config:
     # only the leader will watch and delivery resource changes,
     # other instances (as candidates) stand by.
     electionId: "ingress-apisix-leader"
+    # Set to false to disable IngressClass creation
+    createIngressClass: true
     # -- The class of an Ingress object is set using the field IngressClassName in
     # Kubernetes clusters version v1.18.0 or higher or the annotation
     # "kubernetes.io/ingress.class" (deprecated).
