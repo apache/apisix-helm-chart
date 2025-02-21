@@ -235,7 +235,7 @@ control:
     # nodePort: 32000
 
     # -- which ip to listen on for Apache APISIX Control API
-    ip: "127.0.0.1"
+    ip: 0.0.0.0
     # -- which port to use for Apache APISIX Control API
     port: 9090
     # -- Service port to use for Apache APISIX Control API
@@ -253,7 +253,7 @@ control:
     hosts:
       - host: apisix-control.local
         paths:
-          - "/*"
+          - "/"
     tls: []
   #  - secretName: apisix-tls
   #    hosts:
