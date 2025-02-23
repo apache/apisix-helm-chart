@@ -45,6 +45,8 @@ serviceAccount:
   # -- Whether automounting API credentials for a service account
   automountServiceAccountToken: true
 
+# -- set false to use `Deployment`, set true to use `DaemonSet`
+useDaemonSet: false
 
 replicaCount: 1
 

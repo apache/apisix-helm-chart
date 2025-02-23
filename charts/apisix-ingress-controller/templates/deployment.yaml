@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ ternary "DaemonSet" "Deployment" .Values.useDaemonSet }}
 metadata:
   name: {{ include "apisix-ingress-controller.fullname" . }}
   namespace: {{ .Release.Namespace }}
@@ -26,14 +26,18 @@ metadata:
   labels:
     {{- include "apisix-ingress-controller.labels" . | nindent 4 }}
 spec:
+  {{- if and (not .Values.useDaemonSet) (not .Values.autoscaling.enabled) }}
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   {{- end }}
   selector:
     matchLabels:
       {{- include "apisix-ingress-controller.selectorLabels" . | nindent 6 }}
-  {{- with .Values.updateStrategy }}
-  strategy: {{ toYaml . | nindent 4 }}
+  {{- if (not .Values.useDaemonSet) }}
+  strategy: {{ toYaml .Values.updateStrategy | nindent 4 }}
+  {{- else }}
+  updateStrategy: {{ toYaml .Values.updateStrategy | nindent 4 }}
   {{- end }}
   template:
     metadata:
