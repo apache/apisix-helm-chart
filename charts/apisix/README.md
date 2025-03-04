@@ -204,6 +204,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
 | podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
 | priorityClassName | string | `""` | Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods |
+| proxyProtocol.enabled | bool | `false` | Enable or disable PROXY protocol |
+| proxyProtocol.listenHTTPPort | int | `9181` | The port with proxy protocol for HTTP |
+| proxyProtocol.listenHTTPSPort | int | `9182` | The port with proxy protocol for HTTPS |
+| proxyProtocol.enableTCPPP | bool | `false` | Enable the proxy protocol for TCP proxy, works for stream_proxy.tcp option |
+| proxyProtocol.enableTCPPPToUpstream | bool | `false` | Enable the proxy protocol to the upstream server |
 | rbac.create | bool | `false` |  |
 | replicaCount | int | `1` | if useDaemonSet is true or autoscaling.enabled is true, replicaCount not become effective |
 | resources | object | `{}` | Set pod resource requests & limits |
