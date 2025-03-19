@@ -28,7 +28,9 @@ metadata:
     app.kubernetes.io/service: apisix-gateway
 spec:
   type: {{ .Values.service.type }}
+  {{- if or (eq .Values.gateway.type "LoadBalancer") (eq .Values.gateway.type "NodePort") }}
   externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- end }}
   {{- if eq .Values.service.type "LoadBalancer" }}
   {{- if .Values.service.loadBalancerIP }}
   loadBalancerIP: {{ .Values.service.loadBalancerIP }}
