@@ -51,7 +51,7 @@ data:
       election_id: {{ .Values.config.kubernetes.electionId | quote }}
       ingress_class: {{ .Values.config.kubernetes.ingressClass | quote }}
       ingress_version: {{ .Values.config.kubernetes.ingressVersion | quote }}
-      watch_endpointslices: {{ .Values.config.kubernetes.watchEndpointSlices }}
+      watch_endpoint_slices: {{ .Values.config.kubernetes.watchEndpointSlices }}
       apisix_route_version: {{ .Values.config.kubernetes.apisixRouteVersion | quote }}
       enable_gateway_api: {{ .Values.config.kubernetes.enableGatewayAPI }}
       apisix_version: {{ .Values.config.kubernetes.apiVersion | quote }}
