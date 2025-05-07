@@ -93,6 +93,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.luaModuleHook.luaPath | string | `""` | extend lua_package_path to load third party code |
 | apisix.nginx.configurationSnippet | object | `{"httpAdmin":"","httpEnd":"","httpSrv":"","httpStart":"","main":"","stream":""}` | Custom configuration snippet. |
 | apisix.nginx.customLuaSharedDicts | list | `[]` | Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict |
+| apisix.nginx.luaSharedDicts | list | `[]` | Override default [lua_shared_dict](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L250-L276) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict |
 | apisix.nginx.enableCPUAffinity | bool | `true` |  |
 | apisix.nginx.envs | list | `[]` |  |
 | apisix.nginx.keepaliveTimeout | string | `"60s"` | Timeout during which a keep-alive client connection will stay open on the server side. |
