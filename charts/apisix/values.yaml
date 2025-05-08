@@ -449,7 +449,7 @@ apisix:
       #   size: 1m
 
     # -- Overrides [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings,
-    # click [here](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L258) to view the default values.
+    # click [here](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L251) to view the default values.
     luaSharedDictsOverride: {}
       # prometheus-metrics: 100m
 
