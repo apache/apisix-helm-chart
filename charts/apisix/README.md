@@ -102,7 +102,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.logs.enableAccessLog | bool | `true` | Enable access log or not, default true |
 | apisix.nginx.logs.errorLog | string | `"/dev/stderr"` | Error log path |
 | apisix.nginx.logs.errorLogLevel | string | `"warn"` | Error log level |
-| apisix.nginx.luaSharedDictsOverride | object | `{}` | Overrides [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings, click [here](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L258) to view the default values. |
+| apisix.nginx.luaSharedDictsOverride | object | `{}` | Overrides [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings, click [here](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L251) to view the default values. |
 | apisix.nginx.workerConnections | string | `"10620"` |  |
 | apisix.nginx.workerProcesses | string | `"auto"` |  |
 | apisix.nginx.workerRlimitNofile | string | `"20480"` |  |
