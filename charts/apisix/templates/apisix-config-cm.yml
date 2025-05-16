@@ -21,6 +21,10 @@ metadata:
   name: apisix.yaml
 data:
   apisix.yaml: |
+{{- with .Values.apisix.standaloneConfig.config }}
+{{ . | indent 4 }}
+{{- else }}
+    # Use apisix.standaloneConfig.config to customize this
     routes:
     -
       uri: /hi
@@ -30,3 +34,5 @@ data:
         type: roundrobin
     #END
 {{- end }}
+{{- end }}
+
