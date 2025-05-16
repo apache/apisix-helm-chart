@@ -350,6 +350,10 @@ apisix:
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     role: "traditional"
 
+  standaloneConfig:
+    # -- If apisix.deployment.mode is "standalone": custom apisix.yaml as string.
+    config: ""
+
   admin:
     # -- Enable Admin API
     enabled: true
