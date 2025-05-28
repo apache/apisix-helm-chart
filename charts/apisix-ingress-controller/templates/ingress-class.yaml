@@ -8,5 +8,9 @@ apiVersion: {{ .Values.config.kubernetes.ingressVersion }}
 kind: IngressClass
 metadata:
   name: {{ .Values.config.kubernetes.ingressClass | quote }}
+  {{- if .Values.config.kubernetes.defaultIngressClass }}
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+  {{- end }}
 spec:
   controller: apisix.apache.org/apisix-ingress # fix: https://github.com/apache/apisix-ingress-controller/issues/1653

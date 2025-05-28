@@ -123,6 +123,9 @@ config:
     # Kubernetes clusters version v1.18.0 or higher or the annotation
     # "kubernetes.io/ingress.class" (deprecated).
     ingressClass: "apisix"
+    # -- If true, Ingresses without `ingressClassName` get assigned to this IngressClass on creation.
+    # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#default-ingress-class
+    defaultIngressClass: false
     # -- the supported ingress api group version, can be "networking/v1beta1",
     # "networking/v1" (for Kubernetes version v1.19.0 or higher), and
     # "extensions/v1beta1", default is "networking/v1".
