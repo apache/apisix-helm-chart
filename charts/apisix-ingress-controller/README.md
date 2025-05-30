@@ -148,6 +148,7 @@ The same for container level, you need to set:
 | fullnameOverride | string | `""` |  |
 | gateway.externalIPs | list | `[]` | load balancer ips |
 | gateway.externalTrafficPolicy | string | `"Cluster"` |  |
+| gateway.nginx.configurationSnippet | object | `{"httpAdmin":"","httpEnd":"","httpSrv":"","httpStart":"","main":"","stream":""}` | Custom configuration snippet. |
 | gateway.nginx.errorLog | string | `"stderr"` | Nginx error logs path |
 | gateway.nginx.errorLogLevel | string | `"warn"` | Nginx error logs level |
 | gateway.nginx.workerConnections | string | `"10620"` | Nginx worker connections |

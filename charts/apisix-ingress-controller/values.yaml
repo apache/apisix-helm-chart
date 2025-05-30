@@ -248,6 +248,20 @@ gateway:
     errorLog: stderr
     # -- Nginx error logs level
     errorLogLevel: warn
+    # -- Custom configuration snippet.
+    configurationSnippet:
+      main: |
+
+      httpStart: |
+
+      httpEnd: |
+
+      httpSrv: |
+
+      httpAdmin: |
+
+      stream: |
+
   resources: {}
   securityContext: {}
     # capabilities:
