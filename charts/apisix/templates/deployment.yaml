@@ -241,7 +241,7 @@ spec:
       volumes:
         {{- if eq .Values.apisix.deployment.mode "standalone" }}
         - configMap:
-            name: apisix.yaml
+            name: {{ include "apisix.standaloneConfigName" . }}
           name: apisix-admin
         {{- end }}
         - configMap:
