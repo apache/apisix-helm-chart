@@ -206,6 +206,12 @@ data:
           {{ $dict.name }}: {{ $dict.size }}
         {{- end }}
         {{- end }}
+        {{- if .Values.apisix.nginx.luaSharedDicts }}
+        lua_shared_dict:
+        {{- range $dict := .Values.apisix.nginx.luaSharedDicts }}
+          - {{ $dict.name }}: {{ $dict.size }}
+        {{- end }}
+        {{- end }}
       {{- if .Values.apisix.nginx.configurationSnippet.main }}
       main_configuration_snippet: {{- toYaml .Values.apisix.nginx.configurationSnippet.main | indent 6 }}
       {{- end }}
