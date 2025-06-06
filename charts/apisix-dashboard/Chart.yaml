@@ -14,9 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# This chart is deprecated and no longer maintained.
+#
+# In short:
+# The old version of the APISIX Dashboard lacks maintenance from community members,
+# while the new version of the Dashboard will be directly integrated into APISIX,
+# eliminating the need for the current chart.
+#
+# For details, please see https://github.com/apache/apisix-dashboard/issues/2981.
+#
+# If you are still using the old version of the APISIX Dashboard,
+# you can continue to use the chart.
+deprecated: true
+
 apiVersion: v2
 name: apisix-dashboard
-description: A Helm chart for Apache APISIX Dashboard
+description: DEPRECATED A Helm chart for Apache APISIX Dashboard
 icon: https://apache.org/logos/res/apisix/apisix.png
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -31,12 +45,9 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.8.2
+version: 0.8.3
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 appVersion: 3.0.0
-
-maintainers:
-  - name: tao12345666333

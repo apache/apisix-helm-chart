@@ -1,4 +1,17 @@
-# Apache APISIX Dashboard
+# [DEPRECATED] Apache APISIX Dashboard
+
+> [!WARNING]
+> This chart is deprecated and no longer maintained.
+>
+> In short:
+> The old version of the APISIX Dashboard lacks maintenance from community members,
+> while the new version of the Dashboard will be directly integrated into APISIX,
+> eliminating the need for the current chart.
+>
+> For details, please see <https://github.com/apache/apisix-dashboard/issues/2981>.
+>
+> If you are still using the old version of the APISIX Dashboard,
+> you can continue to use the chart.
 
 [APISIX Dashboard](https://github.com/apache/apisix-dashboard/) is designed to make it as easy as possible for users to operate Apache APISIX through a frontend interface.
 
@@ -100,5 +113,5 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | tolerations | list | `[]` | Tolerations for pod assignment |
-| topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
+| topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: <https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods> |
 | updateStrategy | object | `{}` | Update strategy for apisix dashboard deployment |
