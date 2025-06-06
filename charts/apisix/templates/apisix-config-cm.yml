@@ -14,13 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if eq .Values.apisix.deployment.mode "standalone" }}
+{{- if (eq (include "apisix.shouldRenderStandaloneConfig" .) "true") }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: apisix.yaml
 data:
   apisix.yaml: |
+{{- with .Values.apisix.standaloneConfig.config }}
+{{ . | indent 4 }}
+{{- else }}
+    # Use apisix.standaloneConfig.config to customize this
     routes:
     -
       uri: /hi
@@ -29,4 +33,5 @@ data:
           "127.0.0.1:1980": 1
         type: roundrobin
     #END
+{{- end }}
 {{- end }}

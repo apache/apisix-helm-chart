@@ -350,6 +350,13 @@ apisix:
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     role: "traditional"
 
+  standaloneConfig:
+    # -- If apisix.deployment.mode is "standalone": custom apisix.yaml as string. Takes precedence over configMapRef.
+    config: ""
+    # -- If apisix.deployment.mode is "standalone": reference to an existing config map. It must contain the key "apisix.yaml".
+    configMapName: ""
+
+
   admin:
     # -- Enable Admin API
     enabled: true
