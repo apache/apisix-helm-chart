@@ -19,7 +19,7 @@
 #
 # In short:
 # The old version of the APISIX Dashboard lacks maintenance from community members,
-# while the new version of the Dashboard will be directly integrated into APISIX,
+# while the brand new Dashboard will be directly integrated into APISIX,
 # eliminating the need for the current chart.
 #
 # For details, please see https://github.com/apache/apisix-dashboard/issues/2981.
