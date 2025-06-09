@@ -22,14 +22,14 @@
 Apache APISIX Helm Charts provide the installation of [Apache APISIX](https://github.com/apache/apisix#apache-apisix) components for kubernetes.
 
 - [Apache APISIX Helm Chart](./docs/en/latest/apisix.md)
-- [Apache APISIX Dashboard Helm Chart](./docs/en/latest/apisix-dashboard.md)
+- [[DEPRECATED] Apache APISIX Dashboard Helm Chart](./docs/en/latest/apisix-dashboard.md)
 - [Apache APISIX Ingress Controller Helm Chart](./docs/en/latest/apisix-ingress-controller.md)
 
 Currently, APISIX Ingress Controller automatically manipulates some APISIX resources, which is not very compatible with APISIX Dashboard. In addition, users should not modify resources labeled `managed-by: apisix-ingress-controllers` via APISIX Dashboard.
 
 ## Compatibility matrix
 
-|            | APISIX | APISIX Ingress | APISIX Dashboard |
+|            | APISIX | APISIX Ingress | [DEPRECATED] APISIX Dashboard |
 | :--------: | :----: | :------------: | :--------------: |
 | Chart v2.x |  v3.x  |      v1.x      |       v3.x       |
 | Chart v1.x |  v3.x  |      v1.x      |       v3.x       |
