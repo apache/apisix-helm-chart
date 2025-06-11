@@ -157,3 +157,25 @@ Key to use to fetch viewer token from secret
 {{- "viewer" }}
 {{- end }}
 {{- end }}
+
+{{/*
+Return true if we should render the standalone config.
+*/}}
+{{- define "apisix.shouldRenderStandaloneConfig" -}}
+{{- $isStandalone := eq .Values.apisix.deployment.mode "standalone" -}}
+{{- $configEmpty := empty .Values.apisix.standaloneConfig.config -}}
+{{- $configMapNameEmpty := empty .Values.apisix.standaloneConfig.configMapName -}}
+{{- $dontRender := and $configEmpty (not $configMapNameEmpty) -}}
+{{- ternary true false (and $isStandalone (not $dontRender)) -}}
+{{- end }}
+
+{{/*
+Return the name of the standalone config.
+*/}}
+{{- define "apisix.standaloneConfigName" -}}
+{{- if (eq (include "apisix.shouldRenderStandaloneConfig" .) "true") -}}
+"apisix.yaml"
+{{- else -}}
+{{ .Values.apisix.standaloneConfig.configMapName | quote }}
+{{- end -}}
+{{- end }}
