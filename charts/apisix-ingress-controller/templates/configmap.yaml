@@ -67,7 +67,7 @@ data:
       {{- end}}
       {{- end }}
       {{- if .Values.config.apisix.existingSecret }}
-      default_cluster_admin_key: "{{"{{"}}.DEFAULT_CLUSTER_ADMIN_KEY{{"}}"}}"
+      default_cluster_admin_key: ${{"{{"}}.DEFAULT_CLUSTER_ADMIN_KEY{{"}}"}}
       {{- else }}
       default_cluster_admin_key: {{ .Values.config.apisix.adminKey | quote }}
       {{- end }}
