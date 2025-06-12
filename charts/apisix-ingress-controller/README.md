@@ -197,3 +197,4 @@ The same for container level, you need to set:
 | tolerations | list | `[]` |  |
 | topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
 | updateStrategy | object | `{}` | Update strategy for apisix ingress controller deployment |
+| useDaemonSet | bool | `false` | set false to use `Deployment`, set true to use `DaemonSet` |
