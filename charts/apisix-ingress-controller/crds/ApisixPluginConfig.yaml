@@ -17,7 +17,6 @@ spec:
     - additionalPrinterColumns:
         - jsonPath: .metadata.creationTimestamp
           name: Age
-          priority: 0
           type: date
       deprecated: true
       name: v2beta3
@@ -71,7 +70,6 @@ spec:
     - additionalPrinterColumns:
         - jsonPath: .metadata.creationTimestamp
           name: Age
-          priority: 0
           type: date
       name: v2
       schema:
