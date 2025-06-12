@@ -1,3 +1,4 @@
+{{- if .Values.config.kubernetes.createIngressClass }}
 {{ if or (eq .Values.config.kubernetes.ingressVersion "") (eq .Values.config.kubernetes.ingressVersion "networking/v1")}}
 apiVersion: networking.k8s.io/v1
 {{- else if (eq .Values.config.kubernetes.ingressVersion "networking/v1beta1")}}
@@ -14,3 +15,4 @@ metadata:
   {{- end }}
 spec:
   controller: apisix.apache.org/apisix-ingress # fix: https://github.com/apache/apisix-ingress-controller/issues/1653
+{{- end }}
