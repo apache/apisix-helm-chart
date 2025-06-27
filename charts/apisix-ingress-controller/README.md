@@ -110,6 +110,7 @@ The same for container level, you need to set:
 | config.controllerName | string | `"apisix.apache.org/apisix-ingress-controller"` |  |
 | config.enableHTTP2 | bool | `false` |  |
 | config.execADCTimeout | string | `"15s"` |  |
+| config.kubernetes.inressClass | string | `"apisix"` |  |
 | config.leaderElection.disable | bool | `false` |  |
 | config.leaderElection.id | string | `"apisix-ingress-controller-leader"` |  |
 | config.leaderElection.leaseDuration | string | `"15s"` |  |
