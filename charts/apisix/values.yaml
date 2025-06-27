@@ -29,7 +29,7 @@ image:
   pullPolicy: IfNotPresent
   # -- Apache APISIX image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 3.11.0-debian
+  tag: 3.13.0-debian
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
@@ -349,6 +349,7 @@ apisix:
     #
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     role: "traditional"
+    role_traditional_config_provider: "etcd" # enum: etcd, yaml
 
   admin:
     # -- Enable Admin API
@@ -573,6 +574,10 @@ apisix:
             - key: "the-file-name"
               path: "mount-path"
 
+  status:
+    ip: "127.0.0.1"
+    port: 7085
+
 # -- external etcd configuration. If etcd.enabled is false, these configuration will be used.
 externalEtcd:
   # -- if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379.
@@ -652,3 +657,20 @@ ingress-controller:
   config:
     apisix:
       adminAPIVersion: "v3"
+    provider:
+      type: "apisix"
+  gatewayProxy:
+    createDefault: false
+    provider:
+      type: ControlPlane
+      controlPlane:
+        endpoints: []
+        auth:
+          type: AdminKey
+          adminKey:
+            value: "edd1c9f034335f136f87ad84b625c8f1"
+  apisix:
+    adminService:
+      # namespace: apisix-ingress
+      name: apisix-admin
+      port: 9180

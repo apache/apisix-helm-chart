@@ -169,6 +169,12 @@ data:
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.fallbackSNI }}
         fallback_sni: {{ .Values.apisix.ssl.fallbackSNI | quote }}
         {{- end }}
+    {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional_config_provider "yaml") }}
+    {{- if $useTraditionalYaml }}
+    status:
+      ip: {{ default "127.0.0.1" .Values.apisix.status.ip }}
+      port: {{ default "7085" (.Values.apisix.status.port | toString) }}
+    {{-end}}
 
     nginx_config:    # config for render the template to genarate nginx.conf
       error_log: "{{ .Values.apisix.nginx.logs.errorLog }}"
@@ -299,7 +305,7 @@ data:
 
       {{- if eq .Values.apisix.deployment.role "traditional" }}
       role_traditional:
-        config_provider: etcd
+        config_provider: {{ default "etcd" .Values.apisix.deployment.role_traditional_config_provider }}
       {{- end }}
 
       {{- if eq .Values.apisix.deployment.role "control_plane" }}

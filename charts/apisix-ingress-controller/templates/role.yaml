@@ -14,21 +14,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: networking.k8s.io/v1
-kind: IngressClass
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
 metadata:
-  name: {{ .Values.config.kubernetes.ingressClass }}
-  {{- if .Values.config.kubernetes.defaultIngressClass }}
-  annotations:
-    ingressclass.kubernetes.io/is-default-class: "true"
-  {{- end }}
-spec:
-  controller: {{ .Values.config.controllerName | default "apisix.apache.org/apisix-ingress-controller" }}
-  {{- if .Values.gatewayProxy.createDefault }}
-  parameters:
-    apiGroup: apisix.apache.org
-    kind: GatewayProxy
-    name: {{ .Release.Name }}-config
-    namespace: {{ .Release.Namespace }}
-    scope: Namespace
-  {{- end}}
+  labels:
+    {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
+  name: {{ .Release.Name }}-apisix-ingress-leader-election-role
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
