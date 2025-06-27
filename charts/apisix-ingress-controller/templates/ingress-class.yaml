@@ -3,4 +3,4 @@ kind: IngressClass
 metadata:
   name: {{ .Values.config.kubernetes.inressClass }}
 spec:
-  controller: apisix.apache.org/apisix-ingress-controller
+  controller: {{ .Values.config.controllerName | default "apisix.apache.org/apisix-ingress-controller" }}
