@@ -56,4 +56,22 @@ config:
     syncPeriod: "1s"
     initSyncDelay: "20m"
   kubernetes:
-    inressClass: apisix
+    ingressClass: apisix
+    defaultIngressClass: false
+
+gatewayProxy:
+  createDefault: false
+  provider:
+    type: ControlPlane
+    controlPlane:
+      endpoints: []
+      auth:
+        type: AdminKey
+        adminKey:
+          value: "edd1c9f034335f136f87ad84b625c8f1"
+
+apisix:
+  adminService:
+    namespace: apisix-ingress
+    name: apisix-admin
+    port: 9180

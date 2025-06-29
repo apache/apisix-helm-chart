@@ -33,6 +33,7 @@ spec:
   template:
     metadata:
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- if .Values.deployment.podAnnotations }}
         {{- range $key, $value := $.Values.deployment.podAnnotations }}
         {{ $key }}: {{ $value | quote }}
