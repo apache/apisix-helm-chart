@@ -128,7 +128,7 @@ The same for container level, you need to set:
 | config.provider.type | string | `"apisix"` |  |
 | config.secureMetrics | bool | `false` |  |
 | deployment.affinity | object | `{}` |  |
-| deployment.annotations | list | `[]` |  |
+| deployment.annotations | list | `[]` | Add annotations to Apache APISIX ingress controller resource |
 | deployment.image.pullPolicy | string | `"IfNotPresent"` |  |
 | deployment.image.repository | string | `"apache/apisix-ingress-controller"` |  |
 | deployment.image.tag | string | `"dev"` |  |
@@ -137,15 +137,15 @@ The same for container level, you need to set:
 | deployment.podSecurityContext | object | `{}` |  |
 | deployment.replicas | int | `1` |  |
 | deployment.tolerations | list | `[]` |  |
-| deployment.topologySpreadConstraints | list | `[]` |  |
+| deployment.topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
 | fullnameOverride | string | `""` |  |
 | gatewayProxy.createDefault | bool | `false` |  |
 | gatewayProxy.provider.controlPlane.auth.adminKey.value | string | `"edd1c9f034335f136f87ad84b625c8f1"` |  |
 | gatewayProxy.provider.controlPlane.auth.type | string | `"AdminKey"` |  |
 | gatewayProxy.provider.controlPlane.endpoints | list | `[]` |  |
 | gatewayProxy.provider.type | string | `"ControlPlane"` |  |
-| labelsOverride | object | `{}` |  |
-| nameOverride | string | `""` |  |
+| labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX ingress controller resource |
+| nameOverride | string | `""` | Default values for apisix-ingress-controller. This is a YAML-formatted file. Declare variables to be passed into your templates.  |
 | podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |
 | podDisruptionBudget.enabled | bool | `false` | Enable or disable podDisruptionBudget |
 | podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
