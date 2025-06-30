@@ -19,18 +19,16 @@ autoscaling:
   enabled: false
   minReplicas: 1
 
+replicaCount: 1
+
 deployment:
-  annotations: {}
-  podAnnotations: {}
+  annotations: []
+  podAnnotations: []
   replicas: 1
   nodeSelector: {}
   tolerations: []
   affinity: {}
-  podSecurityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
+  podSecurityContext: {}
   topologySpreadConstraints: []
   image:
     repository: apache/apisix-ingress-controller
@@ -49,7 +47,7 @@ config:
   metricsAddr: ":8080"
   enableHTTP2: false
   probeAddr: ":8081"
-  secureMetrics: ""
+  secureMetrics: false
   execADCTimeout: "15s"
   provider:
     type: "apisix"

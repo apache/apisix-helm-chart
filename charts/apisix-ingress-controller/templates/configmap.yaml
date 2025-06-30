@@ -43,13 +43,13 @@ data:
     
     probe_addr: {{ .Values.config.probeAddr | default ":8081" }}
     
-    secure_metrics: {{ .Values.config.secureMetrics | default "" }}
+    secure_metrics: {{ .Values.config.secureMetrics | default false }}
     
     exec_adc_timeout: {{ .Values.config.execADCTimeout | default "15s" }}
 
     provider:
       type: {{ .Values.config.provider.type | default "apisix" }}
 
-      sync_period: {{ .Values.config.provider.syncPeriod | default "0s" }}
+      sync_period: {{ .Values.config.provider.syncPeriod | default "1s" }}
 
       init_sync_delay: {{ .Values.config.provider.initSyncDelay | default "20m" }}

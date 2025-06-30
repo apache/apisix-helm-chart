@@ -126,16 +126,15 @@ The same for container level, you need to set:
 | config.provider.initSyncDelay | string | `"20m"` |  |
 | config.provider.syncPeriod | string | `"1s"` |  |
 | config.provider.type | string | `"apisix"` |  |
-| config.secureMetrics | string | `""` |  |
+| config.secureMetrics | bool | `false` |  |
 | deployment.affinity | object | `{}` |  |
-| deployment.annotations | object | `{}` |  |
+| deployment.annotations | list | `[]` |  |
 | deployment.image.pullPolicy | string | `"IfNotPresent"` |  |
 | deployment.image.repository | string | `"apache/apisix-ingress-controller"` |  |
 | deployment.image.tag | string | `"dev"` |  |
 | deployment.nodeSelector | object | `{}` |  |
-| deployment.podAnnotations | object | `{}` |  |
-| deployment.podSecurityContext.allowPrivilegeEscalation | bool | `false` |  |
-| deployment.podSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| deployment.podAnnotations | list | `[]` |  |
+| deployment.podSecurityContext | object | `{}` |  |
 | deployment.replicas | int | `1` |  |
 | deployment.tolerations | list | `[]` |  |
 | deployment.topologySpreadConstraints | list | `[]` |  |
@@ -151,3 +150,4 @@ The same for container level, you need to set:
 | podDisruptionBudget.enabled | bool | `false` | Enable or disable podDisruptionBudget |
 | podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
 | podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
+| replicaCount | int | `1` |  |
