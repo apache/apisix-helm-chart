@@ -105,12 +105,16 @@ The same for container level, you need to set:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| apisix.adminService.name | string | `"apisix-admin"` |  |
+| apisix.adminService.namespace | string | `"apisix-ingress"` |  |
+| apisix.adminService.port | int | `9180` |  |
 | autoscaling.enabled | bool | `false` |  |
 | autoscaling.minReplicas | int | `1` |  |
 | config.controllerName | string | `"apisix.apache.org/apisix-ingress-controller"` |  |
 | config.enableHTTP2 | bool | `false` |  |
 | config.execADCTimeout | string | `"15s"` |  |
-| config.kubernetes.inressClass | string | `"apisix"` |  |
+| config.kubernetes.defaultIngressClass | bool | `false` |  |
+| config.kubernetes.ingressClass | string | `"apisix"` |  |
 | config.leaderElection.disable | bool | `false` |  |
 | config.leaderElection.id | string | `"apisix-ingress-controller-leader"` |  |
 | config.leaderElection.leaseDuration | string | `"15s"` |  |
@@ -136,6 +140,11 @@ The same for container level, you need to set:
 | deployment.tolerations | list | `[]` |  |
 | deployment.topologySpreadConstraints | list | `[]` |  |
 | fullnameOverride | string | `""` |  |
+| gatewayProxy.createDefault | bool | `false` |  |
+| gatewayProxy.provider.controlPlane.auth.adminKey.value | string | `"edd1c9f034335f136f87ad84b625c8f1"` |  |
+| gatewayProxy.provider.controlPlane.auth.type | string | `"AdminKey"` |  |
+| gatewayProxy.provider.controlPlane.endpoints | list | `[]` |  |
+| gatewayProxy.provider.type | string | `"ControlPlane"` |  |
 | labelsOverride | object | `{}` |  |
 | nameOverride | string | `""` |  |
 | podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |
