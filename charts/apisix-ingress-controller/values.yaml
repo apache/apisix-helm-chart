@@ -44,12 +44,10 @@ autoscaling:
   enabled: false
   minReplicas: 1
 
-replicaCount: 1
-
 deployment:
   # -- Add annotations to Apache APISIX ingress controller resource
-  annotations: []
-  podAnnotations: []
+  annotations: {}
+  podAnnotations: {}
   replicas: 1
   nodeSelector: {}
   tolerations: []

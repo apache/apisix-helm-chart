@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if and .Values.podDisruptionBudget.enabled (or (and .Values.autoscaling.enabled (gt (.Values.autoscaling.minReplicas | int) 1)) (and (not .Values.autoscaling.enabled) (gt (.Values.replicaCount | int) 1))) }}
+{{- if and .Values.podDisruptionBudget.enabled (or (and .Values.autoscaling.enabled (gt (.Values.autoscaling.minReplicas | int) 1)) (and (not .Values.autoscaling.enabled) (gt (.Values.deployment.replicas | int) 1))) }}
 {{ if semverCompare "<1.21-0" .Capabilities.KubeVersion.Version -}}
 apiVersion: policy/v1beta1
 {{- else -}}
