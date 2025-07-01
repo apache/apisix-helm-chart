@@ -59,7 +59,7 @@ spec:
       priorityClassName: {{ . }}
       {{- end }}
       containers:
-        {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional_config_provider "yaml") }}
+        {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
           securityContext:
@@ -166,14 +166,15 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             successThreshold: 1
-            tcpSocket:
-              port: {{ .Values.service.http.containerPort }}
-            timeoutSeconds: 1
             {{- if $useTraditionalYaml }}
             httpGet:
               path: /status/ready
               port: {{ default 7085 .Values.apisix.status.port }}
+            {{- else }}
+            tcpSocket:
+              port: {{ .Values.service.http.containerPort }}
             {{- end}}
+            timeoutSeconds: 1
           {{- end }}
           lifecycle:
             preStop:

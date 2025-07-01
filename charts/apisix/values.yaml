@@ -349,7 +349,8 @@ apisix:
     #
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     role: "traditional"
-    role_traditional_config_provider: "etcd" # enum: etcd, yaml
+    role_traditional:
+      config_provider: "etcd" # enum: etcd, yaml
 
   admin:
     # -- Enable Admin API
@@ -655,8 +656,6 @@ dashboard:
 ingress-controller:
   enabled: false
   config:
-    apisix:
-      adminAPIVersion: "v3"
     provider:
       type: "apisix"
   gatewayProxy:
