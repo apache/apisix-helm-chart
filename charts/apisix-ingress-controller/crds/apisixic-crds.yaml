@@ -10,6 +10,8 @@ spec:
     kind: ApisixConsumer
     listKind: ApisixConsumerList
     plural: apisixconsumers
+    shortNames:
+    - ac
     singular: apisixconsumer
   scope: Namespaced
   versions:
@@ -355,6 +357,8 @@ spec:
     kind: ApisixGlobalRule
     listKind: ApisixGlobalRuleList
     plural: apisixglobalrules
+    shortNames:
+    - agr
     singular: apisixglobalrule
   scope: Namespaced
   versions:
@@ -492,6 +496,8 @@ spec:
     kind: ApisixPluginConfig
     listKind: ApisixPluginConfigList
     plural: apisixpluginconfigs
+    shortNames:
+    - apc
     singular: apisixpluginconfig
   scope: Namespaced
   versions:
@@ -630,10 +636,40 @@ spec:
     kind: ApisixRoute
     listKind: ApisixRouteList
     plural: apisixroutes
+    shortNames:
+    - ar
     singular: apisixroute
   scope: Namespaced
   versions:
-  - name: v2
+  - additionalPrinterColumns:
+    - description: HTTP Hosts
+      jsonPath: .spec.http[].match.hosts
+      name: Hosts
+      type: string
+    - description: HTTP Paths
+      jsonPath: .spec.http[].match.paths
+      name: URIs
+      type: string
+    - description: Backend Service for HTTP
+      jsonPath: .spec.http[].backends[].serviceName
+      name: Target Service (HTTP)
+      priority: 1
+      type: string
+    - description: TCP Ingress Port
+      jsonPath: .spec.tcp[].match.ingressPort
+      name: Ingress Port (TCP)
+      priority: 1
+      type: integer
+    - description: Backend Service for TCP
+      jsonPath: .spec.tcp[].match.backend.serviceName
+      name: Target Service (TCP)
+      priority: 1
+      type: string
+    - description: Creation time
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v2
     schema:
       openAPIV3Schema:
         description: ApisixRoute is the Schema for the apisixroutes API.
@@ -1092,7 +1128,26 @@ spec:
     singular: apisixtls
   scope: Namespaced
   versions:
-  - name: v2
+  - additionalPrinterColumns:
+    - jsonPath: .spec.hosts
+      name: SNIs
+      type: string
+    - jsonPath: .spec.secret.name
+      name: Secret Name
+      type: string
+    - jsonPath: .spec.secret.namespace
+      name: Secret Namespace
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - jsonPath: .spec.client.ca.name
+      name: Client CA Secret Name
+      type: string
+    - jsonPath: .spec.client.ca.namespace
+      name: Client CA Secret Namespace
+      type: string
+    name: v2
     schema:
       openAPIV3Schema:
         description: ApisixTls is the Schema for the apisixtls API.
@@ -1251,6 +1306,8 @@ spec:
     kind: ApisixUpstream
     listKind: ApisixUpstreamList
     plural: apisixupstreams
+    shortNames:
+    - au
     singular: apisixupstream
   scope: Namespaced
   versions:
