@@ -60,7 +60,7 @@ deployment:
   image:
     repository: apache/apisix-ingress-controller
     pullPolicy: IfNotPresent
-    tag: "dev"
+    tag: "2.0.0-rc1"
 
 config:
   logLevel: "info"

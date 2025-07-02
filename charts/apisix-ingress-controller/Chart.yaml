@@ -24,8 +24,8 @@ keywords:
   - nginx
   - crd
 type: application
-version: 0.14.1
-appVersion: 1.8.0
+version: 1.0.0
+appVersion: 2.0.0-rc1
 sources:
   - https://github.com/apache/apisix-helm-chart
 
@@ -34,4 +34,4 @@ maintainers:
 
 # ref: https://artifacthub.io/docs/topics/annotations/helm/
 annotations:
-  artifacthub.io/prerelease: "false"
+  artifacthub.io/prerelease: "true"
