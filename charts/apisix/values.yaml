@@ -576,7 +576,7 @@ apisix:
               path: "mount-path"
 
   status:
-    ip: "127.0.0.1"
+    ip: "0.0.0.0"
     port: 7085
 
 # -- external etcd configuration. If etcd.enabled is false, these configuration will be used.
@@ -655,21 +655,3 @@ dashboard:
 # -- Ingress controller configuration
 ingress-controller:
   enabled: false
-  config:
-    provider:
-      type: "apisix"
-  gatewayProxy:
-    createDefault: false
-    provider:
-      type: ControlPlane
-      controlPlane:
-        endpoints: []
-        auth:
-          type: AdminKey
-          adminKey:
-            value: "edd1c9f034335f136f87ad84b625c8f1"
-  apisix:
-    adminService:
-      # namespace: apisix-ingress
-      name: apisix-admin
-      port: 9180

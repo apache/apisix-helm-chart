@@ -24,9 +24,9 @@ spec:
   provider:
     type: {{ .Values.gatewayProxy.provider.type }}
     controlPlane:
-      endpoints:
-      {{ $adminService := .Values.apisix.adminService -}}
-      - http://{{ $adminService.name }}.{{ $adminService.namespace }}:{{ $adminService.port }}
+      service:
+        name: {{ .Values.apisix.adminService.name }}
+        port: {{ .Values.apisix.adminService.port }}
       {{- with .Values.gatewayProxy.provider.controlPlane.auth }}
       auth:
         {{- toYaml . | nindent 8 }}
