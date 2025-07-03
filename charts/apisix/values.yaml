@@ -349,6 +349,9 @@ apisix:
     #
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     role: "traditional"
+    role_traditional:
+      # enum: etcd, yaml
+      config_provider: "etcd"
 
   admin:
     # -- Enable Admin API
@@ -573,6 +576,10 @@ apisix:
             - key: "the-file-name"
               path: "mount-path"
 
+  status:
+    ip: "0.0.0.0"
+    port: 7085
+
 # -- external etcd configuration. If etcd.enabled is false, these configuration will be used.
 externalEtcd:
   # -- if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379.
@@ -649,6 +656,3 @@ dashboard:
 # -- Ingress controller configuration
 ingress-controller:
   enabled: false
-  config:
-    apisix:
-      adminAPIVersion: "v3"

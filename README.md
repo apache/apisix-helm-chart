@@ -30,10 +30,10 @@ Currently, APISIX Ingress Controller automatically manipulates some APISIX resou
 ## Compatibility matrix
 
 |            | APISIX | APISIX Ingress | [DEPRECATED] APISIX Dashboard |
-| :--------: | :----: | :------------: | :--------------: |
-| Chart v2.x |  v3.x  |      v1.x      |       v3.x       |
-| Chart v1.x |  v3.x  |      v1.x      |       v3.x       |
-| Chart v0.x |  v2.x  |      v1.x      |       v2.x       |
+|:----------:|:------:|:--------------:|:-----------------------------:|
+| Chart v2.x |  v3.x  |   v1.x v2.x    |             v3.x              |
+| Chart v1.x |  v3.x  |      v1.x      |             v3.x              |
+| Chart v0.x |  v2.x  |      v1.x      |             v2.x              |
 
 ## Changelogs
 

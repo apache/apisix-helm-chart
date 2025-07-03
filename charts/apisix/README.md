@@ -67,6 +67,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
 | apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
+| apisix.deployment.role_traditional.config_provider | string | `"etcd"` |  |
 | apisix.discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
 | apisix.discovery.registry | object | `{}` | Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281), and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery) |
 | apisix.dns.resolvers[0] | string | `"127.0.0.1"` |  |
@@ -122,6 +123,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.ssl.existingCASecret | string | `""` | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) |
 | apisix.ssl.fallbackSNI | string | `""` | Define SNI to fallback if none is presented by client |
 | apisix.ssl.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
+| apisix.status.ip | string | `"0.0.0.0"` |  |
+| apisix.status.port | int | `7085` |  |
 | apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
 | apisix.vault.enabled | bool | `false` | Enable or disable the vault integration |
 | apisix.vault.host | string | `""` | The host address where the vault server is running. |
@@ -184,7 +187,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
 | image.tag | string | `"3.13.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
-| ingress-controller | object | `{"config":{"apisix":{"adminAPIVersion":"v3"}},"enabled":false}` | Ingress controller configuration |
+| ingress-controller | object | `{"enabled":false}` | Ingress controller configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |
 | ingress.servicePort | number | `nil` | Service port to send traffic. Defaults to `service.http.servicePort`. |
 | initContainer.image | string | `"busybox"` | Init container image |
