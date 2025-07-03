@@ -17,14 +17,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
-  name: {{ .Release.Name }}
+  name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
   {{- range $key, $value := .Values.deployment.annotations }}
     {{ $key }}: {{ $value | quote }}
   {{- end }}
+  labels:
+    {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.deployment.replicas }}
   selector:
