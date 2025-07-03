@@ -8,5 +8,5 @@ dependencies:
 - name: apisix-ingress-controller
   repository: https://charts.apiseven.com
   version: 1.0.1
-digest: sha256:f8caa50ecaace275d2a67a59c24a470e3904850f9d653ea0906dd05148096c59
-generated: "2025-07-03T13:26:23.401217+08:00"
+digest: sha256:a05753b8273b1b0e64d5ad94acc325f6191480277ae245bd23d95b696ff72cfc
+generated: "2025-07-03T18:18:51.915886+08:00"

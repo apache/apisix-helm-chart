@@ -350,7 +350,8 @@ apisix:
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     role: "traditional"
     role_traditional:
-      config_provider: "etcd" # enum: etcd, yaml
+      # enum: etcd, yaml
+      config_provider: "etcd"
 
   admin:
     # -- Enable Admin API
