@@ -634,7 +634,8 @@ etcd:
     enabled: false
 
   service:
-    port: 2379
+    ports:
+      client: 2379
 
   replicaCount: 3
 
