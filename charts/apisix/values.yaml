@@ -637,6 +637,8 @@ etcd:
     port: 2379
 
   replicaCount: 3
+  autoCompactionRetention: "1h"
+  autoCompactionMode: "periodic"
 
 dashboard:
   enabled: false
