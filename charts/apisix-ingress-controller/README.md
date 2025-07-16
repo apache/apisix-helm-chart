@@ -136,6 +136,7 @@ The same for container level, you need to set:
 | deployment.podAnnotations | object | `{}` |  |
 | deployment.podSecurityContext | object | `{}` |  |
 | deployment.replicas | int | `1` |  |
+| deployment.resources | object | `{}` | Set pod resource requests & limits |
 | deployment.tolerations | list | `[]` |  |
 | deployment.topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
 | fullnameOverride | string | `""` |  |
