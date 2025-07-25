@@ -21,9 +21,6 @@ To install the chart with the release name `my-apisix`:
 helm repo add apisix https://charts.apiseven.com
 helm repo update
 
-# Optional: List the APISIX chart version and the app version.
-helm search repo apisix
-
 helm install [RELEASE_NAME] apisix/apisix --namespace ingress-apisix --create-namespace
 ```
 
@@ -52,8 +49,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.admin.credentials.secretName | string | `""` | The APISIX Helm chart supports storing user credentials in a secret. The secret needs to contain two keys, admin and viewer, with their respective values set. |
 | apisix.admin.credentials.secretViewerKey | string | `""` | Name of the viewer role key in the secret, overrides the default key name "viewer" |
 | apisix.admin.credentials.viewer | string | `"4054f7cf07e344346cd3f287985e76a2"` | Apache APISIX admin API viewer role credentials |
-| apisix.admin.enabled | bool | `true` | Enable Admin API |
 | apisix.admin.enable_admin_ui | bool | `true` | Enable Embedded Admin UI |
+| apisix.admin.enabled | bool | `true` | Enable Admin API |
 | apisix.admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
 | apisix.admin.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix-admin.local","paths":["/apisix"]}],"tls":[]}` | Using ingress access Apache APISIX admin service |
 | apisix.admin.ingress.annotations | object | `{}` | Ingress annotations |
@@ -184,7 +181,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | hostNetwork | bool | `false` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.13.0-debian"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.13.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"enabled":false}` | Ingress controller configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |
