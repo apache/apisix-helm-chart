@@ -21,6 +21,9 @@ To install the chart with the release name `my-apisix`:
 helm repo add apisix https://charts.apiseven.com
 helm repo update
 
+# Optional: List the APISIX chart version and the app version.
+helm search repo apisix
+
 helm install [RELEASE_NAME] apisix/apisix --namespace ingress-apisix --create-namespace
 ```
 
@@ -50,6 +53,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.admin.credentials.secretViewerKey | string | `""` | Name of the viewer role key in the secret, overrides the default key name "viewer" |
 | apisix.admin.credentials.viewer | string | `"4054f7cf07e344346cd3f287985e76a2"` | Apache APISIX admin API viewer role credentials |
 | apisix.admin.enabled | bool | `true` | Enable Admin API |
+| apisix.admin.enable_admin_ui | bool | `true` | Enable Embedded Admin UI |
 | apisix.admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
 | apisix.admin.ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix-admin.local","paths":["/apisix"]}],"tls":[]}` | Using ingress access Apache APISIX admin service |
 | apisix.admin.ingress.annotations | object | `{}` | Ingress annotations |
@@ -149,11 +153,6 @@ The command removes all the Kubernetes components associated with the chart and 
 | control.service.port | int | `9090` | which port to use for Apache APISIX Control API |
 | control.service.servicePort | int | `9090` | Service port to use for Apache APISIX Control API |
 | control.service.type | string | `"ClusterIP"` | Control service type |
-| dashboard.config.conf.etcd.endpoints | list | `["apisix-etcd:2379"]` | Supports defining multiple etcd host addresses for an etcd cluster |
-| dashboard.config.conf.etcd.password | string | `nil` | Specifies etcd basic auth password if enable etcd auth |
-| dashboard.config.conf.etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
-| dashboard.config.conf.etcd.username | string | `nil` | Specifies etcd basic auth username if enable etcd auth |
-| dashboard.enabled | bool | `false` |  |
 | etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"enabled":true,"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30}` | etcd configuration use the FQDN address or the IP of the etcd |
 | etcd.auth | object | `{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
 | etcd.auth.rbac.create | bool | `false` | No authentication by default. Switch to enable RBAC authentication |

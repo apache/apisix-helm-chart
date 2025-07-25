@@ -31,7 +31,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.11.2
+version: 2.11.3
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -45,11 +45,6 @@ dependencies:
     version: 9.7.3
     repository: https://charts.bitnami.com/bitnami
     condition: etcd.enabled
-  - name: apisix-dashboard
-    version: 0.8.2
-    repository: https://charts.apiseven.com
-    condition: dashboard.enabled
-    alias: dashboard
   - name: apisix-ingress-controller
     version: 1.0.2
     repository: https://charts.apiseven.com
@@ -58,6 +53,14 @@ dependencies:
 
 maintainers:
   - name: tao12345666333
+  - name: AlinsRan
+    email: alinsran@apache.org
+  - name: nic-6443
+    email: nic443@apache.org
+  - name: bzp2010
+    email: bzp2010@apache.org
+  - name: juzhiyuan
+    email: juzhiyuan@api7.ai
 
 # ref: https://artifacthub.io/docs/topics/annotations/helm/
 annotations:

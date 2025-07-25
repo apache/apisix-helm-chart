@@ -29,7 +29,7 @@ image:
   pullPolicy: IfNotPresent
   # -- Apache APISIX image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 3.13.0-debian
+  tag: 3.13.0-ubuntu
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
@@ -356,6 +356,7 @@ apisix:
   admin:
     # -- Enable Admin API
     enabled: true
+    enable_admin_ui: true
     # -- admin service type
     type: ClusterIP
     # loadBalancerIP: a.b.c.d
@@ -639,21 +640,6 @@ etcd:
   replicaCount: 3
   autoCompactionRetention: "1h"
   autoCompactionMode: "periodic"
-
-dashboard:
-  enabled: false
-  config:
-    conf:
-      etcd:
-        # -- Supports defining multiple etcd host addresses for an etcd cluster
-        endpoints:
-          - apisix-etcd:2379
-        # -- apisix configurations prefix
-        prefix: "/apisix"
-        # -- Specifies etcd basic auth username if enable etcd auth
-        username: ~
-        # -- Specifies etcd basic auth password if enable etcd auth
-        password: ~
 
 # -- Ingress controller configuration
 ingress-controller:
