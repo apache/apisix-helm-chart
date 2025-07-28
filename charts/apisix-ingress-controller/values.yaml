@@ -80,11 +80,15 @@ config:
   execADCTimeout: "15s"
   provider:
     type: "apisix"
-    syncPeriod: "1s"
-    initSyncDelay: "20m"
+    syncPeriod: "1h"
+    initSyncDelay: "0s"
   kubernetes:
     ingressClass: apisix
     defaultIngressClass: false
+
+metrics:
+  enabled: true
+  containerPort: 8080
 
 gatewayProxy:
   createDefault: false
@@ -102,3 +106,15 @@ apisix:
     namespace: apisix-ingress
     name: apisix-admin
     port: 9180
+
+serviceMonitor:
+  enabled: false
+  namespace: "monitoring"
+  interval: 15s
+  # -- @param serviceMonitor.labels ServiceMonitor extra labels
+  labels: {}
+  # -- @param serviceMonitor.annotations ServiceMonitor annotations
+  annotations: {}
+  # -- @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion.
+  # ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs
+  metricRelabelings: {}
