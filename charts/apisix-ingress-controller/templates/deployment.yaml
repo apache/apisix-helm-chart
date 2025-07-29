@@ -54,11 +54,9 @@ spec:
               fieldPath: metadata.name
         image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
         ports:
-        {{- if .Values.metrics.enabled }}
         - containerPort: {{ splitList ":" .Values.config.metricsAddr | last | int }}
           name: metrics
           protocol: TCP
-        {{- end }}
         volumeMounts:
         - name: {{ .Release.Name }}-ingress-config
           mountPath: /app/conf/config.yaml
