@@ -18,7 +18,7 @@ This chart bootstraps all the components needed to run Apache APISIX on a Kubern
 To install the chart with the release name `my-apisix`:
 
 ```sh
-helm repo add apisix https://charts.apiseven.com
+helm repo add apisix https://apache.github.io/apisix-helm-chart
 helm repo update
 
 helm install [RELEASE_NAME] apisix/apisix --namespace ingress-apisix --create-namespace

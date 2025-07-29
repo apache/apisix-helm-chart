@@ -24,7 +24,7 @@ APISIX Dashboard requires Kubernetes version 1.14+.
 ## Get Repo Info
 
 ```console
-helm repo add apisix https://charts.apiseven.com
+helm repo add apisix https://apache.github.io/apisix-helm-chart
 helm repo update
 ```
 
