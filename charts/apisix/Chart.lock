@@ -3,7 +3,7 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 9.7.3
 - name: apisix-ingress-controller
-  repository: https://charts.apiseven.com
+  repository: https://apache.github.io/apisix-helm-chart
   version: 1.0.2
-digest: sha256:61e2b59f316fcc2f29f4dc8c69ed3f1c4e0802ead88e1522585e0cf449965f34
-generated: "2025-07-25T15:00:34.85056+08:00"
+digest: sha256:61e0700375e4227a0b091c52661ffd39d8d8a5faf8e6331af9736ee7c55f2346
+generated: "2025-07-29T15:34:25.528135+08:00"
