@@ -55,7 +55,7 @@ spec:
         image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
         ports:
         {{- if .Values.metrics.enabled }}
-        - containerPort: {{ .Values.metrics.containerPort }}
+        - containerPort: {{ splitList ":" .Values.config.metricsAddr | last | int }}
           name: metrics
           protocol: TCP
         {{- end }}

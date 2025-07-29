@@ -60,7 +60,7 @@ deployment:
   image:
     repository: apache/apisix-ingress-controller
     pullPolicy: IfNotPresent
-    tag: "2.0.0-rc2"
+    tag: "2.0.0-rc3"
   # -- Set pod resource requests & limits
   resources: {}
 
@@ -86,10 +86,6 @@ config:
     ingressClass: apisix
     defaultIngressClass: false
 
-metrics:
-  enabled: true
-  containerPort: 8080
-
 gatewayProxy:
   createDefault: false
   provider:
@@ -108,8 +104,11 @@ apisix:
     port: 9180
 
 serviceMonitor:
+  # -- Enable or disable ServiceMonitor
   enabled: false
+  # -- @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor
   namespace: "monitoring"
+  # -- @param serviceMonitor.interval Interval at which metrics should be scraped
   interval: 15s
   # -- @param serviceMonitor.labels ServiceMonitor extra labels
   labels: {}
