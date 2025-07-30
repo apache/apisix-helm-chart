@@ -183,7 +183,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
 | image.tag | string | `"3.13.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
-| ingress-controller | object | `{"enabled":false}` | Ingress controller configuration |
+| ingress-controller | object | `{"enabled":false,"gatewayProxy":{"createDefault":true}}` | Ingress controller configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |
 | ingress.servicePort | number | `nil` | Service port to send traffic. Defaults to `service.http.servicePort`. |
 | initContainer.image | string | `"busybox"` | Init container image |
