@@ -645,3 +645,5 @@ etcd:
 # -- Ingress controller configuration
 ingress-controller:
   enabled: false
+  gatewayProxy:
+    createDefault: true
