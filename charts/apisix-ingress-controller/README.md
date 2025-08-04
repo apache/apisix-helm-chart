@@ -123,8 +123,8 @@ The same for container level, you need to set:
 | config.logLevel | string | `"info"` |  |
 | config.metricsAddr | string | `":8080"` |  |
 | config.probeAddr | string | `":8081"` |  |
-| config.provider.initSyncDelay | string | `"0s"` |  |
-| config.provider.syncPeriod | string | `"1h"` |  |
+| config.provider.initSyncDelay | string | `"20m"` |  |
+| config.provider.syncPeriod | string | `"1m"` |  |
 | config.provider.type | string | `"apisix"` |  |
 | config.secureMetrics | bool | `false` |  |
 | deployment.affinity | object | `{}` |  |
