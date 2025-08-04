@@ -80,8 +80,8 @@ config:
   execADCTimeout: "15s"
   provider:
     type: "apisix"
-    syncPeriod: "1h"
-    initSyncDelay: "0s"
+    syncPeriod: "1m"
+    initSyncDelay: "20m"
   kubernetes:
     ingressClass: apisix
     defaultIngressClass: false
