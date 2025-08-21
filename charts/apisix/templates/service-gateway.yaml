@@ -58,8 +58,11 @@ spec:
   {{- end }}
   {{- range .Values.service.http.additionalContainerPorts }}
   - name: apisix-gateway-{{ .port | toString }}
-    port: {{ .port }}
+    port: {{ or .servicePort .port }}
     targetPort: {{ .port }}
+  {{- if not (empty .nodePort) }}
+    nodePort: {{ .nodePort }}
+  {{- end}}
     protocol: TCP
   {{- end }}
   {{- if or .Values.apisix.ssl.enabled }}
