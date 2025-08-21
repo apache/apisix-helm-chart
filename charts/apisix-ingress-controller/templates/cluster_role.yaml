@@ -17,7 +17,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Release.Name }}-apisix-ingress-manager-role
+  name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}-manager-role
 rules:
 - apiGroups:
   - ""
@@ -155,7 +155,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Release.Name }}-apisix-ingress-metrics-auth-role
+  name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}-metrics-auth-role
 rules:
 - apiGroups:
   - authentication.k8s.io
@@ -173,7 +173,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Release.Name }}-apisix-ingress-metrics-reader
+  name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}-metrics-reader
 rules:
 - nonResourceURLs:
   - /metrics

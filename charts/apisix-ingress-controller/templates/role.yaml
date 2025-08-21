@@ -19,7 +19,7 @@ kind: Role
 metadata:
   labels:
     {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
-  name: {{ .Release.Name }}-apisix-ingress-leader-election-role
+  name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}-leader-election-role
   namespace: {{ .Release.Namespace }}
 rules:
 - apiGroups:
