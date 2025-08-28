@@ -60,9 +60,17 @@ deployment:
   image:
     repository: apache/apisix-ingress-controller
     pullPolicy: IfNotPresent
-    tag: "2.0.0-rc3"
+    tag: "dev"
   # -- Set pod resource requests & limits
   resources: {}
+
+  # -- Set adc sidecar container configuration
+  adcContainer:
+    image:
+      repository: ghcr.io/api7/adc
+      tag: "0.21.0"
+    config:
+      logLevel: "info"
 
 config:
   logLevel: "info"
