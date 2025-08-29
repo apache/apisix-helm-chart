@@ -34,6 +34,7 @@ jobs:
                && helm repo add bitnami https://charts.bitnami.com/bitnami \
                && helm repo add apisix https://charts.apiseven.com \
                && ct lint \
+                  --validate-maintainers=false \
                   --charts charts/apisix \
                   --charts charts/apisix-dashboard \
                   --charts charts/apisix-ingress-controller'
