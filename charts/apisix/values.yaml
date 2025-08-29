@@ -608,8 +608,12 @@ etcd:
   # this etcd is based on bitnami/etcd helm chart and latest bitnami docker image, only for development and testing purposes,
   # if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it.
   enabled: true
-  # -- etcd image tag
+  # -- docker image for built-in etcd
   image:
+    registry: docker.io
+    repository: bitnami/etcd
+    # -- `bitnami/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267,
+    # you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags.
     tag: latest
 
   # -- apisix configurations prefix
