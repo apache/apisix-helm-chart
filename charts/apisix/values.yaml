@@ -606,6 +606,10 @@ externalEtcd:
 etcd:
   # -- install etcd(v3) by default, set false if do not want to install etcd(v3) together
   enabled: true
+  # -- etcd image tag
+  image:
+    tag: latest
+
   # -- apisix configurations prefix
   prefix: "/apisix"
   # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
