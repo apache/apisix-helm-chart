@@ -24,8 +24,8 @@ keywords:
   - nginx
   - crd
 type: application
-version: 1.0.4
-appVersion: 2.0.0-rc3
+version: 1.0.5
+appVersion: 2.0.0-rc4
 sources:
   - https://github.com/apache/apisix-helm-chart
 
