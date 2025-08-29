@@ -604,7 +604,9 @@ externalEtcd:
 # -- etcd configuration
 # use the FQDN address or the IP of the etcd
 etcd:
-  # -- install etcd(v3) by default, set false if do not want to install etcd(v3) together
+  # -- install built-in etcd by default, set false if do not want to install built-in etcd together,
+  # this etcd is based on bitnami/etcd helm chart and latest bitnami docker image, only for development and testing purposes,
+  # if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it.
   enabled: true
   # -- etcd image tag
   image:

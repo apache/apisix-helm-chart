@@ -162,7 +162,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | etcd.auth.tls.sni | string | `""` | specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. |
 | etcd.auth.tls.verify | bool | `true` | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd |
 | etcd.containerSecurityContext | object | `{"enabled":false}` | added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19 |
-| etcd.enabled | bool | `true` | install etcd(v3) by default, set false if do not want to install etcd(v3) together |
+| etcd.enabled | bool | `true` | install built-in etcd by default, set false if do not want to install built-in etcd together, this etcd is based on bitnami/etcd helm chart and latest bitnami docker image, only for development and testing purposes, if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it. |
 | etcd.image | object | `{"tag":"latest"}` | etcd image tag |
 | etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | etcd.timeout | int | `30` | Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster |
