@@ -554,9 +554,16 @@ apisix:
     cmd: ["/path/to/apisix-plugin-runner/runner", "run"]
 
   wasm:
-    # -- Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/)
+    # -- Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/).
     enabled: false
+    # -- Set Wasm plugin name.
     plugins: []
+    # -- Set wasm plugin priority.
+    priority: 7999
+    # -- Set path to Wasm plugin.
+    file: ""
+    # -- Set the HTTP request phase in which the plugin should run.
+    http_request_phase: rewrite
 
   # -- customPlugins allows you to mount your own HTTP plugins.
   customPlugins:
