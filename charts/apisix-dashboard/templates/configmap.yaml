@@ -54,6 +54,10 @@ data:
         access_log:
           file_path: {{ .accessLog.filePath }}
       {{- end }}
+      {{- if .security }}
+      security:
+        {{- toYaml .security | nindent 6 }}
+      {{- end }}
     {{- end }}
     {{- with .Values.config.authentication }}
     authentication:
