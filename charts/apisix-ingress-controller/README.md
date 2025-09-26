@@ -124,14 +124,15 @@ The same for container level, you need to set:
 | config.metricsAddr | string | `":8080"` |  |
 | config.probeAddr | string | `":8081"` |  |
 | config.provider.initSyncDelay | string | `"20m"` |  |
-| config.provider.syncPeriod | string | `"1s"` |  |
+| config.provider.syncPeriod | string | `"1m"` |  |
 | config.provider.type | string | `"apisix"` |  |
 | config.secureMetrics | bool | `false` |  |
+| deployment.adcContainer | object | `{"config":{"logLevel":"info"},"image":{"repository":"ghcr.io/api7/adc","tag":"0.21.0"}}` | Set adc sidecar container configuration |
 | deployment.affinity | object | `{}` |  |
 | deployment.annotations | object | `{}` | Add annotations to Apache APISIX ingress controller resource |
 | deployment.image.pullPolicy | string | `"IfNotPresent"` |  |
 | deployment.image.repository | string | `"apache/apisix-ingress-controller"` |  |
-| deployment.image.tag | string | `"2.0.0-rc2"` |  |
+| deployment.image.tag | string | `"2.0.0-rc4"` |  |
 | deployment.nodeSelector | object | `{}` |  |
 | deployment.podAnnotations | object | `{}` |  |
 | deployment.podSecurityContext | object | `{}` |  |
@@ -151,3 +152,9 @@ The same for container level, you need to set:
 | podDisruptionBudget.enabled | bool | `false` | Enable or disable podDisruptionBudget |
 | podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
 | podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
+| serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
+| serviceMonitor.enabled | bool | `false` | Enable or disable ServiceMonitor |
+| serviceMonitor.interval | string | `"15s"` | @param serviceMonitor.interval Interval at which metrics should be scraped |
+| serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
+| serviceMonitor.metricRelabelings | object | `{}` | @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion. ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs |
+| serviceMonitor.namespace | string | `"monitoring"` | @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor |

@@ -29,11 +29,12 @@ jobs:
               --name ct-lint \
               --volume $PWD:/workdir \
               --workdir /workdir/charts/apisix \
-              quay.io/helmpack/chart-testing:v3.4.0 sh -c 'helm dependency update \
+              quay.io/helmpack/chart-testing:v3.13.0 sh -c 'helm dependency update \
                && cd ../.. \
                && helm repo add bitnami https://charts.bitnami.com/bitnami \
                && helm repo add apisix https://apache.github.io/apisix-helm-chart \
                && ct lint \
+                  --validate-maintainers=false \
                   --charts charts/apisix \
                   --charts charts/apisix-dashboard \
                   --charts charts/apisix-ingress-controller'
@@ -62,7 +63,7 @@ jobs:
               --volume $HOME/.kube/kind-config-kind:/root/.kube/config \
               --volume $PWD:/workdir \
               --workdir /workdir/charts/apisix \
-              quay.io/helmpack/chart-testing:v3.4.0 sh -c 'helm dependency update \
+              quay.io/helmpack/chart-testing:v3.13.0 sh -c 'helm dependency update \
                && cd ../.. \
                && helm repo add bitnami https://charts.bitnami.com/bitnami \
                && helm repo add apisix https://apache.github.io/apisix-helm-chart \

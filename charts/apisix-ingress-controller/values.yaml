@@ -60,9 +60,17 @@ deployment:
   image:
     repository: apache/apisix-ingress-controller
     pullPolicy: IfNotPresent
-    tag: "2.0.0-rc2"
+    tag: "2.0.0-rc4"
   # -- Set pod resource requests & limits
   resources: {}
+
+  # -- Set adc sidecar container configuration
+  adcContainer:
+    image:
+      repository: ghcr.io/api7/adc
+      tag: "0.21.0"
+    config:
+      logLevel: "info"
 
 config:
   logLevel: "info"
@@ -80,7 +88,7 @@ config:
   execADCTimeout: "15s"
   provider:
     type: "apisix"
-    syncPeriod: "1s"
+    syncPeriod: "1m"
     initSyncDelay: "20m"
   kubernetes:
     ingressClass: apisix
@@ -102,3 +110,18 @@ apisix:
     namespace: apisix-ingress
     name: apisix-admin
     port: 9180
+
+serviceMonitor:
+  # -- Enable or disable ServiceMonitor
+  enabled: false
+  # -- @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor
+  namespace: "monitoring"
+  # -- @param serviceMonitor.interval Interval at which metrics should be scraped
+  interval: 15s
+  # -- @param serviceMonitor.labels ServiceMonitor extra labels
+  labels: {}
+  # -- @param serviceMonitor.annotations ServiceMonitor annotations
+  annotations: {}
+  # -- @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion.
+  # ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs
+  metricRelabelings: {}
