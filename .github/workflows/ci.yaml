@@ -32,6 +32,7 @@ jobs:
               quay.io/helmpack/chart-testing:v3.13.0 sh -c 'helm dependency update \
                && cd ../.. \
                && helm repo add bitnami https://charts.bitnami.com/bitnami \
+               && helm repo add apisix https://charts.apiseven.com \
                && helm repo add apisix https://apache.github.io/apisix-helm-chart \
                && ct lint \
                   --validate-maintainers=false \
@@ -66,6 +67,7 @@ jobs:
               quay.io/helmpack/chart-testing:v3.13.0 sh -c 'helm dependency update \
                && cd ../.. \
                && helm repo add bitnami https://charts.bitnami.com/bitnami \
+               && helm repo add apisix https://charts.apiseven.com \
                && helm repo add apisix https://apache.github.io/apisix-helm-chart \
                && ct install \
                   --charts charts/apisix'
