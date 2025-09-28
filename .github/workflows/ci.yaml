@@ -33,7 +33,7 @@ jobs:
                && cd ../.. \
                && helm repo add bitnami https://charts.bitnami.com/bitnami \
                && helm repo add apisix https://charts.apiseven.com \
-               && helm repo add apisix https://apache.github.io/apisix-helm-chart \
+               && helm repo add apisix-apache https://apache.github.io/apisix-helm-chart \
                && ct lint \
                   --validate-maintainers=false \
                   --charts charts/apisix \
@@ -68,7 +68,7 @@ jobs:
                && cd ../.. \
                && helm repo add bitnami https://charts.bitnami.com/bitnami \
                && helm repo add apisix https://charts.apiseven.com \
-               && helm repo add apisix https://apache.github.io/apisix-helm-chart \
+               && helm repo add apisix-apache https://apache.github.io/apisix-helm-chart \
                && ct install \
                   --charts charts/apisix'
 
