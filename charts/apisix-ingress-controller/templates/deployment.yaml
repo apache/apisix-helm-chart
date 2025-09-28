@@ -59,7 +59,7 @@ spec:
           name: metrics
           protocol: TCP
         volumeMounts:
-        - name: {{ .Release.Name }}-ingress-config
+        - name: config
           mountPath: /app/conf/config.yaml
           subPath: config.yaml
         livenessProbe:
@@ -133,10 +133,10 @@ spec:
         {{- tpl (. | toYaml) $ | nindent 8 }}
       {{- end }}
       volumes:
-      - name: {{ .Release.Name }}-ingress-config
+      - name: config
         configMap:
-          name: {{ .Release.Name }}-ingress-config
+          name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}-ingress-config
       securityContext:
         runAsNonRoot: false
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ include "apisix-ingress-controller-manager.name.fullname" . }}
       terminationGracePeriodSeconds: 10

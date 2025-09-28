@@ -19,7 +19,7 @@ apiVersion: apisix.apache.org/v1alpha1
 kind: GatewayProxy
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ .Release.Name }}-config
+  name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}-config
 spec:
   provider:
     type: {{ .Values.gatewayProxy.provider.type }}
