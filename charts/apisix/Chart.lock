@@ -5,5 +5,5 @@ dependencies:
 - name: apisix-ingress-controller
   repository: https://apache.github.io/apisix-helm-chart
   version: 1.0.5
-digest: sha256:645325383aa153ba7b41ef4f63ba38f5169173b2791aaeb32b0754ecbb922884
-generated: "2025-09-01T16:08:09.544116895+08:00"
+digest: sha256:55ca99d580bfd975ccdc3c422062ee0c0948af7ec715c6e2c6931757ccc234df
+generated: "2025-09-28T11:29:35.523212+08:00"
