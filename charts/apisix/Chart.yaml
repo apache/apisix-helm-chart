@@ -47,7 +47,7 @@ dependencies:
     condition: etcd.enabled
   - name: apisix-ingress-controller
     version: 1.0.5
-    repository: https://charts.apiseven.com
+    repository: https://apache.github.io/apisix-helm-chart
     condition: ingress-controller.enabled
     alias: ingress-controller
 
