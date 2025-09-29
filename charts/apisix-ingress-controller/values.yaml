@@ -105,6 +105,13 @@ gatewayProxy:
         adminKey:
           value: "edd1c9f034335f136f87ad84b625c8f1"
 
+  # -- publishService specifies the LoadBalancer-type Service whose external address the controller uses to update the
+  # status of Ingress resources.
+  publishService: apisix-ingress/apisix-gateway
+  # -- statusAddress specifies the external IP addresses that the controller uses to populate the status field
+  # of GatewayProxy or Ingress resources for developers to access. statusAddress has higher priority than publishService.
+  # statusAddress:
+
 apisix:
   adminService:
     namespace: apisix-ingress
