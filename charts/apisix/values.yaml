@@ -584,6 +584,15 @@ apisix:
     ip: "0.0.0.0"
     port: 7085
 
+  # -- Data encryption settings.
+  encryption:
+    # -- Enable or disable the encryption feature.
+    enabled: true
+    # -- The keyring used for encryption and decryption of sensitive data.
+    # leave empty to use the default keyring.
+    keyring: []
+      # - "0123456789abcdef"
+
 # -- external etcd configuration. If etcd.enabled is false, these configuration will be used.
 externalEtcd:
   # -- if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379.
