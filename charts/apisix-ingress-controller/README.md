@@ -146,6 +146,8 @@ The same for container level, you need to set:
 | gatewayProxy.provider.controlPlane.auth.type | string | `"AdminKey"` |  |
 | gatewayProxy.provider.controlPlane.endpoints | list | `[]` |  |
 | gatewayProxy.provider.type | string | `"ControlPlane"` |  |
+| gatewayProxy.publishService | string | `""` | publishService specifies the LoadBalancer-type Service whose external address the controller uses to update the status of Ingress resources. Example: [Namespace]/[APISIX_LoadBalancer_Service]. Applicable to ingress resources. |
+| gatewayProxy.statusAddress | string | `""` | statusAddress specifies the external IP addresses that the controller uses to populate the status field of GatewayProxy or Ingress resources for developers to access. statusAddress has higher priority than publishService. |
 | labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX ingress controller resource |
 | nameOverride | string | `""` | Default values for apisix-ingress-controller. This is a YAML-formatted file. Declare variables to be passed into your templates.  |
 | podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |

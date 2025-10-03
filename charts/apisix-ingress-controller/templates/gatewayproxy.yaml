@@ -31,7 +31,9 @@ spec:
       auth:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+  {{- if .Values.gatewayProxy.publishService }}
   publishService: {{ .Values.gatewayProxy.publishService }}
+  {{- end }}
   {{- if .Values.gatewayProxy.statusAddress }}
   statusAddress: {{ .Values.gatewayProxy.statusAddress }}
   {{- end }}
