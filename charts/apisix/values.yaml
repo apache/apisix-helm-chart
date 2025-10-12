@@ -611,7 +611,7 @@ etcd:
   # -- docker image for built-in etcd
   image:
     registry: docker.io
-    repository: bitnami/etcd
+    repository: bitnamilegacy/etcd
     # -- `bitnami/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267,
     # you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags.
     tag: latest
