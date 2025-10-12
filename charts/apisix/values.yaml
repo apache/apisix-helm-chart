@@ -605,14 +605,14 @@ externalEtcd:
 # use the FQDN address or the IP of the etcd
 etcd:
   # -- install built-in etcd by default, set false if do not want to install built-in etcd together,
-  # this etcd is based on bitnami/etcd helm chart and latest bitnami docker image, only for development and testing purposes,
+  # this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes,
   # if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it.
   enabled: true
   # -- docker image for built-in etcd
   image:
     registry: docker.io
     repository: bitnamilegacy/etcd
-    # -- `bitnami/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267,
+    # -- `bitnamilegacy/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267,
     # you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags.
     tag: latest
 
@@ -621,7 +621,7 @@ etcd:
   # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
   timeout: 30
 
-  # -- if etcd.enabled is true, set more values of bitnami/etcd helm chart
+  # -- if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart
   auth:
     rbac:
       # -- No authentication by default. Switch to enable RBAC authentication
