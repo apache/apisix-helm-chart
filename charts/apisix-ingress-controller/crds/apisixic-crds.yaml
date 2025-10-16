@@ -18,7 +18,8 @@ spec:
   - name: v2
     schema:
       openAPIV3Schema:
-        description: ApisixConsumer is the Schema for the apisixconsumers API.
+        description: ApisixConsumer defines configuration of a consumer and their
+          authentication details.
         properties:
           apiVersion:
             description: |-
@@ -38,18 +39,18 @@ spec:
           metadata:
             type: object
           spec:
-            description: ApisixConsumerSpec defines the desired state of ApisixConsumer.
+            description: ApisixConsumerSpec defines the consumer authentication configuration.
             properties:
               authParameter:
+                description: AuthParameter defines the authentication credentials
+                  and configuration for this consumer.
                 properties:
                   basicAuth:
-                    description: ApisixConsumerBasicAuth defines the configuration
-                      for basic auth.
+                    description: BasicAuth configures the basic authentication details.
                     properties:
                       secretRef:
-                        description: |-
-                          LocalObjectReference contains enough information to let you locate the
-                          referenced object inside the same namespace.
+                        description: SecretRef references a Kubernetes Secret containing
+                          the basic authentication credentials.
                         properties:
                           name:
                             default: ""
@@ -63,12 +64,13 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       value:
-                        description: ApisixConsumerBasicAuthValue defines the in-place
-                          username and password configuration for basic auth.
+                        description: Value specifies the basic authentication credentials.
                         properties:
                           password:
+                            description: Password is the basic authentication password.
                             type: string
                           username:
+                            description: Username is the basic authentication username.
                             type: string
                         required:
                         - password
@@ -76,13 +78,11 @@ spec:
                         type: object
                     type: object
                   hmacAuth:
-                    description: ApisixConsumerHMACAuth defines the configuration
-                      for the hmac auth.
+                    description: HMACAuth configures the HMAC authentication details.
                     properties:
                       secretRef:
-                        description: |-
-                          LocalObjectReference contains enough information to let you locate the
-                          referenced object inside the same namespace.
+                        description: SecretRef references a Kubernetes Secret containing
+                          the HMAC credentials.
                         properties:
                           name:
                             default: ""
@@ -96,44 +96,74 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       value:
-                        description: ApisixConsumerHMACAuthValue defines the in-place
-                          configuration for hmac auth.
+                        description: Value specifies HMAC authentication credentials.
+                        oneOf:
+                        - required:
+                          - key_id
+                          - secret_key
+                        - required:
+                          - access_key
+                          - secret_key
                         properties:
                           access_key:
+                            description: AccessKey is the identifier used to look
+                              up the HMAC secret. Deprecated from consumer configuration
                             type: string
                           algorithm:
+                            description: Algorithm specifies the hashing algorithm
+                              (e.g., "hmac-sha256"). Deprecated from consumer configuration
                             type: string
                           clock_skew:
+                            description: ClockSkew is the allowed time difference
+                              (in seconds) between client and server clocks. Deprecated
+                              from consumer configuration
                             format: int64
                             type: integer
                           encode_uri_params:
+                            description: EncodeURIParams indicates whether URI parameters
+                              are encoded when calculating the signature. Deprecated
+                              from consumer configuration
                             type: boolean
                           keep_headers:
+                            description: KeepHeaders determines whether the HMAC signature
+                              headers are preserved after verification. Deprecated
+                              from consumer configuration
                             type: boolean
+                          key_id:
+                            description: KeyID is the identifier used to look up the
+                              HMAC secret.
+                            type: string
                           max_req_body:
+                            description: MaxReqBody sets the maximum size (in bytes)
+                              of the request body that can be validated. Deprecated
+                              from consumer configuration
                             format: int64
                             type: integer
                           secret_key:
+                            description: SecretKey is the HMAC secret used to sign
+                              the request.
                             type: string
                           signed_headers:
+                            description: SignedHeaders lists the headers that must
+                              be included in the signature. Deprecated from consumer
+                              configuration
                             items:
                               type: string
                             type: array
                           validate_request_body:
+                            description: ValidateRequestBody enables HMAC validation
+                              of the request body. Deprecated from consumer configuration
                             type: boolean
                         required:
-                        - access_key
                         - secret_key
                         type: object
                     type: object
                   jwtAuth:
-                    description: ApisixConsumerJwtAuth defines the configuration for
-                      the jwt auth.
+                    description: JwtAuth configures the JWT authentication details.
                     properties:
                       secretRef:
-                        description: |-
-                          LocalObjectReference contains enough information to let you locate the
-                          referenced object inside the same namespace.
+                        description: SecretRef references a Kubernetes Secret containing
+                          JWT authentication credentials.
                         properties:
                           name:
                             default: ""
@@ -147,26 +177,41 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       value:
-                        description: ApisixConsumerJwtAuthValue defines the in-place
-                          configuration for jwt auth.
+                        description: Value specifies JWT authentication credentials.
                         properties:
                           algorithm:
+                            description: |-
+                              Algorithm specifies the signing algorithm.
+                              Can be `HS256`, `HS512`, `RS256`, or `ES256`.
                             type: string
                           base64_secret:
+                            description: Base64Secret indicates whether the secret
+                              is base64-encoded.
                             type: boolean
                           exp:
+                            description: Exp is the token expiration period in seconds.
                             format: int64
                             type: integer
                           key:
+                            description: Key is the unique identifier for the JWT
+                              credential.
                             type: string
                           lifetime_grace_period:
+                            description: LifetimeGracePeriod is the allowed clock
+                              skew in seconds for token expiration.
                             format: int64
                             type: integer
                           private_key:
+                            description: PrivateKey is the private key used to sign
+                              the JWT (for asymmetric algorithms).
                             type: string
                           public_key:
+                            description: PublicKey is the public key used to verify
+                              JWT signatures (for asymmetric algorithms).
                             type: string
                           secret:
+                            description: Secret is the shared secret used to sign
+                              the JWT (for symmetric algorithms).
                             type: string
                         required:
                         - key
@@ -174,13 +219,11 @@ spec:
                         type: object
                     type: object
                   keyAuth:
-                    description: ApisixConsumerKeyAuth defines the configuration for
-                      the key auth.
+                    description: KeyAuth configures the key authentication details.
                     properties:
                       secretRef:
-                        description: |-
-                          LocalObjectReference contains enough information to let you locate the
-                          referenced object inside the same namespace.
+                        description: SecretRef references a Kubernetes Secret containing
+                          the key authentication credentials.
                         properties:
                           name:
                             default: ""
@@ -194,23 +237,21 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       value:
-                        description: ApisixConsumerKeyAuthValue defines the in-place
-                          configuration for basic auth.
+                        description: Value specifies the key authentication credentials.
                         properties:
                           key:
+                            description: Key is the credential used for key authentication.
                             type: string
                         required:
                         - key
                         type: object
                     type: object
                   ldapAuth:
-                    description: ApisixConsumerLDAPAuth defines the configuration
-                      for the ldap auth.
+                    description: LDAPAuth configures the LDAP authentication details.
                     properties:
                       secretRef:
-                        description: |-
-                          LocalObjectReference contains enough information to let you locate the
-                          referenced object inside the same namespace.
+                        description: SecretRef references a Kubernetes Secret containing
+                          the LDAP credentials.
                         properties:
                           name:
                             default: ""
@@ -224,10 +265,11 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       value:
-                        description: ApisixConsumerLDAPAuthValue defines the in-place
-                          configuration for ldap auth.
+                        description: Value specifies LDAP authentication credentials.
                         properties:
                           user_dn:
+                            description: UserDN is the distinguished name (DN) of
+                              the LDAP user.
                             type: string
                         required:
                         - user_dn
@@ -236,13 +278,12 @@ spec:
                     - secretRef
                     type: object
                   wolfRBAC:
-                    description: ApisixConsumerWolfRBAC defines the configuration
-                      for the wolf-rbac auth.
+                    description: WolfRBAC configures the Wolf RBAC authentication
+                      details.
                     properties:
                       secretRef:
-                        description: |-
-                          LocalObjectReference contains enough information to let you locate the
-                          referenced object inside the same namespace.
+                        description: SecretRef references a Kubernetes Secret containing
+                          the Wolf RBAC token.
                         properties:
                           name:
                             default: ""
@@ -256,15 +297,18 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       value:
-                        description: ApisixConsumerWolfRBAC defines the in-place server
-                          and appid and header_prefix configuration for wolf-rbac
-                          auth.
+                        description: Value specifies the Wolf RBAC token.
                         properties:
                           appid:
+                            description: Appid is the application identifier used
+                              when communicating with the Wolf RBAC server.
                             type: string
                           header_prefix:
+                            description: HeaderPrefix is the prefix added to request
+                              headers for RBAC enforcement.
                             type: string
                           server:
+                            description: Server is the URL of the Wolf RBAC server.
                             type: string
                         type: object
                     type: object
@@ -272,9 +316,7 @@ spec:
               ingressClassName:
                 description: |-
                   IngressClassName is the name of an IngressClass cluster resource.
-                  controller implementations use this field to know whether they should be
-                  serving this ApisixConsumer resource, by a transitive connection
-                  (controller -> IngressClass -> ApisixConsumer resource).
+                  The controller uses this field to decide whether the resource should be managed.
                 type: string
             required:
             - authParameter
@@ -365,7 +407,7 @@ spec:
   - name: v2
     schema:
       openAPIV3Schema:
-        description: ApisixGlobalRule is the Schema for the apisixglobalrules API.
+        description: ApisixGlobalRule defines configuration for global plugins.
         properties:
           apiVersion:
             description: |-
@@ -385,15 +427,15 @@ spec:
           metadata:
             type: object
           spec:
-            description: ApisixGlobalRuleSpec defines the desired state of ApisixGlobalRule.
+            description: ApisixGlobalRuleSpec defines the global plugin configuration.
             properties:
               ingressClassName:
                 description: |-
                   IngressClassName is the name of an IngressClass cluster resource.
-                  The controller uses this field to decide whether the resource should be managed or not.
+                  The controller uses this field to decide whether the resource should be managed.
                 type: string
               plugins:
-                description: Plugins contains a list of ApisixRoutePlugin
+                description: Plugins contain a list of global plugins.
                 items:
                   description: ApisixRoutePlugin represents an APISIX plugin.
                   properties:
@@ -504,8 +546,8 @@ spec:
   - name: v2
     schema:
       openAPIV3Schema:
-        description: ApisixPluginConfig is the Schema for the apisixpluginconfigs
-          API.
+        description: ApisixPluginConfig defines a reusable set of plugin configuration
+          that can be referenced by routes.
         properties:
           apiVersion:
             description: |-
@@ -525,15 +567,15 @@ spec:
           metadata:
             type: object
           spec:
-            description: ApisixPluginConfigSpec defines the desired state of ApisixPluginConfigSpec.
+            description: ApisixPluginConfigSpec defines the plugin config configuration.
             properties:
               ingressClassName:
                 description: |-
                   IngressClassName is the name of an IngressClass cluster resource.
-                  The controller uses this field to decide whether the resource should be managed or not.
+                  The controller uses this field to decide whether the resource should be managed.
                 type: string
               plugins:
-                description: Plugins contain a list of ApisixRoutePlugin
+                description: Plugins contain a list of plugins.
                 items:
                   description: ApisixRoutePlugin represents an APISIX plugin.
                   properties:
@@ -672,7 +714,7 @@ spec:
     name: v2
     schema:
       openAPIV3Schema:
-        description: ApisixRoute is the Schema for the apisixroutes API.
+        description: ApisixRoute is defines configuration for HTTP and stream routes.
         properties:
           apiVersion:
             description: |-
@@ -692,55 +734,67 @@ spec:
           metadata:
             type: object
           spec:
-            description: ApisixRouteSpec is the spec definition for ApisixRouteSpec.
+            description: ApisixRouteSpec defines HTTP and stream route configuration.
             properties:
               http:
+                description: |-
+                  HTTP defines a list of HTTP route rules.
+                  Each rule specifies conditions to match HTTP requests and how to forward them.
                 items:
-                  description: ApisixRouteHTTP represents a single route in for HTTP
-                    traffic.
+                  description: ApisixRouteHTTP represents a single HTTP route configuration.
                   properties:
                     authentication:
-                      description: |-
-                        ApisixRouteAuthentication is the authentication-related
-                        configuration in ApisixRoute.
+                      description: Authentication holds authentication-related configuration
+                        for this route.
                       properties:
                         enable:
+                          description: Enable toggles authentication on or off.
                           type: boolean
                         jwtAuth:
-                          description: |-
-                            ApisixRouteAuthenticationJwtAuth is the jwt auth related
-                            configuration in ApisixRouteAuthentication.
+                          description: JwtAuth defines configuration for JWT authentication.
                           properties:
                             cookie:
+                              description: Cookie specifies the cookie name to look
+                                for the JWT token.
                               type: string
                             header:
+                              description: Header specifies the HTTP header name to
+                                look for the JWT token.
                               type: string
                             query:
+                              description: Query specifies the URL query parameter
+                                name to look for the JWT token.
                               type: string
                           type: object
                         keyAuth:
-                          description: |-
-                            ApisixRouteAuthenticationKeyAuth is the keyAuth-related
-                            configuration in ApisixRouteAuthentication.
+                          description: KeyAuth defines configuration for key authentication.
                           properties:
                             header:
+                              description: Header specifies the HTTP header name to
+                                look for the key authentication token.
                               type: string
                           type: object
                         ldapAuth:
-                          description: |-
-                            ApisixRouteAuthenticationLDAPAuth is the LDAP auth related
-                            configuration in ApisixRouteAuthentication.
+                          description: LDAPAuth defines configuration for LDAP authentication.
                           properties:
                             base_dn:
+                              description: BaseDN is the base distinguished name (DN)
+                                for LDAP searches.
                               type: string
                             ldap_uri:
+                              description: LDAPURI is the URI of the LDAP server.
                               type: string
                             uid:
+                              description: UID is the user identifier attribute in
+                                LDAP.
                               type: string
                             use_tls:
+                              description: UseTLS indicates whether to use TLS for
+                                the LDAP connection.
                               type: boolean
                           type: object
                         type:
+                          description: Type specifies the authentication type.
                           type: string
                       required:
                       - enable
@@ -748,39 +802,42 @@ spec:
                       type: object
                     backends:
                       description: |-
-                        Backends represents potential backends to proxy after the route
-                        rule matched. When number of backends are more than one, traffic-split
-                        plugin in APISIX will be used to split traffic based on the backend weight.
+                        Backends lists potential backend services to proxy requests to.
+                        If more than one backend is specified, the `traffic-split` plugin is used
+                        to distribute traffic according to backend weights.
                       items:
                         description: ApisixRouteHTTPBackend represents an HTTP backend
-                          (a Kubernetes Service).
+                          (Kubernetes Service).
                         properties:
                           resolveGranularity:
                             description: |-
-                              The resolve granularity, can be "endpoints" or "service",
-                              when set to "endpoints", the pod ips will be used; other
-                              wise, the service ClusterIP or ExternalIP will be used,
-                              default is endpoints.
+                              ResolveGranularity determines how the backend service is resolved.
+                              Valid values are `endpoints` and `service`. When set to `endpoints`,
+                              individual pod IPs will be used; otherwise, the Service's ClusterIP or ExternalIP is used.
+                              The default is `endpoints`.
                             type: string
                           serviceName:
                             description: |-
-                              The name (short) of the service, note cross namespace is forbidden,
-                              so be sure the ApisixRoute and Service are in the same namespace.
+                              ServiceName is the name of the Kubernetes Service.
+                              Cross-namespace references are not supported—ensure the ApisixRoute
+                              and the Service are in the same namespace.
                             type: string
                           servicePort:
                             anyOf:
                             - type: integer
                             - type: string
-                            description: The service port, could be the name or the
-                              port number.
+                            description: |-
+                              ServicePort is the port of the Kubernetes Service.
+                              This can be either the port name or port number.
                             x-kubernetes-int-or-string: true
                           subset:
                             description: |-
-                              Subset specifies a subset for the target Service. The subset should be pre-defined
-                              in ApisixUpstream about this service.
+                              Subset specifies a named subset of the target Service.
+                              The subset must be pre-defined in the corresponding ApisixUpstream resource.
                             type: string
                           weight:
-                            description: Weight of this backend.
+                            description: Weight specifies the relative traffic weight
+                              for this backend.
                             type: integer
                         required:
                         - serviceName
@@ -788,51 +845,41 @@ spec:
                         type: object
                       type: array
                     match:
-                      description: ApisixRouteHTTPMatch represents the match condition
-                        for hitting this route.
+                      description: Match defines the HTTP request matching criteria.
                       properties:
                         exprs:
-                          description: |-
-                            NginxVars represents generic match predicates,
-                            it uses Nginx variable systems, so any predicate
-                            like headers, querystring and etc can be leveraged
-                            here to match the route.
-                            For instance, it can be:
-                            nginxVars:
-                              - subject: "$remote_addr"
-                                op: in
-                                value:
-                                  - "127.0.0.1"
-                                  - "10.0.5.11"
+                          description: NginxVars defines match conditions based on
+                            Nginx variables.
                           items:
                             description: ApisixRouteHTTPMatchExpr represents a binary
-                              route match expression .
+                              expression used to match requests based on Nginx variables.
                             properties:
                               op:
-                                description: Op is the operator.
+                                description: |-
+                                  Op specifies the operator used in the expression.
+                                  Can be `Equal`, `NotEqual`, `GreaterThan`, `GreaterThanEqual`, `LessThan`, `LessThanEqual`, `RegexMatch`,
+                                  `RegexNotMatch`, `RegexMatchCaseInsensitive`, `RegexNotMatchCaseInsensitive`, `In`, or `NotIn`.
                                 type: string
                               set:
                                 description: |-
-                                  Set is an array type object of the expression.
-                                  It should be used when the Op is "in" or "not_in";
+                                  Set provides a list of acceptable values for the expression.
+                                  This should be used when Op is `In` or `NotIn`.
                                 items:
                                   type: string
                                 type: array
                               subject:
                                 description: |-
-                                  Subject is the expression subject, it can
-                                  be any string composed by literals and nginx
-                                  vars.
+                                  Subject defines the left-hand side of the expression.
+                                  It can be any [APISIX variable](https://apisix.apache.org/docs/apisix/apisix-variable) or string literal.
                                 properties:
                                   name:
-                                    description: The name of subject.
+                                    description: Name is the name of the header or
+                                      query parameter.
                                     type: string
                                   scope:
                                     description: |-
-                                      The subject scope, can be:
-                                      ScopeQuery, ScopeHeader, ScopePath
-                                      when subject is ScopePath, Name field
-                                      will be ignored.
+                                      Scope specifies the subject scope and can be `Header`, `Query`, or `Path`.
+                                      When Scope is `Path`, Name will be ignored.
                                     type: string
                                 required:
                                 - name
@@ -840,10 +887,9 @@ spec:
                                 type: object
                               value:
                                 description: |-
-                                  Value is the normal type object for the expression,
-                                  it should be used when the Op is not "in" and "not_in".
-                                  Set and Value are exclusive so only of them can be set
-                                  in the same time.
+                                  Value defines a single value to compare against the subject.
+                                  This should be used when Op is not `In` or `NotIn`.
+                                  Set and Value are mutually exclusive—only one should be set at a time.
                                 type: string
                             required:
                             - op
@@ -852,36 +898,36 @@ spec:
                           type: array
                         filter_func:
                           description: |-
-                            Matches based on a user-defined filtering function.
-                            These functions can accept an input parameter `vars`
-                            which can be used to access the Nginx variables.
+                            FilterFunc is a user-defined function for advanced request filtering.
+                            The function can use Nginx variables through the `vars` parameter.
                           type: string
                         hosts:
                           description: |-
-                            HTTP Host predicates, host can be a wildcard domain or
-                            an exact domain. For wildcard domain, only one generic
-                            level is allowed, for instance, "*.foo.com" is valid but
-                            "*.*.foo.com" is not.
+                            Hosts specifies Host header values to match.
+                            Supports exact and wildcard domains.
+                            Only one level of wildcard is allowed (e.g., `*.example.com` is valid,
+                            but `*.*.example.com` is not).
                           items:
                             type: string
                           type: array
                         methods:
-                          description: HTTP request method predicates.
+                          description: Methods specifies the HTTP methods to match.
                           items:
                             type: string
                           type: array
                         paths:
                           description: |-
-                            URI path predicates, at least one path should be
-                            configured, path could be exact or prefix, for prefix path,
-                            append "*" after it, for instance, "/foo*".
+                            Paths is a list of URI path patterns to match.
+                            At least one path must be specified.
+                            Supports exact matches and prefix matches.
+                            For prefix matches, append `*` to the path, such as `/foo*`.
                           items:
                             type: string
                           type: array
                         remoteAddrs:
                           description: |-
-                            Remote address predicates, items can be valid IPv4 address
-                            or IPv6 address or CIDR.
+                            RemoteAddrs is a list of source IP addresses or CIDR ranges to match.
+                            Supports both IPv4 and IPv6 formats.
                           items:
                             type: string
                           type: array
@@ -889,15 +935,20 @@ spec:
                       - paths
                       type: object
                     name:
-                      description: The rule name, cannot be empty.
+                      description: Name is the unique rule name and cannot be empty.
                       type: string
                     plugin_config_name:
+                      description: PluginConfigName specifies the name of the plugin
+                        config to apply.
                       type: string
                     plugin_config_namespace:
-                      description: By default, PluginConfigNamespace will be the same
-                        as the namespace of ApisixRoute
+                      description: |-
+                        PluginConfigNamespace specifies the namespace of the plugin config.
+                        Defaults to the namespace of the ApisixRoute if not set.
                       type: string
                     plugins:
+                      description: Plugins lists additional plugins applied to this
+                        route.
                       items:
                         description: ApisixRoutePlugin represents an APISIX plugin.
                         properties:
@@ -922,97 +973,126 @@ spec:
                       type: array
                     priority:
                       description: |-
-                        Route priority, when multiple routes contains
-                        same URI path (for path matching), route with
-                        higher priority will take effect.
+                        Priority defines the route priority when multiple routes share the same URI path.
+                        Higher values mean higher priority in route matching.
                       type: integer
                     timeout:
-                      description: UpstreamTimeout is settings for the read, send
-                        and connect to the upstream.
+                      description: Timeout specifies upstream timeout settings.
                       properties:
                         connect:
+                          description: Connect timeout for establishing a connection
+                            to the upstream.
                           type: string
                         read:
+                          description: Read timeout for reading data from the upstream.
                           type: string
                         send:
+                          description: Send timeout for sending data to the upstream.
                           type: string
                       type: object
                     upstreams:
-                      description: Upstreams refer to ApisixUpstream CRD
+                      description: Upstreams references ApisixUpstream CRDs.
                       items:
-                        description: ApisixRouteUpstreamReference contains a ApisixUpstream
-                          CRD reference
+                        description: |-
+                          ApisixRouteUpstreamReference references an ApisixUpstream CRD to be used as a backend.
+                          It can be used in traffic-splitting scenarios or to select a specific upstream configuration.
                         properties:
                           name:
+                            description: Name is the name of the ApisixUpstream resource.
                             type: string
                           weight:
+                            description: Weight is the weight assigned to this upstream.
                             type: integer
                         type: object
                       type: array
                     websocket:
+                      description: Websocket enables or disables websocket support
+                        for this route.
                       type: boolean
                   required:
                   - name
                   type: object
                 type: array
+                x-kubernetes-list-map-keys:
+                - name
+                x-kubernetes-list-type: map
               ingressClassName:
+                description: |-
+                  IngressClassName is the name of the IngressClass this route belongs to.
+                  It allows multiple controllers to watch and reconcile different routes.
                 type: string
               stream:
+                description: |-
+                  Stream defines a list of stream route rules.
+                  Each rule specifies conditions to match TCP/UDP traffic and how to forward them.
                 items:
-                  description: ApisixRouteStream is the configuration for level 4
-                    route
+                  description: ApisixRouteStream defines the configuration for a Layer
+                    4 (TCP/UDP) route. Currently not supported.
                   properties:
                     backend:
-                      description: ApisixRouteStreamBackend represents a TCP backend
-                        (a Kubernetes Service).
+                      description: Backend specifies the destination service to which
+                        traffic should be forwarded.
                       properties:
                         resolveGranularity:
+                          default: endpoint
                           description: |-
-                            The resolve granularity, can be "endpoints" or "service",
-                            when set to "endpoints", the pod ips will be used; other
-                            wise, the service ClusterIP or ExternalIP will be used,
-                            default is endpoints.
+                            ResolveGranularity determines how the backend service is resolved.
+                            Valid values are `endpoint` and `service`. When set to `endpoint`,
+                            individual pod IPs will be used; otherwise, the Service's ClusterIP or ExternalIP is used.
+                            The default is `endpoint`.
+                          enum:
+                          - endpoint
+                          - service
                           type: string
                         serviceName:
                           description: |-
-                            The name (short) of the service, note cross namespace is forbidden,
-                            so be sure the ApisixRoute and Service are in the same namespace.
+                            ServiceName is the name of the Kubernetes Service.
+                            Cross-namespace references are not supported—ensure the ApisixRoute
+                            and the Service are in the same namespace.
                           type: string
                         servicePort:
                           anyOf:
                           - type: integer
                           - type: string
-                          description: The service port, could be the name or the
-                            port number.
+                          description: |-
+                            ServicePort is the port of the Kubernetes Service.
+                            This can be either the port name or port number.
                           x-kubernetes-int-or-string: true
                         subset:
                           description: |-
-                            Subset specifies a subset for the target Service. The subset should be pre-defined
-                            in ApisixUpstream about this service.
+                            Subset specifies a named subset of the target Service.
+                            The subset must be pre-defined in the corresponding ApisixUpstream resource.
                           type: string
                       required:
                       - serviceName
                       - servicePort
                       type: object
                     match:
-                      description: ApisixRouteStreamMatch represents the match conditions
-                        of stream route.
+                      description: Match defines the criteria used to match incoming
+                        TCP or UDP connections.
                       properties:
                         host:
+                          description: Host is the destination host address used to
+                            match the incoming TCP/UDP traffic.
                           type: string
                         ingressPort:
                           description: |-
-                            IngressPort represents the port listening on the Ingress proxy server.
-                            It should be pre-defined as APISIX doesn't support dynamic listening.
+                            IngressPort is the port on which the APISIX Ingress proxy server listens.
+                            This must be a statically configured port, as APISIX does not support dynamic port binding.
                           format: int32
+                          maximum: 65535
+                          minimum: 0
                           type: integer
                       required:
                       - ingressPort
                       type: object
                     name:
-                      description: The rule name cannot be empty.
+                      description: Name is a unique identifier for the route. This
+                        field must not be empty.
                       type: string
                     plugins:
+                      description: Plugins defines a list of plugins to apply to this
+                        route.
                       items:
                         description: ApisixRoutePlugin represents an APISIX plugin.
                         properties:
@@ -1036,6 +1116,11 @@ spec:
                         type: object
                       type: array
                     protocol:
+                      description: Protocol specifies the L4 protocol to match. Can
+                        be `TCP` or `UDP`.
+                      enum:
+                      - TCP
+                      - UDP
                       type: string
                   required:
                   - backend
@@ -1044,6 +1129,9 @@ spec:
                   - protocol
                   type: object
                 type: array
+                x-kubernetes-list-map-keys:
+                - name
+                x-kubernetes-list-type: map
             type: object
           status:
             description: ApisixStatus is the status report for Apisix ingress Resources
@@ -1150,7 +1238,7 @@ spec:
     name: v2
     schema:
       openAPIV3Schema:
-        description: ApisixTls is the Schema for the apisixtls API.
+        description: ApisixTls defines configuration for TLS and mutual TLS (mTLS).
         properties:
           apiVersion:
             description: |-
@@ -1170,20 +1258,23 @@ spec:
           metadata:
             type: object
           spec:
-            description: ApisixTlsSpec defines the desired state of ApisixTls.
+            description: ApisixTlsSpec defines the TLS configuration.
             properties:
               client:
-                description: ApisixMutualTlsClientConfig describes the mutual TLS
-                  CA and verify depth
+                description: Client defines mutual TLS (mTLS) settings, such as the
+                  CA certificate and verification depth.
                 properties:
                   caSecret:
-                    description: ApisixSecret describes the Kubernetes Secret name
-                      and namespace.
+                    description: CASecret references the secret containing the CA
+                      certificate for client certificate validation.
                     properties:
                       name:
+                        description: Name is the name of the Kubernetes Secret.
                         minLength: 1
                         type: string
                       namespace:
+                        description: Namespace is the namespace where the Kubernetes
+                          Secret is located.
                         minLength: 1
                         type: string
                     required:
@@ -1191,13 +1282,20 @@ spec:
                     - namespace
                     type: object
                   depth:
+                    description: Depth specifies the maximum verification depth for
+                      the client certificate chain.
                     type: integer
                   skip_mtls_uri_regex:
+                    description: SkipMTLSUriRegex contains RegEx patterns for URIs
+                      to skip mutual TLS verification.
                     items:
                       type: string
                     type: array
                 type: object
               hosts:
+                description: |-
+                  Hosts lists the SNI (Server Name Indication) hostnames that this TLS configuration applies to.
+                  Must contain at least one host.
                 items:
                   pattern: ^\*?[0-9a-zA-Z-.]+$
                   type: string
@@ -1205,19 +1303,21 @@ spec:
                 type: array
               ingressClassName:
                 description: |-
-                  IngressClassName is the name of an IngressClass cluster resource.
-                  controller implementations use this field to know whether they should be
-                  serving this ApisixTls resource, by a transitive connection
-                  (controller -> IngressClass -> ApisixTls resource).
+                  IngressClassName specifies which IngressClass this resource is associated with.
+                  The APISIX controller only processes this resource if the class matches its own.
                 type: string
               secret:
-                description: ApisixSecret describes the Kubernetes Secret name and
-                  namespace.
+                description: |-
+                  Secret refers to the Kubernetes TLS secret containing the certificate and private key.
+                  This secret must exist in the specified namespace and contain valid TLS data.
                 properties:
                   name:
+                    description: Name is the name of the Kubernetes Secret.
                     minLength: 1
                     type: string
                   namespace:
+                    description: Namespace is the namespace where the Kubernetes Secret
+                      is located.
                     minLength: 1
                     type: string
                 required:
@@ -1314,7 +1414,7 @@ spec:
   - name: v2
     schema:
       openAPIV3Schema:
-        description: ApisixUpstream is the Schema for the apisixupstreams API.
+        description: ApisixUpstream defines configuration for upstream services.
         properties:
           apiVersion:
             description: |-
@@ -1334,20 +1434,23 @@ spec:
           metadata:
             type: object
           spec:
-            description: ApisixUpstreamSpec describes the specification of ApisixUpstream.
+            description: ApisixUpstreamSpec defines the upstream configuration.
             properties:
               discovery:
-                description: |-
-                  Deprecated: this is no longer support on standalone mode.
-                  Discovery is used to configure service discovery for upstream.
+                description: Discovery configures service discovery for the upstream.
                 properties:
                   args:
                     additionalProperties:
                       type: string
+                    description: |-
+                      Args contains additional configuration parameters required by the discovery provider.
+                      These are passed as key-value pairs.
                     type: object
                   serviceName:
+                    description: ServiceName is the name of the service to discover.
                     type: string
                   type:
+                    description: Type is the name of the service discovery provider.
                     type: string
                 required:
                 - serviceName
@@ -1355,147 +1458,202 @@ spec:
                 type: object
               externalNodes:
                 description: |-
-                  ExternalNodes contains external nodes the Upstream should use
-                  If this field is set, the upstream will use these nodes directly without any further resolves
+                  ExternalNodes defines a static list of backend nodes. These can be external hosts
+                  outside the cluster or cluster-internal Services specified by their DNS name.
+                  When this field is set, the upstream will route traffic directly to these nodes
+                  without DNS resolution or service discovery.
                 items:
-                  description: ApisixUpstreamExternalNode is the external node conf
+                  description: |-
+                    ApisixUpstreamExternalNode defines configuration for an external upstream node.
+                    This allows referencing services outside the cluster.
                   properties:
                     name:
+                      description: Name is the hostname or IP address of the external
+                        node.
                       type: string
                     port:
-                      description: Port defines the port of the external node
+                      description: Port specifies the port number on which the external
+                        node is accepting traffic.
+                      maximum: 65535
+                      minimum: 1
                       type: integer
                     type:
-                      description: ApisixUpstreamExternalType is the external service
-                        type
+                      description: Type indicates the kind of external node. Can be
+                        `Domain`, or `Service`.
                       type: string
                     weight:
+                      description: |-
+                        Weight defines the load balancing weight of this node.
+                        Higher values increase the share of traffic sent to this node.
                       type: integer
                   type: object
                 minItems: 1
                 type: array
               healthCheck:
-                description: |-
-                  Deprecated: this is no longer support on standalone mode.
-                  The health check configurations for the upstream.
+                description: HealthCheck defines the active and passive health check
+                  configuration for the upstream.
                 properties:
                   active:
-                    description: ActiveHealthCheck defines the active kind of upstream
-                      health check.
+                    description: Active health checks proactively send requests to
+                      upstream nodes to determine their availability.
                     properties:
                       concurrency:
+                        description: Concurrency sets the number of targets to be
+                          checked at the same time.
                         minimum: 0
                         type: integer
                       healthy:
-                        description: |-
-                          ActiveHealthCheckHealthy defines the conditions to judge whether
-                          an upstream node is healthy with the active manner.
+                        description: Healthy configures the rules that define an upstream
+                          node as healthy.
                         properties:
                           httpCodes:
+                            description: HTTPCodes define a list of HTTP status codes
+                              that are considered healthy.
                             items:
                               type: integer
                             minItems: 1
                             type: array
                           interval:
+                            description: Interval defines the time interval for checking
+                              targets, in seconds.
                             type: string
                           successes:
+                            description: Successes define the number of successful
+                              probes to define a healthy target.
                             maximum: 254
                             minimum: 0
                             type: integer
                         type: object
                       host:
+                        description: Host sets the upstream host.
                         type: string
                       httpPath:
+                        description: HTTPPath sets the HTTP probe request path.
                         type: string
                       port:
+                        description: Port sets the upstream port.
                         format: int32
                         maximum: 65535
-                        minimum: 0
+                        minimum: 1
                         type: integer
                       requestHeaders:
+                        description: RequestHeaders sets the request headers.
                         items:
                           type: string
                         type: array
                       strictTLS:
+                        description: StrictTLS sets whether to enforce TLS.
                         type: boolean
                       timeout:
-                        description: |-
-                          A Duration represents the elapsed time between two instants
-                          as an int64 nanosecond count. The representation limits the
-                          largest representable duration to approximately 290 years.
+                        description: Timeout sets health check timeout in seconds.
                         format: int64
                         type: integer
                       type:
+                        default: http
+                        description: Type is the health check type. Can be `http`,
+                          `https`, or `tcp`.
                         enum:
                         - http
                         - https
                         - tcp
                         type: string
                       unhealthy:
-                        description: |-
-                          ActiveHealthCheckUnhealthy defines the conditions to judge whether
-                          an upstream node is unhealthy with the active manager.
+                        description: Unhealthy configures the rules that define an
+                          upstream node as unhealthy.
                         properties:
                           httpCodes:
+                            description: HTTPCodes define a list of HTTP status codes
+                              that are considered unhealthy.
                             items:
                               type: integer
                             minItems: 1
                             type: array
                           httpFailures:
+                            description: HTTPFailures define the number of HTTP failures
+                              to define an unhealthy target.
                             maximum: 254
                             minimum: 0
                             type: integer
                           interval:
+                            description: Interval defines the time interval for checking
+                              targets, in seconds.
                             type: string
                           tcpFailures:
+                            description: TCPFailures define the number of TCP failures
+                              to define an unhealthy target.
                             maximum: 254
                             minimum: 0
                             type: integer
                           timeout:
+                            description: |-
+                              Timeout sets health check timeout in seconds.
+                              https://github.com/apache/apisix/blob/0151d9e35bba63d7c316187272d88e19db0be634/apisix/schema_def.lua#L196
+                            maximum: 254
+                            minimum: 1
                             type: integer
                         type: object
                     type: object
                   passive:
-                    description: |-
-                      PassiveHealthCheck defines the conditions to judge whether
-                      an upstream node is healthy with the passive manager.
+                    description: Passive health checks evaluate upstream health based
+                      on observed traffic, such as timeouts or errors.
                     properties:
                       healthy:
-                        description: |-
-                          PassiveHealthCheckHealthy defines the conditions to judge whether
-                          an upstream node is healthy with the passive manner.
+                        description: Healthy defines the conditions under which an
+                          upstream node is considered healthy.
                         properties:
                           httpCodes:
+                            description: HTTPCodes define a list of HTTP status codes
+                              that are considered healthy.
                             items:
                               type: integer
                             minItems: 1
                             type: array
                           successes:
+                            description: Successes define the number of successful
+                              probes to define a healthy target.
                             maximum: 254
                             minimum: 0
                             type: integer
                         type: object
                       type:
+                        default: http
+                        description: |-
+                          Type specifies the type of passive health check.
+                          Can be `http`, `https`, or `tcp`.
+                        enum:
+                        - http
+                        - https
+                        - tcp
                         type: string
                       unhealthy:
-                        description: |-
-                          PassiveHealthCheckUnhealthy defines the conditions to judge whether
-                          an upstream node is unhealthy with the passive manager.
+                        description: Unhealthy defines the conditions under which
+                          an upstream node is considered unhealthy.
                         properties:
                           httpCodes:
+                            description: HTTPCodes define a list of HTTP status codes
+                              that are considered unhealthy.
                             items:
                               type: integer
                             minItems: 1
                             type: array
                           httpFailures:
+                            description: HTTPFailures define the number of HTTP failures
+                              to define an unhealthy target.
                             maximum: 254
                             minimum: 0
                             type: integer
                           tcpFailures:
+                            description: TCPFailures define the number of TCP failures
+                              to define an unhealthy target.
                             maximum: 254
                             minimum: 0
                             type: integer
                           timeout:
+                            description: |-
+                              Timeout sets health check timeout in seconds.
+                              https://github.com/apache/apisix/blob/0151d9e35bba63d7c316187272d88e19db0be634/apisix/schema_def.lua#L196
+                            maximum: 254
+                            minimum: 1
                             type: integer
                         type: object
                     type: object
@@ -1505,183 +1663,258 @@ spec:
               ingressClassName:
                 description: |-
                   IngressClassName is the name of an IngressClass cluster resource.
-                  controller implementations use this field to know whether they should be
-                  serving this ApisixUpstream resource, by a transitive connection
-                  (controller -> IngressClass -> ApisixUpstream resource).
+                  Controller implementations use this field to determine whether they
+                  should process this ApisixUpstream resource.
                 type: string
               loadbalancer:
-                description: |-
-                  LoadBalancer represents the load balancer configuration for Kubernetes Service.
-                  The default strategy is round robin.
+                description: LoadBalancer specifies the load balancer configuration
+                  for Kubernetes Service.
                 properties:
                   hashOn:
+                    default: vars
                     description: |-
-                      The HashOn and Key fields are required when Type is "chash".
-                      HashOn represents the key fetching scope.
+                      HashOn specified the type of field used for hashing, required when type is `chash`.
+                      Default is `vars`. Can be `vars`, `header`, `cookie`, `consumer`, or `vars_combinations`.
+                    enum:
+                    - vars
+                    - header
+                    - cookie
+                    - consumer
+                    - vars_combinations
                     type: string
                   key:
-                    description: Key represents the hash key.
+                    description: |-
+                      Key is used with HashOn, generally required when type is `chash`.
+                      When HashOn is `header` or `cookie`, specifies the name of the header or cookie.
+                      When HashOn is `consumer`, key is not required, as the consumer name is used automatically.
+                      When HashOn is `vars` or `vars_combinations`, key refers to one or a combination of
+                      [APISIX variables](https://apisix.apache.org/docs/apisix/apisix-variable).
                     type: string
                   type:
+                    default: roundrobin
+                    description: |-
+                      Type specifies the load balancing algorithms to route traffic to the backend.
+                      Default is `roundrobin`.
+                      Can be `roundrobin`, `chash`, `ewma`, or `least_conn`.
+                    enum:
+                    - roundrobin
+                    - chash
+                    - ewma
+                    - least_conn
                     type: string
                 required:
                 - type
                 type: object
               passHost:
                 description: |-
-                  Configures the host when the request is forwarded to the upstream.
-                  Can be one of pass, node or rewrite.
+                  PassHost configures how the host header should be determined when a
+                  request is forwarded to the upstream.
+                  Default is `pass`.
+                  Can be `pass`, `node` or `rewrite`:
+                  * `pass`: preserve the original Host header
+                  * `node`: use the upstream node’s host
+                  * `rewrite`: set to a custom host via upstreamHost
                 enum:
                 - pass
                 - node
                 - rewrite
                 type: string
               portLevelSettings:
+                description: |-
+                  PortLevelSettings allows fine-grained upstream configuration for specific ports,
+                  useful when a backend service exposes multiple ports with different behaviors or protocols.
                 items:
                   description: |-
                     PortLevelSettings configures the ApisixUpstreamConfig for each individual port. It inherits
-                    configurations from the outer level (the whole Kubernetes Service) and overrides some of
+                    configuration from the outer level (the whole Kubernetes Service) and overrides some of
                     them if they are set on the port level.
                   properties:
                     discovery:
-                      description: |-
-                        Deprecated: this is no longer support on standalone mode.
-                        Discovery is used to configure service discovery for upstream.
+                      description: Discovery configures service discovery for the
+                        upstream.
                       properties:
                         args:
                           additionalProperties:
                             type: string
+                          description: |-
+                            Args contains additional configuration parameters required by the discovery provider.
+                            These are passed as key-value pairs.
                           type: object
                         serviceName:
+                          description: ServiceName is the name of the service to discover.
                           type: string
                         type:
+                          description: Type is the name of the service discovery provider.
                           type: string
                       required:
                       - serviceName
                       - type
                       type: object
                     healthCheck:
-                      description: |-
-                        Deprecated: this is no longer support on standalone mode.
-                        The health check configurations for the upstream.
+                      description: HealthCheck defines the active and passive health
+                        check configuration for the upstream.
                       properties:
                         active:
-                          description: ActiveHealthCheck defines the active kind of
-                            upstream health check.
+                          description: Active health checks proactively send requests
+                            to upstream nodes to determine their availability.
                           properties:
                             concurrency:
+                              description: Concurrency sets the number of targets
+                                to be checked at the same time.
                               minimum: 0
                               type: integer
                             healthy:
-                              description: |-
-                                ActiveHealthCheckHealthy defines the conditions to judge whether
-                                an upstream node is healthy with the active manner.
+                              description: Healthy configures the rules that define
+                                an upstream node as healthy.
                               properties:
                                 httpCodes:
+                                  description: HTTPCodes define a list of HTTP status
+                                    codes that are considered healthy.
                                   items:
                                     type: integer
                                   minItems: 1
                                   type: array
                                 interval:
+                                  description: Interval defines the time interval
+                                    for checking targets, in seconds.
                                   type: string
                                 successes:
+                                  description: Successes define the number of successful
+                                    probes to define a healthy target.
                                   maximum: 254
                                   minimum: 0
                                   type: integer
                               type: object
                             host:
+                              description: Host sets the upstream host.
                               type: string
                             httpPath:
+                              description: HTTPPath sets the HTTP probe request path.
                               type: string
                             port:
+                              description: Port sets the upstream port.
                               format: int32
                               maximum: 65535
-                              minimum: 0
+                              minimum: 1
                               type: integer
                             requestHeaders:
+                              description: RequestHeaders sets the request headers.
                               items:
                                 type: string
                               type: array
                             strictTLS:
+                              description: StrictTLS sets whether to enforce TLS.
                               type: boolean
                             timeout:
-                              description: |-
-                                A Duration represents the elapsed time between two instants
-                                as an int64 nanosecond count. The representation limits the
-                                largest representable duration to approximately 290 years.
+                              description: Timeout sets health check timeout in seconds.
                               format: int64
                               type: integer
                             type:
+                              default: http
+                              description: Type is the health check type. Can be `http`,
+                                `https`, or `tcp`.
                               enum:
                               - http
                               - https
                               - tcp
                               type: string
                             unhealthy:
-                              description: |-
-                                ActiveHealthCheckUnhealthy defines the conditions to judge whether
-                                an upstream node is unhealthy with the active manager.
+                              description: Unhealthy configures the rules that define
+                                an upstream node as unhealthy.
                               properties:
                                 httpCodes:
+                                  description: HTTPCodes define a list of HTTP status
+                                    codes that are considered unhealthy.
                                   items:
                                     type: integer
                                   minItems: 1
                                   type: array
                                 httpFailures:
+                                  description: HTTPFailures define the number of HTTP
+                                    failures to define an unhealthy target.
                                   maximum: 254
                                   minimum: 0
                                   type: integer
                                 interval:
+                                  description: Interval defines the time interval
+                                    for checking targets, in seconds.
                                   type: string
                                 tcpFailures:
+                                  description: TCPFailures define the number of TCP
+                                    failures to define an unhealthy target.
                                   maximum: 254
                                   minimum: 0
                                   type: integer
                                 timeout:
+                                  description: |-
+                                    Timeout sets health check timeout in seconds.
+                                    https://github.com/apache/apisix/blob/0151d9e35bba63d7c316187272d88e19db0be634/apisix/schema_def.lua#L196
+                                  maximum: 254
+                                  minimum: 1
                                   type: integer
                               type: object
                           type: object
                         passive:
-                          description: |-
-                            PassiveHealthCheck defines the conditions to judge whether
-                            an upstream node is healthy with the passive manager.
+                          description: Passive health checks evaluate upstream health
+                            based on observed traffic, such as timeouts or errors.
                           properties:
                             healthy:
-                              description: |-
-                                PassiveHealthCheckHealthy defines the conditions to judge whether
-                                an upstream node is healthy with the passive manner.
+                              description: Healthy defines the conditions under which
+                                an upstream node is considered healthy.
                               properties:
                                 httpCodes:
+                                  description: HTTPCodes define a list of HTTP status
+                                    codes that are considered healthy.
                                   items:
                                     type: integer
                                   minItems: 1
                                   type: array
                                 successes:
+                                  description: Successes define the number of successful
+                                    probes to define a healthy target.
                                   maximum: 254
                                   minimum: 0
                                   type: integer
                               type: object
                             type:
+                              default: http
+                              description: |-
+                                Type specifies the type of passive health check.
+                                Can be `http`, `https`, or `tcp`.
+                              enum:
+                              - http
+                              - https
+                              - tcp
                               type: string
                             unhealthy:
-                              description: |-
-                                PassiveHealthCheckUnhealthy defines the conditions to judge whether
-                                an upstream node is unhealthy with the passive manager.
+                              description: Unhealthy defines the conditions under
+                                which an upstream node is considered unhealthy.
                               properties:
                                 httpCodes:
+                                  description: HTTPCodes define a list of HTTP status
+                                    codes that are considered unhealthy.
                                   items:
                                     type: integer
                                   minItems: 1
                                   type: array
                                 httpFailures:
+                                  description: HTTPFailures define the number of HTTP
+                                    failures to define an unhealthy target.
                                   maximum: 254
                                   minimum: 0
                                   type: integer
                                 tcpFailures:
+                                  description: TCPFailures define the number of TCP
+                                    failures to define an unhealthy target.
                                   maximum: 254
                                   minimum: 0
                                   type: integer
                                 timeout:
+                                  description: |-
+                                    Timeout sets health check timeout in seconds.
+                                    https://github.com/apache/apisix/blob/0151d9e35bba63d7c316187272d88e19db0be634/apisix/schema_def.lua#L196
+                                  maximum: 254
+                                  minimum: 1
                                   type: integer
                               type: object
                           type: object
@@ -1689,47 +1922,75 @@ spec:
                       - active
                       type: object
                     loadbalancer:
-                      description: |-
-                        LoadBalancer represents the load balancer configuration for Kubernetes Service.
-                        The default strategy is round robin.
+                      description: LoadBalancer specifies the load balancer configuration
+                        for Kubernetes Service.
                       properties:
                         hashOn:
+                          default: vars
                           description: |-
-                            The HashOn and Key fields are required when Type is "chash".
-                            HashOn represents the key fetching scope.
+                            HashOn specified the type of field used for hashing, required when type is `chash`.
+                            Default is `vars`. Can be `vars`, `header`, `cookie`, `consumer`, or `vars_combinations`.
+                          enum:
+                          - vars
+                          - header
+                          - cookie
+                          - consumer
+                          - vars_combinations
                           type: string
                         key:
-                          description: Key represents the hash key.
+                          description: |-
+                            Key is used with HashOn, generally required when type is `chash`.
+                            When HashOn is `header` or `cookie`, specifies the name of the header or cookie.
+                            When HashOn is `consumer`, key is not required, as the consumer name is used automatically.
+                            When HashOn is `vars` or `vars_combinations`, key refers to one or a combination of
+                            [APISIX variables](https://apisix.apache.org/docs/apisix/apisix-variable).
                           type: string
                         type:
+                          default: roundrobin
+                          description: |-
+                            Type specifies the load balancing algorithms to route traffic to the backend.
+                            Default is `roundrobin`.
+                            Can be `roundrobin`, `chash`, `ewma`, or `least_conn`.
+                          enum:
+                          - roundrobin
+                          - chash
+                          - ewma
+                          - least_conn
                           type: string
                       required:
                       - type
                       type: object
                     passHost:
                       description: |-
-                        Configures the host when the request is forwarded to the upstream.
-                        Can be one of pass, node or rewrite.
+                        PassHost configures how the host header should be determined when a
+                        request is forwarded to the upstream.
+                        Default is `pass`.
+                        Can be `pass`, `node` or `rewrite`:
+                        * `pass`: preserve the original Host header
+                        * `node`: use the upstream node’s host
+                        * `rewrite`: set to a custom host via upstreamHost
                       enum:
                       - pass
                       - node
                       - rewrite
                       type: string
                     port:
-                      description: Port is a Kubernetes Service port, it should be
-                        already defined.
+                      description: Port is a Kubernetes Service port.
                       format: int32
+                      maximum: 65535
+                      minimum: 1
                       type: integer
                     retries:
                       description: |-
-                        How many times that the proxy (Apache APISIX) should do when
-                        errors occur (error, timeout or bad http status codes like 500, 502).
+                        Retries defines the number of retry attempts APISIX should make when a failure occurs.
+                        Failures include timeouts, network errors, or 5xx status codes.
                       format: int64
                       type: integer
                     scheme:
                       description: |-
-                        The scheme used to talk with the upstream.
-                        Now value can be http, grpc.
+                        Scheme is the protocol used to communicate with the upstream.
+                        Default is `http`.
+                        Can be `http`, `https`, `grpc`, or `grpcs`.
                       enum:
                       - http
                       - https
@@ -1738,8 +1999,8 @@ spec:
                       type: string
                     subsets:
                       description: |-
-                        Subsets groups the service endpoints by their labels. Usually used to differentiate
-                        service versions.
+                        Subsets defines labeled subsets of service endpoints, typically used for
+                        service versioning or canary deployments.
                       items:
                         description: ApisixUpstreamSubset defines a single endpoints
                           group of one Service.
@@ -1758,24 +2019,32 @@ spec:
                         type: object
                       type: array
                     timeout:
-                      description: Timeout settings for the read, send and connect
-                        to the upstream.
+                      description: Timeout specifies the connection, send, and read
+                        timeouts for upstream requests.
                       properties:
                         connect:
+                          description: Connect timeout for establishing a connection
+                            to the upstream.
                           type: string
                         read:
+                          description: Read timeout for reading data from the upstream.
                           type: string
                         send:
+                          description: Send timeout for sending data to the upstream.
                           type: string
                       type: object
                     tlsSecret:
-                      description: Set the client certificate when connecting to TLS
-                        upstream.
+                      description: |-
+                        TLSSecret references a Kubernetes Secret that contains the client certificate and key
+                        for mutual TLS when connecting to the upstream.
                       properties:
                         name:
+                          description: Name is the name of the Kubernetes Secret.
                           minLength: 1
                           type: string
                         namespace:
+                          description: Namespace is the namespace where the Kubernetes
+                            Secret is located.
                           minLength: 1
                           type: string
                       required:
@@ -1783,9 +2052,8 @@ spec:
                       - namespace
                       type: object
                     upstreamHost:
-                      description: |-
-                        Specifies the host of the Upstream request. This is only valid if
-                        the pass_host is set to rewrite
+                      description: UpstreamHost sets a custom Host header when passHost
+                        is set to `rewrite`.
                       type: string
                   required:
                   - port
@@ -1793,14 +2061,15 @@ spec:
                 type: array
               retries:
                 description: |-
-                  How many times that the proxy (Apache APISIX) should do when
-                  errors occur (error, timeout or bad http status codes like 500, 502).
+                  Retries defines the number of retry attempts APISIX should make when a failure occurs.
+                  Failures include timeouts, network errors, or 5xx status codes.
                 format: int64
                 type: integer
               scheme:
                 description: |-
-                  The scheme used to talk with the upstream.
-                  Now value can be http, grpc.
+                  Scheme is the protocol used to communicate with the upstream.
+                  Default is `http`.
+                  Can be `http`, `https`, `grpc`, or `grpcs`.
                 enum:
                 - http
                 - https
@@ -1809,8 +2078,8 @@ spec:
                 type: string
               subsets:
                 description: |-
-                  Subsets groups the service endpoints by their labels. Usually used to differentiate
-                  service versions.
+                  Subsets defines labeled subsets of service endpoints, typically used for
+                  service versioning or canary deployments.
                 items:
                   description: ApisixUpstreamSubset defines a single endpoints group
                     of one Service.
@@ -1829,23 +2098,32 @@ spec:
                   type: object
                 type: array
               timeout:
-                description: Timeout settings for the read, send and connect to the
-                  upstream.
+                description: Timeout specifies the connection, send, and read timeouts
+                  for upstream requests.
                 properties:
                   connect:
+                    description: Connect timeout for establishing a connection to
+                      the upstream.
                     type: string
                   read:
+                    description: Read timeout for reading data from the upstream.
                     type: string
                   send:
+                    description: Send timeout for sending data to the upstream.
                     type: string
                 type: object
               tlsSecret:
-                description: Set the client certificate when connecting to TLS upstream.
+                description: |-
+                  TLSSecret references a Kubernetes Secret that contains the client certificate and key
+                  for mutual TLS when connecting to the upstream.
                 properties:
                   name:
+                    description: Name is the name of the Kubernetes Secret.
                     minLength: 1
                     type: string
                   namespace:
+                    description: Namespace is the namespace where the Kubernetes Secret
+                      is located.
                     minLength: 1
                     type: string
                 required:
@@ -1853,9 +2131,8 @@ spec:
                 - namespace
                 type: object
               upstreamHost:
-                description: |-
-                  Specifies the host of the Upstream request. This is only valid if
-                  the pass_host is set to rewrite
+                description: UpstreamHost sets a custom Host header when passHost
+                  is set to `rewrite`.
                 type: string
             type: object
           status:
@@ -1942,6 +2219,8 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: BackendTrafficPolicy defines configuration for traffic handling
+          policies applied to backend services.
         properties:
           apiVersion:
             description: |-
@@ -1973,9 +2252,9 @@ spec:
                   hashOn:
                     default: vars
                     description: |-
-                      HashOn specified the type of field used for hashing, required when Type is `chash`.
+                      HashOn specified the type of field used for hashing, required when type is `chash`.
                       Default is `vars`.
-                      Can be one of `vars`, `header`, `cookie`, `consumer`, or `vars_combinations`.
+                      Can be `vars`, `header`, `cookie`, `consumer`, or `vars_combinations`.
                     enum:
                     - vars
                     - header
@@ -1985,7 +2264,7 @@ spec:
                     type: string
                   key:
                     description: |-
-                      Key is used with HashOn, generally required when Type is `chash`.
+                      Key is used with HashOn, generally required when type is `chash`.
                       When HashOn is `header` or `cookie`, specifies the name of the header or cookie.
                       When HashOn is `consumer`, key is not required, as the consumer name is used automatically.
                       When HashOn is `vars` or `vars_combinations`, key refers to one or a combination of
@@ -1994,9 +2273,9 @@ spec:
                   type:
                     default: roundrobin
                     description: |-
-                      Type specifies the load balancing algorithms.
+                      Type specifies the load balancing algorithms to route traffic to the backend.
                       Default is `roundrobin`.
-                      Can be one of `roundrobin`, `chash`, `ewma`, or `least_conn`.
+                      Can be `roundrobin`, `chash`, `ewma`, or `least_conn`.
                     enum:
                     - roundrobin
                     - chash
@@ -2013,8 +2292,10 @@ spec:
                 description: |-
                   PassHost configures how the host header should be determined when a
                   request is forwarded to the upstream.
-                  Default is `pass`.
-                  Can be one of `pass`, `node` or `rewrite`.
+                  Default is `pass`. Can be `pass`, `node` or `rewrite`:
+                  * `pass`: preserve the original Host header
+                  * `node`: use the upstream node’s host
+                  * `rewrite`: set to a custom host via `upstreamHost`
                 enum:
                 - pass
                 - node
@@ -2030,7 +2311,7 @@ spec:
                 description: |-
                   Scheme is the protocol used to communicate with the upstream.
                   Default is `http`.
-                  Can be one of `http`, `https`, `grpc`, or `grpcs`.
+                  Can be `http`, `https`, `grpc`, or `grpcs`.
                 enum:
                 - http
                 - https
@@ -2451,6 +2732,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: Consumer defines configuration for a consumer.
         properties:
           apiVersion:
             description: |-
@@ -2471,7 +2753,7 @@ spec:
             type: object
           spec:
             description: |-
-              ConsumerSpec defines the configuration for a consumer, including consumer name,
+              ConsumerSpec defines configuration for a consumer, including consumer name,
               authentication credentials, and plugin settings.
             properties:
               credentials:
@@ -2505,7 +2787,7 @@ spec:
                     type:
                       description: |-
                         Type specifies the type of authentication to configure credentials for.
-                        Can be one of `jwt-auth`, `basic-auth`, `key-auth`, or `hmac-auth`.
+                        Can be `jwt-auth`, `basic-auth`, `key-auth`, or `hmac-auth`.
                       enum:
                       - jwt-auth
                       - basic-auth
@@ -2637,7 +2919,8 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: GatewayProxy is the Schema for the gatewayproxies API.
+        description: GatewayProxy defines configuration for the gateway proxy instances
+          used to route traffic to services.
         properties:
           apiVersion:
             description: |-
@@ -2658,19 +2941,19 @@ spec:
             type: object
           spec:
             description: |-
-              GatewayProxySpec defines the desired state and configuration of a GatewayProxy,
+              GatewayProxySpec defines configuration of gateway proxy instances,
               including networking settings, global plugins, and plugin metadata.
             properties:
               pluginMetadata:
                 additionalProperties:
                   x-kubernetes-preserve-unknown-fields: true
-                description: PluginMetadata configures common configurations shared
+                description: PluginMetadata configures common configuration shared
                   by all plugin instances of the same name.
                 type: object
               plugins:
                 description: Plugins configure global plugins.
                 items:
-                  description: GatewayProxyPlugin contains plugin configurations.
+                  description: GatewayProxyPlugin contains plugin configuration.
                   properties:
                     config:
                       description: Config defines the plugin's configuration details.
@@ -2691,7 +2974,7 @@ spec:
                       plane provider.
                     properties:
                       auth:
-                        description: Auth specifies the authentication configurations.
+                        description: Auth specifies the authentication configuration.
                         properties:
                           adminKey:
                             description: AdminKey specifies the admin key authentication
@@ -2722,6 +3005,9 @@ spec:
                                     type: object
                                 type: object
                             type: object
+                            x-kubernetes-validations:
+                            - message: exactly one of value or valueFrom must be specified
+                              rule: has(self.value) != has(self.valueFrom)
                           type:
                             description: |-
                               Type specifies the type of authentication.
@@ -2732,6 +3018,10 @@ spec:
                         required:
                         - type
                         type: object
+                        x-kubernetes-validations:
+                        - message: adminKey must be specified when type is AdminKey
+                          rule: 'self.type == ''AdminKey'' ? has(self.adminKey) :
+                            true'
                       endpoints:
                         description: Endpoints specifies the list of control plane
                           endpoints.
@@ -2742,8 +3032,10 @@ spec:
                       service:
                         properties:
                           name:
+                            description: Name is the name of the provider.
                             type: string
                           port:
+                            description: Port is the port of the provider.
                             format: int32
                             maximum: 65535
                             minimum: 1
@@ -2785,6 +3077,8 @@ spec:
                 items:
                   type: string
                 type: array
+            required:
+            - provider
             type: object
         type: object
     served: true
@@ -2808,7 +3102,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: HTTPRoutePolicy is the Schema for the httproutepolicies API.
+        description: HTTPRoutePolicy defines configuration of traffic policies.
         properties:
           apiVersion:
             description: |-
@@ -2829,12 +3123,13 @@ spec:
             type: object
           spec:
             description: |-
-              HTTPRoutePolicySpec defines the desired state and configuration of a HTTPRoutePolicy,
+              HTTPRoutePolicySpec defines configuration of a HTTPRoutePolicy,
               including route priority and request matching conditions.
             properties:
               priority:
-                description: Priority sets the priority for route. A higher value
-                  sets a higher priority in route matching.
+                description: |-
+                  Priority sets the priority for route. when multiple routes have the same URI path,
+                  a higher value sets a higher priority in route matching.
                 format: int64
                 type: integer
               targetRefs:
@@ -3223,7 +3518,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: PluginConfig is the Schema for the PluginConfigs API.
+        description: PluginConfig defines plugin configuration.
         properties:
           apiVersion:
             description: |-
@@ -3245,10 +3540,10 @@ spec:
           spec:
             description: |-
               PluginConfigSpec defines the desired state of a PluginConfig,
-              in which plugins and their configurations are specified.
+              in which plugins and their configuration are specified.
             properties:
               plugins:
-                description: Plugins are an array of plugins and their configurations
+                description: Plugins are an array of plugins and their configuration
                   to be applied.
                 items:
                   properties:
