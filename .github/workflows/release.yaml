@@ -36,6 +36,7 @@ jobs:
         uses: ./.github/actions/chart-releaser-action
         with:
           charts_dir: .
+          version: v1.8.1
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           CR_SKIP_EXISTING: true
