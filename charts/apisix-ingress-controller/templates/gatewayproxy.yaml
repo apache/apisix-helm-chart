@@ -24,11 +24,51 @@ spec:
   provider:
     type: {{ .Values.gatewayProxy.provider.type }}
     controlPlane:
+      {{- with .Values.gatewayProxy.provider.controlPlane.endpoints }}
+      {{- if (gt (len .) 0) }}
+      endpoints:
+      {{- toYaml . | nindent 8 }}
+      {{- else }}
       service:
         name: {{ .Values.apisix.adminService.name }}
         port: {{ .Values.apisix.adminService.port }}
+      {{- end }}
+      {{- end }}
+
+      {{- with .Values.gatewayProxy.provider.controlPlane.tlsVerify }}
+      tlsVerify: {{ . }}
+      {{- end }}
+
       {{- with .Values.gatewayProxy.provider.controlPlane.auth }}
       auth:
-        {{- toYaml . | nindent 8 }}
+        type: {{ .type }}
+        {{- with .adminKey }}
+        adminKey:
+          {{- if .value }}
+          value: {{ .value | quote }}
+          {{- else if .valueFrom }}
+          valueFrom:
+            {{- toYaml .valueFrom | nindent 12 }}
+          {{- end }}
+        {{- end }}
       {{- end }}
+
+  {{- with .Values.gatewayProxy.publishService }}
+  publishService: {{ . | quote }}
+  {{- end }}
+
+  {{- with .Values.gatewayProxy.statusAddress }}
+  statusAddress:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.gatewayProxy.plugins }}
+  plugins:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.gatewayProxy.pluginMetadata }}
+  pluginMetadata:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{- end }}
