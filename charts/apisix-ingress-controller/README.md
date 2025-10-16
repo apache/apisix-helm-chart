@@ -141,11 +141,18 @@ The same for container level, you need to set:
 | deployment.tolerations | list | `[]` |  |
 | deployment.topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
 | fullnameOverride | string | `""` |  |
-| gatewayProxy.createDefault | bool | `false` |  |
-| gatewayProxy.provider.controlPlane.auth.adminKey.value | string | `"edd1c9f034335f136f87ad84b625c8f1"` |  |
-| gatewayProxy.provider.controlPlane.auth.type | string | `"AdminKey"` |  |
-| gatewayProxy.provider.controlPlane.endpoints | list | `[]` |  |
-| gatewayProxy.provider.type | string | `"ControlPlane"` |  |
+| gatewayProxy.createDefault | bool | `false` | Controls whether to create a default GatewayProxy custom resource. |
+| gatewayProxy.provider | object | `{"controlPlane":{"auth":{"adminKey":{"value":"edd1c9f034335f136f87ad84b625c8f1","valueFrom":{}},"type":"AdminKey"},"endpoints":[]},"pluginMetadata":{},"plugins":[],"type":"ControlPlane"}` | Configuration for the GatewayProxy provider connection |
+| gatewayProxy.provider.controlPlane | object | `{"auth":{"adminKey":{"value":"edd1c9f034335f136f87ad84b625c8f1","valueFrom":{}},"type":"AdminKey"},"endpoints":[]}` | ControlPlane provider specific configuration |
+| gatewayProxy.provider.controlPlane.auth | object | `{"adminKey":{"value":"edd1c9f034335f136f87ad84b625c8f1","valueFrom":{}},"type":"AdminKey"}` | Authentication configuration for control plane connection |
+| gatewayProxy.provider.controlPlane.auth.adminKey | object | `{"value":"edd1c9f034335f136f87ad84b625c8f1","valueFrom":{}}` | AdminKey authentication configuration. Either `value` or `valueFrom` must be specified, but not both. |
+| gatewayProxy.provider.controlPlane.auth.adminKey.value | string | `"edd1c9f034335f136f87ad84b625c8f1"` | The admin key value for authentication. |
+| gatewayProxy.provider.controlPlane.auth.adminKey.valueFrom | object | `{}` | Reference to admin key stored in a Kubernetes Secret |
+| gatewayProxy.provider.controlPlane.auth.type | string | `AdminKey` | Authentication type. Only `AdminKey` is currently supported. |
+| gatewayProxy.provider.controlPlane.endpoints | list | `[]` | List of APISIX control plane Admin API endpoints. example: ["http://apisix-admin.default.svc.cluster.local:9180"] |
+| gatewayProxy.provider.pluginMetadata | object | `{}` | Global plugin metadata shared by all instances of the same plugin. |
+| gatewayProxy.provider.plugins | list | `[]` | List of global plugins to be enabled on the GatewayProxy. |
+| gatewayProxy.provider.type | string | `"ControlPlane"` | Specifies the provider type for the GatewayProxy. |
 | labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX ingress controller resource |
 | nameOverride | string | `""` | Default values for apisix-ingress-controller. This is a YAML-formatted file. Declare variables to be passed into your templates.  |
 | podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |

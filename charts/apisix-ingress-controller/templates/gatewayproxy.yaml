@@ -44,11 +44,11 @@ spec:
         type: {{ .type }}
         {{- with .adminKey }}
         adminKey:
-          {{- if .value }}
-          value: {{ .value | quote }}
-          {{- else if .valueFrom }}
+          {{- if .valueFrom }}
           valueFrom:
             {{- toYaml .valueFrom | nindent 12 }}
+          {{- else if .value }}
+          value: {{ .value | quote }}
           {{- end }}
         {{- end }}
       {{- end }}
