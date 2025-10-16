@@ -24,15 +24,17 @@ spec:
   provider:
     type: {{ .Values.gatewayProxy.provider.type }}
     controlPlane:
-      {{- with .Values.gatewayProxy.provider.controlPlane.endpoints }}
-      {{- if (gt (len .) 0) }}
+      {{- if .Values.gatewayProxy.provider.controlPlane.endpoints }}
       endpoints:
-      {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.gatewayProxy.provider.controlPlane.endpoints | nindent 8 }}
+      {{- else if .Values.gatewayProxy.provider.controlPlane.service.name }}
+      service:
+        name: {{ .Values.gatewayProxy.provider.controlPlane.service.name }}
+        port: {{ .Values.gatewayProxy.provider.controlPlane.service.port }}
       {{- else }}
       service:
         name: {{ .Values.apisix.adminService.name }}
         port: {{ .Values.apisix.adminService.port }}
-      {{- end }}
       {{- end }}
 
       {{- with .Values.gatewayProxy.provider.controlPlane.tlsVerify }}

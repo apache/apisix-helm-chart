@@ -104,12 +104,18 @@ gatewayProxy:
   provider:
     # -- Specifies the provider type for the GatewayProxy.
     type: ControlPlane
-    
+
     # -- ControlPlane provider specific configuration
+    # Either `endpoints` or `service` must be specified, but not both.
     controlPlane:
       # -- List of APISIX control plane Admin API endpoints.
       # example: ["http://apisix-admin.default.svc.cluster.local:9180"]
       endpoints: []
+
+      # -- Alternatively, reference a Kubernetes Service for the APISIX Admin API.
+      service:
+        name: ""
+        port: 9180
 
       # -- Authentication configuration for control plane connection
       auth:
@@ -126,9 +132,7 @@ gatewayProxy:
           # -- Reference to admin key stored in a Kubernetes Secret
           valueFrom: {}
             # secretKeyRef:
-            #   # -- Name of the Secret containing the admin key
             #   name: apisix-admin-secret
-            #   # -- Key within the Secret containing the admin key value
             #   key: admin-key
 
     # -- List of global plugins to be enabled on the GatewayProxy.
