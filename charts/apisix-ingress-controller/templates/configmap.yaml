@@ -38,3 +38,11 @@ data:
       type: {{ .Values.config.provider.type | default "apisix" }}
       sync_period: {{ .Values.config.provider.syncPeriod | default "1s" }}
       init_sync_delay: {{ .Values.config.provider.initSyncDelay | default "20m" }}
+    {{- if .Values.webhook.enabled }}
+    webhook:
+      enable: true
+      port: {{ .Values.webhook.port }}
+      tls_cert_file: "tls.crt"
+      tls_key_file: "tls.key"
+      tls_cert_dir: "/certs"
+    {{- end }}

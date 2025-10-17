@@ -58,10 +58,20 @@ spec:
         - containerPort: {{ splitList ":" .Values.config.metricsAddr | last | int }}
           name: metrics
           protocol: TCP
+        {{- if .Values.webhook.enabled }}
+        - containerPort: {{ .Values.webhook.port }}
+          name: webhook
+          protocol: TCP
+        {{- end }}
         volumeMounts:
         - name: {{ .Release.Name }}-ingress-config
           mountPath: /app/conf/config.yaml
           subPath: config.yaml
+        {{- if .Values.webhook.enabled }}
+        - name: webhook-certs
+          mountPath: /certs
+          readOnly: true
+        {{- end }}
         livenessProbe:
           httpGet:
             path: /healthz
@@ -136,6 +146,11 @@ spec:
       - name: {{ .Release.Name }}-ingress-config
         configMap:
           name: {{ .Release.Name }}-ingress-config
+      {{- if .Values.webhook.enabled }}
+      - name: webhook-certs
+        secret:
+          secretName: {{ include "apisix-ingress-controller-manager.webhook.secretName" . }}
+      {{- end }}
       securityContext:
         runAsNonRoot: false
       serviceAccountName: {{ .Release.Name }}

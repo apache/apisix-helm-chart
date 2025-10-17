@@ -94,6 +94,24 @@ config:
     ingressClass: apisix
     defaultIngressClass: false
 
+# Admission webhook configuration
+webhook:
+  # -- Enable or disable admission webhook
+  enabled: true
+  # -- The port for the webhook server to listen on
+  port: 9443
+  # -- Failure policy for the webhook (Fail or Ignore)
+  failurePolicy: Fail
+  # -- Timeout in seconds for the webhook
+  timeoutSeconds: 10
+  certificate:
+    # -- Set to true if you want to provide your own certificate
+    provided: false
+    # -- Secret name containing the certificate (required if provided is true)
+    # secretName: "my-webhook-cert"
+    # -- CA bundle in base64 format (required if provided is true)
+    # caBundle: ""
+
 # The GatewayProxy resource configures gateway proxy instances including networking,
 # provider connection, global plugins, and plugin metadata.
 gatewayProxy:
