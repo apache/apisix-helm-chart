@@ -279,11 +279,14 @@ spec:
           name: id
         {{- end }}
         {{- if .Values.apisix.customPlugins.enabled }}
-        {{- range $plugin := .Values.apisix.customPlugins.plugins }}
-        {{- if ne $plugin.configMap.name "" }}
-        - name: plugin-{{ $plugin.configMap.name }}
+        {{- $uniqueConfigMaps := include "apisix.uniqueConfigMaps" . }}
+        {{- if ne $uniqueConfigMaps "" }}
+        {{- range $configMapName := splitList "," $uniqueConfigMaps }}
+        {{- if ne $configMapName "" }}
+        - name: plugin-{{ $configMapName }}
           configMap:
-            name: {{ $plugin.configMap.name }}
+            name: {{ $configMapName }}
+        {{- end }}
         {{- end }}
         {{- end }}
         {{- end }}

@@ -157,3 +157,18 @@ Key to use to fetch viewer token from secret
 {{- "viewer" }}
 {{- end }}
 {{- end }}
+
+{{/*
+Get unique ConfigMap names from custom plugins
+*/}}
+{{- define "apisix.uniqueConfigMaps" -}}
+{{- $configMaps := dict }}
+{{- if .Values.apisix.customPlugins.enabled }}
+{{- range $plugin := .Values.apisix.customPlugins.plugins }}
+{{- if ne $plugin.configMap.name "" }}
+{{- $_ := set $configMaps $plugin.configMap.name true }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- keys $configMaps | join "," }}
+{{- end }}
