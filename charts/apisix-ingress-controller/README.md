@@ -158,3 +158,8 @@ The same for container level, you need to set:
 | serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
 | serviceMonitor.metricRelabelings | object | `{}` | @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion. ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs |
 | serviceMonitor.namespace | string | `"monitoring"` | @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor |
+| webhook.certificate.provided | bool | `false` | Set to true if you want to provide your own certificate |
+| webhook.enabled | bool | `true` | Enable or disable admission webhook |
+| webhook.failurePolicy | string | `"Fail"` | Failure policy for the webhook (Fail or Ignore) |
+| webhook.port | int | `9443` | The port for the webhook server to listen on |
+| webhook.timeoutSeconds | int | `10` | Timeout in seconds for the webhook |

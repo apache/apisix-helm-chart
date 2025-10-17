@@ -1,0 +1,254 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- if .Values.webhook.enabled }}
+{{- $certCert := "" -}}
+{{- $certKey := "" -}}
+{{- $caCert := "" -}}
+{{- if not .Values.webhook.certificate.provided }}
+{{- $cn := printf "%s.%s.svc" (include "apisix-ingress-controller-manager.webhook.serviceName" .) .Release.Namespace -}}
+{{- $ca := genCA "apisix-ingress-webhook-ca" 3650 -}}
+{{- $cert := genSignedCert $cn nil (list $cn) 3650 $ca -}}
+{{- $certCert = $cert.Cert -}}
+{{- $certKey = $cert.Key -}}
+{{- $caCert = $ca.Cert -}}
+
+{{- $certSecret := (lookup "v1" "Secret" .Release.Namespace (include "apisix-ingress-controller-manager.webhook.secretName" .)) -}}
+{{- if $certSecret }}
+{{- $certCert = (b64dec (get $certSecret.data "tls.crt")) -}}
+{{- $certKey = (b64dec (get $certSecret.data "tls.key")) -}}
+{{- $caCert = (b64dec (get $certSecret.data "ca.crt")) -}}
+{{- end }}
+{{- end }}
+
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}-webhook
+  labels:
+    {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
+webhooks:
+- name: vapisixroute-v2.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-apisix-apache-org-v2-apisixroute
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["apisix.apache.org"]
+    apiVersions: ["v2"]
+    resources: ["apisixroutes"]
+- name: vapisixconsumer-v2.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-apisix-apache-org-v2-apisixconsumer
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["apisix.apache.org"]
+    apiVersions: ["v2"]
+    resources: ["apisixconsumers"]
+- name: vapisixtls-v2.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-apisix-apache-org-v2-apisixtls
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["apisix.apache.org"]
+    apiVersions: ["v2"]
+    resources: ["apisixtlses"]
+- name: vconsumer-v1alpha1.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-apisix-apache-org-v1alpha1-consumer
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["apisix.apache.org"]
+    apiVersions: ["v1alpha1"]
+    resources: ["consumers"]
+- name: vgatewayproxy-v1alpha1.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-apisix-apache-org-v1alpha1-gatewayproxy
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["apisix.apache.org"]
+    apiVersions: ["v1alpha1"]
+    resources: ["gatewayproxies"]
+- name: vingress-v1.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-networking-k8s-io-v1-ingress
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["networking.k8s.io"]
+    apiVersions: ["v1"]
+    resources: ["ingresses"]
+- name: vingressclass-v1.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-networking-k8s-io-v1-ingressclass
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["networking.k8s.io"]
+    apiVersions: ["v1"]
+    resources: ["ingressclasses"]
+- name: vgateway-v1.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-gateway-networking-k8s-io-v1-gateway
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["gateway.networking.k8s.io"]
+    apiVersions: ["v1"]
+    resources: ["gateways"]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
+spec:
+  ports:
+  - name: webhook
+    port: 443
+    protocol: TCP
+    targetPort: webhook
+  selector:
+    {{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 4 }}
+
+{{- if not .Values.webhook.certificate.provided }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "apisix-ingress-controller-manager.webhook.secretName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ b64enc $certCert }}
+  tls.key: {{ b64enc $certKey }}
+  ca.crt: {{ b64enc $caCert }}
+{{- end }}
+{{- end }}

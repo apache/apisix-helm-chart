@@ -94,7 +94,6 @@ rules:
   - gateway.networking.k8s.io
   resources:
   - gatewayclasses
-  - gateways
   verbs:
   - get
   - list
@@ -105,6 +104,7 @@ rules:
   resources:
   - gatewayclasses/status
   - gateways/status
+  - grpcroutes/status
   - httproutes/status
   - referencegrants/status
   verbs:
@@ -113,35 +113,22 @@ rules:
 - apiGroups:
   - gateway.networking.k8s.io
   resources:
+  - gateways
+  - grpcroutes
   - httproutes
+  - referencegrants
   verbs:
   - get
   - list
-  - watch
-- apiGroups:
-  - gateway.networking.k8s.io
-  resources:
-  - referencegrants
-  verbs:
-  - list
-  - update
   - watch
 - apiGroups:
   - networking.k8s.io
   resources:
   - ingressclasses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - networking.k8s.io
-  resources:
   - ingresses
   verbs:
   - get
   - list
-  - update
   - watch
 - apiGroups:
   - networking.k8s.io
@@ -150,6 +137,14 @@ rules:
   verbs:
   - get
   - update
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - get
+  - list
+  - watch
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
