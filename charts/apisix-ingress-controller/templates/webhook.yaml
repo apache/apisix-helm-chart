@@ -218,6 +218,94 @@ webhooks:
     apiGroups: ["gateway.networking.k8s.io"]
     apiVersions: ["v1"]
     resources: ["gateways"]
+- name: vgrpcroute-v1.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-gateway-networking-k8s-io-v1-grpcroute
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["gateway.networking.k8s.io"]
+    apiVersions: ["v1"]
+    resources: ["grpcroutes"]
+- name: vhttproute-v1.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-gateway-networking-k8s-io-v1-httproute
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["gateway.networking.k8s.io"]
+    apiVersions: ["v1"]
+    resources: ["httproutes"]
+- name: vtcproute-v1alpha2.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-gateway-networking-k8s-io-v1alpha2-tcproute
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["gateway.networking.k8s.io"]
+    apiVersions: ["v1alpha2"]
+    resources: ["tcproutes"]
+- name: vudproute-v1alpha2.kb.io
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    {{- if not .Values.webhook.certificate.provided }}
+    caBundle: {{ b64enc $caCert }}
+    {{- else }}
+    caBundle: {{ .Values.webhook.certificate.caBundle }}
+    {{- end }}
+    service:
+      name: {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-gateway-networking-k8s-io-v1alpha2-udproute
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
+  {{- with .Values.webhook.timeoutSeconds }}
+  timeoutSeconds: {{ . }}
+  {{- end }}
+  sideEffects: None
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["gateway.networking.k8s.io"]
+    apiVersions: ["v1alpha2"]
+    resources: ["udproutes"]
 
 ---
 apiVersion: v1

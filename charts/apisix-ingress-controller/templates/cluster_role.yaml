@@ -106,6 +106,8 @@ rules:
   - gateways/status
   - grpcroutes/status
   - httproutes/status
+  - tcproutes/status
+  - udproutes/status
   - referencegrants/status
   verbs:
   - get
@@ -116,6 +118,8 @@ rules:
   - gateways
   - grpcroutes
   - httproutes
+  - tcproutes
+  - udproutes
   - referencegrants
   verbs:
   - get
