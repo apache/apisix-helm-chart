@@ -94,16 +94,66 @@ config:
     ingressClass: apisix
     defaultIngressClass: false
 
+# The GatewayProxy resource configures gateway proxy instances including networking,
+# provider connection, global plugins, and plugin metadata.
 gatewayProxy:
+  # -- Controls whether to create a default GatewayProxy custom resource.
   createDefault: false
+
+  # -- Configuration for the GatewayProxy provider connection
   provider:
+    # -- Specifies the provider type for the GatewayProxy.
     type: ControlPlane
+
+    # -- ControlPlane provider specific configuration
+    # Either `endpoints` or `service` must be specified, but not both.
     controlPlane:
+      # -- List of APISIX control plane Admin API endpoints.
+      # example: ["http://apisix-admin.default.svc.cluster.local:9180"]
       endpoints: []
+
+      # -- Alternatively, reference a Kubernetes Service for the APISIX Admin API.
+      service:
+        name: ""
+        port: 9180
+
+      # -- Authentication configuration for control plane connection
       auth:
+        # -- Authentication type. Only `AdminKey` is currently supported.
+        # @default -- `AdminKey`
         type: AdminKey
+
+        # -- AdminKey authentication configuration.
+        # Either `value` or `valueFrom` must be specified, but not both.
         adminKey:
+          # -- The admin key value for authentication.
           value: "edd1c9f034335f136f87ad84b625c8f1"
+
+          # -- Reference to admin key stored in a Kubernetes Secret
+          valueFrom: {}
+            # secretKeyRef:
+            #   name: apisix-admin-secret
+            #   key: admin-key
+
+    # -- List of global plugins to be enabled on the GatewayProxy.
+    plugins: []
+      # - name: cors
+      #   enabled: true
+      #   config:
+      #     allow_origins: "*"
+      #     allow_methods: "GET,POST,PUT,DELETE"
+      # - name: ip-restriction
+      #   enabled: false
+      #   config:
+      #     whitelist:
+      #       - 10.0.0.0/8
+      #       - 192.168.0.0/16
+
+    # -- Global plugin metadata shared by all instances of the same plugin.
+    pluginMetadata: {}
+      # prometheus:
+      #   disable: false
+      #   export_uri: /apisix/prometheus/metrics
 
 apisix:
   adminService:
