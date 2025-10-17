@@ -108,6 +108,7 @@ rules:
   - httproutes/status
   - tcproutes/status
   - udproutes/status
+  - tlsroutes/status
   - referencegrants/status
   verbs:
   - get
@@ -120,6 +121,7 @@ rules:
   - httproutes
   - tcproutes
   - udproutes
+  - tlsroutes
   - referencegrants
   verbs:
   - get
