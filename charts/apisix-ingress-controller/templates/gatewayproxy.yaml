@@ -1,0 +1,76 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- if .Values.gatewayProxy.createDefault }}
+apiVersion: apisix.apache.org/v1alpha1
+kind: GatewayProxy
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-config
+spec:
+  provider:
+    type: {{ .Values.gatewayProxy.provider.type }}
+    controlPlane:
+      {{- if .Values.gatewayProxy.provider.controlPlane.endpoints }}
+      endpoints:
+        {{- toYaml .Values.gatewayProxy.provider.controlPlane.endpoints | nindent 8 }}
+      {{- else if .Values.gatewayProxy.provider.controlPlane.service.name }}
+      service:
+        name: {{ .Values.gatewayProxy.provider.controlPlane.service.name }}
+        port: {{ .Values.gatewayProxy.provider.controlPlane.service.port }}
+      {{- else }}
+      service:
+        name: {{ .Values.apisix.adminService.name }}
+        port: {{ .Values.apisix.adminService.port }}
+      {{- end }}
+
+      {{- with .Values.gatewayProxy.provider.controlPlane.tlsVerify }}
+      tlsVerify: {{ . }}
+      {{- end }}
+
+      {{- with .Values.gatewayProxy.provider.controlPlane.auth }}
+      auth:
+        type: {{ .type }}
+        {{- with .adminKey }}
+        adminKey:
+          {{- if .valueFrom }}
+          valueFrom:
+            {{- toYaml .valueFrom | nindent 12 }}
+          {{- else if .value }}
+          value: {{ .value | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+
+  {{- with .Values.gatewayProxy.publishService }}
+  publishService: {{ . | quote }}
+  {{- end }}
+
+  {{- with .Values.gatewayProxy.statusAddress }}
+  statusAddress:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.gatewayProxy.plugins }}
+  plugins:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.gatewayProxy.pluginMetadata }}
+  pluginMetadata:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
