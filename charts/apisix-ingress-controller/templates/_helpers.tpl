@@ -18,16 +18,15 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "apisix-ingress-controller.name" -}}
+{{- define "apisix-ingress-controller-manager.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
-
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "apisix-ingress-controller.fullname" -}}
+{{- define "apisix-ingress-controller-manager.name.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -39,20 +38,18 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 {{- end }}
-
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "apisix-ingress-controller.chart" -}}
+{{- define "apisix-ingress-controller-manager.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
-
 {{/*
 Common labels
 */}}
-{{- define "apisix-ingress-controller.labels" -}}
-helm.sh/chart: {{ include "apisix-ingress-controller.chart" . }}
-{{ include "apisix-ingress-controller.selectorLabels" . }}
+{{- define "apisix-ingress-controller-manager.labels" -}}
+helm.sh/chart: {{ include "apisix-ingress-controller-manager.chart" . }}
+{{ include "apisix-ingress-controller-manager.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -62,37 +59,31 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "apisix-ingress-controller.selectorLabels" -}}
+{{- define "apisix-ingress-controller-manager.selectorLabels" -}}
 {{- if .Values.labelsOverride }}
 {{- tpl (.Values.labelsOverride | toYaml) . }}
 {{- else }}
-app.kubernetes.io/name: {{ include "apisix-ingress-controller.name" . }}
+app.kubernetes.io/name: {{ include "apisix-ingress-controller-manager.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 {{- end }}
 
 {{/*
-Create the name of the service account to use
+Webhook service name - ensure it stays within 63 character limit
 */}}
-{{- define "apisix-ingress-controller.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "apisix-ingress-controller.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- define "apisix-ingress-controller-manager.webhook.serviceName" -}}
+{{- $suffix := "-webhook-svc" -}}
+{{- $maxLen := sub 63 (len $suffix) | int -}}
+{{- $baseName := include "apisix-ingress-controller-manager.name.fullname" . | trunc $maxLen | trimSuffix "-" -}}
+{{- printf "%s%s" $baseName $suffix -}}
 {{- end }}
-{{- end }}
-
-{{- define "apisix-ingress-controller.namespace" -}}
-{{- default .Release.Namespace .Values.namespace -}}
-{{- end -}}
 
 {{/*
-Key to use to fetch admin token from secret
+Webhook secret name - ensure it stays within 63 character limit
 */}}
-{{- define "apisix-ingress-controller.credentials.secretAdminKey" -}}
-{{- if .Values.config.apisix.existingSecretAdminKeyKey }}
-{{- .Values.config.apisix.existingSecretAdminKeyKey }}
-{{- else }}
-{{- "adminKey" }}
-{{- end }}
+{{- define "apisix-ingress-controller-manager.webhook.secretName" -}}
+{{- $suffix := "-webhook-cert" -}}
+{{- $maxLen := sub 63 (len $suffix) | int -}}
+{{- $baseName := include "apisix-ingress-controller-manager.name.fullname" . | trunc $maxLen | trimSuffix "-" -}}
+{{- printf "%s%s" $baseName $suffix -}}
 {{- end }}

@@ -59,6 +59,7 @@ spec:
       priorityClassName: {{ . }}
       {{- end }}
       containers:
+        {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
           securityContext:
@@ -121,6 +122,11 @@ spec:
               containerPort: {{ .Values.apisix.admin.port }}
               protocol: TCP
             {{- end }}
+            {{- if .Values.control.enabled }}
+            - name: control
+              containerPort: {{ .Values.control.service.port }}
+              protocol: TCP
+            {{- end }}
             {{- if .Values.apisix.prometheus.enabled }}
             - name: prometheus
               containerPort: {{ .Values.apisix.prometheus.containerPort }}
@@ -148,6 +154,11 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
+            {{- if $useTraditionalYaml }}
+            - name: status
+              containerPort: {{ default 7085 .Values.apisix.status.port }}
+              protocol: TCP
+            {{- end}}
 
           {{- if ne .Values.apisix.deployment.role "control_plane" }}
           readinessProbe:
@@ -155,8 +166,14 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             successThreshold: 1
+            {{- if $useTraditionalYaml }}
+            httpGet:
+              path: /status/ready
+              port: {{ default 7085 .Values.apisix.status.port }}
+            {{- else }}
             tcpSocket:
               port: {{ .Values.service.http.containerPort }}
+            {{- end}}
             timeoutSeconds: 1
           {{- end }}
           lifecycle:

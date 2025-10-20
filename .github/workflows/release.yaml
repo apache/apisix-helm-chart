@@ -30,12 +30,14 @@ jobs:
       - name: Add Helm repo
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo add apisix https://charts.apiseven.com
+          helm repo add apisix https://apache.github.io/apisix-helm-chart
 
       - name: Run chart-releaser
         uses: ./.github/actions/chart-releaser-action
         with:
           charts_dir: .
+          version: v1.8.1
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           CR_SKIP_EXISTING: true
+          HELM_EXPERIMENTAL_OCI: 1
