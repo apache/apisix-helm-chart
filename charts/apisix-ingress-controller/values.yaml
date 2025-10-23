@@ -52,15 +52,19 @@ deployment:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
+
+  # -- Set security context for the pod
+  # fsGroup: 2000 ensures containers can share Unix socket files via a common group.
+  podSecurityContext:
+    fsGroup: 2000
+
   # -- Topology Spread Constraints for pod assignment spread across your cluster among failure-domains
   # ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
   topologySpreadConstraints: []
   image:
     repository: apache/apisix-ingress-controller
     pullPolicy: IfNotPresent
-    tag: "2.0.0-rc4"
+    tag: "2.0.0-rc5"
   # -- Set pod resource requests & limits
   resources: {}
 
