@@ -52,6 +52,8 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        - name: ADC_SERVER_URL
+          value: "unix:/sockets/adc.sock"
         image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         ports:
@@ -67,6 +69,8 @@ spec:
         - name: {{ .Release.Name }}-ingress-config
           mountPath: /app/conf/config.yaml
           subPath: config.yaml
+        - name: socket-volume
+          mountPath: /sockets
         {{- if .Values.webhook.enabled }}
         - name: webhook-certs
           mountPath: /certs
@@ -88,14 +92,14 @@ spec:
         resources:
           {{- toYaml .Values.deployment.resources | nindent 10 }}
         securityContext:
-          {{- toYaml .Values.deployment.podSecurityContext | nindent 10 }}
+          {{- toYaml .Values.deployment.securityContext | nindent 10 }}
       - name: adc-server
         image: "{{ .Values.deployment.adcContainer.image.repository }}:{{ .Values.deployment.adcContainer.image.tag }}"
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
         - "server"
         - "--listen"
-        - "http://127.0.0.1:3000"
+        - "unix:/sockets/adc.sock"
         - "--listen-status"
         - "3001"
         env:
@@ -122,10 +126,13 @@ spec:
             port: 3001
           initialDelaySeconds: 5
           periodSeconds: 5
+        volumeMounts:
+          - name: socket-volume
+            mountPath: /sockets
         resources:
           {{- toYaml .Values.deployment.resources | nindent 10 }}
         securityContext:
-          {{- toYaml .Values.deployment.podSecurityContext | nindent 10 }}
+          {{- toYaml .Values.deployment.securityContext | nindent 10 }}
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -146,12 +153,14 @@ spec:
       - name: {{ .Release.Name }}-ingress-config
         configMap:
           name: {{ .Release.Name }}-ingress-config
+      - name: socket-volume
+        emptyDir: {}
       {{- if .Values.webhook.enabled }}
       - name: webhook-certs
         secret:
           secretName: {{ include "apisix-ingress-controller-manager.webhook.secretName" . }}
       {{- end }}
       securityContext:
-        runAsNonRoot: false
+        {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ .Release.Name }}
       terminationGracePeriodSeconds: 10
