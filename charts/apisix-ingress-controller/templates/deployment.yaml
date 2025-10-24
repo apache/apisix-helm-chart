@@ -92,7 +92,7 @@ spec:
         resources:
           {{- toYaml .Values.deployment.resources | nindent 10 }}
         securityContext:
-          {{- toYaml .Values.deployment.podSecurityContext | nindent 10 }}
+          {{- toYaml .Values.deployment.securityContext | nindent 10 }}
       - name: adc-server
         image: "{{ .Values.deployment.adcContainer.image.repository }}:{{ .Values.deployment.adcContainer.image.tag }}"
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
@@ -132,7 +132,7 @@ spec:
         resources:
           {{- toYaml .Values.deployment.resources | nindent 10 }}
         securityContext:
-          {{- toYaml .Values.deployment.podSecurityContext | nindent 10 }}
+          {{- toYaml .Values.deployment.securityContext | nindent 10 }}
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -161,6 +161,6 @@ spec:
           secretName: {{ include "apisix-ingress-controller-manager.webhook.secretName" . }}
       {{- end }}
       securityContext:
-        runAsNonRoot: false
+        {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ .Release.Name }}
       terminationGracePeriodSeconds: 10
