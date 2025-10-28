@@ -67,7 +67,7 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           {{- if eq .Values.apisix.deployment.mode "standalone" }}
-          command: ["sh", "-c","ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && /docker-entrypoint.sh docker-start"]
+          command: ["sh", "-c","cp /apisix-config/apisix.yaml {{ .Values.apisix.configDir }} && ln -s {{ .Values.apisix.configDir }}/apisix.yaml /usr/local/apisix/conf/apisix.yaml && /docker-entrypoint.sh docker-start"]
           {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
