@@ -72,7 +72,7 @@ deployment:
   adcContainer:
     image:
       repository: ghcr.io/api7/adc
-      tag: "0.21.2"
+      tag: "0.22.1"
     config:
       logLevel: "info"
 
