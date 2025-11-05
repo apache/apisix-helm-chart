@@ -58,7 +58,9 @@ data:
       {{- if or .Values.apisix.customPlugins.enabled .Values.apisix.luaModuleHook.enabled }}
       extra_lua_path: {{ .Values.apisix.customPlugins.luaPath }};{{ .Values.apisix.luaModuleHook.luaPath }}
       {{- end }}
-
+      
+      trusted_addresses: {{ toYaml .Values.apisix.trusted_addresses | nindent 8 }}
+      
       enable_control: {{ .Values.control.enabled }}
       {{- if .Values.control.enabled }}
       control:
