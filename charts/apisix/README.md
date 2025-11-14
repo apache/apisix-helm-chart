@@ -70,7 +70,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role_traditional.config_provider | string | `"etcd"` |  |
 | apisix.discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
-| apisix.discovery.registry | object | `{}` | Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281), and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery) |
+| apisix.discovery.registry | object | `{}` | Service discovery registry. Refer to [configuration under discovery](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L307) for example. Also see [example of using external service discovery](https://apisix.apache.org/docs/ingress-controller/1.8.0/tutorials/external-service-discovery/). |
 | apisix.dns.resolvers[0] | string | `"127.0.0.1"` |  |
 | apisix.dns.resolvers[1] | string | `"172.20.0.10"` |  |
 | apisix.dns.resolvers[2] | string | `"114.114.114.114"` |  |
@@ -108,8 +108,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.workerConnections | string | `"10620"` |  |
 | apisix.nginx.workerProcesses | string | `"auto"` |  |
 | apisix.nginx.workerRlimitNofile | string | `"20480"` |  |
-| apisix.pluginAttrs | object | `{}` | Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details |
-| apisix.plugins | list | `[]` | Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
+| apisix.pluginAttrs | object | `{}` | Set APISIX plugin attributes. By default, APISIX's [plugin_attr](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L295) are automatically used. See [configuration example](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L591). |
+| apisix.plugins | list | `[]` | Customize the list of APISIX plugins to enable. By default, APISIX's [default plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L196) are automatically used. |
 | apisix.prometheus.containerPort | int | `9091` | container port where the metrics are exposed |
 | apisix.prometheus.enabled | bool | `false` |  |
 | apisix.prometheus.metricPrefix | string | `"apisix_"` | prefix of the metrics |
@@ -127,7 +127,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.ssl.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | apisix.status.ip | string | `"0.0.0.0"` |  |
 | apisix.status.port | int | `7085` |  |
-| apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
+| apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's [default stream_plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L294) are automatically used. |
 | apisix.vault.enabled | bool | `false` | Enable or disable the vault integration |
 | apisix.vault.host | string | `""` | The host address where the vault server is running. |
 | apisix.vault.prefix | string | `""` | Prefix allows you to better enforcement of policies. |
