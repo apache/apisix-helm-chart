@@ -418,6 +418,9 @@ apisix:
     enableCPUAffinity: true
     # -- Timeout during which a keep-alive client connection will stay open on the server side.
     keepaliveTimeout: 60s
+    # -- The name of the header from which to extract the real client IP address
+    # http://nginx.org/en/docs/http/ngx_http_realip_module.html#real_ip_header
+    realIpHeader: "X-Real-IP"
     envs: []
     # access log and error log configuration
     logs:
