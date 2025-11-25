@@ -128,7 +128,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.status.ip | string | `"0.0.0.0"` |  |
 | apisix.status.port | int | `7085` |  |
 | apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's [default stream_plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L294) are automatically used. |
-| apisix.trustedAddresses[0] | string | `"127.0.0.1"` |  |
+| apisix.trustedAddresses | list | `["127.0.0.1"]` | When configured, APISIX will trust the `X-Forwarded-*` Headers passed in requests from the IP/CIDR in the list. |
 | apisix.vault.enabled | bool | `false` | Enable or disable the vault integration |
 | apisix.vault.host | string | `""` | The host address where the vault server is running. |
 | apisix.vault.prefix | string | `""` | Prefix allows you to better enforcement of policies. |
