@@ -585,9 +585,8 @@ apisix:
     ip: "0.0.0.0"
     port: 7085
 
-  trusted_addresses:
+  trustedAddresses:
     - 127.0.0.1
-    - 172.18.0.0/16
 
 # -- external etcd configuration. If etcd.enabled is false, these configuration will be used.
 externalEtcd:

@@ -176,9 +176,9 @@ data:
         port: {{ default "7085" (.Values.apisix.status.port | toString) }}
       {{- end}}
 
-      {{ if .Values.apisix.trusted_addresses }}
+      {{ if .Values.apisix.trustedAddresses }}
       trusted_addresses:
-      {{- toYaml .Values.apisix.trusted_addresses | nindent 8 }}
+      {{- toYaml .Values.apisix.trustedAddresses | nindent 8 }}
       {{ end }}
 
     nginx_config:    # config for render the template to genarate nginx.conf
