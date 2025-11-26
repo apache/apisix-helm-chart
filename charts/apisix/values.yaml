@@ -279,6 +279,8 @@ apisix:
   # -- Enable nginx IPv6 resolver
   enableIPv6: true
   enableHTTP2: true
+  # -- Address the issue of configuration files being unable to update in standalone mode due to being a ConfigMap
+  configDir: "/etc/apisix/conf.d"
 
   # -- Whether the APISIX version number should be shown in Server header
   enableServerTokens: true
