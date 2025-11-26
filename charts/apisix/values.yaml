@@ -585,6 +585,10 @@ apisix:
     ip: "0.0.0.0"
     port: 7085
 
+  # -- When configured, APISIX will trust the `X-Forwarded-*` Headers passed in requests from the IP/CIDR in the list.
+  trustedAddresses:
+    - 127.0.0.1
+
 # -- external etcd configuration. If etcd.enabled is false, these configuration will be used.
 externalEtcd:
   # -- if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379.
