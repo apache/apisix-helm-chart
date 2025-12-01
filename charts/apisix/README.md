@@ -105,6 +105,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.logs.errorLog | string | `"/dev/stderr"` | Error log path |
 | apisix.nginx.logs.errorLogLevel | string | `"warn"` | Error log level |
 | apisix.nginx.luaSharedDicts | list | `[]` | Override default [lua_shared_dict](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L250-L276) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict |
+| apisix.nginx.realIpFrom | list | `["127.0.0.1","unix:"]` | Defines trusted addresses that are known to send correct replacement addresses. http://nginx.org/en/docs/http/ngx_http_realip_module.html#set_real_ip_from |
+| apisix.nginx.realIpHeader | string | `"X-Real-IP"` | The name of the header from which to extract the real client IP address http://nginx.org/en/docs/http/ngx_http_realip_module.html#real_ip_header |
 | apisix.nginx.workerConnections | string | `"10620"` |  |
 | apisix.nginx.workerProcesses | string | `"auto"` |  |
 | apisix.nginx.workerRlimitNofile | string | `"20480"` |  |
