@@ -105,7 +105,7 @@ webhook:
   # -- The port for the webhook server to listen on
   port: 9443
   # -- Failure policy for the webhook (Fail or Ignore)
-  failurePolicy: Fail
+  failurePolicy: Ignore
   # -- Timeout in seconds for the webhook
   timeoutSeconds: 10
   certificate:
