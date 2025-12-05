@@ -355,6 +355,24 @@ apisix:
       # enum: etcd, yaml
       config_provider: "etcd"
 
+    # -- Standalone rules configuration
+    #
+    # ref: https://apisix.apache.org/docs/apisix/deployment-modes/#standalone
+    standalone:
+      # -- Rules which are set to the default apisix.yaml configmap.
+      # If apisix.delpoyment.standalone.existingConfigMap is empty, these are used.
+      config: |
+        routes:
+        -
+          uri: /hi
+          upstream:
+            nodes:
+              "127.0.0.1:1980": 1
+            type: roundrobin
+      # -- Specifies the name of the ConfigMap that contains the rule configurations.
+      # The configuration must be set to the key named `apisix.yaml` in the configmap.
+      existingConfigMap: ""
+
   admin:
     # -- Enable Admin API
     enabled: true
