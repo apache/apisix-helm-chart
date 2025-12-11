@@ -29,7 +29,7 @@ image:
   pullPolicy: IfNotPresent
   # -- Apache APISIX image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 3.13.0-ubuntu
+  tag: 3.14.1-ubuntu
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
@@ -355,6 +355,24 @@ apisix:
       # enum: etcd, yaml
       config_provider: "etcd"
 
+    # -- Standalone rules configuration
+    #
+    # ref: https://apisix.apache.org/docs/apisix/deployment-modes/#standalone
+    standalone:
+      # -- Rules which are set to the default apisix.yaml configmap.
+      # If apisix.delpoyment.standalone.existingConfigMap is empty, these are used.
+      config: |
+        routes:
+        -
+          uri: /hi
+          upstream:
+            nodes:
+              "127.0.0.1:1980": 1
+            type: roundrobin
+      # -- Specifies the name of the ConfigMap that contains the rule configurations.
+      # The configuration must be set to the key named `apisix.yaml` in the configmap.
+      existingConfigMap: ""
+
   admin:
     # -- Enable Admin API
     enabled: true
@@ -464,8 +482,8 @@ apisix:
   discovery:
     # -- Enable or disable Apache APISIX integration service discovery
     enabled: false
-    # -- Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281),
-    # and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery)
+    # -- Service discovery registry. Refer to [configuration under discovery](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L307) for example.
+    # Also see [example of using external service discovery](https://apisix.apache.org/docs/ingress-controller/1.8.0/tutorials/external-service-discovery/).
     registry: {}
       # Integration service discovery registry. E.g eureka\dns\nacos\consul_kv
       # reference:
@@ -539,12 +557,13 @@ apisix:
     # -- container port where the metrics are exposed
     containerPort: 9091
 
-  # -- Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml)
+  # -- Customize the list of APISIX plugins to enable. By default, APISIX's [default plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L196) are automatically used.
   plugins: []
-  # -- Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml)
+  # -- Customize the list of APISIX stream_plugins to enable. By default, APISIX's [default stream_plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L294) are automatically used.
   stream_plugins: []
 
-  # -- Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details
+  # -- Set APISIX plugin attributes. By default, APISIX's [plugin_attr](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L295) are automatically used.
+  # See [configuration example](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L591).
   pluginAttrs: {}
 
   extPlugin:
@@ -593,6 +612,10 @@ apisix:
     keyring: []
       # - "0123456789abcdef"
 
+  # -- When configured, APISIX will trust the `X-Forwarded-*` Headers passed in requests from the IP/CIDR in the list.
+  trustedAddresses:
+    - 127.0.0.1
+
 # -- external etcd configuration. If etcd.enabled is false, these configuration will be used.
 externalEtcd:
   # -- if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379.
@@ -614,14 +637,14 @@ externalEtcd:
 # use the FQDN address or the IP of the etcd
 etcd:
   # -- install built-in etcd by default, set false if do not want to install built-in etcd together,
-  # this etcd is based on bitnami/etcd helm chart and latest bitnami docker image, only for development and testing purposes,
+  # this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes,
   # if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it.
   enabled: true
   # -- docker image for built-in etcd
   image:
     registry: docker.io
-    repository: bitnami/etcd
-    # -- `bitnami/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267,
+    repository: bitnamilegacy/etcd
+    # -- `bitnamilegacy/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267,
     # you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags.
     tag: latest
 
@@ -630,7 +653,7 @@ etcd:
   # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
   timeout: 30
 
-  # -- if etcd.enabled is true, set more values of bitnami/etcd helm chart
+  # -- if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart
   auth:
     rbac:
       # -- No authentication by default. Switch to enable RBAC authentication

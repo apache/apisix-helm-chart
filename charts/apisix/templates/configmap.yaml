@@ -186,6 +186,11 @@ data:
         port: {{ default "7085" (.Values.apisix.status.port | toString) }}
       {{- end}}
 
+      {{ if .Values.apisix.trustedAddresses }}
+      trusted_addresses:
+      {{- toYaml .Values.apisix.trustedAddresses | nindent 8 }}
+      {{ end }}
+
     nginx_config:    # config for render the template to genarate nginx.conf
       error_log: "{{ .Values.apisix.nginx.logs.errorLog }}"
       error_log_level: "{{ .Values.apisix.nginx.logs.errorLogLevel }}"    # warn,error
@@ -225,7 +230,7 @@ data:
         {{- if .Values.apisix.nginx.luaSharedDicts }}
         lua_shared_dict:
         {{- range $dict := .Values.apisix.nginx.luaSharedDicts }}
-          - {{ $dict.name }}: {{ $dict.size }}
+          {{ $dict.name }}: {{ $dict.size }}
         {{- end }}
         {{- end }}
       {{- if .Values.apisix.nginx.configurationSnippet.main }}

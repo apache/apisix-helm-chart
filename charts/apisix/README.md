@@ -68,9 +68,12 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
 | apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
+| apisix.deployment.standalone | object | `{"config":"routes:\n-\n  uri: /hi\n  upstream:\n    nodes:\n      \"127.0.0.1:1980\": 1\n    type: roundrobin\n","existingConfigMap":""}` | Standalone rules configuration  ref: https://apisix.apache.org/docs/apisix/deployment-modes/#standalone |
+| apisix.deployment.standalone.config | string | `"routes:\n-\n  uri: /hi\n  upstream:\n    nodes:\n      \"127.0.0.1:1980\": 1\n    type: roundrobin\n"` | Rules which are set to the default apisix.yaml configmap. If apisix.delpoyment.standalone.existingConfigMap is empty, these are used. |
+| apisix.deployment.standalone.existingConfigMap | string | `""` | Specifies the name of the ConfigMap that contains the rule configurations. The configuration must be set to the key named `apisix.yaml` in the configmap. |
 | apisix.deployment.role_traditional.config_provider | string | `"etcd"` |  |
 | apisix.discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
-| apisix.discovery.registry | object | `{}` | Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281), and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery) |
+| apisix.discovery.registry | object | `{}` | Service discovery registry. Refer to [configuration under discovery](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L307) for example. Also see [example of using external service discovery](https://apisix.apache.org/docs/ingress-controller/1.8.0/tutorials/external-service-discovery/). |
 | apisix.dns.resolvers[0] | string | `"127.0.0.1"` |  |
 | apisix.dns.resolvers[1] | string | `"172.20.0.10"` |  |
 | apisix.dns.resolvers[2] | string | `"114.114.114.114"` |  |
@@ -108,8 +111,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.workerConnections | string | `"10620"` |  |
 | apisix.nginx.workerProcesses | string | `"auto"` |  |
 | apisix.nginx.workerRlimitNofile | string | `"20480"` |  |
-| apisix.pluginAttrs | object | `{}` | Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details |
-| apisix.plugins | list | `[]` | Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
+| apisix.pluginAttrs | object | `{}` | Set APISIX plugin attributes. By default, APISIX's [plugin_attr](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L295) are automatically used. See [configuration example](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L591). |
+| apisix.plugins | list | `[]` | Customize the list of APISIX plugins to enable. By default, APISIX's [default plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L196) are automatically used. |
 | apisix.prometheus.containerPort | int | `9091` | container port where the metrics are exposed |
 | apisix.prometheus.enabled | bool | `false` |  |
 | apisix.prometheus.metricPrefix | string | `"apisix_"` | prefix of the metrics |
@@ -127,7 +130,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.ssl.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | apisix.status.ip | string | `"0.0.0.0"` |  |
 | apisix.status.port | int | `7085` |  |
-| apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml) |
+| apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's [default stream_plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L294) are automatically used. |
+| apisix.trustedAddresses | list | `["127.0.0.1"]` | When configured, APISIX will trust the `X-Forwarded-*` Headers passed in requests from the IP/CIDR in the list. |
 | apisix.vault.enabled | bool | `false` | Enable or disable the vault integration |
 | apisix.vault.host | string | `""` | The host address where the vault server is running. |
 | apisix.vault.prefix | string | `""` | Prefix allows you to better enforcement of policies. |
@@ -151,8 +155,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | control.service.port | int | `9090` | which port to use for Apache APISIX Control API |
 | control.service.servicePort | int | `9090` | Service port to use for Apache APISIX Control API |
 | control.service.type | string | `"ClusterIP"` | Control service type |
-| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"enabled":true,"image":{"registry":"docker.io","repository":"bitnami/etcd","tag":"latest"},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30}` | etcd configuration use the FQDN address or the IP of the etcd |
-| etcd.auth | object | `{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnami/etcd helm chart |
+| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"enabled":true,"image":{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"timeout":30}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd.auth | object | `{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart |
 | etcd.auth.rbac.create | bool | `false` | No authentication by default. Switch to enable RBAC authentication |
 | etcd.auth.rbac.rootPassword | string | `""` | root password for etcd. Requires etcd.auth.rbac.create to be true. |
 | etcd.auth.tls.certFilename | string | `""` | etcd client cert filename using in etcd.auth.tls.existingSecret |
@@ -162,9 +166,9 @@ The command removes all the Kubernetes components associated with the chart and 
 | etcd.auth.tls.sni | string | `""` | specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. |
 | etcd.auth.tls.verify | bool | `true` | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd |
 | etcd.containerSecurityContext | object | `{"enabled":false}` | added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19 |
-| etcd.enabled | bool | `true` | install built-in etcd by default, set false if do not want to install built-in etcd together, this etcd is based on bitnami/etcd helm chart and latest bitnami docker image, only for development and testing purposes, if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it. |
-| etcd.image | object | `{"registry":"docker.io","repository":"bitnami/etcd","tag":"latest"}` | docker image for built-in etcd |
-| etcd.image.tag | string | `"latest"` | `bitnami/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267, you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags. |
+| etcd.enabled | bool | `true` | install built-in etcd by default, set false if do not want to install built-in etcd together, this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes, if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it. |
+| etcd.image | object | `{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"}` | docker image for built-in etcd |
+| etcd.image.tag | string | `"latest"` | `bitnamilegacy/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267, you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags. |
 | etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | etcd.timeout | int | `30` | Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster |
 | externalEtcd | object | `{"existingSecret":"","host":["http://etcd.host:2379"],"password":"","secretPasswordKey":"etcd-root-password","user":"root"}` | external etcd configuration. If etcd.enabled is false, these configuration will be used. |
@@ -184,7 +188,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | hostNetwork | bool | `false` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.13.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.14.1-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"enabled":false}` | Ingress controller configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |

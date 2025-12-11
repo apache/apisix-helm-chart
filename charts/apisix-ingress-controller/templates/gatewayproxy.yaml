@@ -24,11 +24,53 @@ spec:
   provider:
     type: {{ .Values.gatewayProxy.provider.type }}
     controlPlane:
+      {{- if .Values.gatewayProxy.provider.controlPlane.endpoints }}
+      endpoints:
+        {{- toYaml .Values.gatewayProxy.provider.controlPlane.endpoints | nindent 8 }}
+      {{- else if .Values.gatewayProxy.provider.controlPlane.service.name }}
+      service:
+        name: {{ .Values.gatewayProxy.provider.controlPlane.service.name }}
+        port: {{ .Values.gatewayProxy.provider.controlPlane.service.port }}
+      {{- else }}
       service:
         name: {{ .Values.apisix.adminService.name }}
         port: {{ .Values.apisix.adminService.port }}
+      {{- end }}
+
+      {{- with .Values.gatewayProxy.provider.controlPlane.tlsVerify }}
+      tlsVerify: {{ . }}
+      {{- end }}
+
       {{- with .Values.gatewayProxy.provider.controlPlane.auth }}
       auth:
-        {{- toYaml . | nindent 8 }}
+        type: {{ .type }}
+        {{- with .adminKey }}
+        adminKey:
+          {{- if .valueFrom }}
+          valueFrom:
+            {{- toYaml .valueFrom | nindent 12 }}
+          {{- else if .value }}
+          value: {{ .value | quote }}
+          {{- end }}
+        {{- end }}
       {{- end }}
+
+  {{- with .Values.gatewayProxy.publishService }}
+  publishService: {{ . | quote }}
+  {{- end }}
+
+  {{- with .Values.gatewayProxy.statusAddress }}
+  statusAddress:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.gatewayProxy.plugins }}
+  plugins:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.gatewayProxy.pluginMetadata }}
+  pluginMetadata:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{- end }}
