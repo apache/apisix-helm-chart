@@ -714,7 +714,7 @@ spec:
     name: v2
     schema:
       openAPIV3Schema:
-        description: ApisixRoute is defines configuration for HTTP and stream routes.
+        description: ApisixRoute defines configuration for HTTP and stream routes.
         properties:
           apiVersion:
             description: |-
@@ -1027,7 +1027,7 @@ spec:
                   Each rule specifies conditions to match TCP/UDP traffic and how to forward them.
                 items:
                   description: ApisixRouteStream defines the configuration for a Layer
-                    4 (TCP/UDP) route. Currently not supported.
+                    4 (TCP/UDP) route.
                   properties:
                     backend:
                       description: Backend specifies the destination service to which
@@ -1585,9 +1585,8 @@ spec:
                             minimum: 0
                             type: integer
                           timeout:
-                            description: |-
-                              Timeout sets health check timeout in seconds.
-                              https://github.com/apache/apisix/blob/0151d9e35bba63d7c316187272d88e19db0be634/apisix/schema_def.lua#L196
+                            description: Timeout sets the number of timeouts to define
+                              an unhealthy target.
                             maximum: 254
                             minimum: 1
                             type: integer
@@ -1649,9 +1648,8 @@ spec:
                             minimum: 0
                             type: integer
                           timeout:
-                            description: |-
-                              Timeout sets health check timeout in seconds.
-                              https://github.com/apache/apisix/blob/0151d9e35bba63d7c316187272d88e19db0be634/apisix/schema_def.lua#L196
+                            description: Timeout sets the number of timeouts to define
+                              an unhealthy target.
                             maximum: 254
                             minimum: 1
                             type: integer
@@ -1846,9 +1844,8 @@ spec:
                                   minimum: 0
                                   type: integer
                                 timeout:
-                                  description: |-
-                                    Timeout sets health check timeout in seconds.
-                                    https://github.com/apache/apisix/blob/0151d9e35bba63d7c316187272d88e19db0be634/apisix/schema_def.lua#L196
+                                  description: Timeout sets the number of timeouts
+                                    to define an unhealthy target.
                                   maximum: 254
                                   minimum: 1
                                   type: integer
@@ -1910,9 +1907,8 @@ spec:
                                   minimum: 0
                                   type: integer
                                 timeout:
-                                  description: |-
-                                    Timeout sets health check timeout in seconds.
-                                    https://github.com/apache/apisix/blob/0151d9e35bba63d7c316187272d88e19db0be634/apisix/schema_def.lua#L196
+                                  description: Timeout sets the number of timeouts
+                                    to define an unhealthy target.
                                   maximum: 254
                                   minimum: 1
                                   type: integer
@@ -3029,6 +3025,11 @@ spec:
                           type: string
                         minItems: 1
                         type: array
+                      mode:
+                        description: |-
+                          Mode specifies the mode of control plane provider.
+                          Can be `apisix` or `apisix-standalone`.
+                        type: string
                       service:
                         properties:
                           name:
@@ -3052,6 +3053,9 @@ spec:
                     type: object
                     x-kubernetes-validations:
                     - rule: has(self.endpoints) != has(self.service)
+                    - message: mode is immutable
+                      rule: oldSelf == null || (!has(self.mode) && !has(oldSelf.mode))
+                        || self.mode == oldSelf.mode
                   type:
                     description: Type specifies the type of provider. Can only be
                       `ControlPlane`.

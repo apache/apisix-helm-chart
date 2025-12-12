@@ -68,10 +68,10 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
 | apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
+| apisix.deployment.role_traditional.config_provider | string | `"etcd"` |  |
 | apisix.deployment.standalone | object | `{"config":"routes:\n-\n  uri: /hi\n  upstream:\n    nodes:\n      \"127.0.0.1:1980\": 1\n    type: roundrobin\n","existingConfigMap":""}` | Standalone rules configuration  ref: https://apisix.apache.org/docs/apisix/deployment-modes/#standalone |
 | apisix.deployment.standalone.config | string | `"routes:\n-\n  uri: /hi\n  upstream:\n    nodes:\n      \"127.0.0.1:1980\": 1\n    type: roundrobin\n"` | Rules which are set to the default apisix.yaml configmap. If apisix.delpoyment.standalone.existingConfigMap is empty, these are used. |
 | apisix.deployment.standalone.existingConfigMap | string | `""` | Specifies the name of the ConfigMap that contains the rule configurations. The configuration must be set to the key named `apisix.yaml` in the configmap. |
-| apisix.deployment.role_traditional.config_provider | string | `"etcd"` |  |
 | apisix.discovery.enabled | bool | `false` | Enable or disable Apache APISIX integration service discovery |
 | apisix.discovery.registry | object | `{}` | Service discovery registry. Refer to [configuration under discovery](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L307) for example. Also see [example of using external service discovery](https://apisix.apache.org/docs/ingress-controller/1.8.0/tutorials/external-service-discovery/). |
 | apisix.dns.resolvers[0] | string | `"127.0.0.1"` |  |

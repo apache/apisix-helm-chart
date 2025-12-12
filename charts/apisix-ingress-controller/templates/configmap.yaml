@@ -34,6 +34,7 @@ data:
     probe_addr: {{ .Values.config.probeAddr | default ":8081" }}
     secure_metrics: {{ .Values.config.secureMetrics | default false }}
     exec_adc_timeout: {{ .Values.config.execADCTimeout | default "15s" }}
+    disable_gateway_api: {{ .Values.config.disableGatewayAPI | default false }}
     provider:
       type: {{ .Values.config.provider.type | default "apisix" }}
       sync_period: {{ .Values.config.provider.syncPeriod | default "1s" }}
