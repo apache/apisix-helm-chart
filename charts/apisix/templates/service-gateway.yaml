@@ -50,7 +50,11 @@ spec:
   {{- if .Values.service.http.enabled }}
   - name: apisix-gateway
     port: {{ .Values.service.http.servicePort }}
+    {{- if .Values.apisix.proxy_protocol.enabled }}
+    targetPort: {{ .Values.apisix.proxy_protocol.listen_http_port | default 9181 }}
+    {{- else }}
     targetPort: {{ .Values.service.http.containerPort }}
+    {{- end }}
   {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.http.nodePort))) }}
     nodePort: {{ .Values.service.http.nodePort }}
   {{- end }}
@@ -65,7 +69,11 @@ spec:
   {{- if or .Values.apisix.ssl.enabled }}
   - name: apisix-gateway-tls
     port: {{ .Values.service.tls.servicePort }}
+    {{- if .Values.apisix.proxy_protocol.enabled }}
+    targetPort: {{ .Values.apisix.proxy_protocol.listen_https_port | default 9182 }}
+    {{- else }}
     targetPort: {{ .Values.apisix.ssl.containerPort }}
+    {{- end }}
   {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.tls.nodePort))) }}
     nodePort: {{ .Values.service.tls.nodePort }}
   {{- end }}

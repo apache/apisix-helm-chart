@@ -478,7 +478,12 @@ apisix:
     luaSharedDicts: []
       # - name: prometheus-metrics
       #   size: 20m
-
+  proxy_protocol:
+      enabled: false
+      listen_http_port: 9181
+      listen_https_port: 9182
+      enable_tcp_pp: true
+      enable_tcp_pp_to_upstream: true
   discovery:
     # -- Enable or disable Apache APISIX integration service discovery
     enabled: false
