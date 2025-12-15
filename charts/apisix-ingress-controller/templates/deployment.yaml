@@ -42,6 +42,10 @@ spec:
       labels:
         {{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.deployment.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - env:
         - name: POD_NAMESPACE
