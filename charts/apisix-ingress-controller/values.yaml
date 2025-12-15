@@ -52,6 +52,7 @@ deployment:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  imagePullSecrets: []
 
   # -- Set security context for the pod
   # fsGroup: 2000 ensures containers can share Unix socket files via a common group.
