@@ -37,7 +37,8 @@ jobs:
                   --validate-maintainers=false \
                   --charts charts/apisix \
                   --charts charts/apisix-dashboard \
-                  --charts charts/apisix-ingress-controller'
+                  --charts charts/apisix-ingress-controller \
+                  --charts charts/apisix-crds'
 
       - name: fix permissions
         run: |
