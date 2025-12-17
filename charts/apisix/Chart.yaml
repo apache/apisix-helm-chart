@@ -32,6 +32,7 @@ type: application
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 version: 2.12.5
+version: 2.12.5
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -46,7 +47,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: etcd.enabled
   - name: apisix-ingress-controller
-    version: 1.0.7
+    version: 1.1.0
     repository: https://apache.github.io/apisix-helm-chart
     condition: ingress-controller.enabled
     alias: ingress-controller
