@@ -1,0 +1,8 @@
+# CRDs for Apache APISIX ingress controller
+
+You can use this chart to install the CRDs outside of the APISIX Ingress controller chart.
+Ensure that you use the `--skip-crds` flag when installing the APISIX Ingress controller chart.
+
+The Gateway API CRDs will not be installed by default; set the `gatewayApi.enabled` value to `true` to install them.
+
+{{ template "chart.valuesSection" . }}
