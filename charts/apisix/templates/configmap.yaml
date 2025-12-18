@@ -75,12 +75,12 @@ data:
       enable_ipv6: {{ .Values.apisix.enableIPv6 }} # Enable nginx IPv6 resolver
       enable_http2: {{ .Values.apisix.enableHTTP2 }}
       enable_server_tokens: {{ .Values.apisix.enableServerTokens }} # Whether the APISIX version number should be shown in Server header
-      {{- if .Values.apisix.proxy_protocol.enabled }}
+      {{- if .Values.apisix.proxyProtocol.enabled }}
       proxy_protocol:
-        listen_http_port: {{ .Values.apisix.proxy_protocol.listen_http_port | default 9181 }}
-        listen_https_port: {{ .Values.apisix.proxy_protocol.listen_https_port | default 9182 }}
-        enable_tcp_pp: {{ .Values.apisix.proxy_protocol.enable_tcp_pp }}
-        enable_tcp_pp_to_upstream: {{ .Values.apisix.proxy_protocol.enable_tcp_pp_to_upstream }}
+        listen_http_port: {{ .Values.apisix.proxyProtocol.listen_http_port | default 9181 }}
+        listen_https_port: {{ .Values.apisix.proxyProtocol.listen_https_port | default 9182 }}
+        enable_tcp_pp: {{ .Values.apisix.proxyProtocol.enable_tcp_pp }}
+        enable_tcp_pp_to_upstream: {{ .Values.apisix.proxyProtocol.enable_tcp_pp_to_upstream }}
       {{- end }}
       proxy_cache:                         # Proxy Caching configuration
         cache_ttl: 10s                     # The default caching time if the upstream does not specify the cache time

@@ -478,7 +478,7 @@ apisix:
     luaSharedDicts: []
       # - name: prometheus-metrics
       #   size: 20m
-  proxy_protocol:
+  proxyProtocol:
       enabled: false
       listen_http_port: 9181
       listen_https_port: 9182
