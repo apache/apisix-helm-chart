@@ -662,6 +662,8 @@ etcd:
       certKeyFilename: ""
       # -- whether to verify the etcd endpoint certificate when setup a TLS connection to etcd
       verify: true
+      # -- check TLS Server Name Indication extension.
+      sni_enabled: true
       # -- specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset.
       sni: ""
 
