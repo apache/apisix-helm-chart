@@ -92,7 +92,7 @@ spec:
                   key: {{ include "apisix.admin.credentials.secretViewerKey" . }}
           {{- end }}
 
-          {{- if or (and .Values.etcd.enabled .Values.etcd.auth.rbac.create) (and (not .Values.etcd.enabled) .Values.externalEtcd.user) }}
+          {{- if and (or (and .Values.etcd.enabled .Values.etcd.auth.rbac.create) (and (not .Values.etcd.enabled) .Values.externalEtcd.user)) (or (and .Values.apisix.deployment.role_traditional (eq .Values.apisix.deployment.role_traditional.config_provider "etcd")) (and (not .Values.apisix.deployment.role_traditional) (or (and .Values.apisix.deployment.role_data_plane (eq .Values.apisix.deployment.role_data_plane.config_provider "etcd")) (and .Values.apisix.deployment.role_control_plane (eq .Values.apisix.deployment.role_control_plane.config_provider "etcd"))))) }}
             - name: APISIX_ETCD_PASSWORD
               valueFrom:
                 secretKeyRef:
