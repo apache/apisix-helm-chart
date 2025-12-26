@@ -109,6 +109,10 @@ spec:
           value: "remote-state-file,parallel-backend-request"
         - name: ADC_INGRESS_LOG_LEVEL
           value: "{{ .Values.deployment.adcContainer.config.logLevel }}"
+
+        {{- if .Values.deployment.adcContainer.env }}
+        {{- toYaml .Values.deployment.adcContainer.env | nindent 8 }}
+        {{- end }}
         ports:
         - name: http-status
           containerPort: 3001
