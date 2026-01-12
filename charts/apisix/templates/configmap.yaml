@@ -76,15 +76,15 @@ data:
       enable_http2: {{ .Values.apisix.enableHTTP2 }}
       enable_server_tokens: {{ .Values.apisix.enableServerTokens }} # Whether the APISIX version number should be shown in Server header
 
-      {{- if .Values.proxyProtocol.enabled }}
+      {{- if .Values.apisix.proxyProtocol.enabled }}
       proxy_protocol:                     # Proxy Protocol configuration
-        listen_http_port: {{ .Values.proxyProtocol.listenHTTPPort }}          # The port with proxy protocol for http, it differs from node_listen and admin_listen.
+        listen_http_port: {{ .Values.apisix.proxyProtocol.listenHTTPPort }}          # The port with proxy protocol for http, it differs from node_listen and admin_listen.
                                         # This port can only receive http request with proxy protocol, but node_listen & admin_listen
                                         # can only receive http request. If you enable proxy protocol, you must use this port to
                                         # receive http request with proxy protocol
-        listen_https_port: {{ .Values.proxyProtocol.listenHTTPSPort }}        # The port with proxy protocol for https
-        enable_tcp_pp: {{ .Values.proxyProtocol.enableTCPPP }}             # Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option
-        enable_tcp_pp_to_upstream: {{ .Values.proxyProtocol.enableTCPPPToUpstream }} # Enables the proxy protocol to the upstream server
+        listen_https_port: {{ .Values.apisix.proxyProtocol.listenHTTPSPort }}        # The port with proxy protocol for https
+        enable_tcp_pp: {{ .Values.apisix.proxyProtocol.enableTCPPP }}             # Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option
+        enable_tcp_pp_to_upstream: {{ .Values.apisix.proxyProtocol.enableTCPPPToUpstream }} # Enables the proxy protocol to the upstream server
       {{- end }}
 
       proxy_cache:                         # Proxy Caching configuration
