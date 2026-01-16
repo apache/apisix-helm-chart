@@ -168,13 +168,24 @@ data:
           {{- toYaml . | nindent 10}}
           {{- end }}
         ssl_protocols: {{ .Values.apisix.ssl.sslProtocols | quote }}
-        ssl_ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"
+        ssl_ciphers: {{ .Values.apisix.ssl.sslCiphers | quote }}
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
         ssl_trusted_certificate: "/usr/local/apisix/conf/ssl/{{ .Values.apisix.ssl.certCAFilename }}"
         {{- end }}
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.fallbackSNI }}
         fallback_sni: {{ .Values.apisix.ssl.fallbackSNI | quote }}
         {{- end }}
+      {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
+      {{- if $useTraditionalYaml }}
+      status:
+        ip: {{ default "127.0.0.1" .Values.apisix.status.ip }}
+        port: {{ default "7085" (.Values.apisix.status.port | toString) }}
+      {{- end}}
+
+      {{ if .Values.apisix.trustedAddresses }}
+      trusted_addresses:
+      {{- toYaml .Values.apisix.trustedAddresses | nindent 8 }}
+      {{ end }}
 
     nginx_config:    # config for render the template to genarate nginx.conf
       error_log: "{{ .Values.apisix.nginx.logs.errorLog }}"
@@ -209,6 +220,12 @@ data:
         {{- if .Values.apisix.nginx.customLuaSharedDicts }}
         custom_lua_shared_dict:        # add custom shared cache to nginx.conf
         {{- range $dict := .Values.apisix.nginx.customLuaSharedDicts }}
+          {{ $dict.name }}: {{ $dict.size }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.apisix.nginx.luaSharedDicts }}
+        lua_shared_dict:
+        {{- range $dict := .Values.apisix.nginx.luaSharedDicts }}
           {{ $dict.name }}: {{ $dict.size }}
         {{- end }}
         {{- end }}
@@ -299,7 +316,7 @@ data:
 
       {{- if eq .Values.apisix.deployment.role "traditional" }}
       role_traditional:
-        config_provider: etcd
+        config_provider: {{ default "etcd" .Values.apisix.deployment.role_traditional.config_provider }}
       {{- end }}
 
       {{- if eq .Values.apisix.deployment.role "control_plane" }}
@@ -314,6 +331,9 @@ data:
 
       {{- if not (eq .Values.apisix.deployment.role "data_plane") }}
       admin:
+        {{- if .Values.etcd.enabled }}
+        enable_admin_ui: {{ .Values.apisix.admin.enable_admin_ui }}
+        {{- end }}
         allow_admin:    # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
         {{- if .Values.apisix.admin.allow.ipList }}
         {{- range $ips := .Values.apisix.admin.allow.ipList }}
@@ -322,7 +342,7 @@ data:
         {{- else }}
           - 0.0.0.0/0
         {{- end}}
-        {{- if or (index .Values "ingress-controller" "enabled") .Values.dashboard.enabled  }}
+        {{- if (index .Values "ingress-controller" "enabled") }}
           - 0.0.0.0/0
         {{- end}}
         #   - "::/64"

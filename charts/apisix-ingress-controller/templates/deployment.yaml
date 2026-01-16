@@ -17,162 +17,150 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "apisix-ingress-controller.fullname" . }}
+  name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
-  {{- range $key, $value := .Values.annotations }}
+  {{- range $key, $value := .Values.deployment.annotations }}
     {{ $key }}: {{ $value | quote }}
   {{- end }}
   labels:
-    {{- include "apisix-ingress-controller.labels" . | nindent 4 }}
+    {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  replicas: {{ .Values.deployment.replicas }}
   selector:
     matchLabels:
-      {{- include "apisix-ingress-controller.selectorLabels" . | nindent 6 }}
-  {{- with .Values.updateStrategy }}
-  strategy: {{ toYaml . | nindent 4 }}
-  {{- end }}
+      {{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- if .Values.podAnnotations }}
-        {{- range $key, $value := $.Values.podAnnotations }}
+        {{- if .Values.deployment.podAnnotations }}
+        {{- range $key, $value := $.Values.deployment.podAnnotations }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
         {{- end }}
       labels:
-        {{- include "apisix-ingress-controller.selectorLabels" . | nindent 8 }}
+        {{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.priorityClassName }}
-      priorityClassName: {{ . }}
-      {{- end }}
-      serviceAccountName: {{ include "apisix-ingress-controller.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      volumes:
-        - name: configuration
-          configMap:
-            name: {{ .Release.Name }}-configmap
-            items:
-              - key: config.yaml
-                path: config.yaml
-      {{ if .Values.config.etcdserver.enabled }}
-        - name: apisix-config
-          configMap:
-            name: {{ .Release.Name }}-gw-configmap
-      {{ end }}
-      {{ if not .Values.config.etcdserver.enabled }}
-      initContainers:
-        - name: wait-apisix-admin
-          image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
-          {{ if .Values.config.apisix.serviceFullname }}
-          command: ['sh', '-c', "until nc -z {{ .Values.config.apisix.serviceFullname }} {{ .Values.config.apisix.servicePort }} ; do echo waiting for apisix-admin; sleep 2; done;"]
-          {{ else }}
-          command: ['sh', '-c', "until nc -z {{ .Values.config.apisix.serviceName }}.{{ .Values.config.apisix.serviceNamespace }}.svc.{{ .Values.clusterDomain }} {{ .Values.config.apisix.servicePort }} ; do echo waiting for apisix-admin; sleep 2; done;"]
-          {{ end}}
-
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-      {{ end }}
       containers:
-        - name: {{ .Chart.Name }}
-          command:
-            - /ingress-apisix/apisix-ingress-controller
-            - ingress
-            - --config-path
-            - /ingress-apisix/conf/config.yaml
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ (.Values.config.httpListen | split ":")._1 }}
-              protocol: TCP
-            {{ if .Values.config.etcdserver.enabled }}
-            - name: etcd
-              containerPort: 12379
-              protocol: TCP
-            {{ end }}
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: {{ (.Values.config.httpListen | split ":")._1 }}
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: {{ (.Values.config.httpListen | split ":")._1 }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          volumeMounts:
-            - mountPath: /ingress-apisix/conf/config.yaml
-              name: configuration
-              subPath: config.yaml
-          env:
-          - name: POD_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: POD_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          {{- if .Values.config.apisix.existingSecret }}
-          - name: DEFAULT_CLUSTER_ADMIN_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.config.apisix.existingSecret | quote }}
-                key: {{ include "apisix-ingress-controller.credentials.secretAdminKey" . }}
-          {{- end }}
-        {{ if .Values.config.etcdserver.enabled }}
-        - name: apisix
-          image: "{{ .Values.config.etcdserver.image.repository }}:{{ .Values.config.etcdserver.image.tag }}"
-          imagePullPolicy: {{ .Values.config.etcdserver.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: 9080
-              protocol: TCP
-            - name: http-admin
-              containerPort: 9180
-              protocol: TCP
-            - name: https
-              containerPort: {{ .Values.gateway.tls.containerPort }}
-              protocol: TCP
-            {{- if .Values.serviceMonitor.enabled }}
-            - containerPort: 9091
-              name: prometheus
-              protocol: TCP
-            {{- end }}
-          resources:
-            {{- toYaml .Values.gateway.resources | nindent 12 }}
-          securityContext:
-            {{- toYaml .Values.gateway.securityContext | nindent 12 }}
-          volumeMounts:
-            - name: apisix-config
-              mountPath: /usr/local/apisix/conf/config.yaml
-              subPath: config.yaml
+      - env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: ADC_SERVER_URL
+          value: "unix:/sockets/adc.sock"
+        image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        ports:
+        - containerPort: {{ splitList ":" .Values.config.metricsAddr | last | int }}
+          name: metrics
+          protocol: TCP
+        {{- if .Values.webhook.enabled }}
+        - containerPort: {{ .Values.webhook.port }}
+          name: webhook
+          protocol: TCP
         {{- end }}
-      {{- with .Values.nodeSelector }}
+        volumeMounts:
+        - name: {{ .Release.Name }}-ingress-config
+          mountPath: /app/conf/config.yaml
+          subPath: config.yaml
+        - name: socket-volume
+          mountPath: /sockets
+        {{- if .Values.webhook.enabled }}
+        - name: webhook-certs
+          mountPath: /certs
+          readOnly: true
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          {{- toYaml .Values.deployment.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.deployment.securityContext | nindent 10 }}
+      - name: adc-server
+        image: "{{ .Values.deployment.adcContainer.image.repository }}:{{ .Values.deployment.adcContainer.image.tag }}"
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        args:
+        - "server"
+        - "--listen"
+        - "unix:/sockets/adc.sock"
+        - "--listen-status"
+        - "3001"
+        env:
+        - name: ADC_RUNNING_MODE
+          value: "ingress"
+        - name: ADC_EXPERIMENTAL_FEATURE_FLAGS
+          value: "remote-state-file,parallel-backend-request"
+        - name: ADC_INGRESS_LOG_LEVEL
+          value: "{{ .Values.deployment.adcContainer.config.logLevel }}"
+        ports:
+        - name: http-status
+          containerPort: 3001
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz/ready
+            port: 3001
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz/ready
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+          - name: socket-volume
+            mountPath: /sockets
+        resources:
+          {{- toYaml .Values.deployment.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.deployment.securityContext | nindent 10 }}
+      {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- with .Values.deployment.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- with .Values.deployment.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.topologySpreadConstraints }}
+      {{- with .Values.deployment.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- tpl (. | toYaml) $ | nindent 8 }}
       {{- end }}
+      volumes:
+      - name: {{ .Release.Name }}-ingress-config
+        configMap:
+          name: {{ .Release.Name }}-ingress-config
+      - name: socket-volume
+        emptyDir: {}
+      {{- if .Values.webhook.enabled }}
+      - name: webhook-certs
+        secret:
+          secretName: {{ include "apisix-ingress-controller-manager.webhook.secretName" . }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ .Release.Name }}
+      terminationGracePeriodSeconds: 10

@@ -31,7 +31,7 @@ title: Apache APISIX Helm Chart
 To install the chart with release name `apisix`:
 
 ```shell
-helm repo add apisix https://charts.apiseven.com
+helm repo add apisix https://apache.github.io/apisix-helm-chart
 helm repo update
 helm install apisix apisix/apisix --create-namespace  --namespace apisix
 ```
@@ -41,7 +41,7 @@ helm install apisix apisix/apisix --create-namespace  --namespace apisix
 To quickly experience Apache APISIX related components like Apache APISIX Dashboard and Apache APISIX Ingress Controller. For a quick installation, start by one line:
 
 ```shell
-helm repo add apisix https://charts.apiseven.com && helm repo update && helm upgrade --install apisix apisix/apisix --create-namespace  --namespace apisix --set dashboard.enabled=true --set ingress-controller.enabled=true --set ingress-controller.config.apisix.serviceNamespace=apisix
+helm repo add apisix https://apache.github.io/apisix-helm-chart && helm repo update && helm upgrade --install apisix apisix/apisix --create-namespace  --namespace apisix --set dashboard.enabled=true --set ingress-controller.enabled=true --set ingress-controller.config.apisix.serviceNamespace=apisix
 ```
 
 ## Uninstall

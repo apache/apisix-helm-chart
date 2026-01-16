@@ -1,4 +1,17 @@
-# Apache APISIX Dashboard
+# [DEPRECATED] Apache APISIX Dashboard
+
+> [!WARNING]
+> This chart is deprecated and no longer maintained.
+>
+> In short:
+> The old version of the APISIX Dashboard lacks maintenance from community members,
+> while the brand new Dashboard will be directly integrated into APISIX,
+> eliminating the need for the current chart.
+>
+> For details, please see <https://github.com/apache/apisix-dashboard/issues/2981>.
+>
+> If you are still using the old version of the APISIX Dashboard,
+> you can continue to use the chart.
 
 [APISIX Dashboard](https://github.com/apache/apisix-dashboard/) is designed to make it as easy as possible for users to operate Apache APISIX through a frontend interface.
 
@@ -11,7 +24,7 @@ APISIX Dashboard requires Kubernetes version 1.14+.
 ## Get Repo Info
 
 ```console
-helm repo add apisix https://charts.apiseven.com
+helm repo add apisix https://apache.github.io/apisix-helm-chart
 helm repo update
 ```
 

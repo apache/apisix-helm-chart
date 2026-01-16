@@ -29,7 +29,7 @@ image:
   pullPolicy: IfNotPresent
   # -- Apache APISIX image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 3.11.0-debian
+  tag: 3.14.1-ubuntu
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
@@ -320,6 +320,8 @@ apisix:
     enableHTTP3: false
     # -- TLS protocols allowed to use.
     sslProtocols: "TLSv1.2 TLSv1.3"
+    # -- TLS ciphers allowed to use.
+    sslCiphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"
     # -- Define SNI to fallback if none is presented by client
     fallbackSNI: ""
 
@@ -349,10 +351,33 @@ apisix:
     #
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     role: "traditional"
+    role_traditional:
+      # enum: etcd, yaml
+      config_provider: "etcd"
+
+    # -- Standalone rules configuration
+    #
+    # ref: https://apisix.apache.org/docs/apisix/deployment-modes/#standalone
+    standalone:
+      # -- Rules which are set to the default apisix.yaml configmap.
+      # If apisix.delpoyment.standalone.existingConfigMap is empty, these are used.
+      config: |
+        routes:
+        -
+          uri: /hi
+          upstream:
+            nodes:
+              "127.0.0.1:1980": 1
+            type: roundrobin
+      # -- Specifies the name of the ConfigMap that contains the rule configurations.
+      # The configuration must be set to the key named `apisix.yaml` in the configmap.
+      existingConfigMap: ""
 
   admin:
     # -- Enable Admin API
     enabled: true
+    # -- Enable Embedded Admin UI
+    enable_admin_ui: true
     # -- admin service type
     type: ClusterIP
     # loadBalancerIP: a.b.c.d
@@ -440,7 +465,7 @@ apisix:
 
       stream: |
 
-    # -- Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module#toc88) settings,
+    # -- Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module?tab=readme-ov-file#lua_shared_dict) settings,
     # click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict
     customLuaSharedDicts: []
       # - name: foo
@@ -448,11 +473,17 @@ apisix:
       # - name: bar
       #   size: 1m
 
+    # -- Override default [lua_shared_dict](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L250-L276) settings,
+    # click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict
+    luaSharedDicts: []
+      # - name: prometheus-metrics
+      #   size: 20m
+
   discovery:
     # -- Enable or disable Apache APISIX integration service discovery
     enabled: false
-    # -- Registry is the same to the one in APISIX [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L281),
-    # and refer to such file for more setting details. also refer to [this documentation for integration service discovery](https://apisix.apache.org/docs/apisix/discovery)
+    # -- Service discovery registry. Refer to [configuration under discovery](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L307) for example.
+    # Also see [example of using external service discovery](https://apisix.apache.org/docs/ingress-controller/1.8.0/tutorials/external-service-discovery/).
     registry: {}
       # Integration service discovery registry. E.g eureka\dns\nacos\consul_kv
       # reference:
@@ -526,16 +557,17 @@ apisix:
     # -- container port where the metrics are exposed
     containerPort: 9091
 
-  # -- Customize the list of APISIX plugins to enable. By default, APISIX's default plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml)
+  # -- Customize the list of APISIX plugins to enable. By default, APISIX's [default plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L196) are automatically used.
   plugins: []
-  # -- Customize the list of APISIX stream_plugins to enable. By default, APISIX's default stream_plugins are automatically used. See [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml)
+  # -- Customize the list of APISIX stream_plugins to enable. By default, APISIX's [default stream_plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L294) are automatically used.
   stream_plugins: []
   # -- Customize APISIX proxy_cache plugin settings.
   proxy_cache:
     # -- Customize additional cache zones. See [proxy_cache plugin](https://apisix.apache.org/docs/apisix/plugins/proxy-cache/#enable-plugin)
     zones: []
 
-  # -- Set APISIX plugin attributes, see [config-default.yaml](https://github.com/apache/apisix/blob/master/conf/config-default.yaml#L376) for more details
+  # -- Set APISIX plugin attributes. By default, APISIX's [plugin_attr](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L295) are automatically used.
+  # See [configuration example](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L591).
   pluginAttrs: {}
 
   extPlugin:
@@ -571,6 +603,14 @@ apisix:
             - key: "the-file-name"
               path: "mount-path"
 
+  status:
+    ip: "0.0.0.0"
+    port: 7085
+
+  # -- When configured, APISIX will trust the `X-Forwarded-*` Headers passed in requests from the IP/CIDR in the list.
+  trustedAddresses:
+    - 127.0.0.1
+
 # -- external etcd configuration. If etcd.enabled is false, these configuration will be used.
 externalEtcd:
   # -- if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379.
@@ -591,14 +631,24 @@ externalEtcd:
 # -- etcd configuration
 # use the FQDN address or the IP of the etcd
 etcd:
-  # -- install etcd(v3) by default, set false if do not want to install etcd(v3) together
+  # -- install built-in etcd by default, set false if do not want to install built-in etcd together,
+  # this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes,
+  # if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it.
   enabled: true
+  # -- docker image for built-in etcd
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/etcd
+    # -- `bitnamilegacy/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267,
+    # you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags.
+    tag: latest
+
   # -- apisix configurations prefix
   prefix: "/apisix"
   # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
   timeout: 30
 
-  # -- if etcd.enabled is true, set more values of bitnami/etcd helm chart
+  # -- if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart
   auth:
     rbac:
       # -- No authentication by default. Switch to enable RBAC authentication
@@ -628,25 +678,9 @@ etcd:
     port: 2379
 
   replicaCount: 3
-
-dashboard:
-  enabled: false
-  config:
-    conf:
-      etcd:
-        # -- Supports defining multiple etcd host addresses for an etcd cluster
-        endpoints:
-          - apisix-etcd:2379
-        # -- apisix configurations prefix
-        prefix: "/apisix"
-        # -- Specifies etcd basic auth username if enable etcd auth
-        username: ~
-        # -- Specifies etcd basic auth password if enable etcd auth
-        password: ~
+  autoCompactionRetention: "1h"
+  autoCompactionMode: "periodic"
 
 # -- Ingress controller configuration
 ingress-controller:
   enabled: false
-  config:
-    apisix:
-      adminAPIVersion: "v3"

@@ -18,7 +18,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "apisix-ingress-controller.fullname" . }}
+  name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}
   {{- if .Values.serviceMonitor.namespace }}
   namespace: {{ .Values.serviceMonitor.namespace }}
   {{- end }}
@@ -30,7 +30,7 @@ metadata:
   {{- end }}
 spec:
   endpoints:
-  - targetPort: http
+  - targetPort: metrics
     scheme: http
     {{- if .Values.serviceMonitor.interval }}
     interval: {{ .Values.serviceMonitor.interval }}
@@ -40,10 +40,9 @@ spec:
     {{- end }}
   namespaceSelector:
     matchNames:
-    - {{ template "apisix-ingress-controller.namespace" . }}
+    - {{ .Release.Namespace }}
 
   selector:
     matchLabels:
-      {{- include "apisix-ingress-controller.labels" . | nindent 6 }}
+      {{- include "apisix-ingress-controller-manager.labels" . | nindent 6 }}
 {{- end }}
-
