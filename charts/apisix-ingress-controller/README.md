@@ -133,7 +133,7 @@ The same for container level, you need to set:
 | deployment.annotations | object | `{}` | Add annotations to Apache APISIX ingress controller resource |
 | deployment.image.pullPolicy | string | `"IfNotPresent"` |  |
 | deployment.image.repository | string | `"apache/apisix-ingress-controller"` |  |
-| deployment.image.tag | string | `"2.0.0"` |  |
+| deployment.image.tag | string | `"2.0.1"` |  |
 | deployment.nodeSelector | object | `{}` |  |
 | deployment.podAnnotations | object | `{}` |  |
 | deployment.podSecurityContext | object | `{"fsGroup":2000}` | Set security context for the pod fsGroup: 2000 ensures containers can share Unix socket files via a common group. |
