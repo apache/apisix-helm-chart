@@ -108,7 +108,15 @@ spec:
             - name: http-{{ .port | toString }}
               containerPort: {{ .port }}
               protocol: TCP
-            {{- end }}     
+            {{- end }}
+            {{- if .Values.apisix.proxyProtocol.enabled }}
+            - name: proxy-http
+              containerPort: {{ .Values.apisix.proxyProtocol.listen_http_port | default 9181 }}
+              protocol: TCP
+            - name: proxy-https
+              containerPort: {{ .Values.apisix.proxyProtocol.listen_https_port | default 9182 }}
+              protocol: TCP
+            {{- end }}
             - name: tls
               containerPort: {{ .Values.apisix.ssl.containerPort }}
               protocol: TCP
