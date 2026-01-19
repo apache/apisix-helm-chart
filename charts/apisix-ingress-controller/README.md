@@ -143,6 +143,8 @@ The same for container level, you need to set:
 | deployment.topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
 | fullnameOverride | string | `""` |  |
 | gatewayProxy.createDefault | bool | `false` | Controls whether to create a default GatewayProxy custom resource. |
+| gatewayProxy.pluginMetadata | object | `{}` | Global plugin metadata shared by all instances of the same plugin. |
+| gatewayProxy.plugins | list | `[]` | List of global plugins to be enabled on the GatewayProxy. |
 | gatewayProxy.provider | object | `{"controlPlane":{"auth":{"adminKey":{"value":"edd1c9f034335f136f87ad84b625c8f1","valueFrom":{}},"type":"AdminKey"},"endpoints":[],"service":{"name":"","port":9180}},"pluginMetadata":{},"plugins":[],"type":"ControlPlane"}` | Configuration for the GatewayProxy provider connection |
 | gatewayProxy.provider.controlPlane | object | `{"auth":{"adminKey":{"value":"edd1c9f034335f136f87ad84b625c8f1","valueFrom":{}},"type":"AdminKey"},"endpoints":[],"service":{"name":"","port":9180}}` | ControlPlane provider specific configuration Either `endpoints` or `service` must be specified, but not both. |
 | gatewayProxy.provider.controlPlane.auth | object | `{"adminKey":{"value":"edd1c9f034335f136f87ad84b625c8f1","valueFrom":{}},"type":"AdminKey"}` | Authentication configuration for control plane connection |
@@ -152,8 +154,6 @@ The same for container level, you need to set:
 | gatewayProxy.provider.controlPlane.auth.type | string | `AdminKey` | Authentication type. Only `AdminKey` is currently supported. |
 | gatewayProxy.provider.controlPlane.endpoints | list | `[]` | List of APISIX control plane Admin API endpoints. example: ["http://apisix-admin.default.svc.cluster.local:9180"] |
 | gatewayProxy.provider.controlPlane.service | object | `{"name":"","port":9180}` | Alternatively, reference a Kubernetes Service for the APISIX Admin API. |
-| gatewayProxy.provider.pluginMetadata | object | `{}` | Global plugin metadata shared by all instances of the same plugin. |
-| gatewayProxy.provider.plugins | list | `[]` | List of global plugins to be enabled on the GatewayProxy. |
 | gatewayProxy.provider.type | string | `"ControlPlane"` | Specifies the provider type for the GatewayProxy. |
 | labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX ingress controller resource |
 | nameOverride | string | `""` | Default values for apisix-ingress-controller. This is a YAML-formatted file. Declare variables to be passed into your templates.  |
