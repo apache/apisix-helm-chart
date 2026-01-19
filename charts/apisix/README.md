@@ -117,6 +117,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.prometheus.enabled | bool | `false` |  |
 | apisix.prometheus.metricPrefix | string | `"apisix_"` | prefix of the metrics |
 | apisix.prometheus.path | string | `"/apisix/prometheus/metrics"` | path of the metrics endpoint |
+| apisix.proxy_cache | object | `{"zones":[]}` | Customize APISIX proxy_cache plugin settings. |
+| apisix.proxy_cache.zones | list | `[]` | Customize additional cache zones. See [proxy_cache plugin](https://apisix.apache.org/docs/apisix/plugins/proxy-cache/#enable-plugin) |
 | apisix.router.http | string | `"radixtree_host_uri"` | Defines how apisix handles routing: - radixtree_uri: match route by uri(base on radixtree) - radixtree_host_uri: match route by host + uri(base on radixtree) - radixtree_uri_with_parameter: match route by uri with parameters |
 | apisix.setIDFromPodUID | bool | `false` | Use Pod metadata.uid as the APISIX id. |
 | apisix.ssl.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |

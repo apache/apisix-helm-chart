@@ -561,6 +561,10 @@ apisix:
   plugins: []
   # -- Customize the list of APISIX stream_plugins to enable. By default, APISIX's [default stream_plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L294) are automatically used.
   stream_plugins: []
+  # -- Customize APISIX proxy_cache plugin settings.
+  proxy_cache:
+    # -- Customize additional cache zones. See [proxy_cache plugin](https://apisix.apache.org/docs/apisix/plugins/proxy-cache/#enable-plugin)
+    zones: []
 
   # -- Set APISIX plugin attributes. By default, APISIX's [plugin_attr](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L295) are automatically used.
   # See [configuration example](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L591).
