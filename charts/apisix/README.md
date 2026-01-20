@@ -117,6 +117,12 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.prometheus.enabled | bool | `false` |  |
 | apisix.prometheus.metricPrefix | string | `"apisix_"` | prefix of the metrics |
 | apisix.prometheus.path | string | `"/apisix/prometheus/metrics"` | path of the metrics endpoint |
+| apisix.proxyProtocol | object | `{"enableTCPPP":false,"enableTCPPPToUpstream":false,"enabled":false,"listenHTTPPort":9181,"listenHTTPSPort":9182}` | Configuration for PROXY protocol |
+| apisix.proxyProtocol.enableTCPPP | bool | `false` | Enable the proxy protocol for TCP proxy, works for stream_proxy.tcp option |
+| apisix.proxyProtocol.enableTCPPPToUpstream | bool | `false` | Enable the proxy protocol to the upstream server |
+| apisix.proxyProtocol.enabled | bool | `false` | Enable or disable PROXY protocol |
+| apisix.proxyProtocol.listenHTTPPort | int | `9181` | The port with proxy protocol for HTTP |
+| apisix.proxyProtocol.listenHTTPSPort | int | `9182` | The port with proxy protocol for HTTPS |
 | apisix.router.http | string | `"radixtree_host_uri"` | Defines how apisix handles routing: - radixtree_uri: match route by uri(base on radixtree) - radixtree_host_uri: match route by host + uri(base on radixtree) - radixtree_uri_with_parameter: match route by uri with parameters |
 | apisix.setIDFromPodUID | bool | `false` | Use Pod metadata.uid as the APISIX id. |
 | apisix.ssl.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |

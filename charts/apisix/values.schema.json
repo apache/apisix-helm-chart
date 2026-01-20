@@ -1,6 +1,34 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "properties": {
+    "apisix": {
+      "description": "Apache APISIX configuration",
+      "type": "object",
+      "properties": {
+        "proxyProtocol": {
+          "description": "Configuration for PROXY protocol",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "listenHTTPPort": {
+              "type": "integer"
+            },
+            "listenHTTPSPort": {
+              "type": "integer"
+            },
+            "enableTCPPP": {
+              "type": "boolean"
+            },
+            "enableTCPPPToUpstream": {
+              "type": "boolean"
+            }
+          },
+          "required": ["enabled", "listenHTTPPort", "listenHTTPSPort", "enableTCPPP", "enableTCPPPToUpstream"]
+        }
+      }
+    },
     "plugins": {
       "description": "APISIX plugins to be enabled",
       "type": "array",
