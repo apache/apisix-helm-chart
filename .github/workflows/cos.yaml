@@ -1,0 +1,37 @@
+name: 发布到腾讯云
+
+on:
+  push:
+    branches:
+      - master
+      - legacy
+      - dev
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        run: |
+          echo "installing helm 3..."
+          curl -sSL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+      - name: Upload to COS
+        uses: zkqiang/tencent-cos-action@v0.1.0
+        with:
+          args: upload -r /
+          secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
+          bucket: helm-1374617844
+          region: ap-chengdu
