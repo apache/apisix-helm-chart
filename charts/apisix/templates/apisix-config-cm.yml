@@ -19,6 +19,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: apisix.yaml
+  namespace: {{ .Release.Namespace }}
 data:
   apisix.yaml: |
     {{- .Values.apisix.deployment.standalone.config | nindent 4 }}
