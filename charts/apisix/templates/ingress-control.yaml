@@ -16,7 +16,7 @@
 
 {{- if (and .Values.control.enabled .Values.control.ingress.enabled) -}}
 {{- $fullName := include "apisix.fullname" . -}}
-{{- $svcPort := .Values.control.servicePort -}}
+{{- $svcPort := .Values.control.service.servicePort -}}
 {{- if and .Values.control.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.control.ingress.annotations "kubernetes.io/ingress.class") }}
   {{- $_ := set .Values.control.ingress.annotations "kubernetes.io/ingress.class" .Values.control.ingress.className}}
