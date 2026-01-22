@@ -28,6 +28,7 @@ metadata:
     app.kubernetes.io/service: apisix-gateway
 spec:
   type: {{ .Values.service.type }}
+  sessionAffinity: {{ .Values.service.sessionAffinity | default "None" }}
   externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
   {{- if eq .Values.service.type "LoadBalancer" }}
   {{- if .Values.service.loadBalancerIP }}
