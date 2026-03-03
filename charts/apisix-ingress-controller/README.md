@@ -155,6 +155,7 @@ The same for container level, you need to set:
 | gatewayProxy.provider.pluginMetadata | object | `{}` | Global plugin metadata shared by all instances of the same plugin. |
 | gatewayProxy.provider.plugins | list | `[]` | List of global plugins to be enabled on the GatewayProxy. |
 | gatewayProxy.provider.type | string | `"ControlPlane"` | Specifies the provider type for the GatewayProxy. |
+| global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
 | labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX ingress controller resource |
 | nameOverride | string | `""` | Default values for apisix-ingress-controller. This is a YAML-formatted file. Declare variables to be passed into your templates.  |
 | podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |
