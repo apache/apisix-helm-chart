@@ -111,6 +111,7 @@ The same for container level, you need to set:
 | autoscaling.enabled | bool | `false` |  |
 | autoscaling.minReplicas | int | `1` |  |
 | config.controllerName | string | `"apisix.apache.org/apisix-ingress-controller"` |  |
+| config.disableGatewayAPI | bool | `false` |  |
 | config.enableHTTP2 | bool | `false` |  |
 | config.execADCTimeout | string | `"15s"` |  |
 | config.kubernetes.defaultIngressClass | bool | `false` |  |
@@ -127,7 +128,7 @@ The same for container level, you need to set:
 | config.provider.syncPeriod | string | `"1m"` |  |
 | config.provider.type | string | `"apisix"` |  |
 | config.secureMetrics | bool | `false` |  |
-| deployment.adcContainer | object | `{"config":{"logLevel":"info"},"image":{"repository":"ghcr.io/api7/adc","tag":"0.22.1"}}` | Set adc sidecar container configuration |
+| deployment.adcContainer | object | `{"config":{"logLevel":"info"},"image":{"repository":"ghcr.io/api7/adc","tag":"0.24.2"}}` | Set adc sidecar container configuration |
 | deployment.affinity | object | `{}` |  |
 | deployment.annotations | object | `{}` | Add annotations to Apache APISIX ingress controller resource |
 | deployment.image.pullPolicy | string | `"IfNotPresent"` |  |
