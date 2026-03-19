@@ -346,6 +346,13 @@ apisix:
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     mode: traditional
 
+    livenessProbe:
+      enabled: false
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 1
+      failureThreshold: 6
+      successThreshold: 1
     # -- Deployment role
     # Optional: traditional, data_plane, control_plane
     #
