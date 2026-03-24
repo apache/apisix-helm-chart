@@ -43,9 +43,11 @@ spec:
         {{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 8 }}
     spec:
       {{- $imagePullSecrets := .Values.deployment.imagePullSecrets | default ((.Values.global).imagePullSecrets | default list) }}
-      {{- if $imagePullSecrets }}
+      {{- with $imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml $imagePullSecrets | nindent 8 }}
+        {{- range $imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
       {{- end }}
       containers:
       - env:
