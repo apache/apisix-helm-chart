@@ -643,6 +643,8 @@ etcd:
   prefix: "/apisix"
   # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
   timeout: 30
+  # -- Set the timeout value in seconds for apisix to wait for a response from etcd cluster when watching etcd changes
+  watch_timeout: 50
 
   # -- if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart
   auth:
