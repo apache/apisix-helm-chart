@@ -42,6 +42,13 @@ spec:
       labels:
         {{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 8 }}
     spec:
+      {{- $imagePullSecrets := .Values.deployment.imagePullSecrets | default ((.Values.global).imagePullSecrets | default list) }}
+      {{- with $imagePullSecrets }}
+      imagePullSecrets:
+        {{- range $imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
       containers:
       - env:
         - name: POD_NAMESPACE
