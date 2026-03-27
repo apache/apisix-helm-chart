@@ -244,8 +244,7 @@ control:
   ingress:
     enabled: false
     # -- Ingress annotations
-    annotations:
-      {}
+    annotations: {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- Ingress Class Name
@@ -302,7 +301,7 @@ apisix:
       mounts:
         # -- Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the lua module code path.
         - key: ""
-        # -- Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the lua module code path.
+          # -- Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the lua module code path.
           path: ""
 
   ssl:
@@ -416,8 +415,7 @@ apisix:
     ingress:
       enabled: false
       # -- Ingress annotations
-      annotations:
-        {}
+      annotations: {}
         # kubernetes.io/ingress.class: nginx
         # kubernetes.io/tls-acme: "true"
       hosts:
@@ -478,7 +476,12 @@ apisix:
     luaSharedDicts: []
       # - name: prometheus-metrics
       #   size: 20m
-
+  proxyProtocol:
+    enabled: false
+    listen_http_port: 9181
+    listen_https_port: 9182
+    enable_tcp_pp: true
+    enable_tcp_pp_to_upstream: true
   discovery:
     # -- Enable or disable Apache APISIX integration service discovery
     enabled: false
