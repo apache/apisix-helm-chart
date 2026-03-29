@@ -524,14 +524,22 @@ apisix:
       #      - KUBERNETES_SERVICE_PORT
       #     This is for allowing the default `host` and `port` of `.discovery.registry.kubernetes.service`.
 
-  dns:
-    resolvers:
-      - 127.0.0.1
-      - 172.20.0.10
-      - 114.114.114.114
-      - 223.5.5.5
-      - 1.1.1.1
-      - 8.8.8.8
+      #  dns:
+      #    servers:
+      #      - 127.0.0.1         # Replace with the address of your DNS server.
+      #      - 172.20.0.10
+      #      - 169.254.169.253
+      #      - 114.114.114.114
+      #      - 223.5.5.5
+      #      - 1.1.1.1
+      #      - 8.8.8.8  
+      #    resolv_conf: /etc/resolv.conf # Replace with the path to the local DNS resolv config. Configure either "servers" or "resolv_conf".
+      #    order:                       # Resolve DNS records this order.
+      #      - last                     # Try the latest successful type for a hostname.
+      #      - SRV
+      #      - A
+      #      - AAAA
+      #      - CNAME
     validity: 30
     timeout: 5
 
