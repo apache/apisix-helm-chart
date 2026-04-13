@@ -108,7 +108,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.logs.errorLog | string | `"/dev/stderr"` | Error log path |
 | apisix.nginx.logs.errorLogLevel | string | `"warn"` | Error log level |
 | apisix.nginx.luaSharedDicts | list | `[]` | Override default [lua_shared_dict](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L250-L276) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict |
-| apisix.nginx.metaLuaSharedDicts | list | `[]` | Override default meta-level [lua_shared_dict](https://github.com/apache/apisix/blob/master/conf/config.yaml.example) settings, meta-level shared dicts are shared across both HTTP and stream subsystems. Since APISIX 3.16.0, `upstream-healthcheck` is a meta-level shared dict. |
+| apisix.nginx.metaLuaSharedDicts | list | `[]` | Override default meta-level [lua_shared_dict](https://github.com/apache/apisix/blob/master/conf/config.yaml.example) settings, meta-level shared dicts are shared across both HTTP and stream subsystems. Since APISIX 3.16.0, `upstream-healthcheck` is a meta-level shared dict. click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict |
 | apisix.nginx.workerConnections | string | `"10620"` |  |
 | apisix.nginx.workerProcesses | string | `"auto"` |  |
 | apisix.nginx.workerRlimitNofile | string | `"20480"` |  |
