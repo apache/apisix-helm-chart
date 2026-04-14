@@ -391,6 +391,7 @@ data:
       {{- end }}
         prefix: {{ .Values.etcd.prefix | quote }}    # configuration prefix in etcd
         timeout: {{ .Values.etcd.timeout }}    # 30 seconds
+        watch_timeout: {{ .Values.etcd.watch_timeout }}    # 50 seconds, default value from apisix
         {{- if and (not .Values.etcd.enabled) .Values.externalEtcd.user }}
         user: {{ .Values.externalEtcd.user | quote }}
         password: "{{ print "${{ APISIX_ETCD_PASSWORD }}" }}"
