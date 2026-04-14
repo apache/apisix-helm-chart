@@ -283,6 +283,19 @@ apisix:
   # -- Whether the APISIX version number should be shown in Server header
   enableServerTokens: true
 
+  # -- Configuration for PROXY protocol
+  proxyProtocol:
+    # -- Enable or disable PROXY protocol
+    enabled: false
+    # -- The port with proxy protocol for HTTP
+    listenHTTPPort: 9181
+    # -- The port with proxy protocol for HTTPS
+    listenHTTPSPort: 9182
+    # -- Enable the proxy protocol for TCP proxy, works for stream_proxy.tcp option
+    enableTCPPP: false
+    # -- Enable the proxy protocol to the upstream server
+    enableTCPPPToUpstream: false
+
   # -- Use Pod metadata.uid as the APISIX id.
   setIDFromPodUID: false
 
