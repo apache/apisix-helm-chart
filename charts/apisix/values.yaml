@@ -29,7 +29,7 @@ image:
   pullPolicy: IfNotPresent
   # -- Apache APISIX image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 3.15.0-ubuntu
+  tag: 3.16.0-ubuntu
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
@@ -478,6 +478,14 @@ apisix:
     luaSharedDicts: []
       # - name: prometheus-metrics
       #   size: 20m
+
+    # -- Override default meta-level [lua_shared_dict](https://github.com/apache/apisix/blob/master/conf/config.yaml.example) settings,
+    # meta-level shared dicts are shared across both HTTP and stream subsystems.
+    # Since APISIX 3.16.0, `upstream-healthcheck` is a meta-level shared dict.
+    # click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict
+    metaLuaSharedDicts: []
+      # - name: upstream-healthcheck
+      #   size: 10m
 
   discovery:
     # -- Enable or disable Apache APISIX integration service discovery

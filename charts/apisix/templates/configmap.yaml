@@ -195,6 +195,13 @@ data:
         - {{ $env }}
       {{- end }}
       {{- end }}
+      {{- if .Values.apisix.nginx.metaLuaSharedDicts }}
+      meta:
+        lua_shared_dict:
+        {{- range $dict := .Values.apisix.nginx.metaLuaSharedDicts }}
+          {{ $dict.name }}: {{ $dict.size }}
+        {{- end }}
+      {{- end }}
       http:
         enable_access_log: {{ .Values.apisix.nginx.logs.enableAccessLog }}
         {{- if .Values.apisix.nginx.logs.enableAccessLog }}
