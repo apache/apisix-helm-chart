@@ -1,0 +1,11 @@
+{{- $root := $ -}}
+{{- with $root.Values.gatewayApi -}}
+  {{- if and (hasKey . "enabled") (kindIs "bool" .enabled) .enabled -}}
+    {{- $channel := .channel | default "standard" -}}
+    {{- $hash := dig "verify" $channel "" . -}}
+    {{- $bundle := printf "gateway-api-crds/%s-install.yaml" $channel -}}
+    {{- if eq $hash ($root.Files.Get $bundle | sha256sum) -}}
+      {{- $root.Files.Get $bundle -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
