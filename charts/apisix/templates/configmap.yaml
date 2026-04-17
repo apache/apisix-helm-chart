@@ -62,7 +62,7 @@ data:
       enable_control: {{ .Values.control.enabled }}
       {{- if .Values.control.enabled }}
       control:
-        ip: {{ default "127.0.0.1" .Values.control.service.ip }}
+        ip: {{ default "127.0.0.1" .Values.control.service.ip | quote }}
         port: {{ default 9090 .Values.control.service.port }}
       {{- end }}
 
@@ -172,7 +172,7 @@ data:
       {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
       {{- if $useTraditionalYaml }}
       status:
-        ip: {{ default "127.0.0.1" .Values.apisix.status.ip }}
+        ip: {{ default "127.0.0.1" .Values.apisix.status.ip | quote }}
         port: {{ default "7085" (.Values.apisix.status.port | toString) }}
       {{- end}}
 
@@ -338,7 +338,7 @@ data:
         allow_admin:    # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
         {{- if .Values.apisix.admin.allow.ipList }}
         {{- range $ips := .Values.apisix.admin.allow.ipList }}
-          - {{ $ips }}
+          - {{ $ips | quote }}
         {{- end }}
         {{- else }}
           - 0.0.0.0/0
@@ -349,7 +349,7 @@ data:
         #   - "::/64"
         {{- if .Values.apisix.admin.enabled }}
         admin_listen:
-          ip: {{ .Values.apisix.admin.ip }}
+          ip: {{ .Values.apisix.admin.ip | quote }}
           port: {{ .Values.apisix.admin.port }}
         {{- end }}
         # Default token when use API to call for Admin API.
