@@ -60,7 +60,7 @@ spec:
       {{- end }}
       containers:
         {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
-        - name: {{ .Chart.Name }}
+        - name: {{ include "apisix.name" . }}
           {{- with .Values.securityContext }}
           securityContext:
             {{- . | toYaml | nindent 12 }}
