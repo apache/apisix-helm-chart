@@ -127,6 +127,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.ssl.enabled | bool | `false` |  |
 | apisix.ssl.existingCASecret | string | `""` | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) |
 | apisix.ssl.fallbackSNI | string | `""` | Define SNI to fallback if none is presented by client |
+| apisix.ssl.hostPort | number | `nil` | Bind the APISIX HTTPS container port to a host port. |
 | apisix.ssl.sslCiphers | string | `"ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"` | TLS ciphers allowed to use. |
 | apisix.ssl.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | apisix.status.ip | string | `"0.0.0.0"` |  |
@@ -218,8 +219,9 @@ The command removes all the Kubernetes components associated with the chart and 
 | securityContext | object | `{}` | Set the securityContext for Apache APISIX container |
 | service.externalIPs | list | `[]` |  |
 | service.externalTrafficPolicy | string | `"Cluster"` |  |
-| service.http | object | `{"additionalContainerPorts":[],"containerPort":9080,"enabled":true,"servicePort":80}` | Apache APISIX service settings for http |
+| service.http | object | `{"additionalContainerPorts":[],"containerPort":9080,"enabled":true,"hostPort":null,"servicePort":80}` | Apache APISIX service settings for http |
 | service.http.additionalContainerPorts | list | `[]` | Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24) |
+| service.http.hostPort | number | `nil` | Bind the APISIX HTTP container port to a host port. |
 | service.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
 | service.stream | object | `{"enabled":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | service.tls | object | `{"servicePort":443}` | Apache APISIX service settings for tls |
