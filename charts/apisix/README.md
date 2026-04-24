@@ -206,6 +206,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` | Node labels for Apache APISIX pod assignment |
 | podAnnotations | object | `{}` | Annotations to add to each pod |
+| podLabels | object | `{}` | Labels to add to each pod |
 | podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |
 | podDisruptionBudget.enabled | bool | `false` | Enable or disable podDisruptionBudget |
 | podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
