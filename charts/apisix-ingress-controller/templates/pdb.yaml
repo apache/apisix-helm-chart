@@ -22,10 +22,10 @@ apiVersion: policy/v1
 {{- end }}
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "apisix-ingress-controller.fullname" . }}
+  name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "apisix-ingress-controller.labels" . | nindent 4 }}
+    {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
 spec:
 {{- if .Values.podDisruptionBudget.minAvailable }}
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
@@ -34,5 +34,5 @@ spec:
 {{- end }}
   selector:
     matchLabels:
-{{- include "apisix-ingress-controller.selectorLabels" . | nindent 6 }}
+{{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 6 }}
 {{- end }}
