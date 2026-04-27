@@ -556,14 +556,13 @@ apisix:
   wasm:
     # -- Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/).
     enabled: false
-    # -- Set Wasm plugin name.
+    # -- Set Wasm plugins. Each item supports fields such as name, priority, file, and http_request_phase.
+    # plugins:
+    #   - name: "example-plugin"
+    #     priority: 7999
+    #     file: "/path/to/plugin.wasm"
+    #     http_request_phase: "rewrite"
     plugins: []
-    # -- Set wasm plugin priority.
-    priority: 7999
-    # -- Set path to Wasm plugin.
-    file: ""
-    # -- Set the HTTP request phase in which the plugin should run.
-    http_request_phase: rewrite
 
   # -- customPlugins allows you to mount your own HTTP plugins.
   customPlugins:
