@@ -52,6 +52,7 @@ deployment:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  imagePullSecrets: []
 
   # -- Set security context for the pod
   # fsGroup: 2000 ensures containers can share Unix socket files via a common group.
@@ -72,7 +73,7 @@ deployment:
   adcContainer:
     image:
       repository: ghcr.io/api7/adc
-      tag: "0.23.1"
+      tag: "0.24.2"
     config:
       logLevel: "info"
 
