@@ -121,6 +121,7 @@ The same for container level, you need to set:
 | config.leaderElection.leaseDuration | string | `"15s"` |  |
 | config.leaderElection.renewDeadline | string | `"10s"` |  |
 | config.leaderElection.retryPeriod | string | `"2s"` |  |
+| config.listenerPortMatchMode | string | `"auto"` |  |
 | config.logLevel | string | `"info"` |  |
 | config.metricsAddr | string | `":8080"` |  |
 | config.probeAddr | string | `":8081"` |  |
