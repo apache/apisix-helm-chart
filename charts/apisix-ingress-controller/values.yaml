@@ -73,7 +73,7 @@ deployment:
   adcContainer:
     image:
       repository: ghcr.io/api7/adc
-      tag: "0.24.2"
+      tag: "0.26.0"
     config:
       logLevel: "info"
 
@@ -92,6 +92,7 @@ config:
   secureMetrics: false
   execADCTimeout: "15s"
   disableGatewayAPI: false
+  listenerPortMatchMode: "auto"
   provider:
     type: "apisix"
     syncPeriod: "1m"
