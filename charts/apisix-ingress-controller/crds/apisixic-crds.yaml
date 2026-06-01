@@ -97,6 +97,13 @@ spec:
                         x-kubernetes-map-type: atomic
                       value:
                         description: Value specifies HMAC authentication credentials.
+                        oneOf:
+                        - required:
+                          - key_id
+                          - secret_key
+                        - required:
+                          - access_key
+                          - secret_key
                         properties:
                           access_key:
                             description: AccessKey is the identifier used to look
