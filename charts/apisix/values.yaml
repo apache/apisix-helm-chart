@@ -688,3 +688,9 @@ etcd:
 # -- Ingress controller configuration
 ingress-controller:
   enabled: false
+  webhook:
+    # Specifies whether to enable the validation webhook.
+    # Note: This feature relies on the '/apisix/admin/configs/validate' endpoint.
+    # It requires APISIX version 3.17.0 or later to function correctly.
+    # Ensure your cluster's APISIX deployment meets this version requirement before enabling.
+    enabled: false
