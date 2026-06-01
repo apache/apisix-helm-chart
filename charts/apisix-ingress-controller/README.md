@@ -121,6 +121,7 @@ The same for container level, you need to set:
 | config.leaderElection.leaseDuration | string | `"15s"` |  |
 | config.leaderElection.renewDeadline | string | `"10s"` |  |
 | config.leaderElection.retryPeriod | string | `"2s"` |  |
+| config.listenerPortMatchMode | string | `"auto"` |  |
 | config.logLevel | string | `"info"` |  |
 | config.metricsAddr | string | `":8080"` |  |
 | config.probeAddr | string | `":8081"` |  |
@@ -128,12 +129,12 @@ The same for container level, you need to set:
 | config.provider.syncPeriod | string | `"1m"` |  |
 | config.provider.type | string | `"apisix"` |  |
 | config.secureMetrics | bool | `false` |  |
-| deployment.adcContainer | object | `{"config":{"logLevel":"info"},"image":{"repository":"ghcr.io/api7/adc","tag":"0.24.2"}}` | Set adc sidecar container configuration |
+| deployment.adcContainer | object | `{"config":{"logLevel":"info"},"image":{"repository":"ghcr.io/api7/adc","tag":"0.26.0"}}` | Set adc sidecar container configuration |
 | deployment.affinity | object | `{}` |  |
 | deployment.annotations | object | `{}` | Add annotations to Apache APISIX ingress controller resource |
 | deployment.image.pullPolicy | string | `"IfNotPresent"` |  |
 | deployment.image.repository | string | `"apache/apisix-ingress-controller"` |  |
-| deployment.image.tag | string | `"2.0.1"` |  |
+| deployment.image.tag | string | `"2.1.0"` |  |
 | deployment.imagePullSecrets | list | `[]` |  |
 | deployment.nodeSelector | object | `{}` |  |
 | deployment.podAnnotations | object | `{}` |  |
