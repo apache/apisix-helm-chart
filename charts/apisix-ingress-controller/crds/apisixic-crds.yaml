@@ -182,7 +182,7 @@ spec:
                           algorithm:
                             description: |-
                               Algorithm specifies the signing algorithm.
-                              Can be `HS256`, `HS512`, `RS256`, or `ES256`.
+                              Can be `HS256`, `HS384`, `HS512`, `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`, or `EdDSA`.
                             type: string
                           base64_secret:
                             description: Base64Secret indicates whether the secret
@@ -215,8 +215,15 @@ spec:
                             type: string
                         required:
                         - key
-                        - private_key
                         type: object
+                        x-kubernetes-validations:
+                        - message: algorithms other than HS256/HS384/HS512 require
+                            at least one non-empty public_key or private_key
+                          rule: '!has(self.algorithm) || size(self.algorithm) == 0
+                            || self.algorithm in [''HS256'',''HS384'',''HS512''] ||
+                            (has(self.public_key) && size(self.public_key.trim())
+                            > 0) || (has(self.private_key) && size(self.private_key.trim())
+                            > 0)'
                     type: object
                   keyAuth:
                     description: KeyAuth configures the key authentication details.
@@ -318,8 +325,32 @@ spec:
                   IngressClassName is the name of an IngressClass cluster resource.
                   The controller uses this field to decide whether the resource should be managed.
                 type: string
-            required:
-            - authParameter
+              plugins:
+                description: |-
+                  Plugins lists additional consumer-scoped plugins to attach to this consumer.
+                  These plugins are applied alongside any authentication plugin derived from AuthParameter.
+                  An enabled plugin with the same name as the auth plugin derived from AuthParameter takes precedence.
+                items:
+                  description: ApisixRoutePlugin represents an APISIX plugin.
+                  properties:
+                    config:
+                      description: Plugin configuration.
+                      x-kubernetes-preserve-unknown-fields: true
+                    enable:
+                      default: true
+                      description: Whether this plugin is in use, default is true.
+                      type: boolean
+                    name:
+                      description: The plugin name.
+                      type: string
+                    secretRef:
+                      description: Plugin configuration secretRef.
+                      type: string
+                  required:
+                  - enable
+                  - name
+                  type: object
+                type: array
             type: object
           status:
             description: ApisixStatus is the status report for Apisix ingress Resources
@@ -873,18 +904,34 @@ spec:
                                   It can be any [APISIX variable](https://apisix.apache.org/docs/apisix/apisix-variable) or string literal.
                                 properties:
                                   name:
-                                    description: Name is the name of the header or
-                                      query parameter.
+                                    description: |-
+                                      Name is the name of the subject within the given scope: the header name, query
+                                      parameter name, cookie name, Nginx variable name, or body field name (dot-notation
+                                      JSON path supported for Body scope). Optional when Scope is Path.
                                     type: string
                                   scope:
                                     description: |-
-                                      Scope specifies the subject scope and can be `Header`, `Query`, or `Path`.
+                                      Scope specifies the subject scope.
+                                      Supported values: `Header`, `Query`, `Path`, `Cookie`, `Variable`, `Body`.
                                       When Scope is `Path`, Name will be ignored.
+                                      When Scope is `Body`, Name supports dot-notation JSON path (e.g., "model.version",
+                                      "messages[*].role") and maps to APISIX's `post_arg.<name>` variable, which works with
+                                      application/json, application/x-www-form-urlencoded, and multipart/form-data.
+                                    enum:
+                                    - Header
+                                    - Query
+                                    - Path
+                                    - Cookie
+                                    - Variable
+                                    - Body
                                     type: string
                                 required:
-                                - name
                                 - scope
                                 type: object
+                                x-kubernetes-validations:
+                                - message: name is required when scope is not Path
+                                  rule: self.scope == 'Path' || size(self.name) >
+                                    0
                               value:
                                 description: |-
                                   Value defines a single value to compare against the subject.
@@ -2240,6 +2287,181 @@ spec:
               BackendTrafficPolicySpec defines traffic handling policies applied to backend services,
               such as load balancing strategy, connection settings, and failover behavior.
             properties:
+              healthCheck:
+                description: |-
+                  HealthCheck defines active and passive health check configuration for
+                  the upstream backends. When configured, APISIX will probe backends
+                  (active) or monitor live traffic (passive) to detect and bypass
+                  unhealthy nodes.
+                properties:
+                  active:
+                    description: Active health checks proactively send requests to
+                      upstream nodes to determine their availability.
+                    properties:
+                      concurrency:
+                        description: Concurrency sets the number of targets to be
+                          checked at the same time.
+                        minimum: 0
+                        type: integer
+                      healthy:
+                        description: Healthy configures the thresholds for marking
+                          a node healthy.
+                        properties:
+                          httpCodes:
+                            description: HTTPCodes is the list of HTTP status codes
+                              considered healthy.
+                            items:
+                              type: integer
+                            minItems: 1
+                            type: array
+                          interval:
+                            description: |-
+                              Interval defines the time between health check probes.
+                              Minimum is 1s.
+                            type: string
+                          successes:
+                            description: Successes is the number of consecutive successful
+                              responses required to mark a node healthy.
+                            maximum: 254
+                            minimum: 0
+                            type: integer
+                        type: object
+                      host:
+                        description: Host sets the upstream host used in the health
+                          check request.
+                        type: string
+                      httpPath:
+                        description: HTTPPath sets the HTTP path for the probe request.
+                        type: string
+                      port:
+                        description: Port sets the port on the upstream node to probe.
+                        format: int32
+                        maximum: 65535
+                        minimum: 1
+                        type: integer
+                      requestHeaders:
+                        description: RequestHeaders sets additional HTTP request headers
+                          for the probe.
+                        items:
+                          type: string
+                        type: array
+                      strictTLS:
+                        description: StrictTLS controls whether TLS certificate validation
+                          is enforced.
+                        type: boolean
+                      timeout:
+                        description: Timeout sets health check timeout.
+                        type: string
+                      type:
+                        default: http
+                        description: Type is the health check type. Can be `http`,
+                          `https`, or `tcp`.
+                        enum:
+                        - http
+                        - https
+                        - tcp
+                        type: string
+                      unhealthy:
+                        description: Unhealthy configures the thresholds for marking
+                          a node unhealthy.
+                        properties:
+                          httpCodes:
+                            description: HTTPCodes is the list of HTTP status codes
+                              considered unhealthy.
+                            items:
+                              type: integer
+                            minItems: 1
+                            type: array
+                          httpFailures:
+                            description: HTTPFailures is the number of HTTP failures
+                              to mark a node unhealthy.
+                            maximum: 254
+                            minimum: 0
+                            type: integer
+                          interval:
+                            description: |-
+                              Interval defines the time between health check probes.
+                              Minimum is 1s.
+                            type: string
+                          tcpFailures:
+                            description: TCPFailures is the number of TCP failures
+                              to mark a node unhealthy.
+                            maximum: 254
+                            minimum: 0
+                            type: integer
+                          timeouts:
+                            description: Timeouts is the number of timeouts to mark
+                              a node unhealthy.
+                            maximum: 254
+                            minimum: 1
+                            type: integer
+                        type: object
+                    type: object
+                  passive:
+                    description: Passive health checks evaluate upstream health based
+                      on observed traffic (timeouts, errors).
+                    properties:
+                      healthy:
+                        description: Healthy defines conditions under which a node
+                          is considered healthy.
+                        properties:
+                          httpCodes:
+                            description: HTTPCodes is the list of HTTP status codes
+                              considered healthy.
+                            items:
+                              type: integer
+                            minItems: 1
+                            type: array
+                          successes:
+                            description: Successes is the number of consecutive successful
+                              responses required to mark a node healthy.
+                            maximum: 254
+                            minimum: 0
+                            type: integer
+                        type: object
+                      type:
+                        default: http
+                        description: Type is the passive health check type. Can be
+                          `http`, `https`, or `tcp`.
+                        enum:
+                        - http
+                        - https
+                        - tcp
+                        type: string
+                      unhealthy:
+                        description: Unhealthy defines conditions under which a node
+                          is considered unhealthy.
+                        properties:
+                          httpCodes:
+                            description: HTTPCodes is the list of HTTP status codes
+                              considered unhealthy.
+                            items:
+                              type: integer
+                            minItems: 1
+                            type: array
+                          httpFailures:
+                            description: HTTPFailures is the number of HTTP failures
+                              to mark a node unhealthy.
+                            maximum: 254
+                            minimum: 0
+                            type: integer
+                          tcpFailures:
+                            description: TCPFailures is the number of TCP failures
+                              to mark a node unhealthy.
+                            maximum: 254
+                            minimum: 0
+                            type: integer
+                          timeouts:
+                            description: Timeouts is the number of timeouts to mark
+                              a node unhealthy.
+                            maximum: 254
+                            minimum: 1
+                            type: integer
+                        type: object
+                    type: object
+                required:
+                - active
+                type: object
               loadbalancer:
                 description: |-
                   LoadBalancer represents the load balancer configuration for Kubernetes Service.
