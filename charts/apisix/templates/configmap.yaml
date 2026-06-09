@@ -84,6 +84,13 @@ data:
       #   listen_https_port: 9182         # The port with proxy protocol for https
       #   enable_tcp_pp: true             # Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option
       #   enable_tcp_pp_to_upstream: true # Enables the proxy protocol to the upstream server
+      {{- with .Values.apisix.proxyProtocol }}
+      proxy_protocol:
+        listen_http_port: {{ .listenHttpPort }}
+        listen_https_port: {{ .listenHttpsPort }}
+        enable_tcp_pp: {{ default false .enableTcpPP }}
+        enable_tcp_pp_to_upstream: {{ default false .enableTcpPPToUpstream }}
+      {{- end }}
 
       proxy_cache:                         # Proxy Caching configuration
         cache_ttl: 10s                     # The default caching time if the upstream does not specify the cache time
@@ -214,10 +221,9 @@ data:
         client_body_timeout: 60s       # timeout for reading client request body, then 408 (Request Time-out) error is returned to the client
         send_timeout: 10s              # timeout for transmitting a response to the client.then the connection is closed
         underscores_in_headers: "on"   # default enables the use of underscores in client request header fields
-        real_ip_header: "X-Real-IP"    # http://nginx.org/en/docs/http/ngx_http_realip_module.html#real_ip_header
+        real_ip_header: {{ .Values.apisix.nginx.real_ip_header }}   # http://nginx.org/en/docs/http/ngx_http_realip_module.html#real_ip_header
         real_ip_from:                  # http://nginx.org/en/docs/http/ngx_http_realip_module.html#set_real_ip_from
-          - 127.0.0.1
-          - 'unix:'
+        {{- toYaml .Values.apisix.nginx.real_ip_from | nindent 10 }}
         {{- if .Values.apisix.nginx.customLuaSharedDicts }}
         custom_lua_shared_dict:        # add custom shared cache to nginx.conf
         {{- range $dict := .Values.apisix.nginx.customLuaSharedDicts }}

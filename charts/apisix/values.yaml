@@ -276,6 +276,8 @@ metrics:
     annotations: {}
 
 apisix:
+
+
   # -- Enable nginx IPv6 resolver
   enableIPv6: true
   enableHTTP2: true
@@ -438,6 +440,12 @@ apisix:
     keepaliveTimeout: 60s
     envs: []
     # access log and error log configuration
+    # -- Header field used to identify the originating client IP address.
+    real_ip_header: "X-Real-IP"
+    # -- Trusted addresses used by nginx realip module when resolving the client IP.
+    real_ip_from:
+      - 127.0.0.1
+      - 'unix:'
     logs:
       # -- Enable access log or not, default true
       enableAccessLog: true
@@ -565,6 +573,7 @@ apisix:
     # -- container port where the metrics are exposed
     containerPort: 9091
 
+
   # -- Customize the list of APISIX plugins to enable. By default, APISIX's [default plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L196) are automatically used.
   plugins: []
   # -- Customize the list of APISIX stream_plugins to enable. By default, APISIX's [default stream_plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L294) are automatically used.
@@ -606,6 +615,14 @@ apisix:
           mounts:
             - key: "the-file-name"
               path: "mount-path"
+
+  # -- Proxy Protocol configuration.
+  proxyProtocol: {}
+  #  listenHttpPort: 9081
+  #  listenHttpsPort: 9082
+  #  enableTcpPP: false
+  #  enableTcpPPToUpstream: false
+  #  exposed: false
 
   status:
     ip: "0.0.0.0"

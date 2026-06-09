@@ -87,6 +87,45 @@
         "luaPath",
         "plugins"
       ]
+    },
+    "apisix": {
+      "type": "object",
+      "properties": {
+        "nginx": {
+          "type": "object",
+          "properties": {
+            "real_ip_header": {
+              "type": "string"
+            },
+            "real_ip_from": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "proxyProtocol": {
+          "type": "object",
+          "properties": {
+            "listenHttpPort": {
+              "type": "integer"
+            },
+            "listenHttpsPort": {
+              "type": "integer"
+            },
+            "enableTcpPP": {
+              "type": "boolean"
+            },
+            "enableTcpPPToUpstream": {
+              "type": "boolean"
+            },
+            "exposed": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
     }
   }
 }
