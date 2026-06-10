@@ -92,7 +92,11 @@ config:
   secureMetrics: false
   execADCTimeout: "15s"
   disableGatewayAPI: false
-  listenerPortMatchMode: "auto"
+  # server_port matches the port APISIX actually listens on (e.g. 9080/9443),
+  # not the Gateway listener port. Defaults to "off" so port-var injection is
+  # opt-in; set to "auto"/"explicit" only when APISIX listens on the same ports
+  # declared in the Gateway listeners.
+  listenerPortMatchMode: "off"
   provider:
     type: "apisix"
     syncPeriod: "1m"
