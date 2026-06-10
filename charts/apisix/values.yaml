@@ -688,6 +688,11 @@ etcd:
 # -- Ingress controller configuration
 ingress-controller:
   enabled: false
+  config:
+    # server_port matches the port APISIX actually listens on (e.g. 9080/9443),
+    # not the Gateway listener port. Default to "off" so port-var injection is
+    # opt-in.
+    listenerPortMatchMode: "off"
   webhook:
     # Specifies whether to enable the validation webhook.
     # Note: This feature relies on the '/apisix/admin/configs/validate' endpoint.
