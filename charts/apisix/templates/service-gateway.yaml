@@ -62,6 +62,22 @@ spec:
     targetPort: {{ .port }}
     protocol: TCP
   {{- end }}
+  {{- if .Values.apisix.proxyProtocol.enabled }}
+  - name: apisix-gateway-pp-http
+    port: {{ .Values.apisix.proxyProtocol.listenHttpPort }}
+    targetPort: {{ .Values.apisix.proxyProtocol.listenHttpPort }}
+  {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.apisix.proxyProtocol.listenHttpNodePort))) }}
+    nodePort: {{ .Values.apisix.proxyProtocol.listenHttpNodePort }}
+  {{- end }}
+    protocol: TCP
+  - name: apisix-gateway-pp-tls
+    port: {{ .Values.apisix.proxyProtocol.listenHttpsPort }}
+    targetPort: {{ .Values.apisix.proxyProtocol.listenHttpsPort }}
+  {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.apisix.proxyProtocol.listenHttpsNodePort))) }}
+    nodePort: {{ .Values.apisix.proxyProtocol.listenHttpsNodePort }}
+  {{- end }}
+    protocol: TCP
+  {{- end }}
   {{- if or .Values.apisix.ssl.enabled }}
   - name: apisix-gateway-tls
     port: {{ .Values.service.tls.servicePort }}
@@ -82,8 +98,16 @@ spec:
   {{- range $index, $port := .tcp }}
   - name: proxy-tcp-{{ $index | toString }}
   {{- if kindIs "map" $port }}
+  {{- if $port.addr }}
     port: {{ splitList ":" ($port.addr | toString) | last }}
     targetPort: {{ splitList ":" ($port.addr | toString) | last }}
+  {{- else }}
+    port: {{ $port.port }}
+    targetPort: {{ $port.port }}
+  {{- end }}
+  {{- if (and (eq $.Values.service.type "NodePort") (not (empty $port.nodePort))) }}
+    nodePort: {{ $port.nodePort }}
+  {{- end }}
     protocol: TCP
   {{- else }}
     port: {{ $port }}
