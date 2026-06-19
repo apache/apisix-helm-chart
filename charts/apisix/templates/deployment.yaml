@@ -109,6 +109,14 @@ spec:
               containerPort: {{ .port }}
               protocol: TCP
             {{- end }}     
+            {{- if .Values.apisix.proxyProtocol.enabled }}
+            - name: pp-http
+              containerPort: {{ .Values.apisix.proxyProtocol.listenHttpPort }}
+              protocol: TCP
+            - name: pp-tls
+              containerPort: {{ .Values.apisix.proxyProtocol.listenHttpsPort }}
+              protocol: TCP
+            {{- end }}
             - name: tls
               containerPort: {{ .Values.apisix.ssl.containerPort }}
               protocol: TCP
@@ -138,7 +146,11 @@ spec:
             {{- range $index, $port := .tcp }}
             - name: proxy-tcp-{{ $index | toString }}
             {{- if kindIs "map" $port }}
+            {{- if $port.addr }}
               containerPort: {{ splitList ":" ($port.addr | toString) | last }}
+            {{- else }}
+              containerPort: {{ $port.port }}
+            {{- end }}
             {{- else }}
               containerPort: {{ $port }}
             {{- end }}

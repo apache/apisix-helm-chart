@@ -305,6 +305,23 @@ apisix:
         # -- Filepath of the plugin code, for setting the mapping relationship between ConfigMap key and the lua module code path.
           path: ""
 
+  proxyProtocol:
+    # -- Enable Proxy Protocol. When enabled, dedicated listeners (listenHttpPort/listenHttpsPort)
+    # are added alongside the standard ports so internal cluster traffic continues to work.
+    enabled: false
+    # -- Listening port for HTTP with Proxy Protocol
+    listenHttpPort: 9181
+    # -- NodePort for HTTP Proxy Protocol listener (NodePort service type only)
+    listenHttpNodePort: ""
+    # -- Listening port for HTTPS with Proxy Protocol
+    listenHttpsPort: 9182
+    # -- NodePort for HTTPS Proxy Protocol listener (NodePort service type only)
+    listenHttpsNodePort: ""
+    # -- Enable Proxy Protocol for TCP stream proxy
+    enableTcpPP: false
+    # -- Enable Proxy Protocol to upstream servers
+    enableTcpPPToUpstream: false
+
   ssl:
     enabled: false
     containerPort: 9443
