@@ -138,8 +138,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.vault.prefix | string | `""` | Prefix allows you to better enforcement of policies. |
 | apisix.vault.timeout | int | `10` | HTTP timeout for each request. |
 | apisix.vault.token | string | `""` | The generated token from vault instance that can grant access to read data from the vault. |
-| apisix.wasm.enabled | bool | `false` | Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/) |
-| apisix.wasm.plugins | list | `[]` |  |
+| apisix.wasm.enabled | bool | `false` | Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/). |
+| apisix.wasm.plugins | list | `[]` | Set Wasm plugins. Each item supports fields such as name, priority, file, and http_request_phase. |
 | autoscaling.enabled | bool | `false` |  |
 | autoscaling.maxReplicas | int | `100` |  |
 | autoscaling.minReplicas | int | `1` |  |
