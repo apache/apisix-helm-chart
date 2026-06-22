@@ -104,6 +104,9 @@ spec:
             - name: http
               containerPort: {{ .Values.service.http.containerPort }}
               protocol: TCP
+              {{- with .Values.service.http.hostPort }}
+              hostPort: {{ . }}
+              {{- end }}
             {{- range .Values.service.http.additionalContainerPorts }}
             - name: http-{{ .port | toString }}
               containerPort: {{ .port }}
@@ -112,6 +115,9 @@ spec:
             - name: tls
               containerPort: {{ .Values.apisix.ssl.containerPort }}
               protocol: TCP
+              {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.hostPort }}
+              hostPort: {{ .Values.apisix.ssl.hostPort }}
+              {{- end }}
             {{- range .Values.apisix.ssl.additionalContainerPorts }}
             - name: tls-{{ .port | toString }}
               containerPort: {{ .port }}
