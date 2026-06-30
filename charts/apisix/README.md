@@ -101,6 +101,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.enableCPUAffinity | bool | `true` |  |
 | apisix.nginx.envs | list | `[]` |  |
 | apisix.nginx.keepaliveTimeout | string | `"60s"` | Timeout during which a keep-alive client connection will stay open on the server side. |
+| apisix.nginx.real_ip_from | list | `["127.0.0.1","unix:"]` | Trusted addresses used by nginx realip module when resolving the client IP. |
+| apisix.nginx.real_ip_header | string | `"X-Real-IP"` | Header field used to identify the originating client IP address. |
 | apisix.nginx.logs.accessLog | string | `"/dev/stdout"` | Access log path |
 | apisix.nginx.logs.accessLogFormat | string | `"$remote_addr - $remote_user [$time_local] $http_host \\\"$request\\\" $status $body_bytes_sent $request_time \\\"$http_referer\\\" \\\"$http_user_agent\\\" $upstream_addr $upstream_status $upstream_response_time \\\"$upstream_scheme://$upstream_host$upstream_uri\\\""` | Access log format |
 | apisix.nginx.logs.accessLogFormatEscape | string | `"default"` | Allows setting json or default characters escaping in variables |
@@ -118,6 +120,12 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.prometheus.enabled | bool | `false` |  |
 | apisix.prometheus.metricPrefix | string | `"apisix_"` | prefix of the metrics |
 | apisix.prometheus.path | string | `"/apisix/prometheus/metrics"` | path of the metrics endpoint |
+| apisix.proxyProtocol | object | `{}` | Proxy Protocol configuration. |
+| apisix.proxyProtocol.exposed | bool | `false` | Expose the proxy protocol HTTP and HTTPS listener ports through the main gateway service target ports. |
+| apisix.proxyProtocol.enableTcpPP | bool | `false` | Enable the proxy protocol for TCP proxy traffic. |
+| apisix.proxyProtocol.enableTcpPPToUpstream | bool | `false` | Enables sending proxy protocol information to the upstream server. |
+| apisix.proxyProtocol.listenHttpPort | int | `9081` | Port that receives HTTP requests with proxy protocol enabled. |
+| apisix.proxyProtocol.listenHttpsPort | int | `9082` | Port that receives HTTPS requests with proxy protocol enabled. |
 | apisix.router.http | string | `"radixtree_host_uri"` | Defines how apisix handles routing: - radixtree_uri: match route by uri(base on radixtree) - radixtree_host_uri: match route by host + uri(base on radixtree) - radixtree_uri_with_parameter: match route by uri with parameters |
 | apisix.setIDFromPodUID | bool | `false` | Use Pod metadata.uid as the APISIX id. |
 | apisix.ssl.additionalContainerPorts | list | `[]` | Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99) |
