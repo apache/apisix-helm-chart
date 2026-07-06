@@ -94,6 +94,24 @@ data:
         zones:                             # The parameters of a cache
           {{- toYaml .Values.apisix.proxyCache.zones | nindent 10 }}
 
+      delete_uri_tail_slash: {{ .Values.apisix.deleteURITailSlash }}    # delete the '/' at the end of the URI
+      # The URI normalization in servlet is a little different from the RFC's.
+      # See https://github.com/jakartaee/servlet/blob/master/spec/src/main/asciidoc/servlet-spec-body.adoc#352-uri-path-canonicalization,
+      # which is used under Tomcat.
+      # Turn this option on if you want to be compatible with servlet when matching URI path.
+      normalize_uri_like_servlet: {{ .Values.apisix.normalizeURILikeServlet }}
+
+      # fine tune the parameters of LRU cache for some features like secret
+      lru:
+        secret:
+          ttl: {{ .Values.apisix.lru.secret.ttl }} # seconds
+          count: {{ .Values.apisix.lru.secret.count }}
+          neg_ttl: {{ .Values.apisix.lru.secret.neg_ttl }}
+          neg_count: {{ .Values.apisix.lru.secret.neg_count }}
+
+      tracing: {{ .Values.apisix.tracing }}    # Enable comprehensive request lifecycle tracing (SSL/SNI, rewrite, access, header_filter, body_filter, and log).
+                                               # When disabled, OpenTelemetry collects only a single span per request.
+
       router:
         http: {{ .Values.apisix.router.http }}  # radixtree_uri: match route by uri(base on radixtree)
                                     # radixtree_host_uri: match route by host + uri(base on radixtree)
@@ -203,6 +221,13 @@ data:
           {{ $dict.name }}: {{ $dict.size }}
         {{- end }}
       {{- end }}
+      stream:
+        enable_access_log: {{ .Values.apisix.nginx.logs.stream.enableAccessLog }}
+        {{- if .Values.apisix.nginx.logs.stream.enableAccessLog }}
+        access_log: "{{ .Values.apisix.nginx.logs.stream.accessLog }}"
+        access_log_format: '{{ .Values.apisix.nginx.logs.stream.accessLogFormat }}'
+        access_log_format_escape: {{ .Values.apisix.nginx.logs.stream.accessLogFormatEscape }}
+        {{- end }}
       http:
         enable_access_log: {{ .Values.apisix.nginx.logs.enableAccessLog }}
         {{- if .Values.apisix.nginx.logs.enableAccessLog }}

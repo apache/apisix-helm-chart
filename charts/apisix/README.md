@@ -69,6 +69,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.customPlugins.plugins[0].configMap | object | `{"mounts":[{"key":"the-file-name","path":"mount-path"}],"name":"configmap-name"}` | plugin codes can be saved inside configmap object. |
 | apisix.customPlugins.plugins[0].configMap.mounts | list | `[{"key":"the-file-name","path":"mount-path"}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
+| apisix.deleteURITailSlash | bool | `false` | Delete the '/' at the end of the URI |
 | apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role_traditional.config_provider | string | `"etcd"` | Config provider for the traditional role. enum: etcd, yaml |
@@ -89,6 +90,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.fullCustomConfig.config | object | `{}` | If apisix.fullCustomConfig.enabled is true, full customized config.yaml. Please note that other settings about APISIX config will be ignored |
 | apisix.fullCustomConfig.enabled | bool | `false` | Enable full customized config.yaml |
 | apisix.graphql.maxSize | int | `1048576` | The maximum size in bytes of GraphQL queries APISIX parses when matching routes by GraphQL attributes (default 1MiB) |
+| apisix.lru | object | `{"secret":{"count":512,"neg_count":512,"neg_ttl":60,"ttl":300}}` | fine tune the parameters of LRU cache for some features like secret |
+| apisix.lru.secret.count | int | `512` | Maximum number of cached secret values |
+| apisix.lru.secret.neg_count | int | `512` | Maximum number of cached negative (failed lookup) results |
+| apisix.lru.secret.neg_ttl | int | `60` | TTL in seconds for cached negative (failed lookup) results |
+| apisix.lru.secret.ttl | int | `300` | TTL in seconds for cached secret values |
 | apisix.luaModuleHook | object | `{"configMapRef":{"mounts":[{"key":"","path":""}],"name":""},"enabled":false,"hookPoint":"","luaPath":""}` | Whether to add a custom lua module |
 | apisix.luaModuleHook.configMapRef | object | `{"mounts":[{"key":"","path":""}],"name":""}` | configmap that stores the codes |
 | apisix.luaModuleHook.configMapRef.mounts[0] | object | `{"key":"","path":""}` | Name of the ConfigMap key, for setting the mapping relationship between ConfigMap key and the lua module code path. |
@@ -130,6 +136,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.logs.enableAccessLog | bool | `true` | Enable access log or not, default true |
 | apisix.nginx.logs.errorLog | string | `"/dev/stderr"` | Error log path |
 | apisix.nginx.logs.errorLogLevel | string | `"warn"` | Error log level |
+| apisix.nginx.logs.stream | object | `{"accessLog":"logs/access_stream.log","accessLogFormat":"$remote_addr [$time_local] $protocol $status $bytes_sent $bytes_received $session_time","accessLogFormatEscape":"default","enableAccessLog":false}` | Stream (L4 proxy) access log configuration |
+| apisix.nginx.logs.stream.accessLog | string | `"logs/access_stream.log"` | Stream access log path |
+| apisix.nginx.logs.stream.accessLogFormat | string | `"$remote_addr [$time_local] $protocol $status $bytes_sent $bytes_received $session_time"` | Stream access log format |
+| apisix.nginx.logs.stream.accessLogFormatEscape | string | `"default"` | Allows setting json or default characters escaping in variables for stream |
+| apisix.nginx.logs.stream.enableAccessLog | bool | `false` | Enable stream access log or not, default false |
 | apisix.nginx.luaSharedDicts | list | `[]` | Override default [lua_shared_dict](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L250-L276) settings, click [here](https://github.com/apache/apisix-helm-chart/blob/master/charts/apisix/values.yaml#L27-L30) to learn the format of a shared dict |
 | apisix.nginx.maxPendingTimers | int | `16384` | Maximum number of pending timers. Increase it if you see "too many pending timers" error |
 | apisix.nginx.maxRunningTimers | int | `4096` | Maximum number of running timers. Increase it if you see "lua_max_running_timers are not enough" error |
@@ -138,6 +149,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.nginx.workerProcesses | string | `"auto"` | The number of nginx worker processes. `auto` means the number of CPU cores |
 | apisix.nginx.workerRlimitNofile | string | `"20480"` | The number of files a worker process can open, should be larger than apisix.nginx.workerConnections |
 | apisix.nginx.workerShutdownTimeout | string | `"240s"` | Timeout for a graceful shutdown of worker processes |
+| apisix.normalizeURILikeServlet | bool | `false` | The URI normalization in servlet is a little different from the RFC's. See https://github.com/jakartaee/servlet/blob/master/spec/src/main/asciidoc/servlet-spec-body.adoc#352-uri-path-canonicalization, which is used under Tomcat. Turn this option on if you want to be compatible with servlet when matching URI path. |
 | apisix.pluginAttrs | object | `{}` | Set APISIX plugin attributes. By default, APISIX's [plugin_attr](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L295) are automatically used. See [configuration example](https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L591). |
 | apisix.plugins | list | `[]` | Customize the list of APISIX plugins to enable. By default, APISIX's [default plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L196) are automatically used. |
 | apisix.prometheus.containerPort | int | `9091` | container port where the metrics are exposed |
@@ -168,6 +180,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.status.ip | string | `"0.0.0.0"` | The IP address on which the status endpoint (`/status`, `/status/ready`) listens |
 | apisix.status.port | int | `7085` | The port on which the status endpoint listens |
 | apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's [default stream_plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L294) are automatically used. |
+| apisix.tracing | bool | `false` | Enable comprehensive request lifecycle tracing (SSL/SNI, rewrite, access, header_filter, body_filter, and log). When disabled, OpenTelemetry collects only a single span per request. |
 | apisix.trustedAddresses | list | `["127.0.0.1"]` | When configured, APISIX will trust the `X-Forwarded-*` Headers passed in requests from the IP/CIDR in the list. |
 | apisix.vault.enabled | bool | `false` | Enable or disable the vault integration |
 | apisix.vault.host | string | `""` | The host address where the vault server is running. |
