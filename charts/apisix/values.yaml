@@ -65,8 +65,6 @@ podDisruptionBudget:
 
 # -- Set pod resource requests & limits
 resources: {}
-  # -- Use the host's network namespace
-
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -77,6 +75,8 @@ resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
+
+# -- Use the host's network namespace
 hostNetwork: false
 
 # -- Node labels for Apache APISIX pod assignment
@@ -108,6 +108,7 @@ timezone: ""
 #         key: KEY
 extraEnvVars: []
 
+# -- Update strategy of the workload (Deployment or DaemonSet), e.g. `type: RollingUpdate`
 updateStrategy: {}
   # type: RollingUpdate
 
@@ -119,7 +120,7 @@ extraVolumes: []
 # - name: extras
 #   emptyDir: {}
 
-# -- Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail.
+# -- Additional `volumeMounts` for the APISIX container, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail.
 extraVolumeMounts: []
 # - name: extras
 #   mountPath: /usr/share/extras
@@ -141,41 +142,55 @@ initContainer:
   tag: 1.28
 
 autoscaling:
+  # -- Enable HorizontalPodAutoscaler for APISIX (only when useDaemonSet is false)
   enabled: false
   # -- HPA version, the value is "v2" or "v2beta1", default "v2"
   version: v2
+  # -- Minimum number of APISIX replicas
   minReplicas: 1
+  # -- Maximum number of APISIX replicas
   maxReplicas: 100
+  # -- Target average CPU utilization percentage that triggers scaling
   targetCPUUtilizationPercentage: 80
+  # -- Target average memory utilization percentage that triggers scaling
   targetMemoryUtilizationPercentage: 80
 
+# -- String to partially override the chart fullname
 nameOverride: ""
+# -- String to fully override the chart fullname
 fullnameOverride: ""
 
 serviceAccount:
+  # -- Whether a ServiceAccount should be created for the APISIX pods
   create: false
+  # -- Annotations to add to the ServiceAccount
   annotations: {}
+  # -- Name of the ServiceAccount to use. If not set and create is true, a name is generated from the chart fullname
   name: ""
 
 rbac:
+  # -- Whether RBAC resources (ClusterRole and ClusterRoleBinding) should be created
   create: false
 
 service:
   # -- Apache APISIX service type for user access itself
   type: NodePort
-  # -- Setting how the Service route external traffic
-  # If you want to keep the client source IP, you can set this to Local.
-
+  # -- Setting how the Service route external traffic.
+  # If you want to keep the client source IP, you can set this to Local,
   # ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
   externalTrafficPolicy: Cluster
   # type: LoadBalancer
   # annotations:
   #   service.beta.kubernetes.io/aws-load-balancer-type: nlb
+  # -- IPs for which nodes in the cluster will also accept traffic for the service
   externalIPs: []
   # -- Apache APISIX service settings for http
   http:
+    # -- Enable plain HTTP listeners
     enabled: true
+    # -- Kubernetes service port for HTTP traffic
     servicePort: 80
+    # -- Container port APISIX listens on for HTTP traffic
     containerPort: 9080
     # -- Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24)
     additionalContainerPorts: []
@@ -186,13 +201,17 @@ service:
       #   enable_http2: true
   # -- Apache APISIX service settings for tls
   tls:
+    # -- Kubernetes service port for HTTPS traffic
     servicePort: 443
     # nodePort: 4443
 
   # -- Apache APISIX service settings for stream. L4 proxy (TCP/UDP)
   stream:
+    # -- Enable the stream (L4 proxy) subsystem
     enabled: false
+    # -- TCP proxy port list, element format: port number, or a map with `addr` and optional `tls`
     tcp: []
+    # -- UDP proxy port list
     udp: []
   #  - secretName: apisix-tls
   #    hosts:
@@ -205,6 +224,7 @@ service:
 
 # -- Using ingress access Apache APISIX service
 ingress:
+  # -- Enable an Ingress resource in front of the APISIX service
   enabled: false
   # -- (number) Service port to send traffic. Defaults to `service.http.servicePort`.
   servicePort:
@@ -212,9 +232,11 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+  # -- Ingress host and path rules
   hosts:
     - host: apisix.local
       paths: []
+  # -- Ingress TLS settings
   tls: []
 
 control:
@@ -242,6 +264,7 @@ control:
     servicePort: 9090
   # -- Using ingress access Apache APISIX Control service
   ingress:
+    # -- Enable an Ingress resource in front of the Control API service
     enabled: false
     # -- Ingress annotations
     annotations:
@@ -250,10 +273,12 @@ control:
       # kubernetes.io/tls-acme: "true"
     # -- Ingress Class Name
     # className: "nginx"
+    # -- Ingress host and path rules
     hosts:
       - host: apisix-control.local
         paths:
           - "/*"
+    # -- Ingress TLS settings
     tls: []
   #  - secretName: apisix-tls
   #    hosts:
@@ -278,16 +303,54 @@ metrics:
 apisix:
   # -- Enable nginx IPv6 resolver
   enableIPv6: true
+  # -- Enable HTTP/2 on the HTTP listeners
   enableHTTP2: true
 
   # -- Whether the APISIX version number should be shown in Server header
   enableServerTokens: true
+
+  # -- When true, the upstream status is always written to the `X-APISIX-Upstream-Status` response header; when false, it is written only for 5xx responses
+  showUpstreamStatusInResponseHeader: false
+
+  # -- PROXY Protocol configuration.
+  proxyProtocol:
+    # -- (int) The HTTP port that accepts the PROXY Protocol. It differs from `service.http` ports and `apisix.admin` port:
+    # this port only accepts HTTP requests carrying the PROXY Protocol, while the other ports only accept plain HTTP
+    # requests. If you enable the PROXY Protocol, you must use this port to receive HTTP requests with it.
+    listenHttpPort:
+    # -- (int) The HTTPS port that accepts the PROXY Protocol.
+    listenHttpsPort:
+    # -- Accept the PROXY Protocol on every service.stream.tcp port.
+    enableTcpPP: false
+    # -- Send the PROXY Protocol to the upstream server on every service.stream.tcp port.
+    enableTcpPPToUpstream: false
+
+  # -- Proxy caching configuration used by the proxy-cache plugin.
+  proxyCache:
+    # -- The default caching time in disk if the upstream does not specify the cache time
+    cacheTtl: 10s
+    # -- The parameters of a cache. The `memory_size` field stores the cache index for the
+    # disk strategy and the cache content for the memory strategy; `disk_size`, `disk_path`
+    # and `cache_levels` only apply to the disk strategy.
+    zones:
+      - name: disk_cache_one
+        memory_size: 50m
+        disk_size: 1G
+        disk_path: "/tmp/disk_cache_one"
+        cache_levels: "1:2"
+      - name: memory_cache
+        memory_size: 50m
+
+  graphql:
+    # -- The maximum size in bytes of GraphQL queries APISIX parses when matching routes by GraphQL attributes (default 1MiB)
+    maxSize: 1048576
 
   # -- Use Pod metadata.uid as the APISIX id.
   setIDFromPodUID: false
 
   # -- Whether to add a custom lua module
   luaModuleHook:
+    # -- Enable loading a custom lua module hook
     enabled: false
     # -- extend lua_package_path to load third party code
     luaPath: ""
@@ -306,7 +369,9 @@ apisix:
           path: ""
 
   ssl:
+    # -- Enable HTTPS listeners
     enabled: false
+    # -- Container port APISIX listens on for HTTPS traffic
     containerPort: 9443
     # -- Support multiple https ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L99)
     additionalContainerPorts: []
@@ -317,11 +382,15 @@ apisix:
     existingCASecret: ""
     # -- Filename be used in the apisix.ssl.existingCASecret
     certCAFilename: ""
+    # -- Enable HTTP/3 (QUIC) on the HTTPS listeners
     enableHTTP3: false
     # -- TLS protocols allowed to use.
     sslProtocols: "TLSv1.2 TLSv1.3"
     # -- TLS ciphers allowed to use.
     sslCiphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"
+    # -- Enable or disable TLS session tickets. Disabled by default because session tickets
+    # defeat Perfect Forward Secrecy (see https://github.com/mozilla/server-side-tls/issues/135)
+    sslSessionTickets: false
     # -- Define SNI to fallback if none is presented by client
     fallbackSNI: ""
 
@@ -352,7 +421,7 @@ apisix:
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     role: "traditional"
     role_traditional:
-      # enum: etcd, yaml
+      # -- Config provider for the traditional role. enum: etcd, yaml
       config_provider: "etcd"
 
     # -- Standalone rules configuration
@@ -414,29 +483,86 @@ apisix:
         - 127.0.0.1/24
     # -- Using ingress access Apache APISIX admin service
     ingress:
+      # -- Enable an Ingress resource in front of the Admin API service
       enabled: false
       # -- Ingress annotations
       annotations:
         {}
         # kubernetes.io/ingress.class: nginx
         # kubernetes.io/tls-acme: "true"
+      # -- Ingress host and path rules
       hosts:
         - host: apisix-admin.local
           paths:
             - "/apisix"
+      # -- Ingress TLS settings
       tls: []
     #  - secretName: apisix-tls
     #    hosts:
     #      - chart-example.local
 
   nginx:
+    # -- The number of files a worker process can open, should be larger than apisix.nginx.workerConnections
     workerRlimitNofile: "20480"
+    # -- The maximum number of connections that each worker process can open
     workerConnections: "10620"
+    # -- The number of nginx worker processes. `auto` means the number of CPU cores
     workerProcesses: auto
+    # -- Bind nginx worker processes to CPUs
     enableCPUAffinity: true
+    # -- Timeout for a graceful shutdown of worker processes
+    workerShutdownTimeout: "240s"
+    # -- Maximum number of pending timers. Increase it if you see "too many pending timers" error
+    maxPendingTimers: 16384
+    # -- Maximum number of running timers. Increase it if you see "lua_max_running_timers are not enough" error
+    maxRunningTimers: 4096
     # -- Timeout during which a keep-alive client connection will stay open on the server side.
     keepaliveTimeout: 60s
+    # -- List of environment variable names allowed to be accessed within nginx (rendered as nginx `env` directives)
     envs: []
+    # -- Nginx HTTP subsystem configurations
+    http:
+      # -- timeout for reading client request header, then 408 (Request Time-out) error is returned to the client
+      clientHeaderTimeout: "60s"
+      # -- timeout for reading client request body, then 408 (Request Time-out) error is returned to the client
+      clientBodyTimeout: "60s"
+      # -- timeout for transmitting a response to the client, then the connection is closed
+      sendTimeout: "10s"
+      # -- The maximum allowed size of the client request body.
+      # If exceeded, the 413 (Request Entity Too Large) error is returned to the client.
+      # Note that unlike Nginx, we don't limit the body size by default (0 means no limit).
+      clientMaxBodySize: 0
+      # -- Enable the use of underscores in client request header fields
+      underscoresInHeaders: "on"
+      # -- The request header used to determine the client's real IP address,
+      # see [real_ip_header](http://nginx.org/en/docs/http/ngx_http_realip_module.html#real_ip_header)
+      realIpHeader: "X-Real-IP"
+      # -- Whether to search for the real IP recursively when the header set in apisix.nginx.http.realIpHeader contains multiple addresses,
+      # see [real_ip_recursive](http://nginx.org/en/docs/http/ngx_http_realip_module.html#real_ip_recursive)
+      realIpRecursive: "off"
+      # -- Trusted addresses from which the real IP header is honored,
+      # see [set_real_ip_from](http://nginx.org/en/docs/http/ngx_http_realip_module.html#set_real_ip_from)
+      realIpFrom:
+        - 127.0.0.1
+        - "unix:"
+      # -- Enables or disables passing of the server name through TLS Server Name Indication extension (SNI, RFC 6066)
+      # when establishing a connection with the proxied HTTPS server
+      proxySslServerName: true
+      # -- Keepalive settings for connections from APISIX to upstream servers
+      upstream:
+        # -- Maximum number of idle keepalive connections to upstream servers that are preserved in the cache of each worker process.
+        # When this number is exceeded, the least recently used connections are closed
+        keepalive: 320
+        # -- Maximum number of requests that can be served through one keepalive connection.
+        # After the maximum number of requests is made, the connection is closed
+        keepaliveRequests: 1000
+        # -- Timeout during which an idle keepalive connection to an upstream server will stay open
+        keepaliveTimeout: 60s
+      # -- The charset added to the "Content-Type" response header field,
+      # see [charset](http://nginx.org/en/docs/http/ngx_http_charset_module.html#charset)
+      charset: utf-8
+      # -- The maximum size of the nginx variables hash table
+      variablesHashMaxSize: 2048
     # access log and error log configuration
     logs:
       # -- Enable access log or not, default true
@@ -451,18 +577,26 @@ apisix:
       errorLog: "/dev/stderr"
       # -- Error log level
       errorLogLevel: "warn"
-    # -- Custom configuration snippet.
+    # -- Custom nginx configuration snippets injected into the generated nginx.conf.
+    # As arbitrary configuration can be added here, it is your responsibility to make sure
+    # the snippets don't conflict with the configuration generated by APISIX.
     configurationSnippet:
+      # -- Snippet added to the nginx `main` (top-level) block
       main: |
 
+      # -- Snippet added to the beginning of the nginx `http` block
       httpStart: |
 
+      # -- Snippet added to the end of the nginx `http` block
       httpEnd: |
 
+      # -- Snippet added to the nginx `server` block that proxies regular traffic
       httpSrv: |
 
+      # -- Snippet added to the nginx `server` block that serves the Admin API
       httpAdmin: |
 
+      # -- Snippet added to the nginx `stream` block
       stream: |
 
     # -- Add custom [lua_shared_dict](https://github.com/openresty/lua-nginx-module?tab=readme-ov-file#lua_shared_dict) settings,
@@ -533,15 +667,18 @@ apisix:
       #     This is for allowing the default `host` and `port` of `.discovery.registry.kubernetes.service`.
 
   dns:
-    resolvers:
-      - 127.0.0.1
-      - 172.20.0.10
-      - 114.114.114.114
-      - 223.5.5.5
-      - 1.1.1.1
-      - 8.8.8.8
+    # -- Nameservers used by APISIX to resolve upstream domain names.
+    # When empty (default), nameservers are read from `/etc/resolv.conf`,
+    # which is usually what you want inside Kubernetes
+    resolvers: []
+      # - 127.0.0.1
+      # - 8.8.8.8
+    # -- Override the TTL in seconds of valid DNS records
     validity: 30
+    # -- DNS resolver timeout in seconds
     timeout: 5
+    # -- Honor the `search` option in `/etc/resolv.conf` when resolving domain names
+    enableResolvSearchOpt: true
 
   vault:
     # -- Enable or disable the vault integration
@@ -556,7 +693,7 @@ apisix:
     prefix: ""
 
   prometheus:
-    # ref: https://apisix.apache.org/docs/apisix/plugins/prometheus/
+    # -- Enable Prometheus metrics. ref: https://apisix.apache.org/docs/apisix/plugins/prometheus/
     enabled: false
     # -- path of the metrics endpoint
     path: /apisix/prometheus/metrics
@@ -583,6 +720,7 @@ apisix:
   wasm:
     # -- Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/)
     enabled: false
+    # -- List of Wasm plugins, each item with `name`, `priority` and `file` (path or URL of the wasm binary)
     plugins: []
 
   # -- customPlugins allows you to mount your own HTTP plugins.
@@ -608,7 +746,9 @@ apisix:
               path: "mount-path"
 
   status:
+    # -- The IP address on which the status endpoint (`/status`, `/status/ready`) listens
     ip: "0.0.0.0"
+    # -- The port on which the status endpoint listens
     port: 7085
 
   # -- When configured, APISIX will trust the `X-Forwarded-*` Headers passed in requests from the IP/CIDR in the list.
@@ -651,6 +791,10 @@ etcd:
   prefix: "/apisix"
   # -- Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster
   timeout: 30
+  # -- Set the timeout value in seconds for watching etcd
+  watchTimeout: 50
+  # -- The number of retries to etcd during startup
+  startupRetry: 2
 
   # -- if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart
   auth:
@@ -679,14 +823,19 @@ etcd:
     enabled: false
 
   service:
+    # -- etcd client service port
     port: 2379
 
+  # -- Number of etcd replicas, only used when etcd.enabled is true
   replicaCount: 3
+  # -- Auto compaction retention for mvcc key value store, only used when etcd.enabled is true
   autoCompactionRetention: "1h"
+  # -- Auto compaction mode (periodic or revision), only used when etcd.enabled is true
   autoCompactionMode: "periodic"
 
 # -- Ingress controller configuration
 ingress-controller:
+  # -- Enable the apisix-ingress-controller sub-chart
   enabled: false
   webhook:
     # Specifies whether to enable the validation webhook.

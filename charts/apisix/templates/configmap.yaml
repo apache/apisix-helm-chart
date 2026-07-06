@@ -75,30 +75,24 @@ data:
       enable_ipv6: {{ .Values.apisix.enableIPv6 }} # Enable nginx IPv6 resolver
       enable_http2: {{ .Values.apisix.enableHTTP2 }}
       enable_server_tokens: {{ .Values.apisix.enableServerTokens }} # Whether the APISIX version number should be shown in Server header
+      show_upstream_status_in_response_header: {{ .Values.apisix.showUpstreamStatusInResponseHeader }} # when true all upstream status write to `X-APISIX-Upstream-Status` otherwise only 5xx code
 
-      # proxy_protocol:                   # Proxy Protocol configuration
-      #   listen_http_port: 9181          # The port with proxy protocol for http, it differs from node_listen and admin_listen.
-      #                                   # This port can only receive http request with proxy protocol, but node_listen & admin_listen
-      #                                   # can only receive http request. If you enable proxy protocol, you must use this port to
-      #                                   # receive http request with proxy protocol
-      #   listen_https_port: 9182         # The port with proxy protocol for https
-      #   enable_tcp_pp: true             # Enable the proxy protocol for tcp proxy, it works for stream_proxy.tcp option
-      #   enable_tcp_pp_to_upstream: true # Enables the proxy protocol to the upstream server
+      {{- if or .Values.apisix.proxyProtocol.enableTcpPP .Values.apisix.proxyProtocol.enableTcpPPToUpstream .Values.apisix.proxyProtocol.listenHttpPort .Values.apisix.proxyProtocol.listenHttpsPort }}
+      proxy_protocol:
+        {{- if .Values.apisix.proxyProtocol.listenHttpPort }}
+        listen_http_port: {{ .Values.apisix.proxyProtocol.listenHttpPort }}
+        {{- end }}
+        {{- if .Values.apisix.proxyProtocol.listenHttpsPort }}
+        listen_https_port: {{ .Values.apisix.proxyProtocol.listenHttpsPort }}
+        {{- end }}
+        enable_tcp_pp: {{ .Values.apisix.proxyProtocol.enableTcpPP }}
+        enable_tcp_pp_to_upstream: {{ .Values.apisix.proxyProtocol.enableTcpPPToUpstream }}
+      {{- end }}
 
       proxy_cache:                         # Proxy Caching configuration
-        cache_ttl: 10s                     # The default caching time if the upstream does not specify the cache time
+        cache_ttl: {{ .Values.apisix.proxyCache.cacheTtl }} # The default caching time if the upstream does not specify the cache time
         zones:                             # The parameters of a cache
-        - name: disk_cache_one             # The name of the cache, administrator can be specify
-                                           # which cache to use by name in the admin api
-          memory_size: 50m                 # The size of shared memory, it's used to store the cache index
-          disk_size: 1G                    # The size of disk, it's used to store the cache data
-          disk_path: "/tmp/disk_cache_one" # The path to store the cache data
-          cache_levels: "1:2"              # The hierarchy levels of a cache
-      #  - name: disk_cache_two
-      #    memory_size: 50m
-      #    disk_size: 1G
-      #    disk_path: "/tmp/disk_cache_two"
-      #    cache_levels: "1:2"
+          {{- toYaml .Values.apisix.proxyCache.zones | nindent 10 }}
 
       router:
         http: {{ .Values.apisix.router.http }}  # radixtree_uri: match route by uri(base on radixtree)
@@ -147,12 +141,15 @@ data:
           {{- end }}
         {{- end }}
       {{- end }}
-      # dns_resolver:
-      #   {{- range $resolver := .Values.apisix.dns.resolvers }}
-      #   - {{ $resolver }}
-      #   {{- end }}
+      {{- with .Values.apisix.dns.resolvers }}
+      dns_resolver:    # If not set, read from `/etc/resolv.conf`
+        {{- range $resolver := . }}
+        - {{ $resolver }}
+        {{- end }}
+      {{- end }}
       dns_resolver_valid: {{.Values.apisix.dns.validity}}
       resolver_timeout: {{.Values.apisix.dns.timeout}}
+      enable_resolv_search_opt: {{ .Values.apisix.dns.enableResolvSearchOpt }}
       ssl:
         enable: {{ .Values.apisix.ssl.enabled }}
         listen:
@@ -163,6 +160,7 @@ data:
           {{- end }}
         ssl_protocols: {{ .Values.apisix.ssl.sslProtocols | quote }}
         ssl_ciphers: {{ .Values.apisix.ssl.sslCiphers | quote }}
+        ssl_session_tickets: {{ .Values.apisix.ssl.sslSessionTickets }}
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
         ssl_trusted_certificate: "/usr/local/apisix/conf/ssl/{{ .Values.apisix.ssl.certCAFilename }}"
         {{- end }}
@@ -187,6 +185,9 @@ data:
       worker_processes: "{{ .Values.apisix.nginx.workerProcesses }}"
       enable_cpu_affinity: {{ and true .Values.apisix.nginx.enableCPUAffinity }}
       worker_rlimit_nofile: {{ default "20480" .Values.apisix.nginx.workerRlimitNofile }}  # the number of files a worker process can open, should be larger than worker_connections
+      worker_shutdown_timeout: "{{ default "240s" .Values.apisix.nginx.workerShutdownTimeout }}"   # timeout for a graceful shutdown of worker processes
+      max_pending_timers: {{ default "16384" .Values.apisix.nginx.maxPendingTimers }}   # increase it if you see "too many pending timers" error
+      max_running_timers: {{ default "4096" .Values.apisix.nginx.maxRunningTimers }}    # increase it if you see "lua_max_running_timers are not enough" error
       event:
         worker_connections: {{ default "10620" .Values.apisix.nginx.workerConnections  }}
       {{- with .Values.apisix.nginx.envs }}
@@ -210,14 +211,26 @@ data:
         access_log_format_escape: {{ .Values.apisix.nginx.logs.accessLogFormatEscape }}
         {{- end }}
         keepalive_timeout: {{ .Values.apisix.nginx.keepaliveTimeout | quote }}
-        client_header_timeout: 60s     # timeout for reading client request header, then 408 (Request Time-out) error is returned to the client
-        client_body_timeout: 60s       # timeout for reading client request body, then 408 (Request Time-out) error is returned to the client
-        send_timeout: 10s              # timeout for transmitting a response to the client.then the connection is closed
-        underscores_in_headers: "on"   # default enables the use of underscores in client request header fields
-        real_ip_header: "X-Real-IP"    # http://nginx.org/en/docs/http/ngx_http_realip_module.html#real_ip_header
+        client_header_timeout: {{ .Values.apisix.nginx.http.clientHeaderTimeout }}     # timeout for reading client request header, then 408 (Request Time-out) error is returned to the client
+        client_body_timeout: {{ .Values.apisix.nginx.http.clientBodyTimeout }}       # timeout for reading client request body, then 408 (Request Time-out) error is returned to the client
+        send_timeout: {{ .Values.apisix.nginx.http.sendTimeout }}              # timeout for transmitting a response to the client.then the connection is closed
+        client_max_body_size: {{ .Values.apisix.nginx.http.clientMaxBodySize }}   # The maximum allowed size of the client request body.
+                                       # If exceeded, the 413 (Request Entity Too Large) error is returned to the client.
+                                       # Note that unlike Nginx, we don't limit the body size by default.
+        underscores_in_headers: {{ .Values.apisix.nginx.http.underscoresInHeaders | quote }}   # default enables the use of underscores in client request header fields
+        real_ip_header: {{ .Values.apisix.nginx.http.realIpHeader | quote }}    # http://nginx.org/en/docs/http/ngx_http_realip_module.html#real_ip_header
+        real_ip_recursive: {{ .Values.apisix.nginx.http.realIpRecursive | quote }}    # http://nginx.org/en/docs/http/ngx_http_realip_module.html#real_ip_recursive
         real_ip_from:                  # http://nginx.org/en/docs/http/ngx_http_realip_module.html#set_real_ip_from
-          - 127.0.0.1
-          - 'unix:'
+          {{- range $ip := .Values.apisix.nginx.http.realIpFrom }}
+          - {{ $ip | quote }}
+          {{- end }}
+        proxy_ssl_server_name: {{ .Values.apisix.nginx.http.proxySslServerName }}  # send the server name (SNI) when establishing a TLS connection with the proxied HTTPS upstream
+        upstream:
+          keepalive: {{ .Values.apisix.nginx.http.upstream.keepalive }}                     # The maximum number of idle keepalive connections to upstream servers per worker process
+          keepalive_requests: {{ .Values.apisix.nginx.http.upstream.keepaliveRequests }}    # The maximum number of requests that can be served through one keepalive connection
+          keepalive_timeout: {{ .Values.apisix.nginx.http.upstream.keepaliveTimeout }}      # Timeout during which an idle keepalive connection to an upstream server will stay open
+        charset: {{ .Values.apisix.nginx.http.charset }}    # Adds the specified charset to the "Content-Type" response header field
+        variables_hash_max_size: {{ .Values.apisix.nginx.http.variablesHashMaxSize }}    # Sets the maximum size of the variables hash table
         {{- if .Values.apisix.nginx.customLuaSharedDicts }}
         custom_lua_shared_dict:        # add custom shared cache to nginx.conf
         {{- range $dict := .Values.apisix.nginx.customLuaSharedDicts }}
@@ -248,6 +261,9 @@ data:
       {{- if .Values.apisix.nginx.configurationSnippet.stream }}
       stream_configuration_snippet: {{- toYaml .Values.apisix.nginx.configurationSnippet.stream | indent 6 }}
       {{- end }}
+
+    graphql:
+      max_size: {{ int .Values.apisix.graphql.maxSize }}    # the maximum size limitation of graphql in bytes
 
     {{- if .Values.apisix.discovery.enabled }}
     discovery:
@@ -390,7 +406,9 @@ data:
           {{- end}}
       {{- end }}
         prefix: {{ .Values.etcd.prefix | quote }}    # configuration prefix in etcd
-        timeout: {{ .Values.etcd.timeout }}    # 30 seconds
+        timeout: {{ .Values.etcd.timeout }}    # The timeout in seconds when connect/read/write to etcd
+        watch_timeout: {{ .Values.etcd.watchTimeout }}    # The timeout in seconds when watch etcd
+        startup_retry: {{ .Values.etcd.startupRetry }}    # the number of retry to etcd during the startup
         {{- if and (not .Values.etcd.enabled) .Values.externalEtcd.user }}
         user: {{ .Values.externalEtcd.user | quote }}
         password: "{{ print "${{ APISIX_ETCD_PASSWORD }}" }}"
