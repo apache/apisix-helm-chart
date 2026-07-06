@@ -75,7 +75,7 @@ data:
       enable_ipv6: {{ .Values.apisix.enableIPv6 }} # Enable nginx IPv6 resolver
       enable_http2: {{ .Values.apisix.enableHTTP2 }}
       enable_server_tokens: {{ .Values.apisix.enableServerTokens }} # Whether the APISIX version number should be shown in Server header
-      show_upstream_status_in_response_header: {{ .Values.apisix.showUpstreamStatusInResponseHeader }} # when true all upstream status write to `X-APISIX-Upstream-Status` otherwise only 5xx code
+      show_upstream_status_in_response_header: {{ .Values.apisix.showUpstreamStatusInResponseHeader }} # when true, all upstream statuses are written to `X-APISIX-Upstream-Status`; otherwise only 5xx codes
 
       {{- if or .Values.apisix.proxyProtocol.enableTcpPP .Values.apisix.proxyProtocol.enableTcpPPToUpstream .Values.apisix.proxyProtocol.listenHttpPort .Values.apisix.proxyProtocol.listenHttpsPort }}
       proxy_protocol:

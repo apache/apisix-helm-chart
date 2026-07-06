@@ -76,6 +76,18 @@ spec:
     port: {{ .port }}
     targetPort: {{ .port }}
   {{- end }}
+  {{- if .Values.apisix.proxyProtocol.listenHttpPort }}
+  - name: apisix-gateway-pp
+    port: {{ .Values.apisix.proxyProtocol.listenHttpPort }}
+    targetPort: {{ .Values.apisix.proxyProtocol.listenHttpPort }}
+    protocol: TCP
+  {{- end }}
+  {{- if .Values.apisix.proxyProtocol.listenHttpsPort }}
+  - name: apisix-gateway-pp-tls
+    port: {{ .Values.apisix.proxyProtocol.listenHttpsPort }}
+    targetPort: {{ .Values.apisix.proxyProtocol.listenHttpsPort }}
+    protocol: TCP
+  {{- end }}
   {{- if and .Values.service.stream.enabled (or (gt (len .Values.service.stream.tcp) 0) (gt (len .Values.service.stream.udp) 0)) }}
   {{- with .Values.service.stream }}
   {{- if (gt (len .tcp) 0) }}

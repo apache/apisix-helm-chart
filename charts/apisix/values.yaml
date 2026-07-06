@@ -317,8 +317,10 @@ apisix:
     # -- (int) The HTTP port that accepts the PROXY Protocol. It differs from `service.http` ports and `apisix.admin` port:
     # this port only accepts HTTP requests carrying the PROXY Protocol, while the other ports only accept plain HTTP
     # requests. If you enable the PROXY Protocol, you must use this port to receive HTTP requests with it.
+    # When set, the port is also exposed on the gateway Service.
     listenHttpPort:
     # -- (int) The HTTPS port that accepts the PROXY Protocol.
+    # When set, the port is also exposed on the gateway Service.
     listenHttpsPort:
     # -- Accept the PROXY Protocol on every service.stream.tcp port.
     enableTcpPP: false
