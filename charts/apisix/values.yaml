@@ -319,9 +319,15 @@ apisix:
     # requests. If you enable the PROXY Protocol, you must use this port to receive HTTP requests with it.
     # When set, the port is also exposed on the gateway Service.
     listenHttpPort:
+    # -- (int) The nodePort of the PROXY Protocol HTTP port, only used if service.type is NodePort.
+    # If not set, a random port will be assigned by Kubernetes.
+    listenHttpNodePort:
     # -- (int) The HTTPS port that accepts the PROXY Protocol.
     # When set, the port is also exposed on the gateway Service.
     listenHttpsPort:
+    # -- (int) The nodePort of the PROXY Protocol HTTPS port, only used if service.type is NodePort.
+    # If not set, a random port will be assigned by Kubernetes.
+    listenHttpsNodePort:
     # -- Accept the PROXY Protocol on every service.stream.tcp port.
     enableTcpPP: false
     # -- Send the PROXY Protocol to the upstream server on every service.stream.tcp port.
