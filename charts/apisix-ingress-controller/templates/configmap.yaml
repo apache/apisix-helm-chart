@@ -25,9 +25,9 @@ data:
     controller_name: {{ .Values.config.controllerName | default "apisix.apache.org/apisix-ingress-controller" }}
     leader_election_id: {{ .Values.config.leaderElection.id | default "apisix-ingress-controller-leader" }}
     leader_election:
-      leaseDuration: {{ .Values.config.leaderElection.leaseDuration | default "15s" }}
-      renewDeadline: {{ .Values.config.leaderElection.renewDeadline | default "10s" }}
-      retryPeriod: {{ .Values.config.leaderElection.retryPeriod | default "2s" }}
+      lease_duration: {{ .Values.config.leaderElection.leaseDuration | default "15s" }}
+      renew_deadline: {{ .Values.config.leaderElection.renewDeadline | default "10s" }}
+      retry_period: {{ .Values.config.leaderElection.retryPeriod | default "2s" }}
       disable: {{ .Values.config.leaderElection.disable | default false }}
     metrics_addr: {{ .Values.config.metricsAddr | default ":8080" }}
     enable_http2: {{ .Values.config.enableHTTP2 | default false }}
@@ -38,7 +38,7 @@ data:
     listener_port_match_mode: {{ .Values.config.listenerPortMatchMode | default "auto" }}
     provider:
       type: {{ .Values.config.provider.type | default "apisix" }}
-      sync_period: {{ .Values.config.provider.syncPeriod | default "1s" }}
+      sync_period: {{ .Values.config.provider.syncPeriod | default "1m" }}
       init_sync_delay: {{ .Values.config.provider.initSyncDelay | default "20m" }}
     {{- if .Values.webhook.enabled }}
     webhook:
