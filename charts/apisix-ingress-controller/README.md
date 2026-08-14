@@ -134,7 +134,7 @@ The same for container level, you need to set:
 | deployment.annotations | object | `{}` | Add annotations to Apache APISIX ingress controller resource |
 | deployment.image.pullPolicy | string | `"IfNotPresent"` |  |
 | deployment.image.repository | string | `"apache/apisix-ingress-controller"` |  |
-| deployment.image.tag | string | `"2.1.0"` |  |
+| deployment.image.tag | string | `"2.2.0"` |  |
 | deployment.imagePullSecrets | list | `[]` |  |
 | deployment.nodeSelector | object | `{}` |  |
 | deployment.podAnnotations | object | `{}` |  |
