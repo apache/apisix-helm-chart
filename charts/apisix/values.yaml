@@ -132,7 +132,7 @@ extraInitContainers: []
 #   image: busybox:1.28
 #   command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
 
-# -- Additional `containers`, See [Kubernetes containers](https://kubernetes.io/docs/concepts/containers/) for the detail.
+# -- Additional `containers`, See [Kubernetes containers](https://kubernetes.io/docs/concepts/containers/) for the detail. Rendered through `tpl`, so entries may reference other values (e.g. `image: "{{ .Values.someRepository }}:{{ .Values.someTag }}"`).
 extraContainers: []
 
 initContainer:
