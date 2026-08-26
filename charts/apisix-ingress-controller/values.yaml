@@ -92,7 +92,8 @@ config:
   secureMetrics: false
   execADCTimeout: "15s"
   disableGatewayAPI: false
-  listenerPortMatchMode: "auto"
+  # -- Controls `server_port` route matching from Gateway listener ports. Supported values are `off`, `auto`, and `explicit`.
+  listenerPortMatchMode: "off"
   provider:
     type: "apisix"
     syncPeriod: "1m"
