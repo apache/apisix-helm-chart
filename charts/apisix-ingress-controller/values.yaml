@@ -105,6 +105,10 @@ config:
 webhook:
   # -- Enable or disable admission webhook
   enabled: true
+  # -- Annotations for the ValidatingWebhookConfiguration, e.g.
+  # `cert-manager.io/inject-ca-from: <namespace>/<certificate>` so
+  # cert-manager's cainjector maintains the webhook caBundle.
+  annotations: {}
   # -- The port for the webhook server to listen on
   port: 9443
   # -- Failure policy for the webhook (Fail or Ignore)

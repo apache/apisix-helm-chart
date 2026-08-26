@@ -39,6 +39,10 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}-webhook
+  {{- with .Values.webhook.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
 webhooks:
