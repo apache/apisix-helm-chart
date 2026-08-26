@@ -171,6 +171,7 @@ The same for container level, you need to set:
 | serviceMonitor.namespace | string | `"monitoring"` | @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor |
 | webhook.certificate.provided | bool | `false` | Set to true if you want to provide your own certificate |
 | webhook.enabled | bool | `true` | Enable or disable admission webhook |
+| webhook.annotations | object | `{}` | Annotations for the ValidatingWebhookConfiguration, e.g. `cert-manager.io/inject-ca-from: <namespace>/<certificate>` so cert-manager's cainjector maintains the webhook caBundle. |
 | webhook.failurePolicy | string | `"Ignore"` | Failure policy for the webhook (Fail or Ignore) |
 | webhook.port | int | `9443` | The port for the webhook server to listen on |
 | webhook.timeoutSeconds | int | `10` | Timeout in seconds for the webhook |
