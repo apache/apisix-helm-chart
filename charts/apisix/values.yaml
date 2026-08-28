@@ -40,6 +40,8 @@ replicaCount: 1
 priorityClassName: ""
 # -- Annotations to add to each pod
 podAnnotations: {}
+# -- Labels to add to each pod
+podLabels: {}
 # -- Set the securityContext for Apache APISIX pods
 podSecurityContext: {}
   # fsGroup: 2000
