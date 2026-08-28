@@ -54,7 +54,7 @@ spec:
       http:
         paths:
           {{- range .paths }}
-          - path: {{ . }}
+          - path: {{ .path }}
             {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.Version }}
             pathType: ImplementationSpecific
             backend:
