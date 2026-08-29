@@ -24,6 +24,12 @@ spec:
 {{- if and (not .Values.useDaemonSet) (not .Values.autoscaling.enabled) }}
   replicas: {{ .Values.replicaCount }}
 {{- end }}
+{{- if .Values.minReadySeconds }}
+  minReadySeconds: {{ .Values.minReadySeconds }}
+{{- end }}
+{{- if and (not .Values.useDaemonSet) .Values.progressDeadlineSeconds }}
+  progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds }}
+{{- end }}
   selector:
     matchLabels:
       {{- include "apisix.selectorLabels" . | nindent 6 }}
@@ -50,6 +56,7 @@ spec:
         - name: {{ . }}
         {{- end }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       serviceAccountName: {{ include "apisix.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext: 
@@ -154,19 +161,27 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
-            {{- if $useTraditionalYaml }}
+            {{- if or $useTraditionalYaml .Values.apisix.status.enabled }}
             - name: status
               containerPort: {{ default 7085 .Values.apisix.status.port }}
               protocol: TCP
             {{- end}}
 
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- else }}
           {{- if ne .Values.apisix.deployment.role "control_plane" }}
           readinessProbe:
             failureThreshold: 6
             initialDelaySeconds: 10
             periodSeconds: 10
             successThreshold: 1
-            {{- if $useTraditionalYaml }}
+            {{- if or $useTraditionalYaml .Values.apisix.status.enabled }}
             httpGet:
               path: /status/ready
               port: {{ default 7085 .Values.apisix.status.port }}
@@ -175,6 +190,7 @@ spec:
               port: {{ .Values.service.http.containerPort }}
             {{- end}}
             timeoutSeconds: 1
+          {{- end }}
           {{- end }}
           lifecycle:
             preStop:

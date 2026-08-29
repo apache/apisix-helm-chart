@@ -179,6 +179,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.ssl.sslCiphers | string | `"ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"` | TLS ciphers allowed to use. |
 | apisix.ssl.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | apisix.ssl.sslSessionTickets | bool | `false` | Enable or disable TLS session tickets. Disabled by default because session tickets defeat Perfect Forward Secrecy (see https://github.com/mozilla/server-side-tls/issues/135) |
+| apisix.status.enabled | bool | `false` | Enable the status endpoint and probe `/status/ready` for readiness in every deployment mode, always enabled when `role_traditional.config_provider` is `yaml`. Requires APISIX >= 3.13.0 |
 | apisix.status.ip | string | `"0.0.0.0"` | The IP address on which the status endpoint (`/status`, `/status/ready`) listens |
 | apisix.status.port | int | `7085` | The port on which the status endpoint listens |
 | apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's [default stream_plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L294) are automatically used. |
@@ -259,6 +260,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | ingress.tls | list | `[]` | Ingress TLS settings |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.tag | float | `1.28` | Init container tag |
+| livenessProbe | object | `{}` | Override the liveness probe of the APISIX container, by default no liveness probe is set |
 | metrics | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"15s","labels":{},"name":"","namespace":""}}` | Observability configuration. |
 | metrics.serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
 | metrics.serviceMonitor.enabled | bool | `false` | Enable or disable Apache APISIX serviceMonitor |
@@ -266,6 +268,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | metrics.serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
 | metrics.serviceMonitor.name | string | `""` | name of the serviceMonitor, by default, it is the same as the apisix fullname |
 | metrics.serviceMonitor.namespace | string | `""` | namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix |
+| minReadySeconds | int | `0` | Minimum number of seconds a new pod must stay Ready before it is considered available, `0` keeps the Kubernetes default |
 | nameOverride | string | `""` | String to partially override the chart fullname |
 | nodeSelector | object | `{}` | Node labels for Apache APISIX pod assignment |
 | podAnnotations | object | `{}` | Annotations to add to each pod |
@@ -275,7 +278,9 @@ The command removes all the Kubernetes components associated with the chart and 
 | podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
 | podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
 | priorityClassName | string | `""` | Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods |
+| progressDeadlineSeconds | int | `600` | Number of seconds a Deployment may make no rollout progress before it is reported as failed (Deployment only) |
 | rbac.create | bool | `false` | Whether RBAC resources (ClusterRole and ClusterRoleBinding) should be created |
+| readinessProbe | object | `{}` | Override the readiness probe of the APISIX container, the default probes `/status/ready` when the status endpoint is enabled and the proxy TCP port otherwise |
 | replicaCount | int | `1` | if useDaemonSet is true or autoscaling.enabled is true, replicaCount not become effective |
 | resources | object | `{}` | Set pod resource requests & limits |
 | securityContext | object | `{}` | Set the securityContext for Apache APISIX container |
@@ -297,6 +302,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
 | serviceAccount.create | bool | `false` | Whether a ServiceAccount should be created for the APISIX pods |
 | serviceAccount.name | string | `""` | Name of the ServiceAccount to use. If not set and create is true, a name is generated from the chart fullname |
+| terminationGracePeriodSeconds | int | `30` | Number of seconds the pod is given to terminate gracefully, must cover the 30s `preStop` sleep plus `apisix.nginx.workerShutdownTimeout` when draining in-flight requests |
 | timezone | string | `""` | timezone is the timezone where apisix uses. For example: "UTC" or "Asia/Shanghai" This value will be set on apisix container's environment variable TZ. You may need to set the timezone to be consistent with your local time zone, otherwise the apisix's logs may used to retrieve event maybe in wrong timezone. |
 | tolerations | list | `[]` | List of node taints to tolerate |
 | topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
