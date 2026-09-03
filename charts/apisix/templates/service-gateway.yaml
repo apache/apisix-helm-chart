@@ -71,6 +71,15 @@ spec:
   {{- end }}
     protocol: TCP
   {{- end }}
+  {{- if or .Values.apisix.ssl.enableHTTP3 }}
+  - name: apisix-gateway-http3
+    port: {{ .Values.service.tls.servicePort }}
+    targetPort: {{ .Values.apisix.ssl.containerPort }}
+    {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.tls.nodePort))) }}
+    nodePort: {{ .Values.service.tls.nodePort }}
+    {{- end }}
+    protocol: UDP
+  {{- end }}
   {{- range .Values.apisix.ssl.additionalContainerPorts }}
   - name: apisix-gateway-tls-{{ .port | toString }}
     port: {{ .port }}
