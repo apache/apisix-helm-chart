@@ -43,6 +43,8 @@ _See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command doc
 
 ## Upgrading Chart
 
+Chart 1.3.1 changes the default `config.listenerPortMatchMode` from `auto` to `off`, matching the APISIX Ingress Controller 2.2.0 default. This avoids adding `server_port` route predicates when Kubernetes Service ports differ from the ports on which APISIX accepts traffic. If your routes rely on listener-port matching, set `config.listenerPortMatchMode` to `auto` or `explicit` before upgrading.
+
 ```console
 helm upgrade [RELEASE_NAME] [CHART] --install
 ```
@@ -121,7 +123,7 @@ The same for container level, you need to set:
 | config.leaderElection.leaseDuration | string | `"15s"` |  |
 | config.leaderElection.renewDeadline | string | `"10s"` |  |
 | config.leaderElection.retryPeriod | string | `"2s"` |  |
-| config.listenerPortMatchMode | string | `"auto"` |  |
+| config.listenerPortMatchMode | string | `"off"` | Controls `server_port` route matching from Gateway listener ports. Supported values are `off`, `auto`, and `explicit`. |
 | config.logLevel | string | `"info"` |  |
 | config.metricsAddr | string | `":8080"` |  |
 | config.probeAddr | string | `":8081"` |  |
