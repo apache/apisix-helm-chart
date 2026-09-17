@@ -129,6 +129,7 @@ The same for container level, you need to set:
 | config.provider.syncPeriod | string | `"1m"` |  |
 | config.provider.type | string | `"apisix"` |  |
 | config.secureMetrics | bool | `false` |  |
+| crds.gatewayAPI.enabled | bool | `true` | Enable or disable installing the Gateway API standard channel CRDs |
 | deployment.adcContainer | object | `{"config":{"logLevel":"info"},"image":{"repository":"ghcr.io/api7/adc","tag":"0.27.1"}}` | Set adc sidecar container configuration |
 | deployment.affinity | object | `{}` |  |
 | deployment.annotations | object | `{}` | Add annotations to Apache APISIX ingress controller resource |

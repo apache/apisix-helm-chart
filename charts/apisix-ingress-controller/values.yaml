@@ -188,6 +188,11 @@ gatewayProxy:
     # - "10.0.0.1"
     # - "10.0.0.2"
 
+crds:
+  gatewayAPI:
+    # -- Enable or disable installing the Gateway API standard channel CRDs
+    enabled: true
+
 apisix:
   adminService:
     namespace: apisix-ingress

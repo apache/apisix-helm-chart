@@ -69,13 +69,13 @@ helm install apisix-ingress-controller apisix/apisix-ingress-controller --namesp
 
 ### CRD
 
-CRDs upgrading is special as helm chart will skip to apply these resources when they already exist.
-
-> With the arrival of Helm 3, we removed the old crd-install hooks for a more simple methodology. There is now a special directory called crds that you can create in your chart to hold your CRDs. These CRDs are not templated, but will be installed by default when running a helm install for the chart. If the CRD already exists, it will be skipped with a warning. If you wish to skip the CRD installation step, you can pass the --skip-crds flag.
-
-In such a case, you may need to apply these CRDs by yourself.
+Helm installs the APISIX CRDs in `crds/` on `helm install` only and skips them on `helm upgrade`, so apply them yourself when upgrading:
 
 ```shell
-cd /path/to/apisix-ingress-controller
-kubectl apply -k samples/deploy/crd/
+helm pull apisix/apisix-ingress-controller --untar
+kubectl apply --server-side -f apisix-ingress-controller/crds/apisixic-crds.yaml
 ```
+
+The Gateway API CRDs are chart-managed and controlled by `crds.gatewayAPI.enabled` (default `true`).
+CRDs not created by this release (for example by GKE or another chart) are left untouched, and chart-managed ones are kept on `helm uninstall`.
+Set `crds.gatewayAPI.enabled=false` when another component owns the CRDs and you render the chart with `helm template` or Argo CD.
