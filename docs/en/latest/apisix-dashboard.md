@@ -55,5 +55,5 @@ helm install apisix-dashboard apisix/apisix-dashboard --create-namespace --names
 To uninstall/delete the `apisix-dashboard` release:
 
 ```shell
-helm uninstall apisix-dashboard
+helm uninstall apisix-dashboard --namespace apisix
 ```

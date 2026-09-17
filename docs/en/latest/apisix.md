@@ -49,7 +49,7 @@ helm repo add apisix https://apache.github.io/apisix-helm-chart && helm repo upd
 To uninstall/delete the `apisix` release:
 
 ```shell
-helm uninstall apisix
+helm uninstall apisix --namespace apisix
 ```
 
 ## Seeking help
