@@ -58,6 +58,7 @@ spec:
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       containers:
         {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
         - name: {{ .Chart.Name }}
@@ -176,13 +177,10 @@ spec:
             {{- end}}
             timeoutSeconds: 1
           {{- end }}
+          {{- with .Values.lifecycle }}
           lifecycle:
-            preStop:
-              exec:
-                command:
-                  - /bin/sh
-                  - -c
-                  - "sleep 30"
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
           {{- if eq .Values.apisix.deployment.mode "standalone" }}
             - mountPath: /apisix-config
