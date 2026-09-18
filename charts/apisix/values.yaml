@@ -112,6 +112,21 @@ extraEnvVars: []
 updateStrategy: {}
   # type: RollingUpdate
 
+# -- Minimum number of seconds a new pod must stay Ready before it is considered available, `0` keeps the Kubernetes default
+minReadySeconds: 0
+
+# -- Number of seconds a Deployment may make no rollout progress before it is reported as failed (Deployment only)
+progressDeadlineSeconds: 600
+
+# -- Number of seconds the pod is given to terminate gracefully, must cover the 30s `preStop` sleep plus `apisix.nginx.workerShutdownTimeout` when draining in-flight requests
+terminationGracePeriodSeconds: 30
+
+# -- Override the liveness probe of the APISIX container, by default no liveness probe is set
+livenessProbe: {}
+
+# -- Override the readiness probe of the APISIX container, the default probes `/status/ready` when the status endpoint is enabled and the proxy TCP port otherwise
+readinessProbe: {}
+
 # -- Additional Kubernetes resources to deploy with the release.
 extraDeploy: []
 
@@ -789,6 +804,8 @@ apisix:
               path: "mount-path"
 
   status:
+    # -- Enable the status endpoint and probe `/status/ready` for readiness in every deployment mode, always enabled when `role_traditional.config_provider` is `yaml`. Requires APISIX >= 3.13.0
+    enabled: false
     # -- The IP address on which the status endpoint (`/status`, `/status/ready`) listens
     ip: "0.0.0.0"
     # -- The port on which the status endpoint listens
