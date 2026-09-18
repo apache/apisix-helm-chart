@@ -237,7 +237,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | externalEtcd.password | string | `""` | if etcd.enabled is false and externalEtcd.existingSecret is empty, externalEtcd.password is the passsword for external etcd. |
 | externalEtcd.secretPasswordKey | string | `"etcd-root-password"` | externalEtcd.secretPasswordKey Key inside the secret containing the external etcd password |
 | externalEtcd.user | string | `"root"` | if etcd.enabled is false, user for external etcd. Set empty to disable authentication |
-| extraContainers | list | `[]` | Additional `containers`, See [Kubernetes containers](https://kubernetes.io/docs/concepts/containers/) for the detail. |
+| extraContainers | list | `[]` | Additional `containers`, See [Kubernetes containers](https://kubernetes.io/docs/concepts/containers/) for the detail. Rendered through `tpl`, so entries may reference other values (e.g. `image: "{{ .Values.someRepository }}:{{ .Values.someTag }}"`). |
 | extraDeploy | list | `[]` | Additional Kubernetes resources to deploy with the release. |
 | extraEnvVars | list | `[]` | extraEnvVars An array to add extra env vars e.g: extraEnvVars:   - name: FOO     value: "bar"   - name: FOO2     valueFrom:       secretKeyRef:         name: SECRET_NAME         key: KEY |
 | extraInitContainers | list | `[]` | Additional `initContainers`, See [Kubernetes initContainers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for the detail. |
