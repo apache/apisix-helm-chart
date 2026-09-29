@@ -29,7 +29,7 @@ image:
   pullPolicy: IfNotPresent
   # -- Apache APISIX image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 3.18.0-ubuntu
+  tag: 3.19.0-ubuntu
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
@@ -209,7 +209,7 @@ service:
   stream:
     # -- Enable the stream (L4 proxy) subsystem
     enabled: false
-    # -- TCP proxy port list, element format: port number, or a map with `addr` and optional `tls`
+    # -- TCP proxy port list, element format: port number, or a map with `addr` and optional `tls` / `tls_passthrough`
     tcp: []
     # -- UDP proxy port list
     udp: []

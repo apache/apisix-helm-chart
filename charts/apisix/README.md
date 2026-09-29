@@ -248,7 +248,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | hostNetwork | bool | `false` | Use the host's network namespace |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.18.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.19.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"enabled":false,"webhook":{"enabled":false}}` | Ingress controller configuration |
 | ingress-controller.enabled | bool | `false` | Enable the apisix-ingress-controller sub-chart |
@@ -289,7 +289,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | service.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
 | service.stream | object | `{"enabled":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | service.stream.enabled | bool | `false` | Enable the stream (L4 proxy) subsystem |
-| service.stream.tcp | list | `[]` | TCP proxy port list, element format: port number, or a map with `addr` and optional `tls` |
+| service.stream.tcp | list | `[]` | TCP proxy port list, element format: port number, or a map with `addr` and optional `tls` / `tls_passthrough` |
 | service.stream.udp | list | `[]` | UDP proxy port list |
 | service.tls | object | `{"servicePort":443}` | Apache APISIX service settings for tls |
 | service.tls.servicePort | int | `443` | Kubernetes service port for HTTPS traffic |
