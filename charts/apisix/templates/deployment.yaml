@@ -63,7 +63,7 @@ spec:
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       containers:
-        {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
+        {{- $useTraditionalYaml := and (eq (include "apisix.deployment.role" $) "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
           securityContext:
@@ -170,7 +170,7 @@ spec:
               protocol: TCP
             {{- end}}
 
-          {{- if ne .Values.apisix.deployment.role "control_plane" }}
+          {{- if ne (include "apisix.deployment.role" $) "control_plane" }}
           readinessProbe:
             failureThreshold: 6
             initialDelaySeconds: 10

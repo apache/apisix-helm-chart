@@ -461,6 +461,10 @@ apisix:
   deployment:
     # -- Apache APISIX deployment mode
     # Optional: traditional, decoupled, standalone
+    # standalone is file-driven standalone: rules are read from the mounted
+    # apisix.yaml, and the default traditional role is rendered as data_plane.
+    # For API-driven standalone, keep mode traditional and set
+    # role_traditional.config_provider to yaml.
     #
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
     mode: traditional

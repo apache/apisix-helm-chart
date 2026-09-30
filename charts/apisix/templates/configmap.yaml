@@ -44,7 +44,7 @@ data:
     {{- end }}
     {{- else }}
     apisix:    # universal configurations
-      {{- if not (eq .Values.apisix.deployment.role "control_plane") }}
+      {{- if not (eq (include "apisix.deployment.role" $) "control_plane") }}
       node_listen:    # APISIX listening port
         - {{ .Values.service.http.containerPort }}
         {{- with .Values.service.http.additionalContainerPorts }}
@@ -185,7 +185,7 @@ data:
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.fallbackSNI }}
         fallback_sni: {{ .Values.apisix.ssl.fallbackSNI | quote }}
         {{- end }}
-      {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
+      {{- $useTraditionalYaml := and (eq (include "apisix.deployment.role" $) "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
       {{- if $useTraditionalYaml }}
       status:
         ip: {{ default "127.0.0.1" .Values.apisix.status.ip }}
@@ -354,24 +354,24 @@ data:
     {{- end }}
 
     deployment:
-      role: {{ .Values.apisix.deployment.role }}
+      role: {{ (include "apisix.deployment.role" $) }}
 
-      {{- if eq .Values.apisix.deployment.role "traditional" }}
+      {{- if eq (include "apisix.deployment.role" $) "traditional" }}
       role_traditional:
         config_provider: {{ default "etcd" .Values.apisix.deployment.role_traditional.config_provider }}
       {{- end }}
 
-      {{- if eq .Values.apisix.deployment.role "control_plane" }}
+      {{- if eq (include "apisix.deployment.role" $) "control_plane" }}
       role_control_plane:
         config_provider: etcd
       {{- end }}
 
-      {{- if eq .Values.apisix.deployment.role "data_plane" }}
+      {{- if eq (include "apisix.deployment.role" $) "data_plane" }}
       role_data_plane:
         config_provider: {{- eq .Values.apisix.deployment.mode "standalone" | ternary "yaml" "etcd" | indent 1 }}
       {{- end }}
 
-      {{- if not (eq .Values.apisix.deployment.role "data_plane") }}
+      {{- if not (eq (include "apisix.deployment.role" $) "data_plane") }}
       admin:
         {{- if .Values.etcd.enabled }}
         enable_admin_ui: {{ .Values.apisix.admin.enable_admin_ui }}
