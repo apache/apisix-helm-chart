@@ -43,6 +43,8 @@ podAnnotations: {}
 # -- Set the securityContext for Apache APISIX pods
 podSecurityContext: {}
   # fsGroup: 2000
+# -- Number of seconds Kubernetes waits for Apache APISIX to terminate gracefully
+terminationGracePeriodSeconds: 30
 # -- Set the securityContext for Apache APISIX container
 securityContext: {}
   # capabilities:
@@ -51,6 +53,15 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
+
+# -- Lifecycle hooks for the Apache APISIX container
+lifecycle:
+  preStop:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - "sleep 30"
 
 # -- See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details
 podDisruptionBudget:
