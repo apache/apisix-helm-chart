@@ -175,6 +175,16 @@ spec:
               port: {{ .Values.service.http.containerPort }}
             {{- end}}
             timeoutSeconds: 1
+            {{- if .Values.apisix.deployment.livenessProbe.enabled }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.service.http.containerPort }}
+            initialDelaySeconds: {{ .Values.apisix.deployment.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.apisix.deployment.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.apisix.deployment.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.apisix.deployment.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.apisix.deployment.livenessProbe.successThreshold }}
+            {{- end}}
           {{- end }}
           lifecycle:
             preStop:
