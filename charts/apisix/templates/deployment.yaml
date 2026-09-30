@@ -38,6 +38,9 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if and (eq .Values.apisix.deployment.mode "standalone") (not .Values.apisix.deployment.standalone.existingConfigMap) }}
+        checksum/standalone-config: {{ include (print $.Template.BasePath "/apisix-config-cm.yaml") . | sha256sum }}
+        {{- end }}
         {{- with .Values.podAnnotations }}
         {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
@@ -52,7 +55,7 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "apisix.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
-      securityContext: 
+      securityContext:
         {{- . | toYaml | nindent 8 }}
       {{- end }}
       {{- with .Values.priorityClassName }}
@@ -108,7 +111,7 @@ spec:
             - name: http-{{ .port | toString }}
               containerPort: {{ .port }}
               protocol: TCP
-            {{- end }}     
+            {{- end }}
             - name: tls
               containerPort: {{ .Values.apisix.ssl.containerPort }}
               protocol: TCP
@@ -116,7 +119,7 @@ spec:
             - name: tls-{{ .port | toString }}
               containerPort: {{ .port }}
               protocol: TCP
-            {{- end }}     
+            {{- end }}
             {{- if .Values.apisix.admin.enabled }}
             - name: admin
               containerPort: {{ .Values.apisix.admin.port }}
