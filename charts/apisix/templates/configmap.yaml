@@ -140,6 +140,9 @@ data:
           {{- if hasKey . "tls" }}
             tls: {{ .tls }}
           {{- end }}
+          {{- if hasKey . "tls_passthrough" }}
+            tls_passthrough: {{ .tls_passthrough }}
+          {{- end }}
           {{- else }}
           - {{ . }}
           {{- end }}

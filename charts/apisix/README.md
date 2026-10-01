@@ -249,7 +249,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | hostNetwork | bool | `false` | Use the host's network namespace |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.18.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.19.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"enabled":false,"webhook":{"enabled":false}}` | Ingress controller configuration |
 | ingress-controller.enabled | bool | `false` | Enable the apisix-ingress-controller sub-chart |
@@ -271,11 +271,11 @@ The command removes all the Kubernetes components associated with the chart and 
 | nameOverride | string | `""` | String to partially override the chart fullname |
 | nodeSelector | object | `{}` | Node labels for Apache APISIX pod assignment |
 | podAnnotations | object | `{}` | Annotations to add to each pod |
-| podLabels | object | `{}` | Labels to add to each pod |
 | podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |
 | podDisruptionBudget.enabled | bool | `false` | Enable or disable podDisruptionBudget |
 | podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
 | podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
+| podLabels | object | `{}` | Labels to add to each pod |
 | podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
 | priorityClassName | string | `""` | Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods |
 | rbac.create | bool | `false` | Whether RBAC resources (ClusterRole and ClusterRoleBinding) should be created |
@@ -293,7 +293,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | service.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
 | service.stream | object | `{"enabled":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | service.stream.enabled | bool | `false` | Enable the stream (L4 proxy) subsystem |
-| service.stream.tcp | list | `[]` | TCP proxy port list, element format: port number, or a map with `addr` and optional `tls` |
+| service.stream.tcp | list | `[]` | TCP proxy port list, element format: port number, or a map with `addr` and optional `tls` / `tls_passthrough` |
 | service.stream.udp | list | `[]` | UDP proxy port list |
 | service.tls | object | `{"servicePort":443}` | Apache APISIX service settings for tls |
 | service.tls.servicePort | int | `443` | Kubernetes service port for HTTPS traffic |
