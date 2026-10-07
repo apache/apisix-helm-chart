@@ -48,6 +48,8 @@ deployment:
   # -- Add annotations to Apache APISIX ingress controller resource
   annotations: {}
   podAnnotations: {}
+  # -- Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#priorityclass) to avoid being evicted by high priority pods
+  priorityClassName: ""
   replicas: 1
   nodeSelector: {}
   tolerations: []
