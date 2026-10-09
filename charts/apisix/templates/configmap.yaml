@@ -44,6 +44,16 @@ data:
     {{- end }}
     {{- else }}
     apisix:    # universal configurations
+      {{- if .Values.apisix.encryption }}
+      data_encryption:         # Data encryption settings
+        enable_encrypt_fields: {{ .Values.apisix.encryption.enabled }}
+        {{- if and .Values.apisix.encryption.keyring (gt (len .Values.apisix.encryption.keyring) 0) }}
+        keyring:
+          {{- range $key := .Values.apisix.encryption.keyring }}
+          - {{ $key | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
       {{- if not (eq .Values.apisix.deployment.role "control_plane") }}
       node_listen:    # APISIX listening port
         - {{ .Values.service.http.containerPort }}
