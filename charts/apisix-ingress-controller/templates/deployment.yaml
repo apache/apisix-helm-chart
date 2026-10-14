@@ -86,14 +86,14 @@ spec:
         livenessProbe:
           httpGet:
             path: /healthz
-            port: {{ include "apisix-ingress-controller.probePort" . }}
+            port: {{ include "apisix-ingress-controller-manager.probePort" . }}
           initialDelaySeconds: 15
           periodSeconds: 20
         name: manager
         readinessProbe:
           httpGet:
             path: /readyz
-            port: {{ include "apisix-ingress-controller.probePort" . }}
+            port: {{ include "apisix-ingress-controller-manager.probePort" . }}
           initialDelaySeconds: 5
           periodSeconds: 10
         resources:
