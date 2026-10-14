@@ -70,7 +70,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.customPlugins.plugins[0].configMap.mounts | list | `[{"key":"the-file-name","path":"mount-path"}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
 | apisix.deleteURITailSlash | bool | `false` | Delete the '/' at the end of the URI |
-| apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
+| apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone standalone is file-driven standalone: rules are read from the mounted apisix.yaml, and the default traditional role is rendered as data_plane. For API-driven standalone, keep mode traditional and set role_traditional.config_provider to yaml.  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role_traditional.config_provider | string | `"etcd"` | Config provider for the traditional role. enum: etcd, yaml |
 | apisix.deployment.standalone | object | `{"config":"routes:\n-\n  uri: /hi\n  upstream:\n    nodes:\n      \"127.0.0.1:1980\": 1\n    type: roundrobin\n","existingConfigMap":""}` | Standalone rules configuration  ref: https://apisix.apache.org/docs/apisix/deployment-modes/#standalone |
