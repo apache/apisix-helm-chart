@@ -376,9 +376,7 @@ data:
 
       {{- if not (eq .Values.apisix.deployment.role "data_plane") }}
       admin:
-        {{- if .Values.etcd.enabled }}
         enable_admin_ui: {{ .Values.apisix.admin.enable_admin_ui }}
-        {{- end }}
         allow_admin:    # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
         {{- if .Values.apisix.admin.allow.ipList }}
         {{- range $ips := .Values.apisix.admin.allow.ipList }}
