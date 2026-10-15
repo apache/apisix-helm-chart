@@ -378,21 +378,12 @@ data:
       admin:
         enable_admin_ui: {{ .Values.apisix.admin.enable_admin_ui }}
         allow_admin:    # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
-        {{- $ipList := .Values.apisix.admin.allow.ipList }}
-        {{- if kindIs "invalid" $ipList }}
-          - "127.0.0.1/24"
-          - "::1"
+        {{- $allowAdmin := .Values.apisix.admin.allow.ipList | default (list "0.0.0.0/0" "::/0") }}
         {{- if (index .Values "ingress-controller" "enabled") }}
-          - "0.0.0.0/0"
-          - "::/0"
+        {{- $allowAdmin = concat $allowAdmin (.Values.apisix.admin.allow.ingressControllerExtraIpList | default list) }}
         {{- end }}
-        {{- else if $ipList }}
-        {{- range $ips := $ipList }}
+        {{- range $ips := uniq $allowAdmin }}
           - {{ $ips | quote }}
-        {{- end }}
-        {{- else }}
-          - "0.0.0.0/0"
-          - "::/0"
         {{- end }}
         {{- if .Values.apisix.admin.enabled }}
         admin_listen:

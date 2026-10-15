@@ -528,12 +528,17 @@ apisix:
       secretViewerKey: ""
 
     allow:
-      # -- (list) The client IP CIDRs allowed to access Apache APISIX Admin API service.
-      # When unset, defaults to `127.0.0.1/24` and `::1`, plus `0.0.0.0/0` and `::/0` if the
-      # ingress-controller sub-chart is enabled so that it can reach the Admin API.
-      # When set, the list is used as-is and nothing is appended, so include the
-      # ingress-controller Pod CIDR yourself if needed. An empty list allows all clients (`0.0.0.0/0` and `::/0`).
-      ipList: ~
+      # -- The client IP CIDRs allowed to access Apache APISIX Admin API service.
+      # An empty list allows all clients (`0.0.0.0/0` and `::/0`).
+      ipList:
+        - 127.0.0.1/24
+        - "::1"
+      # -- Client IP CIDRs appended to ipList when ingress-controller.enabled is true,
+      # so that the bundled ingress controller can reach the Admin API.
+      # Narrow it to the ingress controller Pod CIDR, or set it to [] to append nothing.
+      ingressControllerExtraIpList:
+        - 0.0.0.0/0
+        - "::/0"
     # -- Using ingress access Apache APISIX admin service
     ingress:
       # -- Enable an Ingress resource in front of the Admin API service
