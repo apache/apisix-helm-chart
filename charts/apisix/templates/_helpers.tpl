@@ -157,3 +157,25 @@ Key to use to fetch viewer token from secret
 {{- "viewer" }}
 {{- end }}
 {{- end }}
+
+{{/*
+The deployment role APISIX runs with. mode "standalone" is file-driven
+standalone: rules come from the mounted apisix.yaml, which APISIX reads as a
+data plane with the yaml config provider. With the default traditional role on
+the etcd provider that combination could never start (no etcd is configured in
+standalone mode), so it is rendered as a data plane. A traditional role on the
+yaml provider (API-driven standalone) is kept as configured; a control plane
+needs etcd and cannot run standalone.
+*/}}
+{{- define "apisix.deployment.role" -}}
+{{- $role := .Values.apisix.deployment.role -}}
+{{- if eq .Values.apisix.deployment.mode "standalone" -}}
+{{- if eq $role "control_plane" -}}
+{{- fail "apisix.deployment.mode \"standalone\" cannot run with apisix.deployment.role \"control_plane\": a control plane needs etcd" -}}
+{{- end -}}
+{{- if and (eq $role "traditional") (ne (default "etcd" .Values.apisix.deployment.role_traditional.config_provider) "yaml") -}}
+{{- $role = "data_plane" -}}
+{{- end -}}
+{{- end -}}
+{{- $role -}}
+{{- end -}}
