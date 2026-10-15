@@ -535,6 +535,12 @@ apisix:
       # -- The client IP CIDR allowed to access Apache APISIX Admin API service.
       ipList:
         - 127.0.0.1/24
+      # -- Client IP CIDRs appended to ipList when ingress-controller.enabled is true,
+      # so that the bundled ingress controller can reach the Admin API.
+      # Narrow it to the ingress controller Pod CIDR, or set it to [] to append nothing.
+      ingressControllerExtraIpList:
+        - 0.0.0.0/0
+        - "::/0"
     # -- Using ingress access Apache APISIX admin service
     ingress:
       # -- Enable an Ingress resource in front of the Admin API service

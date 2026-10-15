@@ -41,6 +41,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Set affinity for Apache APISIX deploy |
+| apisix.admin.allow.ingressControllerExtraIpList | list | `["0.0.0.0/0","::/0"]` | Client IP CIDRs appended to ipList when ingress-controller.enabled is true, so that the bundled ingress controller can reach the Admin API. Narrow it to the ingress controller Pod CIDR, or set it to [] to append nothing. |
 | apisix.admin.allow.ipList | list | `["127.0.0.1/24"]` | The client IP CIDR allowed to access Apache APISIX Admin API service. |
 | apisix.admin.cors | bool | `true` | Admin API support CORS response headers |
 | apisix.admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
