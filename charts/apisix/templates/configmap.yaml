@@ -378,7 +378,7 @@ data:
       admin:
         enable_admin_ui: {{ .Values.apisix.admin.enable_admin_ui }}
         allow_admin:    # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
-        {{- $allowAdmin := .Values.apisix.admin.allow.ipList | default (list "0.0.0.0/0" "::/0") }}
+        {{- $allowAdmin := .Values.apisix.admin.allow.ipList | default (list "0.0.0.0/0") }}
         {{- if (index .Values "ingress-controller" "enabled") }}
         {{- $allowAdmin = concat $allowAdmin (.Values.apisix.admin.allow.ingressControllerExtraIpList | default list) }}
         {{- end }}
