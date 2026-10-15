@@ -529,10 +529,10 @@ apisix:
 
     allow:
       # -- (list) The client IP CIDRs allowed to access Apache APISIX Admin API service.
-      # When unset, defaults to `127.0.0.1/24`, plus `0.0.0.0/0` and `::/0` if the
+      # When unset, defaults to `127.0.0.1/24` and `::1`, plus `0.0.0.0/0` and `::/0` if the
       # ingress-controller sub-chart is enabled so that it can reach the Admin API.
       # When set, the list is used as-is and nothing is appended, so include the
-      # ingress-controller Pod CIDR yourself if needed. An empty list allows all IPv4 clients.
+      # ingress-controller Pod CIDR yourself if needed. An empty list allows all clients (`0.0.0.0/0` and `::/0`).
       ipList: ~
     # -- Using ingress access Apache APISIX admin service
     ingress:

@@ -381,6 +381,7 @@ data:
         {{- $ipList := .Values.apisix.admin.allow.ipList }}
         {{- if kindIs "invalid" $ipList }}
           - "127.0.0.1/24"
+          - "::1"
         {{- if (index .Values "ingress-controller" "enabled") }}
           - "0.0.0.0/0"
           - "::/0"
@@ -391,6 +392,7 @@ data:
         {{- end }}
         {{- else }}
           - "0.0.0.0/0"
+          - "::/0"
         {{- end }}
         {{- if .Values.apisix.admin.enabled }}
         admin_listen:

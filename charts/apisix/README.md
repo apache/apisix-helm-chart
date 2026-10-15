@@ -41,7 +41,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Set affinity for Apache APISIX deploy |
-| apisix.admin.allow.ipList | list | `nil` | The client IP CIDRs allowed to access Apache APISIX Admin API service. When unset, defaults to `127.0.0.1/24`, plus `0.0.0.0/0` and `::/0` if the ingress-controller sub-chart is enabled so that it can reach the Admin API. When set, the list is used as-is and nothing is appended, so include the ingress-controller Pod CIDR yourself if needed. An empty list allows all IPv4 clients. |
+| apisix.admin.allow.ipList | list | `nil` | The client IP CIDRs allowed to access Apache APISIX Admin API service. When unset, defaults to `127.0.0.1/24` and `::1`, plus `0.0.0.0/0` and `::/0` if the ingress-controller sub-chart is enabled so that it can reach the Admin API. When set, the list is used as-is and nothing is appended, so include the ingress-controller Pod CIDR yourself if needed. An empty list allows all clients (`0.0.0.0/0` and `::/0`). |
 | apisix.admin.cors | bool | `true` | Admin API support CORS response headers |
 | apisix.admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
 | apisix.admin.credentials.admin | string | `"edd1c9f034335f136f87ad84b625c8f1"` | Apache APISIX admin API admin role credentials |
