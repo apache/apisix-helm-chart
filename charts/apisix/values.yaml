@@ -175,7 +175,7 @@ fullnameOverride: ""
 
 serviceAccount:
   # -- Whether a ServiceAccount should be created for the APISIX pods
-  create: false
+  create: true
   # -- Annotations to add to the ServiceAccount
   annotations: {}
   # -- Name of the ServiceAccount to use. If not set and create is true, a name is generated from the chart fullname
