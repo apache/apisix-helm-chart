@@ -20,9 +20,9 @@ metadata:
   name: {{ include "apisix.fullname" . }}-gateway
   namespace: {{ .Release.Namespace }}
   annotations:
-    {{- range $key, $value := .Values.service.annotations }}
-      {{ $key }}: {{ $value | quote }}
-    {{- end }}
+  {{- with .Values.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
     app.kubernetes.io/service: apisix-gateway
