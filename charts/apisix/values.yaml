@@ -905,6 +905,9 @@ etcd:
 
 # -- Ingress controller configuration
 ingress-controller:
+  config:
+    # -- Controls Gateway listener port matching. Defaults to off to avoid matching Service ports against different APISIX container ports; set auto or explicit to opt in.
+    listenerPortMatchMode: "off"
   # -- Enable the apisix-ingress-controller sub-chart
   enabled: false
   webhook:

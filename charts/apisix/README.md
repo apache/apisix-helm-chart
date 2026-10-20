@@ -34,6 +34,10 @@ helm delete [RELEASE_NAME] --namespace ingress-apisix
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
+## Upgrading to 2.18.3
+
+The bundled ingress controller now defaults `ingress-controller.config.listenerPortMatchMode` to `off`, matching the controller 2.2.0 default. This avoids adding `server_port` route predicates based on Gateway listener ports when a Service maps them to different APISIX container ports (for example, 80 to 9080). If your routes rely on listener-port matching, explicitly set this value to `auto` or `explicit` before upgrading.
+
 ## Parameters
 
 ## Values
@@ -252,7 +256,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
 | image.tag | string | `"3.19.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
-| ingress-controller | object | `{"enabled":false,"webhook":{"enabled":false}}` | Ingress controller configuration |
+| ingress-controller | object | `{"config":{"listenerPortMatchMode":"off"},"enabled":false,"webhook":{"enabled":false}}` | Ingress controller configuration |
+| ingress-controller.config.listenerPortMatchMode | string | `"off"` | Controls Gateway listener port matching. Defaults to off to avoid matching Service ports against different APISIX container ports; set auto or explicit to opt in. |
 | ingress-controller.enabled | bool | `false` | Enable the apisix-ingress-controller sub-chart |
 | ingress.annotations | object | `{}` | Ingress annotations |
 | ingress.enabled | bool | `false` | Enable an Ingress resource in front of the APISIX service |

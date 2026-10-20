@@ -34,6 +34,10 @@ helm delete [RELEASE_NAME] --namespace ingress-apisix
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
+## Upgrading to 2.18.3
+
+The bundled ingress controller now defaults `ingress-controller.config.listenerPortMatchMode` to `off`, matching the controller 2.2.0 default. This avoids adding `server_port` route predicates based on Gateway listener ports when a Service maps them to different APISIX container ports (for example, 80 to 9080). If your routes rely on listener-port matching, explicitly set this value to `auto` or `explicit` before upgrading.
+
 ## Parameters
 
 {{ template "chart.valuesSection" . }}

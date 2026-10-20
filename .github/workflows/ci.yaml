@@ -33,6 +33,7 @@ jobs:
                && cd ../.. \
                && helm repo add bitnami https://charts.bitnami.com/bitnami \
                && helm repo add apisix https://apache.github.io/apisix-helm-chart \
+               && bash test/umbrella-listener-port-default.sh \
                && ct lint \
                   --validate-maintainers=false \
                   --charts charts/apisix \
