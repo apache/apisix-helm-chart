@@ -79,11 +79,28 @@ Webhook service name - ensure it stays within 63 character limit
 {{- end }}
 
 {{/*
-Webhook secret name - ensure it stays within 63 character limit
+Webhook secret name - use value from values.yaml if provided, otherwise generate one
 */}}
 {{- define "apisix-ingress-controller-manager.webhook.secretName" -}}
+{{- if and .Values.webhook.certificate.provided .Values.webhook.certificate.secretName -}}
+{{- .Values.webhook.certificate.secretName -}}
+{{- else -}}
 {{- $suffix := "-webhook-cert" -}}
 {{- $maxLen := sub 63 (len $suffix) | int -}}
 {{- $baseName := include "apisix-ingress-controller-manager.name.fullname" . | trunc $maxLen | trimSuffix "-" -}}
 {{- printf "%s%s" $baseName $suffix -}}
+{{- end -}}
 {{- end }}
+
+{{/*
+Port of the controller health probe server, taken from config.probeAddr
+(e.g. ":8081", "0.0.0.0:8081", "[::]:8081").
+*/}}
+{{- define "apisix-ingress-controller-manager.probePort" -}}
+{{- $addr := .Values.config.probeAddr | default ":8081" -}}
+{{- $port := $addr | splitList ":" | last | int -}}
+{{- if or (le $port 0) (gt $port 65535) -}}
+{{- fail (printf "config.probeAddr %q must end with a valid port, e.g. \":8081\"" $addr) -}}
+{{- end -}}
+{{- $port -}}
+{{- end -}}

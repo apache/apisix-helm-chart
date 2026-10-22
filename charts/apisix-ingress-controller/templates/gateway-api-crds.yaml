@@ -1,0 +1,39 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- if .Values.crds.gatewayAPI.enabled }}
+{{- /* Render each CRD only when absent or owned by this release, and keep it on uninstall */}}
+{{- range $document := regexSplit "(?m)^---$" (.Files.Get "gateway-api/standard-install.yaml") -1 }}
+{{- $object := fromYaml $document }}
+{{- if $object.Error }}
+{{- fail (printf "gateway-api/standard-install.yaml: %s" $object.Error) }}
+{{- end }}
+{{- if $object.kind }}
+{{- $existing := lookup $object.apiVersion $object.kind "" $object.metadata.name }}
+{{- $existingAnnotations := dict }}
+{{- if $existing }}
+{{- $existingAnnotations = $existing.metadata.annotations | default dict }}
+{{- end }}
+{{- $ownedByRelease := and (eq (get $existingAnnotations "meta.helm.sh/release-name") $.Release.Name) (eq (get $existingAnnotations "meta.helm.sh/release-namespace") $.Release.Namespace) }}
+{{- if or (not $existing) $ownedByRelease }}
+{{- $annotations := merge (dict "helm.sh/resource-policy" "keep") ($object.metadata.annotations | default dict) }}
+{{- $_ := set $object.metadata "annotations" $annotations }}
+---
+{{ toYaml $object }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
