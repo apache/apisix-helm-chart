@@ -41,6 +41,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Set affinity for Apache APISIX deploy |
+| apisix.admin.allow.ingressControllerExtraIpList | list | `["0.0.0.0/0","::/0"]` | Client IP CIDRs appended to ipList when ingress-controller.enabled is true, so that the bundled ingress controller can reach the Admin API. Narrow it to the ingress controller Pod CIDR, or set it to [] to append nothing. |
 | apisix.admin.allow.ipList | list | `["127.0.0.1/24"]` | The client IP CIDR allowed to access Apache APISIX Admin API service. |
 | apisix.admin.cors | bool | `true` | Admin API support CORS response headers |
 | apisix.admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
@@ -70,7 +71,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.customPlugins.plugins[0].configMap.mounts | list | `[{"key":"the-file-name","path":"mount-path"}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
 | apisix.deleteURITailSlash | bool | `false` | Delete the '/' at the end of the URI |
-| apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
+| apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone standalone is file-driven standalone: rules are read from the mounted apisix.yaml, and the default traditional role is rendered as data_plane. For API-driven standalone, keep mode traditional and set role_traditional.config_provider to yaml.  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role_traditional.config_provider | string | `"etcd"` | Config provider for the traditional role. enum: etcd, yaml |
 | apisix.deployment.standalone | object | `{"config":"routes:\n-\n  uri: /hi\n  upstream:\n    nodes:\n      \"127.0.0.1:1980\": 1\n    type: roundrobin\n","existingConfigMap":""}` | Standalone rules configuration  ref: https://apisix.apache.org/docs/apisix/deployment-modes/#standalone |
@@ -176,6 +177,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | apisix.ssl.enabled | bool | `false` | Enable HTTPS listeners |
 | apisix.ssl.existingCASecret | string | `""` | Specifies the name of Secret contains trusted CA certificates in the PEM format used to verify the certificate when APISIX needs to do SSL/TLS handshaking with external services (e.g. etcd) |
 | apisix.ssl.fallbackSNI | string | `""` | Define SNI to fallback if none is presented by client |
+| apisix.ssl.hostPort | number | `nil` | Bind the APISIX HTTPS container port to a host port. |
 | apisix.ssl.sslCiphers | string | `"ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"` | TLS ciphers allowed to use. |
 | apisix.ssl.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | apisix.ssl.sslSessionTickets | bool | `false` | Enable or disable TLS session tickets. Disabled by default because session tickets defeat Perfect Forward Secrecy (see https://github.com/mozilla/server-side-tls/issues/135) |
@@ -248,7 +250,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | hostNetwork | bool | `false` | Use the host's network namespace |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.18.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.19.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"enabled":false,"webhook":{"enabled":false}}` | Ingress controller configuration |
 | ingress-controller.enabled | bool | `false` | Enable the apisix-ingress-controller sub-chart |
@@ -259,6 +261,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | ingress.tls | list | `[]` | Ingress TLS settings |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.tag | float | `1.28` | Init container tag |
+| lifecycle | object | `{"preStop":{"exec":{"command":["/bin/sh","-c","sleep 30"]}}}` | Lifecycle hooks for the Apache APISIX container |
 | metrics | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"15s","labels":{},"name":"","namespace":""}}` | Observability configuration. |
 | metrics.serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
 | metrics.serviceMonitor.enabled | bool | `false` | Enable or disable Apache APISIX serviceMonitor |
@@ -273,6 +276,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | podDisruptionBudget.enabled | bool | `false` | Enable or disable podDisruptionBudget |
 | podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
 | podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
+| podLabels | object | `{}` | Labels to add to each pod |
 | podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
 | priorityClassName | string | `""` | Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods |
 | rbac.create | bool | `false` | Whether RBAC resources (ClusterRole and ClusterRoleBinding) should be created |
@@ -281,15 +285,16 @@ The command removes all the Kubernetes components associated with the chart and 
 | securityContext | object | `{}` | Set the securityContext for Apache APISIX container |
 | service.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the service |
 | service.externalTrafficPolicy | string | `"Cluster"` | Setting how the Service route external traffic. If you want to keep the client source IP, you can set this to Local, ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
-| service.http | object | `{"additionalContainerPorts":[],"containerPort":9080,"enabled":true,"servicePort":80}` | Apache APISIX service settings for http |
+| service.http | object | `{"additionalContainerPorts":[],"containerPort":9080,"enabled":true,"hostPort":null,"servicePort":80}` | Apache APISIX service settings for http |
 | service.http.additionalContainerPorts | list | `[]` | Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24) |
 | service.http.containerPort | int | `9080` | Container port APISIX listens on for HTTP traffic |
 | service.http.enabled | bool | `true` | Enable plain HTTP listeners |
+| service.http.hostPort | number | `nil` | Bind the APISIX HTTP container port to a host port. |
 | service.http.servicePort | int | `80` | Kubernetes service port for HTTP traffic |
 | service.labelsOverride | object | `{}` | Override default labels assigned to Apache APISIX gateway resources |
 | service.stream | object | `{"enabled":false,"tcp":[],"udp":[]}` | Apache APISIX service settings for stream. L4 proxy (TCP/UDP) |
 | service.stream.enabled | bool | `false` | Enable the stream (L4 proxy) subsystem |
-| service.stream.tcp | list | `[]` | TCP proxy port list, element format: port number, or a map with `addr` and optional `tls` |
+| service.stream.tcp | list | `[]` | TCP proxy port list, element format: port number, or a map with `addr` and optional `tls` / `tls_passthrough` |
 | service.stream.udp | list | `[]` | UDP proxy port list |
 | service.tls | object | `{"servicePort":443}` | Apache APISIX service settings for tls |
 | service.tls.servicePort | int | `443` | Kubernetes service port for HTTPS traffic |
@@ -297,6 +302,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
 | serviceAccount.create | bool | `false` | Whether a ServiceAccount should be created for the APISIX pods |
 | serviceAccount.name | string | `""` | Name of the ServiceAccount to use. If not set and create is true, a name is generated from the chart fullname |
+| terminationGracePeriodSeconds | int | `30` | Number of seconds Kubernetes waits for Apache APISIX to terminate gracefully |
 | timezone | string | `""` | timezone is the timezone where apisix uses. For example: "UTC" or "Asia/Shanghai" This value will be set on apisix container's environment variable TZ. You may need to set the timezone to be consistent with your local time zone, otherwise the apisix's logs may used to retrieve event maybe in wrong timezone. |
 | tolerations | list | `[]` | List of node taints to tolerate |
 | topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |

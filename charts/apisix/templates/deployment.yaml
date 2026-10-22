@@ -43,6 +43,9 @@ spec:
         {{- end }}
       labels:
         {{- include "apisix.selectorLabels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+        {{- toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
@@ -58,8 +61,9 @@ spec:
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       containers:
-        {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
+        {{- $useTraditionalYaml := and (eq (include "apisix.deployment.role" $) "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
           securityContext:
@@ -67,7 +71,7 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           {{- if eq .Values.apisix.deployment.mode "standalone" }}
-          command: ["sh", "-c","ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && /docker-entrypoint.sh docker-start"]
+          command: ["sh", "-c","ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && exec /docker-entrypoint.sh docker-start"]
           {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
@@ -104,6 +108,9 @@ spec:
             - name: http
               containerPort: {{ .Values.service.http.containerPort }}
               protocol: TCP
+            {{- with .Values.service.http.hostPort }}
+              hostPort: {{ . }}
+            {{- end }}
             {{- range .Values.service.http.additionalContainerPorts }}
             - name: http-{{ .port | toString }}
               containerPort: {{ .port }}
@@ -112,6 +119,9 @@ spec:
             - name: tls
               containerPort: {{ .Values.apisix.ssl.containerPort }}
               protocol: TCP
+            {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.hostPort }}
+              hostPort: {{ .Values.apisix.ssl.hostPort }}
+            {{- end }}
             {{- range .Values.apisix.ssl.additionalContainerPorts }}
             - name: tls-{{ .port | toString }}
               containerPort: {{ .port }}
@@ -160,7 +170,7 @@ spec:
               protocol: TCP
             {{- end}}
 
-          {{- if ne .Values.apisix.deployment.role "control_plane" }}
+          {{- if ne (include "apisix.deployment.role" $) "control_plane" }}
           readinessProbe:
             failureThreshold: 6
             initialDelaySeconds: 10
@@ -176,13 +186,10 @@ spec:
             {{- end}}
             timeoutSeconds: 1
           {{- end }}
+          {{- with .Values.lifecycle }}
           lifecycle:
-            preStop:
-              exec:
-                command:
-                  - /bin/sh
-                  - -c
-                  - "sleep 30"
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
           {{- if eq .Values.apisix.deployment.mode "standalone" }}
             - mountPath: /apisix-config
@@ -233,7 +240,6 @@ spec:
         {{- toYaml .Values.extraContainers | nindent 8 }}
         {{- end }}
       {{- if .Values.hostNetwork }}
-      hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       {{- end }}
       hostNetwork: {{ .Values.hostNetwork }}

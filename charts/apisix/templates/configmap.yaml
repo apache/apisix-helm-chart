@@ -44,7 +44,7 @@ data:
     {{- end }}
     {{- else }}
     apisix:    # universal configurations
-      {{- if not (eq .Values.apisix.deployment.role "control_plane") }}
+      {{- if not (eq (include "apisix.deployment.role" $) "control_plane") }}
       node_listen:    # APISIX listening port
         - {{ .Values.service.http.containerPort }}
         {{- with .Values.service.http.additionalContainerPorts }}
@@ -62,7 +62,7 @@ data:
       enable_control: {{ .Values.control.enabled }}
       {{- if .Values.control.enabled }}
       control:
-        ip: {{ default "127.0.0.1" .Values.control.service.ip }}
+        ip: {{ default "127.0.0.1" .Values.control.service.ip | quote }}
         port: {{ default 9090 .Values.control.service.port }}
       {{- end }}
 
@@ -140,6 +140,9 @@ data:
           {{- if hasKey . "tls" }}
             tls: {{ .tls }}
           {{- end }}
+          {{- if hasKey . "tls_passthrough" }}
+            tls_passthrough: {{ .tls_passthrough }}
+          {{- end }}
           {{- else }}
           - {{ . }}
           {{- end }}
@@ -185,10 +188,10 @@ data:
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.fallbackSNI }}
         fallback_sni: {{ .Values.apisix.ssl.fallbackSNI | quote }}
         {{- end }}
-      {{- $useTraditionalYaml := and (eq .Values.apisix.deployment.role "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
+      {{- $useTraditionalYaml := and (eq (include "apisix.deployment.role" $) "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
       {{- if $useTraditionalYaml }}
       status:
-        ip: {{ default "127.0.0.1" .Values.apisix.status.ip }}
+        ip: {{ default "127.0.0.1" .Values.apisix.status.ip | quote }}
         port: {{ default "7085" (.Values.apisix.status.port | toString) }}
       {{- end}}
 
@@ -354,43 +357,37 @@ data:
     {{- end }}
 
     deployment:
-      role: {{ .Values.apisix.deployment.role }}
+      role: {{ (include "apisix.deployment.role" $) }}
 
-      {{- if eq .Values.apisix.deployment.role "traditional" }}
+      {{- if eq (include "apisix.deployment.role" $) "traditional" }}
       role_traditional:
         config_provider: {{ default "etcd" .Values.apisix.deployment.role_traditional.config_provider }}
       {{- end }}
 
-      {{- if eq .Values.apisix.deployment.role "control_plane" }}
+      {{- if eq (include "apisix.deployment.role" $) "control_plane" }}
       role_control_plane:
         config_provider: etcd
       {{- end }}
 
-      {{- if eq .Values.apisix.deployment.role "data_plane" }}
+      {{- if eq (include "apisix.deployment.role" $) "data_plane" }}
       role_data_plane:
         config_provider: {{- eq .Values.apisix.deployment.mode "standalone" | ternary "yaml" "etcd" | indent 1 }}
       {{- end }}
 
-      {{- if not (eq .Values.apisix.deployment.role "data_plane") }}
+      {{- if not (eq (include "apisix.deployment.role" $) "data_plane") }}
       admin:
-        {{- if .Values.etcd.enabled }}
         enable_admin_ui: {{ .Values.apisix.admin.enable_admin_ui }}
-        {{- end }}
         allow_admin:    # http://nginx.org/en/docs/http/ngx_http_access_module.html#allow
-        {{- if .Values.apisix.admin.allow.ipList }}
-        {{- range $ips := .Values.apisix.admin.allow.ipList }}
-          - {{ $ips }}
-        {{- end }}
-        {{- else }}
-          - 0.0.0.0/0
-        {{- end}}
+        {{- $allowAdmin := .Values.apisix.admin.allow.ipList | default (list "0.0.0.0/0") }}
         {{- if (index .Values "ingress-controller" "enabled") }}
-          - 0.0.0.0/0
-        {{- end}}
-        #   - "::/64"
+        {{- $allowAdmin = concat $allowAdmin (.Values.apisix.admin.allow.ingressControllerExtraIpList | default list) }}
+        {{- end }}
+        {{- range $ips := uniq $allowAdmin }}
+          - {{ $ips | quote }}
+        {{- end }}
         {{- if .Values.apisix.admin.enabled }}
         admin_listen:
-          ip: {{ .Values.apisix.admin.ip }}
+          ip: {{ .Values.apisix.admin.ip | quote }}
           port: {{ .Values.apisix.admin.port }}
         {{- end }}
         # Default token when use API to call for Admin API.
