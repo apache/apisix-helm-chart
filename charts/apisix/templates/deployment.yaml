@@ -247,6 +247,14 @@ spec:
         {{- if .Values.etcd.enabled }}
         - name: wait-etcd
           image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
+          {{- with .Values.initContainer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.initContainer.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- if .Values.etcd.fullnameOverride }}
           command: ['sh', '-c', "until nc -z {{ .Values.etcd.fullnameOverride }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
           {{ else }}

@@ -34,6 +34,44 @@ helm delete [RELEASE_NAME] --namespace ingress-apisix
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
+## Configure the wait-etcd init container
+
+When `etcd.enabled` is true, `initContainer.resources` and
+`initContainer.securityContext` configure the built-in `wait-etcd` container for
+both Deployment and DaemonSet workloads. They are independent of the top-level
+`resources` and `securityContext`, which configure the APISIX container.
+
+Both options default to `{}` and are omitted from the rendered container when
+empty. Applicable `podSecurityContext` settings still apply to `wait-etcd`.
+For example:
+
+```yaml
+initContainer:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 100m
+      memory: 32Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+```
+
+Adjust resource values for your environment. The default BusyBox image runs as
+root, so `runAsNonRoot: true` also requires a non-zero UID supplied through
+`runAsUser`, `podSecurityContext`, or an admission policy. On platforms such as
+OpenShift that assign a UID, omit the explicit `runAsUser` value.
+
+These options do not configure `extraInitContainers` and have no effect when
+`etcd.enabled` is false.
+
 ## Parameters
 
 {{ template "chart.valuesSection" . }}

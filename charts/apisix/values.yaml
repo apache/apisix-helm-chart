@@ -153,6 +153,24 @@ initContainer:
   image: busybox
   # -- Init container tag
   tag: 1.28
+  # -- Resource requests and limits for the wait-etcd init container (only used when etcd.enabled is true)
+  resources: {}
+    # requests:
+    #   cpu: 10m
+    #   memory: 16Mi
+    # limits:
+    #   cpu: 100m
+    #   memory: 32Mi
+  # -- Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings.
+  securityContext: {}
+    # allowPrivilegeEscalation: false
+    # capabilities:
+    #   drop:
+    #     - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # Set runAsUser to a non-zero UID unless the pod or admission policy supplies one.
+    # runAsUser: 1000
 
 autoscaling:
   # -- Enable HorizontalPodAutoscaler for APISIX (only when useDaemonSet is false)
