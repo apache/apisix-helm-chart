@@ -140,6 +140,7 @@ The same for container level, you need to set:
 | deployment.nodeSelector | object | `{}` |  |
 | deployment.podAnnotations | object | `{}` |  |
 | deployment.podSecurityContext | object | `{"fsGroup":2000}` | Set security context for the pod fsGroup: 2000 ensures containers can share Unix socket files via a common group. |
+| deployment.priorityClassName | string | `""` | Set the [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for the ingress controller pods |
 | deployment.replicas | int | `1` |  |
 | deployment.resources | object | `{}` | Set pod resource requests & limits |
 | deployment.tolerations | list | `[]` |  |
