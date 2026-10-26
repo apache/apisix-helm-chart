@@ -105,6 +105,12 @@ config:
 webhook:
   # -- Enable or disable admission webhook
   enabled: true
+  # -- Annotations for the ValidatingWebhookConfiguration, e.g.
+  # `cert-manager.io/inject-ca-from: <namespace>/<certificate>` so
+  # cert-manager's cainjector maintains the webhook caBundle.
+  # Only use CA injection with `certificate.provided: true` and `certificate.caBundle` unset;
+  # otherwise the injected CA replaces the chart-generated one and the webhook TLS handshake fails.
+  annotations: {}
   # -- The port for the webhook server to listen on
   port: 9443
   # -- Failure policy for the webhook (Fail or Ignore)
@@ -116,7 +122,7 @@ webhook:
     provided: false
     # -- Secret name containing the certificate (required if provided is true)
     # secretName: "my-webhook-cert"
-    # -- CA bundle in base64 format (required if provided is true)
+    # -- CA bundle in base64 format (required if provided is true, unless injected via webhook.annotations)
     # caBundle: ""
 
 # The GatewayProxy resource configures gateway proxy instances including networking,

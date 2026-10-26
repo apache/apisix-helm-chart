@@ -172,6 +172,7 @@ The same for container level, you need to set:
 | serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
 | serviceMonitor.metricRelabelings | object | `{}` | @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion. ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs |
 | serviceMonitor.namespace | string | `"monitoring"` | @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor |
+| webhook.annotations | object | `{}` | Annotations for the ValidatingWebhookConfiguration, e.g. `cert-manager.io/inject-ca-from: <namespace>/<certificate>` so cert-manager's cainjector maintains the webhook caBundle. Only use CA injection with `certificate.provided: true` and `certificate.caBundle` unset; otherwise the injected CA replaces the chart-generated one and the webhook TLS handshake fails. |
 | webhook.certificate.provided | bool | `false` | Set to true if you want to provide your own certificate |
 | webhook.enabled | bool | `true` | Enable or disable admission webhook |
 | webhook.failurePolicy | string | `"Ignore"` | Failure policy for the webhook (Fail or Ignore) |
