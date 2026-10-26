@@ -34,6 +34,44 @@ helm delete [RELEASE_NAME] --namespace ingress-apisix
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
+## Configure the wait-etcd init container
+
+When `etcd.enabled` is true, `initContainer.resources` and
+`initContainer.securityContext` configure the built-in `wait-etcd` container for
+both Deployment and DaemonSet workloads. They are independent of the top-level
+`resources` and `securityContext`, which configure the APISIX container.
+
+Both options default to `{}` and are omitted from the rendered container when
+empty. Applicable `podSecurityContext` settings still apply to `wait-etcd`.
+For example:
+
+```yaml
+initContainer:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 100m
+      memory: 32Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+```
+
+Adjust resource values for your environment. The default BusyBox image runs as
+root, so `runAsNonRoot: true` also requires a non-zero UID supplied through
+`runAsUser`, `podSecurityContext`, or an admission policy. On platforms such as
+OpenShift that assign a UID, omit the explicit `runAsUser` value.
+
+These options do not configure `extraInitContainers` and have no effect when
+`etcd.enabled` is false.
+
 ## Parameters
 
 ## Values
@@ -260,6 +298,8 @@ The command removes all the Kubernetes components associated with the chart and 
 | ingress.servicePort | number | `nil` | Service port to send traffic. Defaults to `service.http.servicePort`. |
 | ingress.tls | list | `[]` | Ingress TLS settings |
 | initContainer.image | string | `"busybox"` | Init container image |
+| initContainer.resources | object | `{}` | Resource requests and limits for the wait-etcd init container (only used when etcd.enabled is true) |
+| initContainer.securityContext | object | `{}` | Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings. |
 | initContainer.tag | float | `1.28` | Init container tag |
 | lifecycle | object | `{"preStop":{"exec":{"command":["/bin/sh","-c","sleep 30"]}}}` | Lifecycle hooks for the Apache APISIX container |
 | metrics | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"15s","labels":{},"name":"","namespace":""}}` | Observability configuration. |
