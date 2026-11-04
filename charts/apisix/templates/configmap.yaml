@@ -443,7 +443,9 @@ data:
           cert: "/etcd-ssl/{{ .Values.etcd.auth.tls.certFilename }}"
           key: "/etcd-ssl/{{ .Values.etcd.auth.tls.certKeyFilename }}"
           verify: {{ .Values.etcd.auth.tls.verify }}
-          sni: "{{ .Values.etcd.auth.tls.sni }}"
+          {{- with .Values.etcd.auth.tls.sni }}
+          sni: {{ . | quote }}
+          {{- end }}
         {{- end }}
       {{- end }}
       {{- end }}

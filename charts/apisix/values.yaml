@@ -902,7 +902,7 @@ etcd:
       certKeyFilename: ""
       # -- whether to verify the etcd endpoint certificate when setup a TLS connection to etcd
       verify: true
-      # -- specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset.
+      # -- specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. Set it to a DNS name in the etcd certificate if the etcd endpoints are IP addresses, since IP SANs are not matched.
       sni: ""
 
   # -- ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
