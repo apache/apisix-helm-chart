@@ -257,7 +257,7 @@ These options do not configure `extraInitContainers` and have no effect when
 | etcd.auth.tls.certKeyFilename | string | `""` | etcd client cert key filename using in etcd.auth.tls.existingSecret |
 | etcd.auth.tls.enabled | bool | `false` | enable etcd client certificate |
 | etcd.auth.tls.existingSecret | string | `""` | name of the secret contains etcd client cert |
-| etcd.auth.tls.sni | string | `""` | specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. |
+| etcd.auth.tls.sni | string | `""` | specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. Set it to a DNS name in the etcd certificate if the etcd endpoints are IP addresses, since IP SANs are not matched. |
 | etcd.auth.tls.verify | bool | `true` | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd |
 | etcd.autoCompactionMode | string | `"periodic"` | Auto compaction mode (periodic or revision), only used when etcd.enabled is true |
 | etcd.autoCompactionRetention | string | `"1h"` | Auto compaction retention for mvcc key value store, only used when etcd.enabled is true |
