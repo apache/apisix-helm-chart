@@ -340,7 +340,7 @@ These options do not configure `extraInitContainers` and have no effect when
 | service.tls.servicePort | int | `443` | Kubernetes service port for HTTPS traffic |
 | service.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
-| serviceAccount.create | bool | `false` | Whether a ServiceAccount should be created for the APISIX pods |
+| serviceAccount.create | bool | `true` | Whether a ServiceAccount should be created for the APISIX pods |
 | serviceAccount.name | string | `""` | Name of the ServiceAccount to use. If not set and create is true, a name is generated from the chart fullname |
 | terminationGracePeriodSeconds | int | `30` | Number of seconds Kubernetes waits for Apache APISIX to terminate gracefully |
 | timezone | string | `""` | timezone is the timezone where apisix uses. For example: "UTC" or "Asia/Shanghai" This value will be set on apisix container's environment variable TZ. You may need to set the timezone to be consistent with your local time zone, otherwise the apisix's logs may used to retrieve event maybe in wrong timezone. |
