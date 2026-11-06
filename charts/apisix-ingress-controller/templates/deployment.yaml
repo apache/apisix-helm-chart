@@ -26,7 +26,9 @@ metadata:
   labels:
     {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.deployment.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 6 }}
