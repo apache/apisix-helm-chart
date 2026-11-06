@@ -31,7 +31,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.18.2
+version: 2.19.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -43,8 +43,13 @@ sources:
 dependencies:
   - name: etcd
     version: 12.0.18
-    repository: https://charts.bitnami.com/bitnami
+    repository: oci://registry-1.docker.io/bitnamicharts
     condition: etcd.enabled
+  - name: etcd
+    version: 0.9.0
+    repository: oci://registry-1.docker.io/cloudpirates
+    condition: etcd-next.enabled
+    alias: etcd-next
   - name: apisix-ingress-controller
     version: 1.3.0
     repository: https://apache.github.io/apisix-helm-chart
