@@ -41,8 +41,16 @@ podDisruptionBudget:
   maxUnavailable: 1
 
 autoscaling:
+  # -- Create a HorizontalPodAutoscaler for the controller. When true, the chart stops setting `deployment.replicas`. Utilization targets need `deployment.resources.requests` to be set. Only the leader reconciles, so extra replicas add failover, not throughput
   enabled: false
+  # -- Minimum number of controller replicas
   minReplicas: 1
+  # -- Maximum number of controller replicas
+  maxReplicas: 3
+  # -- Target average CPU utilization percentage. 0 turns this metric off
+  targetCPUUtilizationPercentage: 80
+  # -- Target average memory utilization percentage. 0 turns this metric off
+  targetMemoryUtilizationPercentage: 0
 
 deployment:
   # -- Add annotations to Apache APISIX ingress controller resource
