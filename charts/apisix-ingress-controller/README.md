@@ -108,8 +108,11 @@ The same for container level, you need to set:
 | apisix.adminService.name | string | `"apisix-admin"` |  |
 | apisix.adminService.namespace | string | `"apisix-ingress"` |  |
 | apisix.adminService.port | int | `9180` |  |
-| autoscaling.enabled | bool | `false` |  |
-| autoscaling.minReplicas | int | `1` |  |
+| autoscaling.enabled | bool | `false` | Create a HorizontalPodAutoscaler for the controller. When true, the chart stops setting `deployment.replicas`. Utilization targets need `deployment.resources.requests` to be set. Only the leader reconciles, so extra replicas add failover, not throughput |
+| autoscaling.maxReplicas | int | `3` | Maximum number of controller replicas |
+| autoscaling.minReplicas | int | `1` | Minimum number of controller replicas |
+| autoscaling.targetCPUUtilizationPercentage | int | `80` | Target average CPU utilization percentage. 0 turns this metric off |
+| autoscaling.targetMemoryUtilizationPercentage | int | `0` | Target average memory utilization percentage. 0 turns this metric off |
 | config.controllerName | string | `"apisix.apache.org/apisix-ingress-controller"` |  |
 | config.disableGatewayAPI | bool | `false` |  |
 | config.enableHTTP2 | bool | `false` |  |
