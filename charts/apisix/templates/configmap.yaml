@@ -414,13 +414,9 @@ data:
       {{- end }}
       {{- if not (eq .Values.apisix.deployment.mode "standalone")}}
       etcd:
-      {{- if .Values.etcd.enabled }}
+      {{- if include "apisix.etcd.builtin" . }}
         host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-          {{- if .Values.etcd.fullnameOverride }}
-          - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
-          {{- else }}
-          - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
-          {{- end}}
+          - "{{ include "apisix.etcd.auth.scheme" . }}://{{ include "apisix.etcd.builtin.host" . }}:{{ include "apisix.etcd.builtin.port" . }}"
       {{- else }}
         host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
           {{- range $value := .Values.externalEtcd.host }}
@@ -431,7 +427,7 @@ data:
         timeout: {{ .Values.etcd.timeout }}    # The timeout in seconds when connect/read/write to etcd
         watch_timeout: {{ .Values.etcd.watchTimeout }}    # The timeout in seconds when watch etcd
         startup_retry: {{ .Values.etcd.startupRetry }}    # the number of retry to etcd during the startup
-        {{- if and (not .Values.etcd.enabled) .Values.externalEtcd.user }}
+        {{- if and (not (include "apisix.etcd.builtin" .)) .Values.externalEtcd.user }}
         user: {{ .Values.externalEtcd.user | quote }}
         password: "{{ print "${{ APISIX_ETCD_PASSWORD }}" }}"
         {{- else if and .Values.etcd.enabled .Values.etcd.auth.rbac.create }}

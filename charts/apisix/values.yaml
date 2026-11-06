@@ -866,6 +866,7 @@ etcd:
   # -- install built-in etcd by default, set false if do not want to install built-in etcd together,
   # this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes,
   # if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it.
+  # Bitnami no longer publishes updates for these images, set it to false and enable `etcd-next` to use the official etcd image instead.
   enabled: true
   # -- docker image for built-in etcd
   image:
@@ -920,6 +921,18 @@ etcd:
   autoCompactionRetention: "1h"
   # -- Auto compaction mode (periodic or revision), only used when etcd.enabled is true
   autoCompactionMode: "periodic"
+
+# -- Built-in etcd based on the CloudPirates etcd helm chart (https://github.com/CloudPirates-io/helm-charts/tree/main/charts/etcd)
+# and the official etcd image, only for development and testing purposes. It cannot be enabled together with `etcd.enabled`.
+# The APISIX side settings under `etcd` (prefix, timeout, watchTimeout, startupRetry and auth.tls) still apply,
+# while the etcd deployment is configured with the values of the CloudPirates etcd chart under this key.
+# Switching an existing release from `etcd` to `etcd-next` creates a new etcd cluster, the data is not migrated
+# and the PVCs of the previous etcd are kept.
+etcd-next:
+  # -- Install the built-in etcd based on the CloudPirates etcd helm chart, requires `etcd.enabled` to be false.
+  # `etcd.auth.rbac` is not supported. To serve TLS, set `etcd-next.auth.enabled` and `etcd-next.auth.existingSecret`
+  # together with `etcd.auth.tls` for the APISIX client certificate.
+  enabled: false
 
 # -- Ingress controller configuration
 ingress-controller:

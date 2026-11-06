@@ -1,9 +1,12 @@
 dependencies:
 - name: etcd
-  repository: https://charts.bitnami.com/bitnami
+  repository: oci://registry-1.docker.io/bitnamicharts
   version: 12.0.18
+- name: etcd
+  repository: oci://registry-1.docker.io/cloudpirates
+  version: 0.9.0
 - name: apisix-ingress-controller
   repository: https://apache.github.io/apisix-helm-chart
   version: 1.3.0
-digest: sha256:5f06bed359271768199c5be3ff17e8855d38d4a79077d4e96bd859292450fc6d
-generated: "2026-08-18T09:54:21.466659855+08:00"
+digest: sha256:b9935a92796022087d9b778c102111affee204dcee8ace91e676b49494b46cd8
+generated: "2026-11-06T08:56:39.341403716+08:00"

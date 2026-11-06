@@ -113,6 +113,55 @@ Scheme to use while connecting etcd
 {{- end }}
 
 {{/*
+Whether a built-in etcd (`etcd` or `etcd-next`) is deployed with this chart.
+Also rejects combinations the selected built-in etcd cannot serve.
+*/}}
+{{- define "apisix.etcd.builtin" -}}
+{{- $next := index .Values "etcd-next" -}}
+{{- if $next.enabled -}}
+{{- if .Values.etcd.enabled -}}
+{{- fail "etcd.enabled and etcd-next.enabled are mutually exclusive: set etcd.enabled to false to use etcd-next" -}}
+{{- end -}}
+{{- if .Values.etcd.auth.rbac.create -}}
+{{- fail "etcd.auth.rbac.create is not supported with etcd-next" -}}
+{{- end -}}
+{{- if ne (toString $next.auth.enabled) (toString .Values.etcd.auth.tls.enabled) -}}
+{{- fail "etcd-next.auth.enabled and etcd.auth.tls.enabled must be set together: etcd-next serves TLS with client certificate authentication only when both are true" -}}
+{{- end -}}
+{{- end -}}
+{{- if or .Values.etcd.enabled $next.enabled -}}
+{{- "true" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Hostname of the built-in etcd client service
+*/}}
+{{- define "apisix.etcd.builtin.host" -}}
+{{- if .Values.etcd.enabled -}}
+{{- if .Values.etcd.fullnameOverride -}}
+{{- .Values.etcd.fullnameOverride -}}
+{{- else -}}
+{{- printf "%s-etcd.%s.svc.%s" .Release.Name .Release.Namespace .Values.etcd.clusterDomain -}}
+{{- end -}}
+{{- else -}}
+{{- $next := index .Subcharts "etcd-next" -}}
+{{- printf "%s.%s.svc.%s" (include "cloudpirates.fullname" $next) (include "cloudpirates.namespace" $next) $next.Values.clusterDomain -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Port of the built-in etcd client service
+*/}}
+{{- define "apisix.etcd.builtin.port" -}}
+{{- if .Values.etcd.enabled -}}
+{{- .Values.etcd.service.port -}}
+{{- else -}}
+{{- (index .Values "etcd-next").service.clientPort -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the name of etcd password secret
 */}}
 {{- define "apisix.etcd.secretName" -}}
