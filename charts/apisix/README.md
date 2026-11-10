@@ -97,7 +97,7 @@ etcd:
 externalEtcd:
   host:
     - https://192.0.2.10:2379
-  user: "" # This example assumes etcd username/password authentication is disabled.
+  user: ""  # This example assumes etcd username/password authentication is disabled.
 ```
 
 Replace the endpoint, Secret name, CA key and SNI with your actual values. The CA
@@ -112,6 +112,10 @@ so the client can use the endpoint hostname.
 
 For mTLS, set `etcd.auth.tls.enabled: true` and configure `existingSecret`,
 `certFilename` and `certKeyFilename` under `etcd.auth.tls` as usual.
+
+On upgrade, review `verify` and `sni` if client certificates are disabled:
+older chart versions ignored these values in that case. In particular,
+`verify: false` now disables server certificate verification for HTTPS endpoints.
 
 ## Parameters
 
