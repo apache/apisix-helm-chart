@@ -72,6 +72,47 @@ OpenShift that assign a UID, omit the explicit `runAsUser` value.
 These options do not configure `extraInitContainers` and have no effect when
 `etcd.enabled` is false.
 
+## Connect to external etcd with server-only TLS
+
+For external etcd, the URL scheme in `externalEtcd.host` selects HTTP or HTTPS.
+`etcd.auth.tls.enabled` controls client certificates; leave it `false` when etcd
+does not require a client certificate. The `verify` and `sni` settings apply
+independently of that flag.
+
+For example, to connect to an IP endpoint using a CA stored in a Secret:
+
+```yaml
+apisix:
+  ssl:
+    enabled: true
+    existingCASecret: etcd-ca
+    certCAFilename: ca.crt
+etcd:
+  enabled: false
+  auth:
+    tls:
+      enabled: false
+      verify: true
+      sni: etcd.example.test
+externalEtcd:
+  host:
+    - https://192.0.2.10:2379
+  user: "" # This example assumes etcd username/password authentication is disabled.
+```
+
+Replace the endpoint, Secret name, CA key and SNI with your actual values. The CA
+Secret must be in the same namespace as APISIX. If etcd username/password
+authentication is enabled, configure `externalEtcd.user` and its password or
+password Secret as usual.
+
+The SNI must be a DNS name covered by every endpoint's server certificate. It
+does not change the connection address or require DNS resolution when the
+endpoints are IP addresses. An empty SNI is omitted from the APISIX configuration
+so the client can use the endpoint hostname.
+
+For mTLS, set `etcd.auth.tls.enabled: true` and configure `existingSecret`,
+`certFilename` and `certKeyFilename` under `etcd.auth.tls` as usual.
+
 ## Parameters
 
 ## Values
@@ -255,10 +296,10 @@ These options do not configure `extraInitContainers` and have no effect when
 | etcd.auth.rbac.rootPassword | string | `""` | root password for etcd. Requires etcd.auth.rbac.create to be true. |
 | etcd.auth.tls.certFilename | string | `""` | etcd client cert filename using in etcd.auth.tls.existingSecret |
 | etcd.auth.tls.certKeyFilename | string | `""` | etcd client cert key filename using in etcd.auth.tls.existingSecret |
-| etcd.auth.tls.enabled | bool | `false` | enable etcd client certificate |
+| etcd.auth.tls.enabled | bool | `false` | Enable etcd client certificates. For external etcd, select HTTPS with externalEtcd.host; verify and sni also apply when client certificates are disabled. |
 | etcd.auth.tls.existingSecret | string | `""` | name of the secret contains etcd client cert |
-| etcd.auth.tls.sni | string | `""` | specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. Set it to a DNS name in the etcd certificate if the etcd endpoints are IP addresses, since IP SANs are not matched. |
-| etcd.auth.tls.verify | bool | `true` | whether to verify the etcd endpoint certificate when setup a TLS connection to etcd |
+| etcd.auth.tls.sni | string | `""` | TLS server name, independently of client certificate authentication. Omitted when empty so the endpoint hostname is used. For IP endpoints, set a DNS name covered by every endpoint certificate, since IP SANs are not matched. |
+| etcd.auth.tls.verify | bool | `true` | Whether to verify the etcd endpoint certificate when setting up TLS, independently of client certificate authentication. |
 | etcd.autoCompactionMode | string | `"periodic"` | Auto compaction mode (periodic or revision), only used when etcd.enabled is true |
 | etcd.autoCompactionRetention | string | `"1h"` | Auto compaction retention for mvcc key value store, only used when etcd.enabled is true |
 | etcd.containerSecurityContext | object | `{"enabled":false}` | added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19 |
