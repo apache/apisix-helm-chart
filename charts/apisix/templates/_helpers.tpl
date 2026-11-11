@@ -113,6 +113,23 @@ Scheme to use while connecting etcd
 {{- end }}
 
 {{/*
+Return true when etcd client certificates are configured, otherwise an empty string.
+Validate the credentials used by the generated APISIX configuration.
+*/}}
+{{- define "apisix.etcd.tls.clientCertEnabled" -}}
+{{- $tls := .Values.etcd.auth.tls -}}
+{{- if and $tls.enabled (or $tls.certFilename $tls.certKeyFilename) -}}
+{{- if not (and $tls.certFilename $tls.certKeyFilename) -}}
+{{- fail "etcd.auth.tls.certFilename and etcd.auth.tls.certKeyFilename must be set together" -}}
+{{- end -}}
+{{- if not $tls.existingSecret -}}
+{{- fail "etcd.auth.tls.existingSecret is required when configuring etcd client certificates" -}}
+{{- end -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the name of etcd password secret
 */}}
 {{- define "apisix.etcd.secretName" -}}

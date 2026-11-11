@@ -201,6 +201,57 @@ OpenShift that assign a UID, omit the explicit `runAsUser` value.
 These options do not configure `extraInitContainers` and have no effect when
 `etcd.enabled` is false.
 
+## Connect to external etcd with server-only TLS
+
+For external etcd, use `https://` endpoints in `externalEtcd.host` and set
+`etcd.auth.tls.enabled: true` to configure TLS verification and SNI. Client
+certificates are optional: leave `existingSecret`, `certFilename` and
+`certKeyFilename` empty when etcd does not require a client certificate.
+
+For example, to connect to an IP endpoint using a CA stored in a Secret:
+
+```yaml
+apisix:
+  ssl:
+    enabled: true
+    existingCASecret: etcd-ca
+    certCAFilename: ca.crt
+etcd:
+  enabled: false
+  auth:
+    tls:
+      enabled: true
+      existingSecret: ""
+      certFilename: ""
+      certKeyFilename: ""
+      verify: true
+      sni: etcd.example.test
+externalEtcd:
+  host:
+    - https://192.0.2.10:2379
+  user: ""  # This example assumes etcd username/password authentication is disabled.
+```
+
+Replace the endpoint, Secret name, CA key and SNI with your actual values. The CA
+Secret must be in the same namespace as APISIX. If etcd username/password
+authentication is enabled, configure `externalEtcd.user` and its password or
+password Secret as usual.
+
+The SNI must be a DNS name covered by every endpoint's server certificate. It
+does not change the connection address or require DNS resolution when the
+endpoints are IP addresses. An empty SNI is omitted from the APISIX configuration
+so the client can use the endpoint hostname.
+
+For mTLS, keep `etcd.auth.tls.enabled: true` and set `existingSecret`,
+`certFilename` and `certKeyFilename` under `etcd.auth.tls`. The certificate and key
+must be configured together. When TLS is enabled, a non-empty `existingSecret`
+is mounted at `/etcd-ssl`, including when certificate paths are supplied through
+`apisix.fullCustomConfig`. The CA Secret above is configured separately.
+
+With `etcd.auth.tls.enabled: false`, the APISIX etcd TLS settings and
+client-certificate mount are omitted as before. This flag does not rewrite
+external endpoint URLs; use `http://` endpoints for HTTP connections.
+
 ## Parameters
 
 {{ template "chart.valuesSection" . }}
