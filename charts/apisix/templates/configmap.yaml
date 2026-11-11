@@ -398,7 +398,7 @@ data:
           # admin: can everything for configuration data
           - name: "admin"
             {{- if eq (include "apisix.admin.credentials.source" (dict "role" "admin" "context" $)) "inline" }}
-            key: {{ .Values.apisix.admin.credentials.admin }}
+            key: {{ .Values.apisix.admin.credentials.admin | toString | quote }}
             {{- else }}
             key: ${{"{{"}}APISIX_ADMIN_KEY{{"}}"}}
             {{- end }}
@@ -406,7 +406,7 @@ data:
           # viewer: only can view configuration data
           - name: "viewer"
             {{- if eq (include "apisix.admin.credentials.source" (dict "role" "viewer" "context" $)) "inline" }}
-            key: {{ .Values.apisix.admin.credentials.viewer }}
+            key: {{ .Values.apisix.admin.credentials.viewer | toString | quote }}
             {{- else }}
             key: ${{"{{"}}APISIX_VIEWER_KEY{{"}}"}}
             {{- end }}

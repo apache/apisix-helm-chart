@@ -116,8 +116,8 @@ jobs:
       - name: Create Kubernetes cluster
         uses: ./.github/actions/setup-kind
         with:
-          version: v0.22.0
-          image: kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245
+          version: v0.27.0
+          image: kindest/node:v1.32.2@sha256:f226345927d7e348497136874b6d207e0b32cc52154ad8323129352923a3142f
 
       - name: End-to-end tests
         run: test/e2e/admin-credentials.sh

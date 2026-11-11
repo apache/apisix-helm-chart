@@ -127,9 +127,12 @@ check "public viewer key as viewer fails" failed_with $? "apisix.admin.credentia
 render apisix --set apisix.admin.credentials.viewer=$PUBLIC_ADMIN
 check "public admin key as viewer fails" failed_with $? "apisix.admin.credentials.viewer is a publicly known default key"
 
+render apisix --set-string "apisix.admin.credentials.admin=\"$PUBLIC_ADMIN\"" --set-string "apisix.admin.credentials.viewer=$PUBLIC_VIEWER "
+check "a public key wrapped in quotes or spaces does not become the public key" test "$(key_of admin)" != "$PUBLIC_ADMIN" -a "$(key_of viewer)" != "$PUBLIC_VIEWER"
+
 echo "# upgrades never replace a generated key"
 render apisix --is-upgrade
-check "upgrade without the generated Secret fails" failed_with $? "ADMIN KEY ERROR: the Secret demo/apisix-admin-credentials does not contain the admin key"
+check "an upgrade render without cluster access (helm diff, --dry-run=client) does not fail" eq $? 0
 render apisix --is-upgrade --set apisix.admin.credentials.admin=MyAdminKey123 --set apisix.admin.credentials.viewer=MyViewerKey456
 check "upgrade with both keys set inline renders" eq $? 0
 render apisix --is-upgrade --set apisix.admin.credentials.secretName=my-admin
@@ -158,6 +161,12 @@ check "existing Secret is passed to the GatewayProxy" eq "$(q 'select(.kind == "
 
 render apisix "${GUIDE[@]}" --set 'ingress-controller.gatewayProxy.plugins[0].name=cors' --set 'ingress-controller.gatewayProxy.plugins[0].enabled=true'
 check "gatewayProxy.plugins are passed through" eq "$(q 'select(.kind == "GatewayProxy") | .spec.plugins[0].name')" "cors"
+render apisix "${GUIDE[@]}" --set apisix.admin.servicePort=19180 \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.tlsVerify=true \
+  --set ingress-controller.gatewayProxy.publishService=demo/apisix-gateway \
+  --set 'ingress-controller.gatewayProxy.statusAddress[0]=10.0.0.1' \
+  --set ingress-controller.gatewayProxy.pluginMetadata.prometheus.disable=false
+check "GatewayProxy uses the admin Service port and passes the optional fields through" eq "$(q 'select(.kind == "GatewayProxy") | (.spec.provider.controlPlane.service.port | tostring) + "," + (.spec.provider.controlPlane.tlsVerify | tostring) + "," + .spec.publishService + "," + .spec.statusAddress[0] + "," + (.spec.pluginMetadata.prometheus.disable | tostring)')" "19180,true,demo/apisix-gateway,10.0.0.1,false"
 
 echo "# createDefault: the controller chart creates its own GatewayProxy"
 render apisix "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true

@@ -59,7 +59,19 @@ when the chart can read it.
 
 On upgrade, a generated key that is missing from the Secret fails the release instead of being
 replaced (see [Upgrading](#upgrading)). The only exception is `apisix.admin.enabled: false`: no
-client can use the keys then, so missing ones are generated again.
+client can use the keys then, so missing ones are generated again. `helm uninstall` deletes the
+generated Secret, so a new install gets new keys.
+
+To let the chart manage keys that an existing release already uses (for example after taking them
+out of `apisix.admin.credentials`), create the Secret first and let Helm adopt it, then upgrade:
+
+```sh
+kubectl -n <namespace> create secret generic <fullname>-admin-credentials \
+  --from-literal=admin=<admin key> --from-literal=viewer=<viewer key>
+kubectl -n <namespace> label secret <fullname>-admin-credentials app.kubernetes.io/managed-by=Helm
+kubectl -n <namespace> annotate secret <fullname>-admin-credentials \
+  meta.helm.sh/release-name=<release> meta.helm.sh/release-namespace=<namespace>
+```
 
 Keys from a Secret reach APISIX as environment variables. Don't use a key made only of digits, or
 `true` / `false`: APISIX converts such values to a number or a boolean, and the key stops matching
@@ -90,8 +102,13 @@ spec:
       - RespectIgnoreDifferences=true
 ```
 
-Flux runs `helm install` and `helm upgrade`, so generated keys are kept as with the Helm CLI. To
-preview an upgrade with Helm, use `--dry-run=server`.
+Flux runs `helm install` and `helm upgrade`, so generated keys are kept as with the Helm CLI.
+
+Previews that cannot read the cluster (`helm upgrade --dry-run=client`, `helm diff upgrade` on
+Helm 3, `helmfile diff`) show a newly generated key for the Secret, but the actual upgrade keeps the
+stored one. To preview against the cluster, use `helm upgrade --dry-run=server --hide-secret`
+(without `--hide-secret` the output contains the keys); with helmfile, pass
+`--template-args="--dry-run=server"`.
 
 ### Rotating keys
 
@@ -100,6 +117,12 @@ APISIX with the new keys. Keys from a Secret, including the generated Secret, ar
 starts: after changing the Secret, run `kubectl rollout restart` on the APISIX workload. The bundled
 ingress controller watches the Secret and picks up the new admin key by itself. To rotate a
 generated key, change it in the Secret; later upgrades keep the new value.
+
+`helm rollback`, including the automatic rollback of `--atomic` (Helm 3) or `--rollback-on-failure`
+(Helm 4), re-applies the Secret stored in the target revision, so rolling back to a revision
+rendered before a rotation restores the old key. After rotating, run `helm upgrade` once so the
+release records the new key, and don't roll back past that revision. To keep keys out of the
+release history, use `apisix.admin.credentials.secretName`.
 
 ## Upgrading
 
@@ -114,6 +137,11 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
   anything. Choose new keys, pass them with `--set apisix.admin.credentials.admin=<key>
   --set apisix.admin.credentials.viewer=<key>` or `apisix.admin.credentials.secretName`, upgrade
   again, and give the new admin key to your Admin API clients.
+* Argo CD and other tools that render the chart with `helm template` cannot run this check: the
+  first sync of 3.0.0 replaces the public keys with random ones, cutting off Admin API clients, and
+  later renders replace them again (see [GitOps and offline rendering](#gitops-and-offline-rendering)).
+  Create a Secret with your keys and set `apisix.admin.credentials.secretName` in the same change
+  that moves the application to 3.0.0.
 * With the bundled ingress controller, remove `ingress-controller.gatewayProxy.createDefault` and
   any admin key set under `ingress-controller.gatewayProxy`: the apisix chart now creates the
   GatewayProxy with this release's Admin API Service and admin key. If you keep
@@ -131,6 +159,9 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
   create the GatewayProxy and refuses to render. Point the controller at your control plane with
   `ingress-controller.gatewayProxy.createDefault: true` and its `endpoints` and admin key, or set
   `ingress-controller.gatewayProxy.name: ""` to leave the IngressClass without a GatewayProxy.
+* The bundled apisix-ingress-controller chart moves from 1.3.0 to 1.5.0. Its Gateway API CRDs are
+  no longer installed from `crds/`: they are rendered as templates (`ingress-controller.crds.gatewayAPI.enabled`),
+  only when they are missing or belong to this release, and kept on uninstall.
 
 ## Configure the wait-etcd init container
 

@@ -25,6 +25,7 @@
 
 set -uo pipefail
 
+HELM=${HELM:-helm}
 CHART=${CHART:-charts/apisix}
 OLD_CHART_VERSION=${OLD_CHART_VERSION:-2.18.2}
 PUBLIC_ADMIN=edd1c9f034335f136f87ad84b625c8f1
@@ -44,7 +45,7 @@ cleanup() {
   if [ "${KEEP_NAMESPACES:-}" != 1 ]; then
     for ns in "${NAMESPACES[@]:-}"; do
       [ -n "$ns" ] || continue
-      helm uninstall --namespace "$ns" apisix --wait >/dev/null 2>&1
+      $HELM uninstall --namespace "$ns" apisix --wait >/dev/null 2>&1
       kubectl delete namespace "$ns" --wait=false >/dev/null 2>&1
     done
   fi
@@ -124,7 +125,7 @@ EOF
 }
 
 uninstall_namespace() { # cluster-scoped controller resources (IngressClass, ClusterRole) must go before the next install
-  helm uninstall --namespace "$1" apisix --wait >/dev/null 2>&1
+  $HELM uninstall --namespace "$1" apisix --wait >/dev/null 2>&1
   kubectl delete namespace "$1" --wait=true --timeout=180s >/dev/null 2>&1
 }
 
@@ -136,8 +137,8 @@ new_namespace() {
 echo "# install with the getting-started guide's values (no key configured)"
 NS=admin-e2e-guide
 new_namespace $NS
-helm install apisix $CHART --namespace $NS "${GUIDE[@]}" --wait --timeout 5m >/dev/null
-check "helm install succeeds" is $? 0
+$HELM install apisix $CHART --namespace $NS "${GUIDE[@]}" --wait --timeout 5m >/dev/null
+check "$HELM install succeeds" is $? 0
 KEY=$(secret_key $NS apisix-admin-credentials admin)
 check "a 32-character admin key was generated" eval '[[ "$KEY" =~ ^[A-Za-z0-9]{32}$ ]]'
 port_forward $NS apisix-admin 19180 9180
@@ -147,10 +148,12 @@ check "Admin API rejects the public default key" is "$(admin_code 19180 /apisix/
 check "Admin API rejects a request without a key" is "$(http_code http://127.0.0.1:19180/apisix/admin/configs)" 401
 deploy_backend $NS echo.test
 check "an Ingress route works, so the controller uses the generated key" wait_for 180 route_ok 19080 echo.test
+$HELM upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --dry-run=client >/dev/null 2>&1
+check "a client-side dry-run upgrade (no cluster access) does not trip the upgrade check" is $? 0
 
-echo "# helm upgrade keeps the key"
-helm upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --set podAnnotations.e2e=upgrade --wait --timeout 5m >/dev/null
-check "helm upgrade succeeds" is $? 0
+echo "# $HELM upgrade keeps the key"
+$HELM upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --set podAnnotations.e2e=upgrade --wait --timeout 5m >/dev/null
+check "$HELM upgrade succeeds" is $? 0
 check "the generated key is unchanged" is "$(secret_key $NS apisix-admin-credentials admin)" "$KEY"
 stop_port_forwards
 port_forward $NS apisix-admin 19180 9180
@@ -170,19 +173,22 @@ check "Admin API accepts the new key" is "$(admin_code 19180 /apisix/admin/confi
 check "Admin API rejects the old key" is "$(admin_code 19180 /apisix/admin/configs "$KEY")" 401
 kubectl --namespace $NS patch ingress echo --type=json -p '[{"op":"replace","path":"/spec/rules/0/host","value":"echo2.test"}]' >/dev/null
 check "a changed Ingress reaches APISIX, so the controller picked up the new key" wait_for 180 route_ok 19080 echo2.test
-helm upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --set podAnnotations.e2e=after-rotation --wait --timeout 5m >/dev/null
+$HELM upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --set podAnnotations.e2e=after-rotation --wait --timeout 5m >/dev/null
 check "an upgrade after the rotation succeeds" is $? 0
 check "a later upgrade keeps the rotated key" is "$(secret_key $NS apisix-admin-credentials admin)" "$NEW_KEY"
+stop_port_forwards
+port_forward $NS apisix-admin 19180 9180
+check "restarted APISIX accepts the rotated key" is "$(admin_code 19180 /apisix/admin/configs "$NEW_KEY")" 200
 stop_port_forwards
 
 echo "# upgrades refuse a damaged generated Secret"
 kubectl --namespace $NS patch secret apisix-admin-credentials --type=json -p '[{"op":"remove","path":"/data/viewer"}]' >/dev/null
-OUT=$(helm upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --wait --timeout 5m 2>&1)
+OUT=$($HELM upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --wait --timeout 5m 2>&1)
 rc=$?
 check "an upgrade fails when the viewer key was deleted from the Secret" test "$rc" -ne 0
 check "the error names the missing viewer key" grep -q "does not contain the viewer key" <<<"$OUT"
 kubectl --namespace $NS patch secret apisix-admin-credentials -p "{\"data\":{\"viewer\":\"$(printf %s ViewerAgain456 | base64)\",\"admin\":\"$(printf %s $PUBLIC_ADMIN | base64)\"}}" >/dev/null
-OUT=$(helm upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --wait --timeout 5m 2>&1)
+OUT=$($HELM upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --wait --timeout 5m 2>&1)
 rc=$?
 check "an upgrade fails when the Secret holds the public default key" test "$rc" -ne 0
 check "the error says the key is publicly known" grep -q "is a publicly known default key" <<<"$OUT"
@@ -192,13 +198,13 @@ echo "# existing Secret (apisix.admin.credentials.secretName)"
 NS=admin-e2e-secret
 new_namespace $NS
 kubectl --namespace $NS create secret generic my-admin --from-literal=admin=$PUBLIC_ADMIN --from-literal=viewer=SecretViewerKey456 >/dev/null
-OUT=$(helm install apisix $CHART --namespace $NS "${GUIDE[@]}" --set apisix.admin.credentials.secretName=my-admin --wait --timeout 5m 2>&1)
+OUT=$($HELM install apisix $CHART --namespace $NS "${GUIDE[@]}" --set apisix.admin.credentials.secretName=my-admin --wait --timeout 5m 2>&1)
 rc=$?
 check "install fails when the Secret holds the public default key" test "$rc" -ne 0
 check "the error names the Secret" grep -q "in the Secret my-admin" <<<"$OUT"
 kubectl --namespace $NS create secret generic my-admin --from-literal=admin=SecretAdminKey123 --from-literal=viewer=SecretViewerKey456 \
   --dry-run=client -o yaml | kubectl replace -f - >/dev/null
-helm install apisix $CHART --namespace $NS "${GUIDE[@]}" --set apisix.admin.credentials.secretName=my-admin --wait --timeout 5m >/dev/null
+$HELM install apisix $CHART --namespace $NS "${GUIDE[@]}" --set apisix.admin.credentials.secretName=my-admin --wait --timeout 5m >/dev/null
 check "install with another key in the Secret succeeds" is $? 0
 port_forward $NS apisix-admin 19183 9180
 port_forward $NS apisix-gateway 19083 80
@@ -211,20 +217,20 @@ uninstall_namespace $NS
 echo "# upgrade a release that used the public default keys"
 NS=admin-e2e-upgrade
 new_namespace $NS
-helm repo add apisix https://apache.github.io/apisix-helm-chart >/dev/null 2>&1
-helm repo update apisix >/dev/null
-helm install apisix apisix/apisix --version "$OLD_CHART_VERSION" --namespace $NS "${GUIDE[@]}" \
+$HELM repo add apisix https://apache.github.io/apisix-helm-chart >/dev/null 2>&1
+$HELM repo update apisix >/dev/null
+$HELM install apisix apisix/apisix --version "$OLD_CHART_VERSION" --namespace $NS "${GUIDE[@]}" \
   --set ingress-controller.gatewayProxy.createDefault=true --wait --timeout 5m >/dev/null
 check "chart $OLD_CHART_VERSION installs" is $? 0
-OUT=$(helm upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --wait --timeout 5m 2>&1)
+OUT=$($HELM upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --wait --timeout 5m 2>&1)
 rc=$?
 check "upgrading without new keys fails" test "$rc" -ne 0
 check "the error explains what to do" grep -q "ADMIN KEY ERROR" <<<"$OUT"
-check "the release was not changed" is "$(helm history apisix --namespace $NS --max 1 -o json | grep -o '"revision":[0-9]*')" '"revision":1'
+check "the release was not changed" is "$($HELM history apisix --namespace $NS --max 1 -o json | grep -o '"revision":[0-9]*')" '"revision":1'
 port_forward $NS apisix-admin 19181 9180
 check "the old key still works after the failed upgrade" is "$(admin_code 19181 /apisix/admin/configs $PUBLIC_ADMIN)" 200
 stop_port_forwards
-helm upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" \
+$HELM upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" \
   --set apisix.admin.credentials.admin=UpgradedAdminKey123 --set apisix.admin.credentials.viewer=UpgradedViewerKey456 \
   --wait --timeout 5m >/dev/null
 check "upgrading with new keys succeeds" is $? 0
@@ -237,11 +243,29 @@ check "an Ingress route works after the upgrade" wait_for 180 route_ok 19081 upg
 stop_port_forwards
 uninstall_namespace $NS
 
+echo "# upgrade a $OLD_CHART_VERSION release that used its own keys"
+NS=admin-e2e-explicit
+new_namespace $NS
+OWN=(--set apisix.admin.credentials.admin=OwnAdminKey123 --set apisix.admin.credentials.viewer=OwnViewerKey456
+     --set ingress-controller.gatewayProxy.createDefault=true
+     --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=OwnAdminKey123)
+$HELM install apisix apisix/apisix --version "$OLD_CHART_VERSION" --namespace $NS "${GUIDE[@]}" "${OWN[@]}" --wait --timeout 5m >/dev/null
+check "chart $OLD_CHART_VERSION installs with its own keys" is $? 0
+$HELM upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" "${OWN[@]}" --wait --timeout 5m >/dev/null
+check "upgrading with the same values succeeds" is $? 0
+port_forward $NS apisix-admin 19184 9180
+port_forward $NS apisix-gateway 19084 80
+check "the existing key still works" is "$(admin_code 19184 /apisix/admin/configs OwnAdminKey123)" 200
+deploy_backend $NS explicit.test
+check "an Ingress route works through the createDefault GatewayProxy" wait_for 180 route_ok 19084 explicit.test
+stop_port_forwards
+uninstall_namespace $NS
+
 echo "# default values (bundled etcd)"
 NS=admin-e2e-etcd
 new_namespace $NS
-helm install apisix $CHART --namespace $NS --wait --timeout 8m >/dev/null
-check "helm install succeeds" is $? 0
+$HELM install apisix $CHART --namespace $NS --wait --timeout 8m >/dev/null
+check "$HELM install succeeds" is $? 0
 KEY=$(secret_key $NS apisix-admin-credentials admin)
 port_forward $NS apisix-admin 19182 9180
 check "Admin API accepts the generated key" is "$(admin_code 19182 /apisix/admin/routes "$KEY")" 200

@@ -241,14 +241,28 @@ apisix.admin.credentials.secretName.
 {{- fail (printf "\nADMIN KEY ERROR: the %s key in the Secret %s/%s is a publicly known default key. Store a different key in the Secret." $role $.Release.Namespace $name) -}}
 {{- else if $current -}}
 {{- $_ := set $data $role (index $existing $role) -}}
-{{- else if and $.Release.IsUpgrade $.Values.apisix.admin.enabled -}}
-{{- fail (printf "\nADMIN KEY ERROR: the Secret %s/%s does not contain the %s key that this chart generates, so this upgrade would replace the key and cut off every Admin API client.\nThis happens when the release was installed with a chart version before 3.0.0, whose publicly known default keys are no longer accepted, or when the key or the Secret was deleted.\nChoose new keys and upgrade again with one of:\n  --set apisix.admin.credentials.admin=<key> --set apisix.admin.credentials.viewer=<key>\n  --set apisix.admin.credentials.secretName=<a Secret with the keys \"admin\" and \"viewer\">\nThen give the new admin key to your Admin API clients. The bundled ingress controller picks it up automatically." $.Release.Namespace $name $role) -}}
+{{- else if and $.Release.IsUpgrade $.Values.apisix.admin.enabled (include "apisix.lookupAvailable" $) -}}
+{{- fail (printf "\nADMIN KEY ERROR: the Secret %s/%s does not contain the %s key that this chart generates, so this upgrade would replace the key and cut off every Admin API client.\nThis happens when the release was installed with a chart version before 3.0.0, when it took its keys from apisix.admin.credentials or had no Admin API before, or when the key or the Secret was deleted.\nSet the keys and upgrade again, with one of:\n  --set apisix.admin.credentials.admin=<key> --set apisix.admin.credentials.viewer=<key>\n  --set apisix.admin.credentials.secretName=<a Secret with the keys \"admin\" and \"viewer\">\nUse the keys your Admin API clients already have to keep them working; a release that used the public default keys of earlier chart versions needs new ones. The bundled ingress controller picks up the admin key automatically. To let the chart manage existing keys instead, see \"Admin API keys\" in the chart README." $.Release.Namespace $name $role) -}}
 {{- else -}}
 {{- $_ := set $data $role (randAlphaNum 32 | b64enc) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
 {{- toYaml $data -}}
+{{- end -}}
+
+{{/*
+Returns "true" when lookup reads the cluster. Every namespace has the ConfigMap
+kube-root-ca.crt (Kubernetes 1.20+), and a real upgrade also finds this
+release's own ConfigMap. Both are missing when Helm renders without the cluster:
+helm template (also with --is-upgrade), helm upgrade --dry-run=client, and
+helm diff on Helm 3. The upgrade check needs this: without it, such previews
+would fail with an error that asks for new keys.
+*/}}
+{{- define "apisix.lookupAvailable" -}}
+{{- if or (lookup "v1" "ConfigMap" .Release.Namespace "kube-root-ca.crt") (lookup "v1" "ConfigMap" .Release.Namespace (include "apisix.fullname" .)) -}}
+true
+{{- end -}}
 {{- end -}}
 
 {{/*
