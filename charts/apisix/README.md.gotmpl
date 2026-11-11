@@ -106,7 +106,7 @@ Flux runs `helm install` and `helm upgrade`, so generated keys are kept as with 
 
 Previews that cannot read the cluster (`helm upgrade --dry-run=client`, `helm diff upgrade` on
 Helm 3, `helmfile diff`) show a newly generated key for the Secret, but the actual upgrade keeps the
-stored one. To preview against the cluster, use `helm upgrade --dry-run=server --hide-secret`
+stored one. Such previews also cannot show an `ADMIN KEY ERROR` that the real upgrade would raise. To preview against the cluster, use `helm upgrade --dry-run=server --hide-secret`
 (without `--hide-secret` the output contains the keys); with helmfile, pass
 `--template-args="--dry-run=server"`.
 
@@ -132,7 +132,10 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
 (`edd1c9f034335f136f87ad84b625c8f1` and `4054f7cf07e344346cd3f287985e76a2`).
 
 * If you already set `apisix.admin.credentials.admin` and `viewer`, or `secretName`, to other keys,
-  nothing changes.
+  nothing changes, with one exception: inline keys are now used exactly as given. Earlier versions
+  rendered them unquoted, so YAML dropped leading or trailing whitespace and quotes (for example the
+  newline at the end of a file passed with `--set-file`). Such keys now fail with `ADMIN KEY ERROR`
+  instead of turning into a key that clients don't send; remove those characters.
 * If your release used the defaults, `helm upgrade` fails with `ADMIN KEY ERROR` before changing
   anything. Choose new keys, pass them with `--set apisix.admin.credentials.admin=<key>
   --set apisix.admin.credentials.viewer=<key>` or `apisix.admin.credentials.secretName`, upgrade
@@ -148,9 +151,11 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
   `createDefault: true`, set its admin key yourself. When it uses this release's Admin API Service
   (`<fullname>-admin`), it must be the key APISIX uses (the same value, or a `secretKeyRef` to the
   same Secret and field), or the chart refuses to render. Without `endpoints` or
-  `ingress-controller.gatewayProxy.provider.controlPlane.service.name`, the controller chart falls
-  back to the Service `apisix-admin`; for any other release name the chart then refuses to render
-  and asks you to set the Service name.
+  `ingress-controller.gatewayProxy.provider.controlPlane.service.name`, the controller chart uses
+  `ingress-controller.apisix.adminService.name`, which defaults to `apisix-admin`. If that default is
+  not this release's Service and this release has its own Admin API, the chart refuses to render and
+  asks you to set the Service name. A data-plane release can keep pointing its controller at a
+  control plane's Admin API Service this way.
 * With `apisix.admin.credentials.secretName`, the chart reads that Secret with `lookup` to reject
   the public default keys, so the identity that runs Helm needs `get` on Secrets in the release
   namespace. Helm's default storage driver keeps releases in Secrets and already needs it.

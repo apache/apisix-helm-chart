@@ -48,9 +48,13 @@ check() { # check <description> <command...>
   fi
 }
 
-render() { # render <release> [helm args...]; sets OUT and returns helm's exit code
-  local release=$1; shift
-  OUT=$($HELM template "$release" "$CHART" --namespace demo "$@" 2>&1)
+render() { # render <release> [helm args...]; sets OUT (manifests) and ERR (stderr), returns helm's exit code
+  local release=$1 errfile rc; shift
+  errfile=$(mktemp)
+  OUT=$($HELM template "$release" "$CHART" --namespace demo "$@" 2>"$errfile")
+  rc=$?
+  ERR=$(cat "$errfile"); rm -f "$errfile"
+  return $rc
 }
 
 q() { yq "$1" <<<"$OUT"; }
@@ -76,7 +80,7 @@ has_no_public_key() { # neither in plain text nor base64-encoded in a Secret
   return 0
 }
 eq() { [ "$1" = "$2" ] || { echo "       expected '$2', got '$1'" >&2; return 1; }; }
-failed_with() { [ "$1" -ne 0 ] && grep -q "$2" <<<"$OUT"; }
+failed_with() { [ "$1" -ne 0 ] && grep -q "$2" <<<"$ERR$OUT"; }
 
 echo "# default values: keys are generated into a Secret"
 render apisix; check "renders" eq $? 0
@@ -90,8 +94,8 @@ check "config reads the admin key from the environment" eq "$(key_of admin)" '${
 check "config reads the viewer key from the environment" eq "$(key_of viewer)" '${{APISIX_VIEWER_KEY}}'
 check "APISIX_ADMIN_KEY comes from the generated Secret" eq "$(env_ref APISIX_ADMIN_KEY)" "apisix-admin-credentials/admin"
 check "APISIX_VIEWER_KEY comes from the generated Secret" eq "$(env_ref APISIX_VIEWER_KEY)" "apisix-admin-credentials/viewer"
-render apisix
-check "an offline render generates a new key (lookup has no cluster)" test "$(secret_value apisix-admin-credentials admin)" != "$admin"
+render apisix; check "renders again" eq $? 0
+check "an offline render generates a new key (lookup has no cluster)" test -n "$(secret_value apisix-admin-credentials admin)" -a "$(secret_value apisix-admin-credentials admin)" != "$admin"
 
 echo "# Secret name follows the release fullname"
 render t
@@ -127,8 +131,17 @@ check "public viewer key as viewer fails" failed_with $? "apisix.admin.credentia
 render apisix --set apisix.admin.credentials.viewer=$PUBLIC_ADMIN
 check "public admin key as viewer fails" failed_with $? "apisix.admin.credentials.viewer is a publicly known default key"
 
-render apisix --set-string "apisix.admin.credentials.admin=\"$PUBLIC_ADMIN\"" --set-string "apisix.admin.credentials.viewer=$PUBLIC_VIEWER "
-check "a public key wrapped in quotes or spaces does not become the public key" test "$(key_of admin)" != "$PUBLIC_ADMIN" -a "$(key_of viewer)" != "$PUBLIC_VIEWER"
+render apisix --set-string "apisix.admin.credentials.admin=\"$PUBLIC_ADMIN\""
+check "a public key wrapped in quotes fails" failed_with $? "apisix.admin.credentials.admin starts or ends with whitespace or a quote"
+render apisix --set-string "apisix.admin.credentials.viewer=$PUBLIC_VIEWER "
+check "a public key with a trailing space fails" failed_with $? "apisix.admin.credentials.viewer starts or ends with whitespace or a quote"
+keyfile=$(mktemp); printf 'FileAdminKey123\n' > "$keyfile"
+render apisix --set-file apisix.admin.credentials.admin="$keyfile"
+check "a key file that ends with a newline fails" failed_with $? "apisix.admin.credentials.admin starts or ends with whitespace or a quote"
+rm -f "$keyfile"
+render apisix --set apisix.admin.credentials.admin=Key#With:Specials --set apisix.admin.credentials.viewer=123456
+check "keys with YAML special characters or only digits render" eq $? 0
+check "...and are used exactly as given" eq "$(key_of admin)/$(key_of viewer)" "Key#With:Specials/123456"
 
 echo "# upgrades never replace a generated key"
 render apisix --is-upgrade
@@ -207,7 +220,7 @@ check "no publicly known key anywhere in the output" has_no_public_key
 render t "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
   --set apisix.admin.credentials.admin=MyAdminKey123 --set apisix.admin.credentials.viewer=MyViewerKey456 \
   --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=MyAdminKey123
-check "fails when it would fall back to the Service apisix-admin in release t" failed_with $? "would use the Service apisix-admin (ingress-controller.apisix.adminService.name), but the Admin API Service of this release is t-apisix-admin"
+check "fails when it would fall back to the Service apisix-admin in release t" failed_with $? "would use the Service apisix-admin (the controller chart's default), but the Admin API Service of this release is t-apisix-admin"
 render t "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
   --set apisix.admin.credentials.admin=MyAdminKey123 --set apisix.admin.credentials.viewer=MyViewerKey456 \
   --set ingress-controller.gatewayProxy.provider.controlPlane.service.name=t-apisix-admin \
@@ -222,6 +235,26 @@ render apisix "${GUIDE[@]}" --set apisix.admin.enabled=false --set ingress-contr
   --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.valueFrom.secretKeyRef.key=admin
 check "fails when it targets this release but the Admin API is disabled" failed_with $? "but this release has no Admin API"
 
+render apisix-dp --set apisix.deployment.role=data_plane --set ingress-controller.enabled=true \
+  --set ingress-controller.gatewayProxy.createDefault=true \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=ControlPlaneKey123
+check "a data-plane release can point its controller at the control plane's apisix-admin" eq $? 0
+check "...through the controller chart's own GatewayProxy" eq "$(q 'select(.kind == "GatewayProxy") | .spec.provider.controlPlane.service.name')" "apisix-admin"
+render apisix --set ingress-controller.enabled=true --set etcd.enabled=false --set apisix.fullCustomConfig.enabled=true \
+  --set-json 'apisix.fullCustomConfig.config.deployment={"role":"traditional","role_traditional":{"config_provider":"yaml"},"admin":{"admin_key":[{"name":"admin","key":"FullCustomKey123","role":"admin"}]}}' \
+  --set ingress-controller.gatewayProxy.createDefault=true \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=FullCustomKey123
+check "fullCustomConfig with its own Admin API and a createDefault GatewayProxy renders" eq $? 0
+render apisix "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
+  --set 'ingress-controller.gatewayProxy.provider.controlPlane.endpoints[0]=http://apisix-admin.demo.svc:9180' \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=OtherKey123
+check "endpoints that name this release's Service still need this release's key" failed_with $? "would not use the Admin API key of this release"
+render apisix "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
+  --set apisix.admin.credentials.admin=MyAdminKey123 --set apisix.admin.credentials.viewer=MyViewerKey456 \
+  --set 'ingress-controller.gatewayProxy.provider.controlPlane.endpoints[0]=http://apisix-admin.demo.svc.cluster.local:9180' \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=MyAdminKey123
+check "endpoints that name this release's Service with its key render" eq $? 0
+
 echo "# the bundled controller in a release without an Admin API"
 for extra in "--set apisix.deployment.mode=standalone" "--set apisix.admin.enabled=false" \
              "--set apisix.fullCustomConfig.enabled=true --set apisix.fullCustomConfig.config.apisix.node_listen[0]=9080"; do
@@ -233,6 +266,10 @@ render apisix --set ingress-controller.enabled=true --set etcd.enabled=false --s
 check "renders with gatewayProxy.name set to empty" eq $? 0
 check "the IngressClass then has no parameters" eq "$(q 'select(.kind == "IngressClass") | .spec.parameters // "none"')" "none"
 check "no GatewayProxy" eq "$(count GatewayProxy)" 0
+render apisix --set ingress-controller.enabled=true --set etcd.enabled=false --set apisix.deployment.mode=standalone \
+  --set-json 'ingress-controller.gatewayProxy.name="{{ \"\" }}"'
+check "a name that renders to an empty string renders" eq $? 0
+check "...and the IngressClass then has no parameters" eq "$(q 'select(.kind == "IngressClass") | .spec.parameters // "none"')" "none"
 
 echo "# releases without an Admin API"
 render apisix --set apisix.deployment.mode=standalone

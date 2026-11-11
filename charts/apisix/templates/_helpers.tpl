@@ -269,15 +269,32 @@ apisix.admin.credentials.secretName.
 {{- end -}}
 
 {{/*
-Returns "true" when lookup reads the cluster. Every namespace has the ConfigMap
-kube-root-ca.crt (Kubernetes 1.20+), and a real upgrade also finds this
-release's own ConfigMap. Both are missing when Helm renders without the cluster:
-helm template (also with --is-upgrade), helm upgrade --dry-run=client, and
-helm diff on Helm 3. The upgrade check needs this: without it, such previews
-would fail with an error that asks for new keys.
+Returns "true" when a key starts or ends with whitespace or a quote. Chart
+versions before 3.0.0 rendered keys unquoted, so YAML dropped such characters;
+now the key is used exactly as given, and these characters would make it a key
+that clients do not send (for example the newline at the end of a file passed
+with --set-file).
+*/}}
+{{- define "apisix.admin.credentials.untrimmed" -}}
+{{- if or (ne . (trim .)) (regexMatch "^[\"']|[\"']$" .) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Returns "true" when lookup reads the cluster. A real upgrade normally finds the
+ConfigMap kube-root-ca.crt (published into every namespace since Kubernetes
+1.20, unless that controller is turned off), this release's own ConfigMap, or
+Helm's record of the previous revision (Secret or ConfigMap storage driver).
+None of them is found when Helm renders without the cluster: helm template
+(also with --is-upgrade), helm upgrade --dry-run=client, and helm diff on
+Helm 3. The upgrade check needs this: without it, such previews would fail with
+an error that asks for new keys.
 */}}
 {{- define "apisix.lookupAvailable" -}}
-{{- if or (lookup "v1" "ConfigMap" .Release.Namespace "kube-root-ca.crt") (lookup "v1" "ConfigMap" .Release.Namespace (include "apisix.fullname" .)) -}}
+{{- $ns := .Release.Namespace -}}
+{{- $previous := printf "sh.helm.release.v1.%s.v%d" .Release.Name (sub (int .Release.Revision) 1) -}}
+{{- if or (lookup "v1" "ConfigMap" $ns "kube-root-ca.crt") (lookup "v1" "ConfigMap" $ns (include "apisix.fullname" .)) (lookup "v1" "Secret" $ns $previous) (lookup "v1" "ConfigMap" $ns $previous) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -310,8 +327,11 @@ it can be read (lookup returns nothing under helm template).
 {{- end -}}
 {{- else if include "apisix.admin.credentials.enabled" . -}}
 {{- range $role := list "admin" "viewer" -}}
-{{- if has (toString (index $c $role)) $public -}}
+{{- $key := toString (index $c $role) -}}
+{{- if has $key $public -}}
 {{- fail (printf "\nADMIN KEY ERROR: apisix.admin.credentials.%s is a publicly known default key. Set a different key, or leave it empty to let the chart generate one." $role) -}}
+{{- else if and (index $c $role) (include "apisix.admin.credentials.untrimmed" $key) -}}
+{{- fail (printf "\nADMIN KEY ERROR: apisix.admin.credentials.%s starts or ends with whitespace or a quote. The chart uses the key exactly as given, so these characters would become part of the key. Remove them (a file passed with --set-file must not end with a newline)." $role) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -366,19 +386,34 @@ GatewayProxy that does not exist.
 {{- fail "\nINGRESS CONTROLLER ERROR: ingress-controller.gatewayProxy.createDefault is true, but no admin key is set for the GatewayProxy it creates.\nRemove ingress-controller.gatewayProxy.createDefault to let the apisix chart create the GatewayProxy with this release's key, or set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey." -}}
 {{- else if has (toString $adminKey.value) $public -}}
 {{- fail "\nINGRESS CONTROLLER ERROR: ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value is a publicly known default key. Use a different key." -}}
+{{- else if include "apisix.admin.credentials.untrimmed" (toString $adminKey.value) -}}
+{{- fail "\nINGRESS CONTROLLER ERROR: ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value starts or ends with whitespace or a quote, which would become part of the key. Remove them." -}}
 {{- end -}}
 {{- end -}}
 {{- $cp := $gp.provider.controlPlane -}}
-{{- if not $cp.endpoints -}}
-{{- /* same Service choice as the controller chart's gatewayproxy.yaml */ -}}
+{{- /* the Service the controller chart's gatewayproxy.yaml uses when there are no endpoints */ -}}
 {{- $localService := printf "%s-admin" (include "apisix.fullname" .) -}}
 {{- $explicitService := ($cp.service | default dict).name | default "" | toString -}}
 {{- $fallbackService := (($ic.apisix | default dict).adminService | default dict).name | default "" | toString -}}
 {{- $service := default $fallbackService $explicitService -}}
-{{- if eq $service $localService -}}
-{{- if not (and .Values.apisix.admin.enabled (include "apisix.admin.credentials.enabled" .)) -}}
-{{- fail (printf "\nINGRESS CONTROLLER ERROR: the GatewayProxy that ingress-controller.gatewayProxy.createDefault creates targets the Service %s of this release, but this release has no Admin API.\nPoint it at your control plane with ingress-controller.gatewayProxy.provider.controlPlane.endpoints or service.name, or remove createDefault." $service) -}}
+{{- $targetsLocal := false -}}
+{{- if $cp.endpoints -}}
+{{- $localHosts := list $localService (printf "%s.%s" $localService .Release.Namespace) (printf "%s.%s.svc" $localService .Release.Namespace) (printf "%s.%s.svc.cluster.local" $localService .Release.Namespace) -}}
+{{- range $endpoint := $cp.endpoints -}}
+{{- if has (urlParse (toString $endpoint)).hostname $localHosts -}}
+{{- $targetsLocal = true -}}
 {{- end -}}
+{{- end -}}
+{{- else -}}
+{{- $targetsLocal = eq $service $localService -}}
+{{- end -}}
+{{- $hasAdminApi := and .Values.apisix.admin.enabled (ne (include "apisix.deployment.role" .) "data_plane") -}}
+{{- if $targetsLocal -}}
+{{- if not $hasAdminApi -}}
+{{- fail (printf "\nINGRESS CONTROLLER ERROR: the GatewayProxy that ingress-controller.gatewayProxy.createDefault creates targets %s, the Admin API Service of this release, but this release has no Admin API.\nPoint it at your control plane with ingress-controller.gatewayProxy.provider.controlPlane.endpoints or service.name, or remove createDefault." $localService) -}}
+{{- end -}}
+{{- if include "apisix.admin.credentials.enabled" . -}}
+{{- /* with fullCustomConfig the chart cannot see the key APISIX uses */ -}}
 {{- $source := include "apisix.admin.credentials.source" (dict "role" "admin" "context" .) -}}
 {{- $match := false -}}
 {{- if eq $source "inline" -}}
@@ -392,9 +427,10 @@ GatewayProxy that does not exist.
 {{- if not $match -}}
 {{- fail "\nINGRESS CONTROLLER ERROR: ingress-controller.gatewayProxy.createDefault is true, but the GatewayProxy that it creates would not use the Admin API key of this release, so the controller could not reach APISIX.\nRemove ingress-controller.gatewayProxy.createDefault: the apisix chart creates the GatewayProxy and gives it the right key.\nTo keep managing the GatewayProxy yourself, set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey to the same key as apisix.admin.credentials: the same value, or a secretKeyRef to the same Secret and field." -}}
 {{- end -}}
-{{- else if not $explicitService -}}
-{{- fail (printf "\nINGRESS CONTROLLER ERROR: the GatewayProxy that ingress-controller.gatewayProxy.createDefault creates would use the Service %s (ingress-controller.apisix.adminService.name), but the Admin API Service of this release is %s.\nRemove createDefault to let the apisix chart create the GatewayProxy, or set ingress-controller.gatewayProxy.provider.controlPlane.service.name." $service $localService) -}}
 {{- end -}}
+{{- else if and (not $cp.endpoints) (not $explicitService) (eq $fallbackService "apisix-admin") $hasAdminApi (include "apisix.admin.credentials.enabled" .) -}}
+{{- /* this release has its own Admin API, but the controller would fall back to the chart default Service name */ -}}
+{{- fail (printf "\nINGRESS CONTROLLER ERROR: the GatewayProxy that ingress-controller.gatewayProxy.createDefault creates would use the Service %s (the controller chart's default), but the Admin API Service of this release is %s.\nRemove createDefault to let the apisix chart create the GatewayProxy, or set ingress-controller.gatewayProxy.provider.controlPlane.service.name." $service $localService) -}}
 {{- end -}}
 {{- else if and (include "apisix.ingressController.gatewayProxy.name" .) (not (include "apisix.ingressController.gatewayProxy.enabled" .)) -}}
 {{- fail (printf "\nINGRESS CONTROLLER ERROR: the bundled ingress controller's IngressClass references the GatewayProxy %s, but this release cannot create it because it has no Admin API (data_plane role, apisix.fullCustomConfig, or apisix.admin.enabled=false).\nSet ingress-controller.gatewayProxy.createDefault=true with the Admin API endpoints and key of your control plane, set ingress-controller.gatewayProxy.name=\"\" to leave the IngressClass without a GatewayProxy, or disable the controller." (include "apisix.ingressController.gatewayProxy.name" .)) -}}

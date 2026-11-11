@@ -148,9 +148,9 @@ check "Admin API rejects the public default key" is "$(admin_code 19180 /apisix/
 check "Admin API rejects a request without a key" is "$(http_code http://127.0.0.1:19180/apisix/admin/configs)" 401
 deploy_backend $NS echo.test
 check "an Ingress route works, so the controller uses the generated key" wait_for 180 route_ok 19080 echo.test
-# The controller chart renders its Gateway API CRDs with lookup too; in a client-side dry-run Helm 3
-# then rejects CRDs that exist but belong to another release. The CRDs are installed already, so
-# leave them out here: this check is about the admin key.
+# The controller chart renders its Gateway API CRDs with lookup too; in a client-side dry-run Helm
+# then rejects CRDs that exist but belong to another release (here, an earlier scenario's). The CRDs
+# are installed already, so leave them out: this check is about the admin key.
 $HELM upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --set ingress-controller.crds.gatewayAPI.enabled=false --dry-run=client >/dev/null 2>&1
 check "a client-side dry-run upgrade (no cluster access) does not trip the upgrade check" is $? 0
 

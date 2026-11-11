@@ -942,6 +942,7 @@ ingress-controller:
     # it. Set `ingress-controller.gatewayProxy.createDefault: true` only if you want the controller
     # chart to create its own GatewayProxy instead; its admin key must then match
     # `apisix.admin.credentials`. Set it to `""` to leave the IngressClass without a GatewayProxy.
+    # It is rendered with `tpl` by both charts with different `.Values`, so use only `.Release.*` in it.
     name: "{{ .Release.Name }}-config"
     provider:
       controlPlane:
