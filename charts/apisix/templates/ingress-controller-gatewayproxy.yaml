@@ -1,0 +1,77 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# GatewayProxy for the bundled ingress controller. Only this chart knows the
+# Admin API Service name and where the admin key is stored, so it creates the
+# GatewayProxy instead of the controller chart. Apart from the provider service
+# and auth, the fields follow charts/apisix-ingress-controller/templates/gatewayproxy.yaml
+# and are read from ingress-controller.gatewayProxy; keep the two in sync.
+{{- if include "apisix.ingressController.gatewayProxy.enabled" . }}
+{{- $gp := (index .Values "ingress-controller").gatewayProxy }}
+{{- $source := include "apisix.admin.credentials.source" (dict "role" "admin" "context" $) }}
+apiVersion: apisix.apache.org/v1alpha1
+kind: GatewayProxy
+metadata:
+  name: {{ include "apisix.ingressController.gatewayProxy.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "apisix.labels" . | nindent 4 }}
+spec:
+  provider:
+    type: ControlPlane
+    controlPlane:
+      service:
+        name: {{ include "apisix.fullname" . }}-admin
+        port: {{ .Values.apisix.admin.servicePort }}
+      {{- with $gp.provider.controlPlane.tlsVerify }}
+      tlsVerify: {{ . }}
+      {{- end }}
+      auth:
+        type: AdminKey
+        adminKey:
+          {{- if eq $source "inline" }}
+          value: {{ .Values.apisix.admin.credentials.admin | quote }}
+          {{- else if eq $source "secret" }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.apisix.admin.credentials.secretName }}
+              key: {{ include "apisix.admin.credentials.secretAdminKey" . }}
+          {{- else }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "apisix.admin.credentials.generatedSecretName" . }}
+              key: admin
+          {{- end }}
+
+  {{- with $gp.publishService }}
+  publishService: {{ . | quote }}
+  {{- end }}
+
+  {{- with $gp.statusAddress }}
+  statusAddress:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with $gp.plugins }}
+  plugins:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with $gp.pluginMetadata }}
+  pluginMetadata:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

@@ -34,6 +34,98 @@ helm delete [RELEASE_NAME] --namespace ingress-apisix
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
+## Admin API keys
+
+The chart does not ship a default Admin API key. When the release has an Admin API (the
+`traditional` and `control_plane` roles, without `apisix.fullCustomConfig`) and you don't set the
+keys yourself, the chart generates random keys for the `admin` and `viewer` roles when the release
+is installed and stores them in the Secret `<fullname>-admin-credentials`
+(`apisix-admin-credentials` for the release name `apisix`). `helm upgrade` keeps them, and the
+bundled ingress controller reads the admin key from the same Secret.
+
+To print the admin key:
+
+```sh
+kubectl get secret --namespace <namespace> apisix-admin-credentials -o jsonpath='{.data.admin}' | base64 -d
+```
+
+To use your own keys, either set `apisix.admin.credentials.admin` and
+`apisix.admin.credentials.viewer`, or store them in a Secret and set
+`apisix.admin.credentials.secretName` (plus `secretAdminKey` / `secretViewerKey` if the Secret
+uses other field names). The publicly known keys that chart versions before 3.0.0 used as defaults
+are rejected wherever the chart sees them: in `apisix.admin.credentials`, in
+`apisix.fullCustomConfig.config`, in the generated Secret, and in the Secret named by `secretName`
+when the chart can read it.
+
+On upgrade, a generated key that is missing from the Secret fails the release instead of being
+replaced (see [Upgrading](#upgrading)). The only exception is `apisix.admin.enabled: false`: no
+client can use the keys then, so missing ones are generated again.
+
+Keys from a Secret reach APISIX as environment variables. Don't use a key made only of digits, or
+`true` / `false`: APISIX converts such values to a number or a boolean, and the key stops matching
+([apache/apisix#14178](https://github.com/apache/apisix/issues/14178)).
+
+### GitOps and offline rendering
+
+The chart keeps a generated key by reading the Secret with Helm's `lookup` function. `lookup`
+returns nothing when the chart is rendered without access to the cluster: `helm template`,
+`helm install --dry-run` (client side), and Argo CD, which renders every application with
+`helm template`. In those cases a new key is generated on every render. Under Argo CD, every sync
+then writes a new key into the Secret while the running APISIX pods keep the old one, and the
+bundled ingress controller, which follows the Secret, gets `401 Unauthorized` from the Admin API.
+
+With such tools, create the Secret yourself (for example with External Secrets or Sealed Secrets)
+and set `apisix.admin.credentials.secretName`. With Argo CD you can instead keep the first generated
+key by adding this to the Application:
+
+```yaml
+spec:
+  ignoreDifferences:
+    - kind: Secret
+      name: <fullname>-admin-credentials
+      jsonPointers:
+        - /data
+  syncPolicy:
+    syncOptions:
+      - RespectIgnoreDifferences=true
+```
+
+Flux runs `helm install` and `helm upgrade`, so generated keys are kept as with the Helm CLI. To
+preview an upgrade with Helm, use `--dry-run=server`.
+
+### Rotating keys
+
+Keys set in `apisix.admin.credentials` are part of the APISIX ConfigMap, so `helm upgrade` restarts
+APISIX with the new keys. Keys from a Secret, including the generated Secret, are read when APISIX
+starts: after changing the Secret, run `kubectl rollout restart` on the APISIX workload. The bundled
+ingress controller watches the Secret and picks up the new admin key by itself. To rotate a
+generated key, change it in the Secret; later upgrades keep the new value.
+
+## Upgrading
+
+### To 3.0.0
+
+Chart 3.0.0 no longer uses the publicly known default Admin API keys
+(`edd1c9f034335f136f87ad84b625c8f1` and `4054f7cf07e344346cd3f287985e76a2`).
+
+* If you already set `apisix.admin.credentials.admin` and `viewer`, or `secretName`, to other keys,
+  nothing changes.
+* If your release used the defaults, `helm upgrade` fails with `ADMIN KEY ERROR` before changing
+  anything. Choose new keys, pass them with `--set apisix.admin.credentials.admin=<key>
+  --set apisix.admin.credentials.viewer=<key>` or `apisix.admin.credentials.secretName`, upgrade
+  again, and give the new admin key to your Admin API clients.
+* With the bundled ingress controller, remove `ingress-controller.gatewayProxy.createDefault` and
+  any admin key set under `ingress-controller.gatewayProxy`: the apisix chart now creates the
+  GatewayProxy with this release's Admin API Service and admin key. If you keep
+  `createDefault: true`, set its admin key yourself; when it targets this release (no
+  `endpoints`), it must be the key APISIX uses (the same value, or a `secretKeyRef` to the same
+  Secret and field), or the chart refuses to render.
+* If the release has no Admin API (the `data_plane` role, `apisix.fullCustomConfig`, or
+  `apisix.admin.enabled: false`) and the bundled ingress controller is enabled, the chart cannot
+  create the GatewayProxy and refuses to render. Point the controller at your control plane with
+  `ingress-controller.gatewayProxy.createDefault: true` and its `endpoints` and admin key, or set
+  `ingress-controller.gatewayProxy.name: ""` to leave the IngressClass without a GatewayProxy.
+
 ## Configure the wait-etcd init container
 
 When `etcd.enabled` is true, `initContainer.resources` and
@@ -82,12 +174,12 @@ These options do not configure `extraInitContainers` and have no effect when
 | apisix.admin.allow.ingressControllerExtraIpList | list | `["0.0.0.0/0","::/0"]` | Client IP CIDRs appended to ipList when ingress-controller.enabled is true, so that the bundled ingress controller can reach the Admin API. Narrow it to the ingress controller Pod CIDR, or set it to [] to append nothing. |
 | apisix.admin.allow.ipList | list | `["127.0.0.1/24"]` | The client IP CIDR allowed to access Apache APISIX Admin API service. |
 | apisix.admin.cors | bool | `true` | Admin API support CORS response headers |
-| apisix.admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
-| apisix.admin.credentials.admin | string | `"edd1c9f034335f136f87ad84b625c8f1"` | Apache APISIX admin API admin role credentials |
+| apisix.admin.credentials | object | `{"admin":"","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":""}` | Admin API credentials. Leave `admin` and `viewer` empty to let the chart generate random keys. They are stored in the Secret `<fullname>-admin-credentials` and kept across upgrades. Tools that render the chart without access to the cluster (`helm template`, Argo CD) cannot keep generated keys; use `secretName` with them. The publicly known keys that chart versions before 3.0.0 used as defaults are rejected. |
+| apisix.admin.credentials.admin | string | `""` | Apache APISIX admin API admin role key. Leave empty to generate one. |
 | apisix.admin.credentials.secretAdminKey | string | `""` | Name of the admin role key in the secret, overrides the default key name "admin" |
 | apisix.admin.credentials.secretName | string | `""` | The APISIX Helm chart supports storing user credentials in a secret. The secret needs to contain two keys, admin and viewer, with their respective values set. |
 | apisix.admin.credentials.secretViewerKey | string | `""` | Name of the viewer role key in the secret, overrides the default key name "viewer" |
-| apisix.admin.credentials.viewer | string | `"4054f7cf07e344346cd3f287985e76a2"` | Apache APISIX admin API viewer role credentials |
+| apisix.admin.credentials.viewer | string | `""` | Apache APISIX admin API viewer role key. Leave empty to generate one. |
 | apisix.admin.enable_admin_ui | bool | `true` | Enable Embedded Admin UI |
 | apisix.admin.enabled | bool | `true` | Enable Admin API |
 | apisix.admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
@@ -290,8 +382,10 @@ These options do not configure `extraInitContainers` and have no effect when
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
 | image.tag | string | `"3.19.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
-| ingress-controller | object | `{"enabled":false,"webhook":{"enabled":false}}` | Ingress controller configuration |
+| ingress-controller | object | `{"enabled":false,"gatewayProxy":{"name":"{{ .Release.Name }}-config","provider":{"controlPlane":{"auth":{"adminKey":{"value":""}}}}},"webhook":{"enabled":false}}` | Ingress controller configuration |
 | ingress-controller.enabled | bool | `false` | Enable the apisix-ingress-controller sub-chart |
+| ingress-controller.gatewayProxy.name | string | `"{{ .Release.Name }}-config"` | Name of the GatewayProxy for the bundled controller. The apisix chart creates it, with this release's Admin API Service and admin key, and the controller's IngressClass references it. Set `ingress-controller.gatewayProxy.createDefault: true` only if you want the controller chart to create its own GatewayProxy instead; its admin key must then match `apisix.admin.credentials`. Set it to `""` to leave the IngressClass without a GatewayProxy. |
+| ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value | string | `""` | Admin key of the GatewayProxy that the controller chart creates when `createDefault` is true. There is no default; the GatewayProxy that the apisix chart creates gets this release's key automatically. |
 | ingress.annotations | object | `{}` | Ingress annotations |
 | ingress.enabled | bool | `false` | Enable an Ingress resource in front of the APISIX service |
 | ingress.hosts | list | `[{"host":"apisix.local","paths":[]}]` | Ingress host and path rules |

@@ -97,6 +97,21 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.apisix.admin.credentials.secretName }}
                   key: {{ include "apisix.admin.credentials.secretViewerKey" . }}
+          {{- else if include "apisix.admin.credentials.generated" . }}
+          {{- if eq (include "apisix.admin.credentials.source" (dict "role" "admin" "context" $)) "generated" }}
+            - name: APISIX_ADMIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "apisix.admin.credentials.generatedSecretName" . }}
+                  key: admin
+          {{- end }}
+          {{- if eq (include "apisix.admin.credentials.source" (dict "role" "viewer" "context" $)) "generated" }}
+            - name: APISIX_VIEWER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "apisix.admin.credentials.generatedSecretName" . }}
+                  key: viewer
+          {{- end }}
           {{- end }}
 
           {{- if or (and .Values.etcd.enabled .Values.etcd.auth.rbac.create) (and (not .Values.etcd.enabled) .Values.externalEtcd.user) }}

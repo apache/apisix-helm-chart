@@ -534,12 +534,17 @@ apisix:
     servicePort: 9180
     # -- Admin API support CORS response headers
     cors: true
-    # -- Admin API credentials
+    # -- Admin API credentials.
+    # Leave `admin` and `viewer` empty to let the chart generate random keys. They are stored in
+    # the Secret `<fullname>-admin-credentials` and kept across upgrades. Tools that render the
+    # chart without access to the cluster (`helm template`, Argo CD) cannot keep generated keys;
+    # use `secretName` with them. The publicly known keys that chart versions before 3.0.0 used
+    # as defaults are rejected.
     credentials:
-      # -- Apache APISIX admin API admin role credentials
-      admin: edd1c9f034335f136f87ad84b625c8f1
-      # -- Apache APISIX admin API viewer role credentials
-      viewer: 4054f7cf07e344346cd3f287985e76a2
+      # -- Apache APISIX admin API admin role key. Leave empty to generate one.
+      admin: ""
+      # -- Apache APISIX admin API viewer role key. Leave empty to generate one.
+      viewer: ""
 
       # -- The APISIX Helm chart supports storing user credentials in a secret.
       # The secret needs to contain two keys, admin and viewer, with their respective values set.
@@ -931,3 +936,18 @@ ingress-controller:
     # It requires APISIX version 3.17.0 or later to function correctly.
     # Ensure your cluster's APISIX deployment meets this version requirement before enabling.
     enabled: false
+  gatewayProxy:
+    # -- Name of the GatewayProxy for the bundled controller. The apisix chart creates it, with
+    # this release's Admin API Service and admin key, and the controller's IngressClass references
+    # it. Set `ingress-controller.gatewayProxy.createDefault: true` only if you want the controller
+    # chart to create its own GatewayProxy instead; its admin key must then match
+    # `apisix.admin.credentials`. Set it to `""` to leave the IngressClass without a GatewayProxy.
+    name: "{{ .Release.Name }}-config"
+    provider:
+      controlPlane:
+        auth:
+          adminKey:
+            # -- Admin key of the GatewayProxy that the controller chart creates when
+            # `createDefault` is true. There is no default; the GatewayProxy that the apisix
+            # chart creates gets this release's key automatically.
+            value: ""
