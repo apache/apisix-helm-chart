@@ -261,9 +261,10 @@ it can be read (lookup returns nothing under helm template).
 {{- $c := .Values.apisix.admin.credentials -}}
 {{- $public := splitList " " (include "apisix.admin.credentials.publicDefaults" .) -}}
 {{- if .Values.apisix.fullCustomConfig.enabled -}}
-{{- $raw := toJson .Values.apisix.fullCustomConfig.config -}}
+{{- /* the ConfigMap renders this config with tpl, so check the rendered text */ -}}
+{{- $rendered := include "apisix.tplvalues.render" (dict "value" .Values.apisix.fullCustomConfig.config "context" .) -}}
 {{- range $key := $public -}}
-{{- if contains $key $raw -}}
+{{- if contains $key $rendered -}}
 {{- fail "\nADMIN KEY ERROR: apisix.fullCustomConfig.config contains a publicly known default Admin API key. Use a different key." -}}
 {{- end -}}
 {{- end -}}
@@ -311,8 +312,11 @@ true
 {{/*
 Checks the bundled ingress controller's GatewayProxy.
 With gatewayProxy.createDefault, the controller chart creates the GatewayProxy:
-it needs an admin key that is not a public default, and when it targets this
-release (no endpoints) the key must come from where APISIX takes it. Without
+it needs an admin key that is not a public default. When it uses this
+release's Admin API Service (no endpoints, and service.name or
+apisix.adminService.name is <fullname>-admin), the release needs an Admin API
+and the key must come from where APISIX takes it; when it falls back to another
+Service name, that is a misconfiguration. Without
 this check the controller cannot reach the Admin API and APISIX never becomes
 ready (apache/apisix-helm-chart#908).
 Without createDefault, this chart creates the GatewayProxy, which needs an
@@ -333,7 +337,17 @@ GatewayProxy that does not exist.
 {{- fail "\nINGRESS CONTROLLER ERROR: ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value is a publicly known default key. Use a different key." -}}
 {{- end -}}
 {{- end -}}
-{{- if and (not $gp.provider.controlPlane.endpoints) (include "apisix.admin.credentials.enabled" .) -}}
+{{- $cp := $gp.provider.controlPlane -}}
+{{- if not $cp.endpoints -}}
+{{- /* same Service choice as the controller chart's gatewayproxy.yaml */ -}}
+{{- $localService := printf "%s-admin" (include "apisix.fullname" .) -}}
+{{- $explicitService := ($cp.service | default dict).name | default "" | toString -}}
+{{- $fallbackService := (($ic.apisix | default dict).adminService | default dict).name | default "" | toString -}}
+{{- $service := default $fallbackService $explicitService -}}
+{{- if eq $service $localService -}}
+{{- if not (and .Values.apisix.admin.enabled (include "apisix.admin.credentials.enabled" .)) -}}
+{{- fail (printf "\nINGRESS CONTROLLER ERROR: the GatewayProxy that ingress-controller.gatewayProxy.createDefault creates targets the Service %s of this release, but this release has no Admin API.\nPoint it at your control plane with ingress-controller.gatewayProxy.provider.controlPlane.endpoints or service.name, or remove createDefault." $service) -}}
+{{- end -}}
 {{- $source := include "apisix.admin.credentials.source" (dict "role" "admin" "context" .) -}}
 {{- $match := false -}}
 {{- if eq $source "inline" -}}
@@ -346,6 +360,9 @@ GatewayProxy that does not exist.
 {{- end -}}
 {{- if not $match -}}
 {{- fail "\nINGRESS CONTROLLER ERROR: ingress-controller.gatewayProxy.createDefault is true, but the GatewayProxy that it creates would not use the Admin API key of this release, so the controller could not reach APISIX.\nRemove ingress-controller.gatewayProxy.createDefault: the apisix chart creates the GatewayProxy and gives it the right key.\nTo keep managing the GatewayProxy yourself, set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey to the same key as apisix.admin.credentials: the same value, or a secretKeyRef to the same Secret and field." -}}
+{{- end -}}
+{{- else if not $explicitService -}}
+{{- fail (printf "\nINGRESS CONTROLLER ERROR: the GatewayProxy that ingress-controller.gatewayProxy.createDefault creates would use the Service %s (ingress-controller.apisix.adminService.name), but the Admin API Service of this release is %s.\nRemove createDefault to let the apisix chart create the GatewayProxy, or set ingress-controller.gatewayProxy.provider.controlPlane.service.name." $service $localService) -}}
 {{- end -}}
 {{- end -}}
 {{- else if and (include "apisix.ingressController.gatewayProxy.name" .) (not (include "apisix.ingressController.gatewayProxy.enabled" .)) -}}

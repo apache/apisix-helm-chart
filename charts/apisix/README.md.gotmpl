@@ -117,9 +117,15 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
 * With the bundled ingress controller, remove `ingress-controller.gatewayProxy.createDefault` and
   any admin key set under `ingress-controller.gatewayProxy`: the apisix chart now creates the
   GatewayProxy with this release's Admin API Service and admin key. If you keep
-  `createDefault: true`, set its admin key yourself; when it targets this release (no
-  `endpoints`), it must be the key APISIX uses (the same value, or a `secretKeyRef` to the same
-  Secret and field), or the chart refuses to render.
+  `createDefault: true`, set its admin key yourself. When it uses this release's Admin API Service
+  (`<fullname>-admin`), it must be the key APISIX uses (the same value, or a `secretKeyRef` to the
+  same Secret and field), or the chart refuses to render. Without `endpoints` or
+  `ingress-controller.gatewayProxy.provider.controlPlane.service.name`, the controller chart falls
+  back to the Service `apisix-admin`; for any other release name the chart then refuses to render
+  and asks you to set the Service name.
+* With `apisix.admin.credentials.secretName`, the chart reads that Secret with `lookup` to reject
+  the public default keys, so the identity that runs Helm needs `get` on Secrets in the release
+  namespace. Helm's default storage driver keeps releases in Secrets and already needs it.
 * If the release has no Admin API (the `data_plane` role, `apisix.fullCustomConfig`, or
   `apisix.admin.enabled: false`) and the bundled ingress controller is enabled, the chart cannot
   create the GatewayProxy and refuses to render. Point the controller at your control plane with

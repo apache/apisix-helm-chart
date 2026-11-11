@@ -23,6 +23,9 @@
 set -uo pipefail
 
 HELM=${HELM:-helm}
+for tool in "${HELM%% *}" yq base64; do
+  command -v "$tool" >/dev/null || { echo "missing required tool: $tool" >&2; exit 2; }
+done
 CHART=charts/apisix
 PUBLIC_ADMIN=edd1c9f034335f136f87ad84b625c8f1
 PUBLIC_VIEWER=4054f7cf07e344346cd3f287985e76a2
@@ -63,12 +66,13 @@ count() { q "select(.kind == \"$1\") | .kind" | grep -c "^$1$"; }
 no_generated_secret() { [ -z "$(q "select(.kind == \"Secret\" and .metadata.name == \"${1:-apisix}-admin-credentials\") | .kind")" ]; }
 has_no_public_key() { # neither in plain text nor base64-encoded in a Secret
   grep -q -e "$PUBLIC_ADMIN" -e "$PUBLIC_VIEWER" <<<"$OUT" && return 1
-  local encoded decoded
+  local values encoded decoded
+  values=$(printf '%s\n' "$OUT" | yq 'select(.kind == "Secret") | .data[]') || return 1
   while IFS= read -r encoded; do
     [ -n "$encoded" ] || continue
     decoded=$(printf '%s' "$encoded" | base64 -d 2>/dev/null)
     [ "$decoded" != "$PUBLIC_ADMIN" ] && [ "$decoded" != "$PUBLIC_VIEWER" ] || return 1
-  done < <(q 'select(.kind == "Secret") | .data[]')
+  done <<<"$values"
   return 0
 }
 eq() { [ "$1" = "$2" ] || { echo "       expected '$2', got '$1'" >&2; return 1; }; }
@@ -191,6 +195,24 @@ render apisix "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=
 check "renders for other endpoints with their own key" eq $? 0
 check "no publicly known key anywhere in the output" has_no_public_key
 
+render t "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
+  --set apisix.admin.credentials.admin=MyAdminKey123 --set apisix.admin.credentials.viewer=MyViewerKey456 \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=MyAdminKey123
+check "fails when it would fall back to the Service apisix-admin in release t" failed_with $? "would use the Service apisix-admin (ingress-controller.apisix.adminService.name), but the Admin API Service of this release is t-apisix-admin"
+render t "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
+  --set apisix.admin.credentials.admin=MyAdminKey123 --set apisix.admin.credentials.viewer=MyViewerKey456 \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.service.name=t-apisix-admin \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=MyAdminKey123
+check "renders in release t with the Service name set and a matching key" eq $? 0
+render apisix "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.service.name=external-admin \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=ExternalKey123
+check "renders for an explicitly named external Service with its own key" eq $? 0
+render apisix "${GUIDE[@]}" --set apisix.admin.enabled=false --set ingress-controller.gatewayProxy.createDefault=true \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.valueFrom.secretKeyRef.name=apisix-admin-credentials \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.valueFrom.secretKeyRef.key=admin
+check "fails when it targets this release but the Admin API is disabled" failed_with $? "but this release has no Admin API"
+
 echo "# the bundled controller in a release without an Admin API"
 for extra in "--set apisix.deployment.mode=standalone" "--set apisix.admin.enabled=false" \
              "--set apisix.fullCustomConfig.enabled=true --set apisix.fullCustomConfig.config.apisix.node_listen[0]=9080"; do
@@ -213,6 +235,9 @@ check "fullCustomConfig renders" eq $? 0
 check "fullCustomConfig: no generated Secret" no_generated_secret
 render apisix --set apisix.fullCustomConfig.enabled=true --set "apisix.fullCustomConfig.config.deployment.admin.admin_key[0].key=$PUBLIC_ADMIN"
 check "fullCustomConfig with a public default key fails" failed_with $? "apisix.fullCustomConfig.config contains a publicly known default Admin API key"
+render apisix --set apisix.fullCustomConfig.enabled=true --set apisix.admin.credentials.admin=$PUBLIC_ADMIN \
+  --set-json 'apisix.fullCustomConfig.config.deployment={"admin":{"admin_key":[{"name":"admin","key":"{{ .Values.apisix.admin.credentials.admin }}","role":"admin"}]}}'
+check "fullCustomConfig that templates in a public default key fails" failed_with $? "apisix.fullCustomConfig.config contains a publicly known default Admin API key"
 
 echo
 echo "passed: $passed, failed: $failed"

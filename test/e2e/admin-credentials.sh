@@ -171,6 +171,7 @@ check "Admin API rejects the old key" is "$(admin_code 19180 /apisix/admin/confi
 kubectl --namespace $NS patch ingress echo --type=json -p '[{"op":"replace","path":"/spec/rules/0/host","value":"echo2.test"}]' >/dev/null
 check "a changed Ingress reaches APISIX, so the controller picked up the new key" wait_for 180 route_ok 19080 echo2.test
 helm upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --set podAnnotations.e2e=after-rotation --wait --timeout 5m >/dev/null
+check "an upgrade after the rotation succeeds" is $? 0
 check "a later upgrade keeps the rotated key" is "$(secret_key $NS apisix-admin-credentials admin)" "$NEW_KEY"
 stop_port_forwards
 

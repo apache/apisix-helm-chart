@@ -85,3 +85,39 @@ jobs:
           fi
           git diff --exit-code
           rm -f ./helm-docs
+
+  admin-credentials:
+    name: Admin API credentials
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Build chart dependencies
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add apisix https://apache.github.io/apisix-helm-chart
+          helm dependency build charts/apisix
+
+      - name: Render tests (Helm 3)
+        run: test/render/admin-credentials.sh
+
+      - name: Render tests (Helm 4)
+        run: |
+          curl -fsSLO https://get.helm.sh/helm-v4.2.4-linux-amd64.tar.gz
+          curl -fsSLO https://get.helm.sh/helm-v4.2.4-linux-amd64.tar.gz.sha256sum
+          sha256sum -c helm-v4.2.4-linux-amd64.tar.gz.sha256sum
+          tar -xzf helm-v4.2.4-linux-amd64.tar.gz
+          HELM=$PWD/linux-amd64/helm test/render/admin-credentials.sh
+
+      - name: Create Kubernetes cluster
+        uses: ./.github/actions/setup-kind
+        with:
+          version: v0.22.0
+          image: kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245
+
+      - name: End-to-end tests
+        run: test/e2e/admin-credentials.sh
