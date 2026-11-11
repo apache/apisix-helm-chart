@@ -114,7 +114,7 @@ Scheme to use while connecting etcd
 
 {{/*
 Return true when etcd client certificates are configured, otherwise an empty string.
-Use the same validation and condition for credentials and their Secret mount.
+Validate the credentials used by the generated APISIX configuration.
 */}}
 {{- define "apisix.etcd.tls.clientCertEnabled" -}}
 {{- $tls := .Values.etcd.auth.tls -}}

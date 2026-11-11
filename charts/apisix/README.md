@@ -115,8 +115,9 @@ so the client can use the endpoint hostname.
 
 For mTLS, keep `etcd.auth.tls.enabled: true` and set `existingSecret`,
 `certFilename` and `certKeyFilename` under `etcd.auth.tls`. The certificate and key
-must be configured together, and their Secret is mounted only when client
-certificates are configured. The CA Secret above is configured separately.
+must be configured together. When TLS is enabled, a non-empty `existingSecret`
+is mounted at `/etcd-ssl`, including when certificate paths are supplied through
+`apisix.fullCustomConfig`. The CA Secret above is configured separately.
 
 With `etcd.auth.tls.enabled: false`, the APISIX etcd TLS settings and
 client-certificate mount are omitted as before. This flag does not rewrite
@@ -306,7 +307,7 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | etcd.auth.tls.certFilename | string | `""` | Client certificate filename in existingSecret. Set together with certKeyFilename for mTLS; leave both empty for server-only TLS. |
 | etcd.auth.tls.certKeyFilename | string | `""` | Client private key filename in existingSecret. Required when certFilename is set. |
 | etcd.auth.tls.enabled | bool | `false` | Enable TLS settings for the APISIX etcd connection. For external etcd, also use https:// endpoints in externalEtcd.host. Client certificates are optional. |
-| etcd.auth.tls.existingSecret | string | `""` | Secret containing the optional etcd client certificate and key. Required when certFilename and certKeyFilename are set. |
+| etcd.auth.tls.existingSecret | string | `""` | Secret containing the optional etcd client certificate and key. Mounted when TLS is enabled and the name is non-empty, including with fullCustomConfig. Required when certFilename and certKeyFilename are set. |
 | etcd.auth.tls.sni | string | `""` | TLS server name used when etcd.auth.tls.enabled is true. Omitted when empty so the endpoint hostname is used. For IP endpoints, set a DNS name covered by every endpoint certificate, since IP SANs are not matched. |
 | etcd.auth.tls.verify | bool | `true` | Whether to verify the etcd endpoint certificate when etcd.auth.tls.enabled is true. |
 | etcd.autoCompactionMode | string | `"periodic"` | Auto compaction mode (periodic or revision), only used when etcd.enabled is true |

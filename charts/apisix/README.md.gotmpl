@@ -115,8 +115,9 @@ so the client can use the endpoint hostname.
 
 For mTLS, keep `etcd.auth.tls.enabled: true` and set `existingSecret`,
 `certFilename` and `certKeyFilename` under `etcd.auth.tls`. The certificate and key
-must be configured together, and their Secret is mounted only when client
-certificates are configured. The CA Secret above is configured separately.
+must be configured together. When TLS is enabled, a non-empty `existingSecret`
+is mounted at `/etcd-ssl`, including when certificate paths are supplied through
+`apisix.fullCustomConfig`. The CA Secret above is configured separately.
 
 With `etcd.auth.tls.enabled: false`, the APISIX etcd TLS settings and
 client-certificate mount are omitted as before. This flag does not rewrite

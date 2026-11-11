@@ -894,7 +894,7 @@ etcd:
     tls:
       # -- Enable TLS settings for the APISIX etcd connection. For external etcd, also use https:// endpoints in externalEtcd.host. Client certificates are optional.
       enabled: false
-      # -- Secret containing the optional etcd client certificate and key. Required when certFilename and certKeyFilename are set.
+      # -- Secret containing the optional etcd client certificate and key. Mounted when TLS is enabled and the name is non-empty, including with fullCustomConfig. Required when certFilename and certKeyFilename are set.
       existingSecret: ""
       # -- Client certificate filename in existingSecret. Set together with certKeyFilename for mTLS; leave both empty for server-only TLS.
       certFilename: ""
