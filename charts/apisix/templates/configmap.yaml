@@ -438,8 +438,9 @@ data:
         user: "root"
         password: "{{ print "${{APISIX_ETCD_PASSWORD}}" }}"
         {{- end }}
+        {{- if .Values.etcd.auth.tls.enabled }}
         tls:
-          {{- if .Values.etcd.auth.tls.enabled }}
+          {{- if include "apisix.etcd.tls.clientCertEnabled" . }}
           cert: "/etcd-ssl/{{ .Values.etcd.auth.tls.certFilename }}"
           key: "/etcd-ssl/{{ .Values.etcd.auth.tls.certKeyFilename }}"
           {{- end }}
@@ -447,6 +448,7 @@ data:
           {{- with .Values.etcd.auth.tls.sni }}
           sni: {{ . | quote }}
           {{- end }}
+        {{- end }}
       {{- end }}
       {{- end }}
      
