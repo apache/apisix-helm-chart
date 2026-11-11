@@ -212,7 +212,7 @@ spec:
               subPath: {{ .Values.apisix.ssl.certCAFilename }}
           {{- end }}
 
-          {{- if .Values.etcd.auth.tls.enabled }}
+          {{- if and .Values.etcd.auth.tls.enabled .Values.etcd.auth.tls.existingSecret }}
             - mountPath: /etcd-ssl
               name: etcd-ssl
           {{- end }}
@@ -281,7 +281,7 @@ spec:
             secretName: {{ .Values.apisix.ssl.existingCASecret | quote }}
           name: ssl
         {{- end }}
-        {{- if .Values.etcd.auth.tls.enabled }}
+        {{- if and .Values.etcd.auth.tls.enabled .Values.etcd.auth.tls.existingSecret }}
         - secret:
             secretName: {{ .Values.etcd.auth.tls.existingSecret | quote }}
           name: etcd-ssl

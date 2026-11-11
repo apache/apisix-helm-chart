@@ -892,17 +892,17 @@ etcd:
       # -- root password for etcd. Requires etcd.auth.rbac.create to be true.
       rootPassword: ""
     tls:
-      # -- enable etcd client certificate
+      # -- Enable TLS settings for the APISIX etcd connection. For external etcd, also use https:// endpoints in externalEtcd.host. Client certificates are optional.
       enabled: false
-      # -- name of the secret contains etcd client cert
+      # -- Secret containing the optional etcd client certificate and key. Mounted when TLS is enabled and the name is non-empty, including with fullCustomConfig. Required when certFilename and certKeyFilename are set.
       existingSecret: ""
-      # -- etcd client cert filename using in etcd.auth.tls.existingSecret
+      # -- Client certificate filename in existingSecret. Set together with certKeyFilename for mTLS; leave both empty for server-only TLS.
       certFilename: ""
-      # -- etcd client cert key filename using in etcd.auth.tls.existingSecret
+      # -- Client private key filename in existingSecret. Required when certFilename is set.
       certKeyFilename: ""
-      # -- whether to verify the etcd endpoint certificate when setup a TLS connection to etcd
+      # -- Whether to verify the etcd endpoint certificate when etcd.auth.tls.enabled is true.
       verify: true
-      # -- specify the TLS Server Name Indication extension, the ETCD endpoint hostname will be used when this setting is unset. Set it to a DNS name in the etcd certificate if the etcd endpoints are IP addresses, since IP SANs are not matched.
+      # -- TLS server name used when etcd.auth.tls.enabled is true. Omitted when empty so the endpoint hostname is used. For IP endpoints, set a DNS name covered by every endpoint certificate, since IP SANs are not matched.
       sni: ""
 
   # -- ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
