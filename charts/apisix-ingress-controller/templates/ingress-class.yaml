@@ -24,7 +24,7 @@ metadata:
   {{- end }}
 spec:
   controller: {{ .Values.config.controllerName | default "apisix.apache.org/apisix-ingress-controller" }}
-  {{- if or .Values.gatewayProxy.createDefault .Values.gatewayProxy.name }}
+  {{- if or .Values.gatewayProxy.createDefault (include "apisix-ingress-controller-manager.configuredGatewayProxyName" .) }}
   parameters:
     apiGroup: apisix.apache.org
     kind: GatewayProxy
