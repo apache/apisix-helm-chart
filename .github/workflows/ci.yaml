@@ -90,6 +90,7 @@ jobs:
     name: Admin API credentials (Helm ${{ matrix.helm }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - helm: v3.22.1

@@ -133,9 +133,10 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
 
 * If you already set `apisix.admin.credentials.admin` and `viewer`, or `secretName`, to other keys,
   nothing changes, with one exception: inline keys are now used exactly as given. Earlier versions
-  rendered them unquoted, so YAML dropped leading or trailing whitespace and quotes (for example the
-  newline at the end of a file passed with `--set-file`). Such keys now fail with `ADMIN KEY ERROR`
-  instead of turning into a key that clients don't send; remove those characters.
+  rendered them unquoted, so YAML dropped leading and trailing spaces, tabs and line breaks (for
+  example the newline at the end of a file passed with `--set-file`), the quotes around a key that
+  starts with one, and a ` #` with everything after it. Such keys now fail with `ADMIN KEY ERROR`
+  instead of silently becoming a key that clients don't send; remove those parts.
 * If your release used the defaults, `helm upgrade` fails with `ADMIN KEY ERROR` before changing
   anything. Choose new keys, pass them with `--set apisix.admin.credentials.admin=<key>
   --set apisix.admin.credentials.viewer=<key>` or `apisix.admin.credentials.secretName`, upgrade
@@ -149,7 +150,7 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
   any admin key set under `ingress-controller.gatewayProxy`: the apisix chart now creates the
   GatewayProxy with this release's Admin API Service and admin key. If you keep
   `createDefault: true`, set its admin key yourself. When it uses this release's Admin API Service
-  (`<fullname>-admin`), it must be the key APISIX uses (the same value, or a `secretKeyRef` to the
+  (`<fullname>-admin`), directly or through `endpoints` that name it, it must be the key APISIX uses (the same value, or a `secretKeyRef` to the
   same Secret and field), or the chart refuses to render. Without `endpoints` or
   `ingress-controller.gatewayProxy.provider.controlPlane.service.name`, the controller chart uses
   `ingress-controller.apisix.adminService.name`, which defaults to `apisix-admin`. If that default is

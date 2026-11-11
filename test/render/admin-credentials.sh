@@ -132,16 +132,25 @@ render apisix --set apisix.admin.credentials.viewer=$PUBLIC_ADMIN
 check "public admin key as viewer fails" failed_with $? "apisix.admin.credentials.viewer is a publicly known default key"
 
 render apisix --set-string "apisix.admin.credentials.admin=\"$PUBLIC_ADMIN\""
-check "a public key wrapped in quotes fails" failed_with $? "apisix.admin.credentials.admin starts or ends with whitespace or a quote"
+check "a public key wrapped in quotes fails" failed_with $? "apisix.admin.credentials.admin starts or ends with whitespace, starts with a quote"
 render apisix --set-string "apisix.admin.credentials.viewer=$PUBLIC_VIEWER "
-check "a public key with a trailing space fails" failed_with $? "apisix.admin.credentials.viewer starts or ends with whitespace or a quote"
+check "a public key with a trailing space fails" failed_with $? "apisix.admin.credentials.viewer starts or ends with whitespace, starts with a quote"
 keyfile=$(mktemp); printf 'FileAdminKey123\n' > "$keyfile"
 render apisix --set-file apisix.admin.credentials.admin="$keyfile"
-check "a key file that ends with a newline fails" failed_with $? "apisix.admin.credentials.admin starts or ends with whitespace or a quote"
+check "a key file that ends with a newline fails" failed_with $? "apisix.admin.credentials.admin starts or ends with whitespace, starts with a quote"
 rm -f "$keyfile"
-render apisix --set apisix.admin.credentials.admin=Key#With:Specials --set apisix.admin.credentials.viewer=123456
+render apisix --set-string 'apisix.admin.credentials.admin=Key#With: Specials' --set apisix.admin.credentials.viewer=123456
 check "keys with YAML special characters or only digits render" eq $? 0
-check "...and are used exactly as given" eq "$(key_of admin)/$(key_of viewer)" "Key#With:Specials/123456"
+check "...and are used exactly as given" eq "$(key_of admin)" "Key#With: Specials"
+check "...a numeric key stays a string" eq "$(config '.deployment.admin.admin_key[] | select(.name == "viewer") | .key | tag')" '!!str'
+render apisix --set-string "apisix.admin.credentials.admin=EndsWithQuote'"
+check "a key that only ends with a quote renders unchanged" eq "$(key_of admin)" "EndsWithQuote'"
+render apisix --set-string 'apisix.admin.credentials.admin=Key #Comment'
+check "a key with a space followed by # fails" failed_with $? "contains a space followed by #"
+render apisix --set-string 'apisix.admin.credentials.admin= LeadingSpaceKey123'
+check "a key with a leading space fails" failed_with $? "apisix.admin.credentials.admin starts or ends with whitespace"
+render apisix --set-string "apisix.admin.credentials.viewer=$(printf '\tTabKey123')"
+check "a key with a leading tab fails" failed_with $? "apisix.admin.credentials.viewer starts or ends with whitespace"
 
 echo "# upgrades never replace a generated key"
 render apisix --is-upgrade
@@ -254,6 +263,27 @@ render apisix "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=
   --set 'ingress-controller.gatewayProxy.provider.controlPlane.endpoints[0]=http://apisix-admin.demo.svc.cluster.local:9180' \
   --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=MyAdminKey123
 check "endpoints that name this release's Service with its key render" eq $? 0
+for ep in http://apisix-admin:9180 http://apisix-admin.demo:9180 http://APISIX-ADMIN.demo.svc:9180/ http://apisix-admin.demo.svc.example.org.:9180; do
+  render apisix "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
+    --set "ingress-controller.gatewayProxy.provider.controlPlane.endpoints[0]=$ep" \
+    --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=OtherKey123
+  check "endpoint $ep is this release's Service" failed_with $? "would not use the Admin API key of this release"
+done
+render apisix "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
+  --set 'ingress-controller.gatewayProxy.provider.controlPlane.endpoints[0]=http://apisix-admin.other:9180' \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=OtherKey123
+check "the same Service name in another namespace is not this release" eq $? 0
+render apisix "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
+  --set 'ingress-controller.gatewayProxy.provider.controlPlane.endpoints[0]=10.0.0.1:9180' \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=OtherKey123
+check "an endpoint without a scheme renders" eq $? 0
+render apisix "${GUIDE[@]}" --set ingress-controller.gatewayProxy.createDefault=true \
+  --set 'ingress-controller.gatewayProxy.provider.controlPlane.endpoints[0]=http://other-apisix-admin:9180' \
+  --set-string 'ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=OtherKey123 '
+check "a createDefault key with a trailing space fails" failed_with $? "adminKey.value starts or ends with whitespace"
+render t "${GUIDE[@]}" --set apisix.admin.enabled=false --set ingress-controller.gatewayProxy.createDefault=true \
+  --set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value=ControlPlaneKey123
+check "a release without an Admin API may fall back to apisix-admin" eq $? 0
 
 echo "# the bundled controller in a release without an Admin API"
 for extra in "--set apisix.deployment.mode=standalone" "--set apisix.admin.enabled=false" \

@@ -149,7 +149,8 @@ check "Admin API rejects a request without a key" is "$(http_code http://127.0.0
 deploy_backend $NS echo.test
 check "an Ingress route works, so the controller uses the generated key" wait_for 180 route_ok 19080 echo.test
 # The controller chart renders its Gateway API CRDs with lookup too; in a client-side dry-run Helm
-# then rejects CRDs that exist but belong to another release (here, an earlier scenario's). The CRDs
+# then rejects CRDs that exist but belong to another release (for example an earlier run's, kept by
+# helm.sh/resource-policy: keep on a reused cluster). The CRDs
 # are installed already, so leave them out: this check is about the admin key.
 $HELM upgrade apisix $CHART --namespace $NS "${GUIDE[@]}" --set ingress-controller.crds.gatewayAPI.enabled=false --dry-run=client >/dev/null 2>&1
 check "a client-side dry-run upgrade (no cluster access) does not trip the upgrade check" is $? 0

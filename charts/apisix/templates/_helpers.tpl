@@ -269,14 +269,15 @@ apisix.admin.credentials.secretName.
 {{- end -}}
 
 {{/*
-Returns "true" when a key starts or ends with whitespace or a quote. Chart
-versions before 3.0.0 rendered keys unquoted, so YAML dropped such characters;
-now the key is used exactly as given, and these characters would make it a key
-that clients do not send (for example the newline at the end of a file passed
-with --set-file).
+Returns "true" when chart versions before 3.0.0, which rendered keys unquoted,
+would have read the key differently: YAML dropped leading and trailing spaces,
+tabs and line breaks (for example the newline at the end of a file passed with
+--set-file), the quotes around a key that starts with one, and a " #" with
+everything after it. The key is now used exactly as given, so such a key would
+silently differ from the one clients send.
 */}}
-{{- define "apisix.admin.credentials.untrimmed" -}}
-{{- if or (ne . (trim .)) (regexMatch "^[\"']|[\"']$" .) -}}
+{{- define "apisix.admin.credentials.ambiguous" -}}
+{{- if or (ne . (trimAll " \t\r\n" .)) (regexMatch "^[\"']|[ \t]#" .) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -330,8 +331,8 @@ it can be read (lookup returns nothing under helm template).
 {{- $key := toString (index $c $role) -}}
 {{- if has $key $public -}}
 {{- fail (printf "\nADMIN KEY ERROR: apisix.admin.credentials.%s is a publicly known default key. Set a different key, or leave it empty to let the chart generate one." $role) -}}
-{{- else if and (index $c $role) (include "apisix.admin.credentials.untrimmed" $key) -}}
-{{- fail (printf "\nADMIN KEY ERROR: apisix.admin.credentials.%s starts or ends with whitespace or a quote. The chart uses the key exactly as given, so these characters would become part of the key. Remove them (a file passed with --set-file must not end with a newline)." $role) -}}
+{{- else if and (index $c $role) (include "apisix.admin.credentials.ambiguous" $key) -}}
+{{- fail (printf "\nADMIN KEY ERROR: apisix.admin.credentials.%s starts or ends with whitespace, starts with a quote, or contains a space followed by #. Chart versions before 3.0.0 dropped these parts of the key; this version uses the key exactly as given, so clients would no longer match it. Remove them (a file passed with --set-file must not end with a newline)." $role) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -363,11 +364,13 @@ true
 {{/*
 Checks the bundled ingress controller's GatewayProxy.
 With gatewayProxy.createDefault, the controller chart creates the GatewayProxy:
-it needs an admin key that is not a public default. When it uses this
-release's Admin API Service (no endpoints, and service.name or
-apisix.adminService.name is <fullname>-admin), the release needs an Admin API
-and the key must come from where APISIX takes it; when it falls back to another
-Service name, that is a misconfiguration. Without
+it needs an admin key that is not a public default. When it targets this
+release's Admin API Service <fullname>-admin (through service.name or
+apisix.adminService.name, or endpoints that name that Service), the release
+needs an Admin API, and the key must come from where APISIX takes it unless
+fullCustomConfig hides it. A release with its own Admin API that falls back to
+the default name apisix-admin, which is not its Service, is misconfigured;
+a data-plane release may point at a control plane's apisix-admin. Without
 this check the controller cannot reach the Admin API and APISIX never becomes
 ready (apache/apisix-helm-chart#908).
 Without createDefault, this chart creates the GatewayProxy, which needs an
@@ -386,8 +389,8 @@ GatewayProxy that does not exist.
 {{- fail "\nINGRESS CONTROLLER ERROR: ingress-controller.gatewayProxy.createDefault is true, but no admin key is set for the GatewayProxy it creates.\nRemove ingress-controller.gatewayProxy.createDefault to let the apisix chart create the GatewayProxy with this release's key, or set ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey." -}}
 {{- else if has (toString $adminKey.value) $public -}}
 {{- fail "\nINGRESS CONTROLLER ERROR: ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value is a publicly known default key. Use a different key." -}}
-{{- else if include "apisix.admin.credentials.untrimmed" (toString $adminKey.value) -}}
-{{- fail "\nINGRESS CONTROLLER ERROR: ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value starts or ends with whitespace or a quote, which would become part of the key. Remove them." -}}
+{{- else if ne (toString $adminKey.value) (trimAll " \t\r\n" (toString $adminKey.value)) -}}
+{{- fail "\nINGRESS CONTROLLER ERROR: ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value starts or ends with whitespace, which would become part of the key. Remove it (a file passed with --set-file must not end with a newline)." -}}
 {{- end -}}
 {{- end -}}
 {{- $cp := $gp.provider.controlPlane -}}
@@ -398,9 +401,12 @@ GatewayProxy that does not exist.
 {{- $service := default $fallbackService $explicitService -}}
 {{- $targetsLocal := false -}}
 {{- if $cp.endpoints -}}
-{{- $localHosts := list $localService (printf "%s.%s" $localService .Release.Namespace) (printf "%s.%s.svc" $localService .Release.Namespace) (printf "%s.%s.svc.cluster.local" $localService .Release.Namespace) -}}
+{{- /* <service>, <service>.<namespace>, <service>.<namespace>.svc[.<cluster domain>], optional trailing dot */ -}}
+{{- $localHost := printf "^%s(\\.%s(\\.svc(\\.[a-z0-9.-]+)?)?)?\\.?$" (regexQuoteMeta $localService) (regexQuoteMeta .Release.Namespace) -}}
 {{- range $endpoint := $cp.endpoints -}}
-{{- if has (urlParse (toString $endpoint)).hostname $localHosts -}}
+{{- $url := toString $endpoint | trim -}}
+{{- $host := regexReplaceAll "^[A-Za-z][A-Za-z0-9+.-]*://([^@/?#]*@)?([^:/?#]*).*$" $url "${2}" -}}
+{{- if and (ne $host $url) (regexMatch $localHost (lower $host)) -}}
 {{- $targetsLocal = true -}}
 {{- end -}}
 {{- end -}}
