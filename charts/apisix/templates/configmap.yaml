@@ -70,12 +70,15 @@ data:
       lua_module_hook: {{ .Values.apisix.luaModuleHook.hookPoint | quote }}
       {{- end }}
 
-      enable_dev_mode: false                       # Sets nginx worker_processes to 1 if set to true
-      enable_reuseport: true                       # Enable nginx SO_REUSEPORT switch if set to true.
+      enable_dev_mode: {{ .Values.apisix.enableDevMode }}       # Sets nginx worker_processes to 1 if set to true
+      enable_reuseport: {{ .Values.apisix.enableReuseport }}  # Enable nginx SO_REUSEPORT switch if set to true.
       enable_ipv6: {{ .Values.apisix.enableIPv6 }} # Enable nginx IPv6 resolver
       enable_http2: {{ .Values.apisix.enableHTTP2 }}
       enable_server_tokens: {{ .Values.apisix.enableServerTokens }} # Whether the APISIX version number should be shown in Server header
       show_upstream_status_in_response_header: {{ .Values.apisix.showUpstreamStatusInResponseHeader }} # when true, all upstream statuses are written to `X-APISIX-Upstream-Status`; otherwise only 5xx codes
+      {{- with .Values.apisix.maxRequestHeadersReadable }}
+      max_request_headers_readable: {{ . }}
+      {{- end }}
 
       {{- if or .Values.apisix.proxyProtocol.enableTcpPP .Values.apisix.proxyProtocol.enableTcpPPToUpstream .Values.apisix.proxyProtocol.listenHttpPort .Values.apisix.proxyProtocol.listenHttpsPort }}
       proxy_protocol:
@@ -185,14 +188,16 @@ data:
         ssl_protocols: {{ .Values.apisix.ssl.sslProtocols | quote }}
         ssl_ciphers: {{ .Values.apisix.ssl.sslCiphers | quote }}
         ssl_session_tickets: {{ .Values.apisix.ssl.sslSessionTickets }}
-        {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
+        {{- if .Values.etcd.auth.tls.caSecret }}
+        ssl_trusted_certificate: "/usr/local/apisix/conf/etcd-ssl/{{ .Values.etcd.auth.tls.caFilename }}"
+        {{- else if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
         ssl_trusted_certificate: "/usr/local/apisix/conf/ssl/{{ .Values.apisix.ssl.certCAFilename }}"
         {{- end }}
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.fallbackSNI }}
         fallback_sni: {{ .Values.apisix.ssl.fallbackSNI | quote }}
         {{- end }}
       {{- $useTraditionalYaml := and (eq (include "apisix.deployment.role" $) "traditional") (eq .Values.apisix.deployment.role_traditional.config_provider "yaml") }}
-      {{- if $useTraditionalYaml }}
+      {{- if .Values.apisix.status.enabled }}
       status:
         ip: {{ default "127.0.0.1" .Values.apisix.status.ip | quote }}
         port: {{ default "7085" (.Values.apisix.status.port | toString) }}

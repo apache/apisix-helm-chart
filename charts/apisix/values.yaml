@@ -336,6 +336,12 @@ metrics:
 apisix:
   # -- Enable nginx IPv6 resolver
   enableIPv6: true
+  # -- Enable APISIX development mode.
+  enableDevMode: false
+  # -- Enable nginx SO_REUSEPORT.
+  enableReuseport: true
+  # -- Maximum number of readable request headers. Empty keeps APISIX default.
+  maxRequestHeadersReadable: ""
   # -- Enable HTTP/2 on the HTTP listeners
   enableHTTP2: true
 
@@ -475,6 +481,9 @@ apisix:
   fullCustomConfig:
     # -- Enable full customized config.yaml
     enabled: false
+    # -- Use an existing ConfigMap containing the complete APISIX config.yaml.
+    # When set, common chart configuration is ignored and this file is mounted directly.
+    existingConfigMap: ""
     # -- If apisix.fullCustomConfig.enabled is true, full customized config.yaml.
     # Please note that other settings about APISIX config will be ignored
     config: {}
@@ -899,6 +908,10 @@ etcd:
       enabled: false
       # -- Secret containing the optional etcd client certificate and key. Mounted when TLS is enabled and the name is non-empty, including with fullCustomConfig. Required when certFilename and certKeyFilename are set.
       existingSecret: ""
+      # -- Secret containing the CA certificate used to verify the etcd server.
+      caSecret: ""
+      # -- CA certificate filename in caSecret.
+      caFilename: ca.crt
       # -- Client certificate filename in existingSecret. Set together with certKeyFilename for mTLS; leave both empty for server-only TLS.
       certFilename: ""
       # -- Client private key filename in existingSecret. Required when certFilename is set.
