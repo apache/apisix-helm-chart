@@ -47,8 +47,11 @@ spec:
       labels:
         {{- include "apisix.selectorLabels" . | nindent 8 }}
         {{- if .Values.etcd.enabled }}
+        {{- $etcdClientLabel := include "apisix.etcd.clientLabel" .Subcharts.etcd }}
+        {{- if not (hasKey (.Values.podLabels | default dict) $etcdClientLabel) }}
         {{- /* lets the pods through the NetworkPolicy of the bundled etcd */}}
-        {{ include "apisix.etcd.clientLabel" .Subcharts.etcd }}: "true"
+        {{ $etcdClientLabel }}: "true"
+        {{- end }}
         {{- end }}
         {{- if .Values.podLabels }}
         {{- toYaml .Values.podLabels | nindent 8 }}

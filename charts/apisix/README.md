@@ -172,7 +172,14 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
   release (`etcd.networkPolicy.allowExternal: false`). During the upgrade, APISIX pods of the
   previous version cannot reach etcd until they are replaced, so Admin API requests can fail for a
   few seconds; the gateway keeps serving its routes. If other pods connect to etcd, for example a
-  data plane installed as another release, allow them as described in
+  data plane installed as another release, the apisix-dashboard chart, APISIX pods with
+  `hostNetwork: true`, or a pod that runs etcdctl, allow them as described in
+  [Access to the bundled etcd](#access-to-the-bundled-etcd). A DaemonSet with
+  `updateStrategy.type: OnDelete` keeps its old pods, which cannot reach etcd, until you delete them.
+* The chart now refuses to render `etcd.metrics.enabled` with the metrics on the client port, a
+  release name or `etcd.fullnameOverride` that makes the etcd client label longer than 63
+  characters, and `hostNetwork: true` without an `etcd.networkPolicy.extraIngress` rule, unless
+  `etcd.networkPolicy.allowExternal` is true. See
   [Access to the bundled etcd](#access-to-the-bundled-etcd).
 * With `etcd.auth.rbac.existingSecret`, APISIX now reads the root password from that Secret, as etcd
   does. Earlier versions read it from the Secret `<etcd fullname>`, which the etcd chart does not
@@ -193,6 +200,28 @@ To let another pod in the release's namespace connect, add the label to it, for 
 `etcd.networkPolicy.ingressNSMatchLabels` and `etcd.networkPolicy.ingressNSPodMatchLabels`. To
 accept connections from any pod, as before 3.0.0, set `etcd.networkPolicy.allowExternal: true`.
 
+Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy.extraIngress`:
+
+- The apisix-dashboard chart connects to etcd directly, and its pods have no configurable labels:
+
+  ```yaml
+  etcd:
+    networkPolicy:
+      extraIngress:
+        - ports:
+            - port: 2379
+          from:
+            - podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: apisix-dashboard
+  ```
+
+- With `hostNetwork: true`, most network plugins cannot select the APISIX pods by their labels:
+  etcd sees the addresses of the nodes, and accepts connections only from its own node. Admit the
+  node addresses with an `ipBlock` rule, or set `etcd.networkPolicy.allowExternal: true`; the chart
+  refuses to render `hostNetwork: true` with neither. For the same reason, the policy does not stop
+  processes in the host network of the nodes that run etcd.
+
 etcd does not require authentication by default (`etcd.auth.rbac.create: false`). With
 `etcd.auth.rbac.create: true`, APISIX connects as `root` with the root password from
 `etcd.auth.rbac.rootPassword` or `etcd.auth.rbac.existingSecret`; when both are empty, the etcd chart
@@ -204,7 +233,7 @@ To turn authentication on for an existing release, create the Secret with the pa
 upgrade:
 
 ```shell
-kubectl create secret generic apisix-etcd-auth \
+kubectl create secret generic apisix-etcd-auth --namespace <namespace> \
   --from-literal=etcd-root-password="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24)"
 ```
 
@@ -218,17 +247,28 @@ etcd:
 
 With `rootPassword` or a generated password instead, the upgrade of an existing release changes
 nothing and fails when `--timeout` expires: the etcd chart's pre-upgrade job waits for the password
-Secret, which only the upgrade itself would create. During the upgrade with `existingSecret`, the new
-APISIX pods restart until etcd requires the password, and Admin API requests can fail meanwhile (for
-about 20 seconds in a test on kind); the gateway keeps serving its routes.
+Secret, which only the upgrade itself would create.
+
+During the upgrade with `existingSecret`, the new APISIX pods restart until etcd requires the
+password. With the default three etcd replicas, etcd requires it only after `etcd-0`, the last pod of
+the rolling update, has restarted, and each etcd pod is ready no sooner than 60 seconds after it
+starts, so the upgrade takes several minutes. From the moment etcd requires the password until the
+new APISIX pods are ready, the APISIX pods of the previous revision cannot use etcd, and Admin API
+requests fail; the gateway keeps serving its routes. In a test on kind with three replicas, this
+lasted about 20 seconds, but it can be longer. Run this upgrade with `--timeout 10m`, and without
+`--atomic` or `--rollback-on-failure`: a rollback after etcd requires the password stops the gateway,
+as described below.
 
 Once etcd requires authentication, do not roll back to a revision without it. etcd keeps
 authentication on, so the APISIX pods of that revision, which connect without a password, cannot
 read their configuration, and the gateway stops routing requests. To turn authentication off again,
-first turn it off in etcd, then upgrade with `etcd.auth.rbac.create: false`:
+turn it off in etcd and delete the `root` user, then upgrade with `etcd.auth.rbac.create: false`.
+Without deleting the user, `etcd-0` fails to start when you turn authentication on again later.
 
 ```shell
-kubectl exec apisix-etcd-0 -- etcdctl --user "root:$ROOT_PASSWORD" auth disable
+ROOT_PASSWORD=$(kubectl get secret --namespace <namespace> apisix-etcd-auth -o jsonpath='{.data.etcd-root-password}' | base64 -d)
+kubectl exec --namespace <namespace> apisix-etcd-0 -- etcdctl --user "root:$ROOT_PASSWORD" auth disable
+kubectl exec --namespace <namespace> apisix-etcd-0 -- etcdctl user delete root
 ```
 
 If you turn on the metrics of the etcd chart, also set `etcd.metrics.useSeparateEndpoint: true`.

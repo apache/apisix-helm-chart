@@ -179,6 +179,9 @@ its NetworkPolicy cannot handle.
 {{- if and $etcd.metrics.enabled (not $etcd.metrics.useSeparateEndpoint) -}}
 {{- fail "etcd.metrics.enabled serves the metrics on the etcd client port, and the etcd chart then opens that port to every pod. Set etcd.metrics.useSeparateEndpoint: true to serve them on a port of their own, or etcd.networkPolicy.allowExternal: true" -}}
 {{- end -}}
+{{- if and .Values.hostNetwork (not $etcd.networkPolicy.extraIngress) -}}
+{{- fail "hostNetwork: true: most network plugins cannot select pods in the host network by their labels, so the NetworkPolicy of the bundled etcd would drop the connections of the APISIX pods. Admit the node addresses with an ipBlock rule in etcd.networkPolicy.extraIngress, or set etcd.networkPolicy.allowExternal: true" -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

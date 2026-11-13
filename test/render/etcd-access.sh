@@ -131,6 +131,10 @@ check "allowExternal: renders" render apisix --set etcd.networkPolicy.allowExter
 check "allowExternal: the client port accepts any pod" is "$(policy_from apisix-etcd)" null
 check "allowExternal: the label is still set" is "$(pod_label apisix-etcd-client)" true
 
+check "nameOverride: renders" render apisix --set etcd.nameOverride=kv
+check "nameOverride: the label follows the etcd name" is "$(pod_label apisix-kv-client)" true
+check "nameOverride: and so does the policy" is "$(policy_from apisix-kv | yq -p json '.[0].podSelector.matchLabels | keys | join(",")')" apisix-kv-client
+
 check "fullnameOverride: renders" render apisix --set etcd.fullnameOverride=kv
 check "fullnameOverride: the label follows the etcd name" is "$(pod_label kv-client)" true
 check "fullnameOverride: and so does the policy" is "$(policy_from kv | yq -p json '.[0].podSelector.matchLabels | keys | join(",")')" kv-client
@@ -142,11 +146,24 @@ check "release name with etcd in it: the label uses the etcd chart's name" is "$
 check "external etcd: renders" render apisix --set etcd.enabled=false --set 'externalEtcd.host[0]=http://etcd.example:2379'
 check "external etcd: no client label" is "$(pod_labels)" "app.kubernetes.io/name,app.kubernetes.io/instance"
 
+check "client label also in podLabels: renders" render apisix --set podLabels.apisix-etcd-client=true
+check "client label also in podLabels: it appears once" is \
+  "$(yq 'select(.kind == "Deployment") | .spec.template.metadata.labels' <<<"$OUT" | grep -c '^apisix-etcd-client:')" 1
+
+check "hostNetwork: fails, the policy cannot select pods in the host network" \
+  fails_with "hostNetwork: true: most network plugins cannot select pods in the host network" apisix --set hostNetwork=true
+check "hostNetwork with allowExternal: renders" render apisix --set hostNetwork=true --set etcd.networkPolicy.allowExternal=true
+check "hostNetwork with an extraIngress rule: renders" render apisix --set hostNetwork=true \
+  --set-json 'etcd.networkPolicy.extraIngress=[{"ports":[{"port":2379}],"from":[{"ipBlock":{"cidr":"10.0.0.0/8"}}]}]'
+check "hostNetwork with external etcd: renders" render apisix --set hostNetwork=true --set etcd.enabled=false \
+  --set 'externalEtcd.host[0]=http://etcd.example:2379'
+
 check "DaemonSet: renders" render apisix --set useDaemonSet=true
 check "DaemonSet: the pods carry the etcd client label" is "$(pod_label apisix-etcd-client)" true
 
 # --- the root password ---------------------------------------------------------------
 
+check "default again: renders" render apisix
 check "default: no etcd user for APISIX" is "$(etcd_config '.deployment.etcd | has("user")')" false
 check "default: no password variable" is "$(password_ref)" ""
 
