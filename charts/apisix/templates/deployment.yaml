@@ -227,6 +227,12 @@ spec:
             - mountPath: /etcd-ssl
               name: etcd-ssl
           {{- end }}
+          {{- if .Values.etcd.auth.tls.caSecret }}
+            - mountPath: /usr/local/apisix/conf/etcd-ssl/{{ .Values.etcd.auth.tls.caFilename }}
+              name: etcd-ca
+              subPath: {{ .Values.etcd.auth.tls.caFilename }}
+              readOnly: true
+          {{- end }}
           {{- if .Values.apisix.customPlugins.enabled }}
           {{- range $plugin := .Values.apisix.customPlugins.plugins }}
           {{- range $mount := $plugin.configMap.mounts }}
@@ -285,7 +291,7 @@ spec:
           name: apisix-admin
         {{- end }}
         - configMap:
-            name: {{ include "apisix.fullname" . }}
+            name: {{ .Values.apisix.fullCustomConfig.existingConfigMap | default (include "apisix.fullname" .) }}
           name: apisix-config
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
         - secret:
@@ -296,6 +302,11 @@ spec:
         - secret:
             secretName: {{ .Values.etcd.auth.tls.existingSecret | quote }}
           name: etcd-ssl
+        {{- end }}
+        {{- if .Values.etcd.auth.tls.caSecret }}
+        - secret:
+            secretName: {{ .Values.etcd.auth.tls.caSecret | quote }}
+          name: etcd-ca
         {{- end }}
 
         {{- if .Values.apisix.setIDFromPodUID }}
