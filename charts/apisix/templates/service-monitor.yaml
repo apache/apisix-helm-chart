@@ -1,3 +1,4 @@
+{{- define "apisix.service.monitor" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -14,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.metrics.serviceMonitor.enabled }}
+{{- if and .Values.metrics.serviceMonitor.enabled .Values.apisix.prometheus.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -41,4 +42,14 @@ spec:
     targetPort: prometheus
     path: {{ .Values.apisix.prometheus.path }}
     interval: {{ .Values.metrics.serviceMonitor.interval }}
+{{- end }}
+
+{{- end }}
+
+{{- if eq .Values.apisix.deployment.mode "decoupled" }}
+{{- if .Values.apisix.deployment.dataPlane.enabled }}
+{{ include "apisix.service.monitor" (merge (dict "componentRole" "data_plane" "componentName" "data-plane") .) }}
+{{- end }}
+{{- else }}
+{{ include "apisix.service.monitor" . }}
 {{- end }}
