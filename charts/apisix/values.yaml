@@ -46,7 +46,12 @@ podLabels: {}
 podSecurityContext: {}
   # fsGroup: 2000
 # -- Number of seconds Kubernetes waits for Apache APISIX to terminate gracefully
-terminationGracePeriodSeconds: 30
+terminationGracePeriodSeconds: 300
+
+# -- Graceful shutdown settings. The grace period must exceed the APISIX worker shutdown timeout.
+gracefulShutdown:
+  enabled: true
+  preStopSeconds: 10
 # -- Set the securityContext for Apache APISIX container
 securityContext: {}
   # capabilities:
@@ -63,7 +68,7 @@ lifecycle:
       command:
         - /bin/sh
         - -c
-        - "sleep 30"
+        - "sleep {{ .Values.gracefulShutdown.preStopSeconds }}"
 
 # -- See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details
 podDisruptionBudget:
@@ -837,6 +842,8 @@ apisix:
               path: "mount-path"
 
   status:
+    # -- Enable the APISIX status endpoint used by Kubernetes probes
+    enabled: true
     # -- The IP address on which the status endpoint (`/status`, `/status/ready`) listens
     ip: "0.0.0.0"
     # -- The port on which the status endpoint listens
