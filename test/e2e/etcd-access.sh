@@ -200,7 +200,7 @@ check "connected to the Admin API" connect
 check "APISIX writes to etcd before the upgrade" writes before-upgrade
 check "before the upgrade, a pod without the client label can reach etcd" reaches_etcd outsider
 check "upgrade with --reuse-values is refused, it would keep etcd open" \
-  upgrade_fails_with "etcd.preUpgradeJob.podLabels is empty" --reuse-values
+  upgrade_fails_with "etcd.preUpgradeJob.podLabels lacks the client label" --reuse-values
 check "upgrade with --reset-then-reuse-values succeeds" upgrade --reset-then-reuse-values
 check "connected to the Admin API" connect
 check "APISIX writes to etcd after the upgrade" writes after-upgrade

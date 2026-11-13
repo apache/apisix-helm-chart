@@ -97,6 +97,14 @@ fails_with() { # fails_with <message part> <release> [helm args...]
   grep -qF -- "$text" <<<"$ERR" || { echo "       error was: $ERR" >&2; return 1; }
 }
 etcd_config() { yq 'select(.kind == "ConfigMap" and .data["config.yaml"] != null) | .data["config.yaml"]' <<<"$OUT" | yq "$1"; }
+with_values() { # with_values <yq expression> <command...>: run the command on a copy of the chart whose values.yaml is edited
+  local expr=$1 dir rc saved=$CHART; shift
+  dir=$(mktemp -d)
+  cp -R "$CHART" "$dir/apisix" && yq -i "$expr" "$dir/apisix/values.yaml" || { rm -rf "$dir"; return 1; }
+  CHART="$dir/apisix"; "$@"; rc=$?; CHART=$saved
+  rm -rf "$dir"
+  return $rc
+}
 secret_exists() { [ -n "$(yq "select(.kind == \"Secret\" and .metadata.name == \"$1\") | .metadata.name" <<<"$OUT")" ]; }
 no_secret() { ! secret_exists "$1"; }
 
@@ -136,14 +144,17 @@ check "a client label of exactly 63 characters: the APISIX pods carry it" \
 check "a client label of exactly 63 characters: and the policy uses it" is \
   "$(policy_from "$EDGE_RELEASE-etcd" | yq -p json '.[0].podSelector.matchLabels | keys | join(",")')" "$EDGE_RELEASE-etcd-client"
 
-# helm upgrade --reuse-values from chart 2.x renders with the old defaults, in
-# which the pre-upgrade job has no labels and etcd.networkPolicy.allowExternal is true
-check "pre-upgrade job without labels: fails" fails_with "etcd.preUpgradeJob.podLabels is empty" \
-  apisix --set etcd.preUpgradeJob.podLabels=null
-check "pre-upgrade job without labels, with allowExternal: fails too" fails_with "etcd.preUpgradeJob.podLabels is empty" \
-  apisix --set etcd.preUpgradeJob.podLabels=null --set etcd.networkPolicy.allowExternal=true
-check "pre-upgrade job without labels, but turned off: renders" render apisix --set etcd.preUpgradeJob.podLabels=null \
-  --set etcd.preUpgradeJob.enabled=false
+# helm upgrade --reuse-values renders with the default values of the chart version
+# it upgrades from. Those of chart 2.x set no etcd.networkPolicy, so the etcd chart's
+# allowExternal: true applies, and give the pre-upgrade job no client label.
+OLD_VALUES_ERROR="etcd.preUpgradeJob.podLabels lacks the client label"
+check "values of chart 2.x, as --reuse-values renders them: fails" with_values \
+  'del(.etcd.networkPolicy) | del(.etcd.preUpgradeJob)' fails_with "$OLD_VALUES_ERROR" apisix
+check "values of chart 2.x with labels of their own on the pre-upgrade job: fails too" with_values \
+  'del(.etcd.networkPolicy) | .etcd.preUpgradeJob.podLabels = {"team": "gateway"}' fails_with "$OLD_VALUES_ERROR" apisix
+check "pre-upgrade job without labels: fails" fails_with "$OLD_VALUES_ERROR" apisix --set etcd.preUpgradeJob.podLabels=null
+check "pre-upgrade job without labels, NetworkPolicy turned off: renders" render apisix \
+  --set etcd.preUpgradeJob.podLabels=null --set etcd.networkPolicy.enabled=false
 check "pre-upgrade job with labels of its own: renders" render apisix --set etcd.preUpgradeJob.podLabels.team=gateway
 check "pre-upgrade job with labels of its own: the client label is kept" \
   is "$(job_label apisix-etcd-pre-upgrade apisix-etcd-client)" true
@@ -194,6 +205,9 @@ check "hostNetwork with the dashboard rule and an ipBlock rule: renders" render 
   --set-json 'etcd.networkPolicy.extraIngress=[{"ports":[{"port":2379}],"from":[{"podSelector":{"matchLabels":{"app.kubernetes.io/name":"apisix-dashboard"}}}]},{"ports":[{"port":2379}],"from":[{"ipBlock":{"cidr":"10.0.1.17/32"}}]}]'
 check "hostNetwork with a rule for every source: renders" render apisix --set hostNetwork=true \
   --set-json 'etcd.networkPolicy.extraIngress=[{"ports":[{"port":2379}]}]'
+check "hostNetwork with rules written as a templated string: fails, the chart cannot check them" \
+  fails_with "hostNetwork: true: most network plugins cannot select pods in the host network" apisix --set hostNetwork=true \
+  --set-string 'etcd.networkPolicy.extraIngress=- from: [{podSelector: {}}]'
 check "hostNetwork with external etcd: renders" render apisix --set hostNetwork=true --set etcd.enabled=false \
   --set 'externalEtcd.host[0]=http://etcd.example:2379'
 

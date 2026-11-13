@@ -181,7 +181,8 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
 * Don't upgrade with `--reuse-values`, or with `spec.upgrade.preserveValues: true` in Flux: they
   render with the default values of the chart version you upgrade from, in which etcd accepts every
   pod, so the chart refuses to render. Use `--reset-then-reuse-values` (Helm 3.14 or later), or pass
-  your values again; `helm get values <release> -o yaml` prints the ones you set.
+  your values again; `helm get values <release> --namespace <namespace> -o yaml` prints the ones you
+  set.
 * The chart now refuses to render `etcd.metrics.enabled` with the metrics on the client port, a
   release name, `etcd.nameOverride` or `etcd.fullnameOverride` that makes the etcd client label
   longer than 63 characters, and `hostNetwork: true` without an `etcd.networkPolicy.extraIngress`
@@ -253,10 +254,10 @@ Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy
   for example, pods get addresses from the VPC): the rule would admit those pods as well. Some
   network plugins do not match node addresses with `ipBlock` rules, for example Cilium in its
   default configuration; use `allowExternal: true` there, and consider etcd authentication,
-  described below. The chart refuses to render `hostNetwork: true` unless an `extraIngress` rule has
-  an `ipBlock` or admits every source, or `allowExternal` is true, but it cannot check which
-  addresses a rule admits. The policy also does not stop processes in the host network of the nodes
-  that run etcd.
+  described below. The chart refuses to render `hostNetwork: true` unless `allowExternal` is true or
+  `extraIngress` is a list with a rule that has an `ipBlock` or admits every source; it cannot check
+  which addresses a rule admits. The policy also does not stop processes in the host network of the
+  nodes that run etcd.
 
 etcd does not require authentication by default (`etcd.auth.rbac.create: false`). With
 `etcd.auth.rbac.create: true`, APISIX connects as `root` with the root password from

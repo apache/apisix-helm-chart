@@ -928,7 +928,9 @@ etcd:
     allowExternal: false
 
   # The jobs of the etcd chart connect to etcd too, so they carry the client label.
-  # The etcd chart renders templates in these labels, keys included.
+  # The etcd chart renders templates in these labels, keys included. The chart
+  # refuses to render when etcd.preUpgradeJob.podLabels lacks the key below, as
+  # values from chart 2.x do under helm upgrade --reuse-values.
   preUpgradeJob:
     # -- Labels of the pods of the etcd chart's pre-upgrade job
     podLabels:

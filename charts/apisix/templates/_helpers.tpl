@@ -171,11 +171,14 @@ its NetworkPolicy cannot handle.
 {{- define "apisix.etcd.validate" -}}
 {{- if .Values.etcd.enabled -}}
 {{- $etcd := .Subcharts.etcd.Values -}}
-{{- /* this chart's values give the pre-upgrade job the client label. They are
-     missing when helm upgrade --reuse-values renders with the values of a
-     chart version before 3.0.0, whose defaults also leave etcd open */}}
-{{- if and $etcd.networkPolicy.enabled $etcd.preUpgradeJob.enabled (empty (get $etcd.preUpgradeJob "podLabels")) -}}
-{{- fail (printf "etcd.preUpgradeJob.podLabels is empty, so the pre-upgrade job of the bundled etcd would lack the label %s that this chart sets there. That happens with helm upgrade --reuse-values from a chart version before 3.0.0: Helm then renders with the default values of that version, which include etcd.networkPolicy.allowExternal: true and so leave etcd open to every pod. Upgrade with --reset-then-reuse-values (Helm 3.14 or later), or pass your values again with -f" (include "apisix.etcd.clientLabel" .Subcharts.etcd)) -}}
+{{- /* helm upgrade --reuse-values from a chart version before 3.0.0 renders
+     with the default values of that version, which leave etcd open to every
+     pod. Those values lack the key of the client label that values.yaml sets
+     in etcd.preUpgradeJob.podLabels, so look for that key as it is written
+     there, before the etcd chart renders it */}}
+{{- $clientLabelKey := "{{ include \"apisix.etcd.clientLabel\" . }}" -}}
+{{- if and $etcd.networkPolicy.enabled (not (hasKey (get $etcd.preUpgradeJob "podLabels" | default dict) $clientLabelKey)) -}}
+{{- fail (printf "etcd.preUpgradeJob.podLabels lacks the client label %s that this chart's values set there, so the values of this release probably come from an earlier chart version. helm upgrade --reuse-values (or spec.upgrade.preserveValues in Flux) does that: Helm then renders with the default values of the chart version you upgrade from, which before 3.0.0 include etcd.networkPolicy.allowExternal: true and so leave etcd open to every pod. Upgrade with --reset-then-reuse-values (Helm 3.14 or later), or pass your values again with -f" (include "apisix.etcd.clientLabel" .Subcharts.etcd)) -}}
 {{- end -}}
 {{- if and $etcd.networkPolicy.enabled (not $etcd.networkPolicy.allowExternal) -}}
 {{- $label := printf "%s-client" (include "common.names.fullname" .Subcharts.etcd) -}}
@@ -187,9 +190,9 @@ its NetworkPolicy cannot handle.
 {{- end -}}
 {{- if .Values.hostNetwork -}}
 {{- /* only an ipBlock peer, or a rule without "from", can admit the addresses
-     of the nodes; a templated string cannot be inspected and is accepted */}}
+     of the nodes; rules written as a templated string cannot be checked */}}
 {{- $extraIngress := $etcd.networkPolicy.extraIngress -}}
-{{- $admitsNodes := and (kindIs "string" $extraIngress) (not (empty $extraIngress)) -}}
+{{- $admitsNodes := false -}}
 {{- if kindIs "slice" $extraIngress -}}
 {{- range $rule := $extraIngress -}}
 {{- if empty (get $rule "from") -}}{{- $admitsNodes = true -}}{{- end -}}
@@ -199,7 +202,7 @@ its NetworkPolicy cannot handle.
 {{- end -}}
 {{- end -}}
 {{- if not $admitsNodes -}}
-{{- fail "hostNetwork: true: most network plugins cannot select pods in the host network by their labels, so the NetworkPolicy of the bundled etcd would drop the connections of the APISIX pods. Add a rule to etcd.networkPolicy.extraIngress with an ipBlock for the addresses the nodes connect from, or set etcd.networkPolicy.allowExternal: true; on Cilium, which by default does not match nodes with ipBlock rules, use allowExternal. See \"Access to the bundled etcd\" in the README" -}}
+{{- fail "hostNetwork: true: most network plugins cannot select pods in the host network by their labels, so the NetworkPolicy of the bundled etcd would drop the connections of the APISIX pods. Add a rule to etcd.networkPolicy.extraIngress, written as a list, with an ipBlock for the addresses the nodes connect from, or set etcd.networkPolicy.allowExternal: true; on Cilium, which by default does not match nodes with ipBlock rules, use allowExternal. See \"Access to the bundled etcd\" in the README" -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
