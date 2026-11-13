@@ -16,7 +16,6 @@
 
 {{- include "apisix.admin.credentials.validate" . }}
 {{- include "apisix.ingressController.validate" . }}
-{{- include "apisix.etcd.validate" . }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

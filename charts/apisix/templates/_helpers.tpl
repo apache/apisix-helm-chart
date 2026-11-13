@@ -173,12 +173,13 @@ its NetworkPolicy cannot handle.
 {{- $etcd := .Subcharts.etcd.Values -}}
 {{- /* helm upgrade --reuse-values from a chart version before 3.0.0 renders
      with the default values of that version, which leave etcd open to every
-     pod. Those values lack the key of the client label that values.yaml sets
-     in etcd.preUpgradeJob.podLabels, so look for that key as it is written
-     there, before the etcd chart renders it */}}
+     pod; before 2.12 they even turn the NetworkPolicy off, so this check does
+     not depend on it. Those values lack the entry that values.yaml sets in
+     etcd.preUpgradeJob.podLabels, so look for its key as it is written there,
+     before the etcd chart renders it */}}
 {{- $clientLabelKey := "{{ include \"apisix.etcd.clientLabel\" . }}" -}}
-{{- if and $etcd.networkPolicy.enabled (not (hasKey (get $etcd.preUpgradeJob "podLabels" | default dict) $clientLabelKey)) -}}
-{{- fail (printf "etcd.preUpgradeJob.podLabels lacks the client label %s that this chart's values set there, so the values of this release probably come from an earlier chart version. helm upgrade --reuse-values (or spec.upgrade.preserveValues in Flux) does that: Helm then renders with the default values of the chart version you upgrade from, which before 3.0.0 include etcd.networkPolicy.allowExternal: true and so leave etcd open to every pod. Upgrade with --reset-then-reuse-values (Helm 3.14 or later), or pass your values again with -f" (include "apisix.etcd.clientLabel" .Subcharts.etcd)) -}}
+{{- if not (hasKey (get $etcd.preUpgradeJob "podLabels" | default dict) $clientLabelKey) -}}
+{{- fail (printf "etcd.preUpgradeJob.podLabels lacks the entry that this chart's values.yaml sets there for the label %s, so the values of this release probably come from an earlier chart version. helm upgrade --reuse-values does that, and so does spec.upgrade.preserveValues: true in Flux: Helm then renders with the default values of the chart version you upgrade from, which before 3.0.0 leave etcd open to every pod. Upgrade with --reset-then-reuse-values (Helm 3.14 or later) or pass your values again with -f; in Flux, set spec.upgrade.preserveValues: false" (include "apisix.etcd.clientLabel" .Subcharts.etcd)) -}}
 {{- end -}}
 {{- if and $etcd.networkPolicy.enabled (not $etcd.networkPolicy.allowExternal) -}}
 {{- $label := printf "%s-client" (include "common.names.fullname" .Subcharts.etcd) -}}

@@ -146,15 +146,21 @@ check "a client label of exactly 63 characters: and the policy uses it" is \
 
 # helm upgrade --reuse-values renders with the default values of the chart version
 # it upgrades from. Those of chart 2.x set no etcd.networkPolicy, so the etcd chart's
-# allowExternal: true applies, and give the pre-upgrade job no client label.
-OLD_VALUES_ERROR="etcd.preUpgradeJob.podLabels lacks the client label"
+# allowExternal: true applies (before 2.12, its networkPolicy.enabled: false), and
+# give the pre-upgrade job no client label.
+OLD_VALUES_ERROR="etcd.preUpgradeJob.podLabels lacks the entry"
 check "values of chart 2.x, as --reuse-values renders them: fails" with_values \
   'del(.etcd.networkPolicy) | del(.etcd.preUpgradeJob)' fails_with "$OLD_VALUES_ERROR" apisix
 check "values of chart 2.x with labels of their own on the pre-upgrade job: fails too" with_values \
   'del(.etcd.networkPolicy) | .etcd.preUpgradeJob.podLabels = {"team": "gateway"}' fails_with "$OLD_VALUES_ERROR" apisix
+check "values of chart 2.x with the pre-upgrade job turned off: fails too" with_values \
+  'del(.etcd.networkPolicy) | .etcd.preUpgradeJob = {"enabled": false}' fails_with "$OLD_VALUES_ERROR" apisix
+check "values of chart 2.x before 2.12, with the NetworkPolicy turned off: fails too" with_values \
+  'del(.etcd.preUpgradeJob) | .etcd.networkPolicy = {"enabled": false}' fails_with "$OLD_VALUES_ERROR" apisix
+check "values of chart 2.x before 2.16: the check runs before the templates that need newer values" \
+  fails_with "$OLD_VALUES_ERROR" apisix --set etcd.preUpgradeJob.podLabels=null --set apisix.proxyProtocol=null
 check "pre-upgrade job without labels: fails" fails_with "$OLD_VALUES_ERROR" apisix --set etcd.preUpgradeJob.podLabels=null
-check "pre-upgrade job without labels, NetworkPolicy turned off: renders" render apisix \
-  --set etcd.preUpgradeJob.podLabels=null --set etcd.networkPolicy.enabled=false
+check "pre-upgrade job turned off: renders" render apisix --set etcd.preUpgradeJob.enabled=false
 check "pre-upgrade job with labels of its own: renders" render apisix --set etcd.preUpgradeJob.podLabels.team=gateway
 check "pre-upgrade job with labels of its own: the client label is kept" \
   is "$(job_label apisix-etcd-pre-upgrade apisix-etcd-client)" true

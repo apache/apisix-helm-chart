@@ -152,7 +152,9 @@ check "then a pod without the label can reach etcd" wait_for 60 reaches_etcd out
 check "upgrade back to the default succeeds" upgrade
 
 echo "# turn on etcd authentication for the existing release"
-kubectl --namespace "$NS" create secret generic apisix-etcd-auth --from-literal=etcd-root-password="$ROOT_PASSWORD" >/dev/null
+# as the README does it: the password goes through standard input, not the command line
+printf '%s' "$ROOT_PASSWORD" |
+  kubectl --namespace "$NS" create secret generic apisix-etcd-auth --from-file=etcd-root-password=/dev/stdin >/dev/null
 check "upgrade with RBAC and the root password in an existing Secret succeeds" \
   upgrade --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
 check "connected to the Admin API" connect
@@ -168,7 +170,7 @@ echo "# turn etcd authentication off again, as the README describes"
 # the password is read in the etcd pod, so it is not in the exec request
 auth_disable() {
   kubectl --namespace "$NS" exec apisix-etcd-0 -- \
-    sh -c 'ETCDCTL_PASSWORD="$(cat "$ETCD_ROOT_PASSWORD_FILE")" etcdctl --user root auth disable' >/dev/null
+    sh -c 'ETCDCTL_PASSWORD="${ETCD_ROOT_PASSWORD:-$(cat "$ETCD_ROOT_PASSWORD_FILE")}" etcdctl --user root auth disable' >/dev/null
 }
 delete_root() { kubectl --namespace "$NS" exec apisix-etcd-0 -- etcdctl user delete root >/dev/null; }
 check "authentication is turned off in etcd" auth_disable
@@ -200,7 +202,7 @@ check "connected to the Admin API" connect
 check "APISIX writes to etcd before the upgrade" writes before-upgrade
 check "before the upgrade, a pod without the client label can reach etcd" reaches_etcd outsider
 check "upgrade with --reuse-values is refused, it would keep etcd open" \
-  upgrade_fails_with "etcd.preUpgradeJob.podLabels lacks the client label" --reuse-values
+  upgrade_fails_with "etcd.preUpgradeJob.podLabels lacks the entry" --reuse-values
 check "upgrade with --reset-then-reuse-values succeeds" upgrade --reset-then-reuse-values
 check "connected to the Admin API" connect
 check "APISIX writes to etcd after the upgrade" writes after-upgrade

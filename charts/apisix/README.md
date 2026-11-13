@@ -11,7 +11,7 @@ This chart bootstraps all the components needed to run Apache APISIX on a Kubern
 ## Prerequisites
 
 * Kubernetes v1.14+
-* Helm v3.7+
+* Helm v3.8+
 
 ## Install
 
@@ -107,7 +107,7 @@ Flux runs `helm install` and `helm upgrade`, so generated keys are kept as with 
 Previews that cannot read the cluster (`helm upgrade --dry-run=client`, `helm diff upgrade` on
 Helm 3, `helmfile diff`) show a newly generated key for the Secret, but the actual upgrade keeps the
 stored one. Such previews also cannot show an `ADMIN KEY ERROR` that the real upgrade would raise. To preview against the cluster, use `helm upgrade --dry-run=server --hide-secret`
-(without `--hide-secret` the output contains the keys); with helmfile, pass
+(Helm 3.15 or later; without `--hide-secret` the output contains the keys); with helmfile, pass
 `--template-args="--dry-run=server"`.
 
 ### Rotating keys
@@ -180,9 +180,10 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
   `updateStrategy.type: OnDelete` keeps its old pods, which cannot reach etcd, until you delete them.
 * Don't upgrade with `--reuse-values`, or with `spec.upgrade.preserveValues: true` in Flux: they
   render with the default values of the chart version you upgrade from, in which etcd accepts every
-  pod, so the chart refuses to render. Use `--reset-then-reuse-values` (Helm 3.14 or later), or pass
-  your values again; `helm get values <release> --namespace <namespace> -o yaml` prints the ones you
-  set.
+  pod, so the chart refuses to render (from 2.0 to 2.7, the etcd chart's image check fails first).
+  Use `--reset-then-reuse-values` (Helm 3.14 or later), or pass your values again;
+  `helm get values <release> --namespace <namespace> -o yaml` prints the ones you set. In Flux, set
+  `spec.upgrade.preserveValues: false`.
 * The chart now refuses to render `etcd.metrics.enabled` with the metrics on the client port, a
   release name, `etcd.nameOverride` or `etcd.fullnameOverride` that makes the etcd client label
   longer than 63 characters, and `hostNetwork: true` without an `etcd.networkPolicy.extraIngress`
@@ -231,8 +232,8 @@ Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy
   ```
 
 - With `hostNetwork: true`, most network plugins cannot select the APISIX pods by their labels:
-  etcd sees the addresses of the nodes, and accepts connections only from its own node. Admit the
-  nodes that run APISIX with an `ipBlock` rule for the addresses they connect from, or set
+  etcd sees the addresses that the nodes connect from, and accepts connections only from its own
+  node. Admit the nodes that run APISIX with an `ipBlock` rule for those addresses, or set
   `etcd.networkPolicy.allowExternal: true`:
 
   ```yaml
@@ -243,21 +244,28 @@ Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy
             - port: 2379
           from:
             - ipBlock:
-                cidr: 10.0.1.17/32  # one entry for each node address
+                cidr: 10.0.1.17/32  # one entry for each address that a node connects from
             - ipBlock:
                 cidr: 10.0.1.18/32
   ```
 
+  Without encapsulation, a node connects from its own address. With encapsulation, it connects to
+  pods on other nodes from the address of its tunnel device, which the network plugin takes from the
+  pod address range: with Calico in IPIP or VXLAN mode, the address in the node annotation
+  `projectcalico.org/IPv4IPIPTunnelAddr` or `projectcalico.org/IPv4VXLANTunnelAddr`; with Flannel in
+  VXLAN mode (also used by Canal, k3s and RKE2), the first address of the node's `spec.podCIDR`,
+  such as `10.42.1.0` for `10.42.1.0/24`. List those addresses as well. Some network plugins do not
+  match node addresses with `ipBlock` rules at all, for example Cilium in its default configuration;
+  use `allowExternal: true` there, and consider etcd authentication, described below.
+
   Such a rule admits everything that connects from those addresses: every process and every
   `hostNetwork` pod on those nodes, in any namespace. Update it when nodes are added or replaced. A
-  range is easier to keep, but don't use one that also holds pod addresses (with the Amazon VPC CNI,
-  for example, pods get addresses from the VPC): the rule would admit those pods as well. Some
-  network plugins do not match node addresses with `ipBlock` rules, for example Cilium in its
-  default configuration; use `allowExternal: true` there, and consider etcd authentication,
-  described below. The chart refuses to render `hostNetwork: true` unless `allowExternal` is true or
-  `extraIngress` is a list with a rule that has an `ipBlock` or admits every source; it cannot check
-  which addresses a rule admits. The policy also does not stop processes in the host network of the
-  nodes that run etcd.
+  range is easier to keep, but don't use one that also holds addresses of pods (with the Amazon VPC
+  CNI, for example, pods get addresses from the VPC): the rule would admit those pods as well. The
+  chart refuses to render `hostNetwork: true` unless `allowExternal` is true or `extraIngress` is a
+  list with a rule that has an `ipBlock` or admits every source; it cannot check which addresses and
+  ports a rule admits. The policy also does not stop processes in the host network of the nodes that
+  run etcd.
 
 etcd does not require authentication by default (`etcd.auth.rbac.create: false`). With
 `etcd.auth.rbac.create: true`, APISIX connects as `root` with the root password from
@@ -270,8 +278,9 @@ To turn authentication on for an existing release, create the Secret with the pa
 upgrade:
 
 ```shell
-kubectl create secret generic apisix-etcd-auth --namespace <namespace> \
-  --from-literal=etcd-root-password="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24)"
+LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24 |
+  kubectl create secret generic apisix-etcd-auth --namespace <namespace> \
+    --from-file=etcd-root-password=/dev/stdin
 ```
 
 ```yaml
@@ -306,7 +315,7 @@ Without deleting the user, `etcd-0` fails to start when you turn authentication 
 
 ```shell
 kubectl exec --namespace <namespace> apisix-etcd-0 -- \
-  sh -c 'ETCDCTL_PASSWORD="$(cat "$ETCD_ROOT_PASSWORD_FILE")" etcdctl --user root auth disable'
+  sh -c 'ETCDCTL_PASSWORD="${ETCD_ROOT_PASSWORD:-$(cat "$ETCD_ROOT_PASSWORD_FILE")}" etcdctl --user root auth disable'
 kubectl exec --namespace <namespace> apisix-etcd-0 -- etcdctl user delete root
 ```
 
