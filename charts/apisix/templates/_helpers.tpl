@@ -17,9 +17,11 @@ If release name contains chart name it will be used as a full name.
 {{- else }}
 {{- $name := default .Chart.Name .Values.nameOverride }}
 {{- if contains $name .Release.Name }}
-{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- $base := .Release.Name }}
+{{- if .componentName }}{{ printf "%s-%s" $base .componentName | trunc 63 | trimSuffix "-" }}{{ else }}{{ $base | trunc 63 | trimSuffix "-" }}{{ end }}
 {{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- $base := printf "%s-%s" .Release.Name $name }}
+{{- if .componentName }}{{ printf "%s-%s" $base .componentName | trunc 63 | trimSuffix "-" }}{{ else }}{{ $base | trunc 63 | trimSuffix "-" }}{{ end }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -47,11 +49,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "apisix.selectorLabels" -}}
-{{- if .Values.service.labelsOverride }}
-{{- tpl (.Values.service.labelsOverride | toYaml) . }}
-{{- else }}
 app.kubernetes.io/name: {{ include "apisix.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if .componentName }}
+app.kubernetes.io/component: {{ .componentName }}
+{{- end }}
+{{- with .Values.service.labelsOverride }}
+{{- tpl (. | toYaml) $ }}
 {{- end }}
 {{- end }}
 
@@ -66,6 +70,13 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
+
+{{/* Return the replica count for the selected component. */}}
+{{- define "apisix.replicaCount" -}}
+{{- if eq .componentName "control-plane" -}}{{ .Values.apisix.deployment.controlPlane.replicaCount }}
+{{- else if eq .componentName "data-plane" -}}{{ .Values.apisix.deployment.dataPlane.replicaCount }}
+{{- else -}}{{ .Values.replicaCount }}{{- end -}}
+{{- end -}}
 {{/*
 Renders a value that contains template.
 Usage:
@@ -185,7 +196,7 @@ yaml provider (API-driven standalone) is kept as configured; a control plane
 needs etcd and cannot run standalone.
 */}}
 {{- define "apisix.deployment.role" -}}
-{{- $role := .Values.apisix.deployment.role -}}
+{{- $role := default .Values.apisix.deployment.role .componentRole -}}
 {{- if eq .Values.apisix.deployment.mode "standalone" -}}
 {{- if eq $role "control_plane" -}}
 {{- fail "apisix.deployment.mode \"standalone\" cannot run with apisix.deployment.role \"control_plane\": a control plane needs etcd" -}}

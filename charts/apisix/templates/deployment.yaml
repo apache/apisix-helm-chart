@@ -1,3 +1,4 @@
+{{- define "apisix.deployment" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -22,7 +23,7 @@ metadata:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
 {{- if and (not .Values.useDaemonSet) (not .Values.autoscaling.enabled) }}
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ include "apisix.replicaCount" . }}
 {{- end }}
   selector:
     matchLabels:
@@ -37,7 +38,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ include "apisix.configmap" . | sha256sum }}
         {{- if and (eq .Values.apisix.deployment.mode "standalone") (not .Values.apisix.deployment.standalone.existingConfigMap) }}
         checksum/standalone-config: {{ include (print $.Template.BasePath "/apisix-config-cm.yaml") . | sha256sum }}
         {{- end }}
@@ -328,3 +329,16 @@ spec:
       topologySpreadConstraints:
         {{- tpl (. | toYaml) $ | nindent 8 }}
       {{- end }}
+
+{{- end }}
+
+{{- if eq .Values.apisix.deployment.mode "decoupled" }}
+{{- if .Values.apisix.deployment.controlPlane.enabled }}
+{{ include "apisix.deployment" (merge (dict "componentRole" "control_plane" "componentName" "control-plane") .) }}
+{{- end }}
+{{- if .Values.apisix.deployment.dataPlane.enabled }}
+{{ include "apisix.deployment" (merge (dict "componentRole" "data_plane" "componentName" "data-plane") .) }}
+{{- end }}
+{{- else }}
+{{ include "apisix.deployment" . }}
+{{- end }}
