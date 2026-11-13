@@ -1,3 +1,4 @@
+{{- define "apisix.service.gateway" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -124,3 +125,13 @@ spec:
   {{- end }}
   selector:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
+
+{{- end }}
+
+{{- if eq .Values.apisix.deployment.mode "decoupled" }}
+{{- if .Values.apisix.deployment.dataPlane.enabled }}
+{{ include "apisix.service.gateway" (merge (dict "componentRole" "data_plane" "componentName" "data-plane") .) }}
+{{- end }}
+{{- else }}
+{{ include "apisix.service.gateway" . }}
+{{- end }}

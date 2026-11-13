@@ -1,3 +1,4 @@
+{{- define "apisix.configmap" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -59,8 +60,8 @@ data:
       extra_lua_path: {{ .Values.apisix.customPlugins.luaPath }};{{ .Values.apisix.luaModuleHook.luaPath }}
       {{- end }}
 
-      enable_control: {{ .Values.control.enabled }}
-      {{- if .Values.control.enabled }}
+      enable_control: {{ or (and (eq .Values.apisix.deployment.mode "decoupled") (eq (include "apisix.deployment.role" $) "control_plane")) (and (ne .Values.apisix.deployment.mode "decoupled") .Values.control.enabled) }}
+      {{- if or (and (eq .Values.apisix.deployment.mode "decoupled") (eq (include "apisix.deployment.role" $) "control_plane")) (and (ne .Values.apisix.deployment.mode "decoupled") .Values.control.enabled) }}
       control:
         ip: {{ default "127.0.0.1" .Values.control.service.ip | quote }}
         port: {{ default 9090 .Values.control.service.port }}
@@ -452,3 +453,16 @@ data:
       {{- end }}
       {{- end }}
      
+
+{{- end }}
+
+{{- if eq .Values.apisix.deployment.mode "decoupled" }}
+{{- if .Values.apisix.deployment.controlPlane.enabled }}
+{{ include "apisix.configmap" (merge (dict "componentRole" "control_plane" "componentName" "control-plane") .) }}
+{{- end }}
+{{- if .Values.apisix.deployment.dataPlane.enabled }}
+{{ include "apisix.configmap" (merge (dict "componentRole" "data_plane" "componentName" "data-plane") .) }}
+{{- end }}
+{{- else }}
+{{ include "apisix.configmap" . }}
+{{- end }}
