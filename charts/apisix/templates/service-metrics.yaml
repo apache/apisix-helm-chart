@@ -1,3 +1,4 @@
+{{- define "apisix.service.metrics" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -31,4 +32,14 @@ spec:
     protocol: TCP
   selector:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
+{{- end }}
+
+{{- end }}
+
+{{- if eq .Values.apisix.deployment.mode "decoupled" }}
+{{- if .Values.apisix.deployment.dataPlane.enabled }}
+{{ include "apisix.service.metrics" (merge (dict "componentRole" "data_plane" "componentName" "data-plane") .) }}
+{{- end }}
+{{- else }}
+{{ include "apisix.service.metrics" . }}
 {{- end }}

@@ -488,7 +488,7 @@ apisix:
     # role_traditional.config_provider to yaml.
     #
     # ref: https://apisix.apache.org/docs/apisix/deployment-modes/
-    mode: traditional
+    mode: decoupled
 
     # -- Deployment role
     # Optional: traditional, data_plane, control_plane
@@ -498,6 +498,16 @@ apisix:
     role_traditional:
       # -- Config provider for the traditional role. enum: etcd, yaml
       config_provider: "etcd"
+
+    # -- Deploy the APISIX control plane component when mode is decoupled.
+    controlPlane:
+      enabled: true
+      replicaCount: 1
+
+    # -- Deploy the APISIX data plane component when mode is decoupled.
+    dataPlane:
+      enabled: true
+      replicaCount: 2
 
     # -- Standalone rules configuration
     #

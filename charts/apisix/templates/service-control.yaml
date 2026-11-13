@@ -1,3 +1,4 @@
+{{- define "apisix.service.control" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -56,3 +57,13 @@ spec:
   selector:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
 {{ end }}
+
+{{- end }}
+
+{{- if eq .Values.apisix.deployment.mode "decoupled" }}
+{{- if .Values.apisix.deployment.controlPlane.enabled }}
+{{ include "apisix.service.control" (merge (dict "componentRole" "control_plane" "componentName" "control-plane") .) }}
+{{- end }}
+{{- else }}
+{{ include "apisix.service.control" . }}
+{{- end }}
