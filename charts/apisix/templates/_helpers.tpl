@@ -145,11 +145,11 @@ Return the name of etcd password secret
 */}}
 {{- define "apisix.etcd.secretName" -}}
 {{- if and .Values.etcd.enabled .Values.etcd.auth.rbac.create }}
-{{- template "common.names.fullname" .Subcharts.etcd }}
+{{- if .Values.etcd.fullnameOverride }}{{ .Values.etcd.fullnameOverride }}{{ else }}{{ printf "%s-etcd" .Release.Name }}{{ end }}
 {{- else if .Values.externalEtcd.existingSecret }}
 {{- print .Values.externalEtcd.existingSecret }}
 {{- else if .Values.externalEtcd.user }}
-{{- printf "etcd-%s" (include "apisix.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- printf "etcd-%s-apisix" .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end -}}
 
