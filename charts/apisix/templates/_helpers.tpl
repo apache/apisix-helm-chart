@@ -171,16 +171,36 @@ its NetworkPolicy cannot handle.
 {{- define "apisix.etcd.validate" -}}
 {{- if .Values.etcd.enabled -}}
 {{- $etcd := .Subcharts.etcd.Values -}}
+{{- /* this chart's values give the pre-upgrade job the client label. They are
+     missing when helm upgrade --reuse-values renders with the values of a
+     chart version before 3.0.0, whose defaults also leave etcd open */}}
+{{- if and $etcd.networkPolicy.enabled $etcd.preUpgradeJob.enabled (empty (get $etcd.preUpgradeJob "podLabels")) -}}
+{{- fail (printf "etcd.preUpgradeJob.podLabels is empty, so the pre-upgrade job of the bundled etcd would lack the label %s that this chart sets there. That happens with helm upgrade --reuse-values from a chart version before 3.0.0: Helm then renders with the default values of that version, which include etcd.networkPolicy.allowExternal: true and so leave etcd open to every pod. Upgrade with --reset-then-reuse-values (Helm 3.14 or later), or pass your values again with -f" (include "apisix.etcd.clientLabel" .Subcharts.etcd)) -}}
+{{- end -}}
 {{- if and $etcd.networkPolicy.enabled (not $etcd.networkPolicy.allowExternal) -}}
 {{- $label := printf "%s-client" (include "common.names.fullname" .Subcharts.etcd) -}}
 {{- if gt (len $label) 63 -}}
-{{- fail (printf "The NetworkPolicy of the bundled etcd admits pods labelled %s, but a label key has at most 63 characters. For a new release, use a shorter release name, etcd.nameOverride or etcd.fullnameOverride; otherwise set etcd.networkPolicy.allowExternal: true" $label) -}}
+{{- fail (printf "The NetworkPolicy of the bundled etcd admits pods labelled %s, but a label key has at most 63 characters. For a new release, use a shorter release name or etcd.fullnameOverride (APISIX does not find etcd under an etcd.nameOverride); otherwise set etcd.networkPolicy.allowExternal: true" $label) -}}
 {{- end -}}
 {{- if and $etcd.metrics.enabled (not $etcd.metrics.useSeparateEndpoint) -}}
 {{- fail "etcd.metrics.enabled serves the metrics on the etcd client port, and the etcd chart then opens that port to every pod. Set etcd.metrics.useSeparateEndpoint: true to serve them on a port of their own, or etcd.networkPolicy.allowExternal: true" -}}
 {{- end -}}
-{{- if and .Values.hostNetwork (not $etcd.networkPolicy.extraIngress) -}}
-{{- fail "hostNetwork: true: most network plugins cannot select pods in the host network by their labels, so the NetworkPolicy of the bundled etcd would drop the connections of the APISIX pods. Admit the node addresses with an ipBlock rule in etcd.networkPolicy.extraIngress, or set etcd.networkPolicy.allowExternal: true" -}}
+{{- if .Values.hostNetwork -}}
+{{- /* only an ipBlock peer, or a rule without "from", can admit the addresses
+     of the nodes; a templated string cannot be inspected and is accepted */}}
+{{- $extraIngress := $etcd.networkPolicy.extraIngress -}}
+{{- $admitsNodes := and (kindIs "string" $extraIngress) (not (empty $extraIngress)) -}}
+{{- if kindIs "slice" $extraIngress -}}
+{{- range $rule := $extraIngress -}}
+{{- if empty (get $rule "from") -}}{{- $admitsNodes = true -}}{{- end -}}
+{{- range $peer := get $rule "from" | default list -}}
+{{- if hasKey $peer "ipBlock" -}}{{- $admitsNodes = true -}}{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if not $admitsNodes -}}
+{{- fail "hostNetwork: true: most network plugins cannot select pods in the host network by their labels, so the NetworkPolicy of the bundled etcd would drop the connections of the APISIX pods. Add a rule to etcd.networkPolicy.extraIngress with an ipBlock for the addresses the nodes connect from, or set etcd.networkPolicy.allowExternal: true; on Cilium, which by default does not match nodes with ipBlock rules, use allowExternal. See \"Access to the bundled etcd\" in the README" -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

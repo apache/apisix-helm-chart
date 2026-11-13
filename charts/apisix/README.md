@@ -11,7 +11,7 @@ This chart bootstraps all the components needed to run Apache APISIX on a Kubern
 ## Prerequisites
 
 * Kubernetes v1.14+
-* Helm v3+
+* Helm v3.7+
 
 ## Install
 
@@ -170,17 +170,23 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
   only when they are missing or belong to this release, and kept on uninstall.
 * The bundled etcd accepts client connections only from its own pods and the APISIX pods of this
   release (`etcd.networkPolicy.allowExternal: false`). During the upgrade, APISIX pods of the
-  previous version cannot reach etcd until they are replaced, so Admin API requests can fail for a
-  few seconds; the gateway keeps serving its routes. If other pods connect to etcd, for example a
-  data plane installed as another release, the apisix-dashboard chart, APISIX pods with
-  `hostNetwork: true`, or a pod that runs etcdctl, allow them as described in
+  previous version cannot reach etcd until they are replaced: Admin API requests that reach them
+  fail, and they receive no configuration changes, but they keep serving the routes they have. With
+  one replica this lasts a few seconds; with several replicas or a DaemonSet, it lasts until the
+  rollout has replaced every old pod. If other pods connect to etcd, for example a data plane
+  installed as another release, the apisix-dashboard chart, APISIX pods with `hostNetwork: true`,
+  or a pod that runs etcdctl, allow them as described in
   [Access to the bundled etcd](#access-to-the-bundled-etcd). A DaemonSet with
   `updateStrategy.type: OnDelete` keeps its old pods, which cannot reach etcd, until you delete them.
+* Don't upgrade with `--reuse-values`, or with `spec.upgrade.preserveValues: true` in Flux: they
+  render with the default values of the chart version you upgrade from, in which etcd accepts every
+  pod, so the chart refuses to render. Use `--reset-then-reuse-values` (Helm 3.14 or later), or pass
+  your values again; `helm get values <release> -o yaml` prints the ones you set.
 * The chart now refuses to render `etcd.metrics.enabled` with the metrics on the client port, a
   release name, `etcd.nameOverride` or `etcd.fullnameOverride` that makes the etcd client label
-  longer than 63 characters, and `hostNetwork: true` without an `etcd.networkPolicy.extraIngress` rule, unless
-  `etcd.networkPolicy.allowExternal` is true. See
-  [Access to the bundled etcd](#access-to-the-bundled-etcd).
+  longer than 63 characters, and `hostNetwork: true` without an `etcd.networkPolicy.extraIngress`
+  rule that can admit the addresses of the nodes, unless `etcd.networkPolicy.allowExternal` is
+  true. See [Access to the bundled etcd](#access-to-the-bundled-etcd).
 * With `etcd.auth.rbac.existingSecret`, APISIX now reads the root password from that Secret, as etcd
   does. Earlier versions read it from the Secret `<etcd fullname>`, which the etcd chart does not
   create in that case.
@@ -195,10 +201,14 @@ the chart adds to the APISIX pods and to the pre-upgrade, snapshot and defragmen
 etcd chart. For a release named `apisix`, the label is `apisix-etcd-client: "true"`. This needs a
 network plugin that enforces NetworkPolicies.
 
-To let another pod in the release's namespace connect, add the label to it, for example with
-`podLabels` for a data plane installed as another release. For pods in other namespaces, set
-`etcd.networkPolicy.ingressNSMatchLabels` and `etcd.networkPolicy.ingressNSPodMatchLabels`. To
-accept connections from any pod, as before 3.0.0, set `etcd.networkPolicy.allowExternal: true`.
+To let another pod in the release's namespace connect, add the label to it before you upgrade this
+release, for example with `podLabels` for a data plane installed as another release. Set the label
+as the string `"true"`, in a values file or with `--set-string`: `--set` makes it a boolean, which
+Kubernetes rejects. For pods in other namespaces, set both `etcd.networkPolicy.ingressNSMatchLabels`
+and `etcd.networkPolicy.ingressNSPodMatchLabels`: the first alone admits every pod in those
+namespaces, and the second has no effect without the first. Clients outside the cluster need an
+`etcd.networkPolicy.extraIngress` rule. To accept connections from any pod, as before 3.0.0, set
+`etcd.networkPolicy.allowExternal: true`.
 
 Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy.extraIngress`:
 
@@ -221,9 +231,32 @@ Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy
 
 - With `hostNetwork: true`, most network plugins cannot select the APISIX pods by their labels:
   etcd sees the addresses of the nodes, and accepts connections only from its own node. Admit the
-  node addresses with an `ipBlock` rule, or set `etcd.networkPolicy.allowExternal: true`; the chart
-  refuses to render `hostNetwork: true` with neither. For the same reason, the policy does not stop
-  processes in the host network of the nodes that run etcd.
+  nodes that run APISIX with an `ipBlock` rule for the addresses they connect from, or set
+  `etcd.networkPolicy.allowExternal: true`:
+
+  ```yaml
+  etcd:
+    networkPolicy:
+      extraIngress:
+        - ports:
+            - port: 2379
+          from:
+            - ipBlock:
+                cidr: 10.0.1.17/32  # one entry for each node address
+            - ipBlock:
+                cidr: 10.0.1.18/32
+  ```
+
+  Such a rule admits everything that connects from those addresses: every process and every
+  `hostNetwork` pod on those nodes, in any namespace. Update it when nodes are added or replaced. A
+  range is easier to keep, but don't use one that also holds pod addresses (with the Amazon VPC CNI,
+  for example, pods get addresses from the VPC): the rule would admit those pods as well. Some
+  network plugins do not match node addresses with `ipBlock` rules, for example Cilium in its
+  default configuration; use `allowExternal: true` there, and consider etcd authentication,
+  described below. The chart refuses to render `hostNetwork: true` unless an `extraIngress` rule has
+  an `ipBlock` or admits every source, or `allowExternal` is true, but it cannot check which
+  addresses a rule admits. The policy also does not stop processes in the host network of the nodes
+  that run etcd.
 
 etcd does not require authentication by default (`etcd.auth.rbac.create: false`). With
 `etcd.auth.rbac.create: true`, APISIX connects as `root` with the root password from
@@ -248,9 +281,11 @@ etcd:
       existingSecret: apisix-etcd-auth
 ```
 
-With `rootPassword` or a generated password instead, the upgrade of an existing release changes
-nothing and fails when `--timeout` expires: the etcd chart's pre-upgrade job waits for the password
-Secret, which only the upgrade itself would create.
+With `rootPassword` instead, the upgrade of an existing release changes nothing and fails when
+`--timeout` expires: the etcd chart's pre-upgrade job waits for the password Secret, which only the
+upgrade itself would create. With neither `rootPassword` nor `existingSecret`, the etcd chart
+refuses the upgrade at once with `PASSWORDS ERROR`; don't follow its hint to set
+`auth.rbac.rootPassword`, create the Secret as shown above.
 
 During the upgrade with `existingSecret`, the new APISIX pods restart until etcd requires the
 password. With the default three etcd replicas, etcd requires it only after `etcd-0`, the last pod of
@@ -269,10 +304,15 @@ turn it off in etcd and delete the `root` user, then upgrade with `etcd.auth.rba
 Without deleting the user, `etcd-0` fails to start when you turn authentication on again later.
 
 ```shell
-ROOT_PASSWORD=$(kubectl get secret --namespace <namespace> apisix-etcd-auth -o jsonpath='{.data.etcd-root-password}' | base64 -d)
-kubectl exec --namespace <namespace> apisix-etcd-0 -- etcdctl --user "root:$ROOT_PASSWORD" auth disable
+kubectl exec --namespace <namespace> apisix-etcd-0 -- \
+  sh -c 'ETCDCTL_PASSWORD="$(cat "$ETCD_ROOT_PASSWORD_FILE")" etcdctl --user root auth disable'
 kubectl exec --namespace <namespace> apisix-etcd-0 -- etcdctl user delete root
 ```
+
+The first command reads the password in the etcd pod, so it does not appear in the command line or
+in the audit log of the Kubernetes API server. Run the upgrade right after these commands: until it
+has replaced the APISIX pods, they keep logging in with the password, which etcd refuses while
+authentication is off, so Admin API requests fail.
 
 If you turn on the metrics of the etcd chart, also set `etcd.metrics.useSeparateEndpoint: true`.
 Otherwise etcd serves the metrics on its client port, and the etcd chart opens that port to every

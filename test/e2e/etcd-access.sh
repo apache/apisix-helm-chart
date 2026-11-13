@@ -127,6 +127,13 @@ refuses_anonymous() { # etcdctl without credentials fails with etcd's own error,
 }
 
 upgrade() { $HELM upgrade apisix "$CHART" --namespace "$NS" "${COMMON[@]}" "$@" >/dev/null; }
+upgrade_fails_with() { # upgrade_fails_with <message part> [helm args...]: the upgrade fails with that message
+  local text=$1 out; shift
+  if out=$($HELM upgrade apisix "$CHART" --namespace "$NS" "${COMMON[@]}" "$@" 2>&1); then
+    echo "       the upgrade succeeded" >&2; return 1
+  fi
+  grep -qF -- "$text" <<<"$out" || { echo "       error was: $(tail -1 <<<"$out")" >&2; return 1; }
+}
 namespace_gone() { ! kubectl get namespace "$NS" >/dev/null 2>&1; }
 
 echo "# the bundled etcd accepts only the APISIX pods"
@@ -158,7 +165,11 @@ check "connected to the Admin API" connect
 check "APISIX still writes to etcd" writes third
 
 echo "# turn etcd authentication off again, as the README describes"
-auth_disable() { kubectl --namespace "$NS" exec apisix-etcd-0 -- etcdctl --user "root:$ROOT_PASSWORD" auth disable >/dev/null; }
+# the password is read in the etcd pod, so it is not in the exec request
+auth_disable() {
+  kubectl --namespace "$NS" exec apisix-etcd-0 -- \
+    sh -c 'ETCDCTL_PASSWORD="$(cat "$ETCD_ROOT_PASSWORD_FILE")" etcdctl --user root auth disable' >/dev/null
+}
 delete_root() { kubectl --namespace "$NS" exec apisix-etcd-0 -- etcdctl user delete root >/dev/null; }
 check "authentication is turned off in etcd" auth_disable
 check "the root user is deleted" delete_root
@@ -188,7 +199,9 @@ check "chart $OLD_CHART_VERSION installs with the bundled etcd" is $? 0
 check "connected to the Admin API" connect
 check "APISIX writes to etcd before the upgrade" writes before-upgrade
 check "before the upgrade, a pod without the client label can reach etcd" reaches_etcd outsider
-check "upgrade to this chart succeeds" upgrade "${OLD_KEYS[@]}"
+check "upgrade with --reuse-values is refused, it would keep etcd open" \
+  upgrade_fails_with "etcd.preUpgradeJob.podLabels is empty" --reuse-values
+check "upgrade with --reset-then-reuse-values succeeds" upgrade --reset-then-reuse-values
 check "connected to the Admin API" connect
 check "APISIX writes to etcd after the upgrade" writes after-upgrade
 check "after the upgrade, a pod with the client label can reach etcd" reaches_etcd labelled apisix-etcd-client=true

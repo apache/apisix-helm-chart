@@ -57,15 +57,17 @@ render() { # render <release> [helm args...]; sets OUT and ERR, returns helm's e
 }
 
 is() { [ "$1" = "$2" ] || { echo "       expected '$2', got '$1'" >&2; return 1; }; }
-pod_label() { # pod_label <label>: the label's value on the APISIX pods
-  yq "select(.kind == \"Deployment\" or .kind == \"DaemonSet\") | .spec.template.metadata.labels[\"$1\"]" <<<"$OUT"
+# Kubernetes accepts only strings as label values, and yq prints the boolean
+# true like the string "true", so the label helpers print only strings
+pod_label() { # pod_label <label>: the label's value on the APISIX pods, if it is a string
+  yq "select(.kind == \"Deployment\" or .kind == \"DaemonSet\") | .spec.template.metadata.labels[\"$1\"] | select(type == \"!!str\")" <<<"$OUT"
 }
 pod_labels() { yq 'select(.kind == "Deployment" or .kind == "DaemonSet") | .spec.template.metadata.labels | keys | join(",")' <<<"$OUT"; }
 pod_label_type() { # pod_label_type <label>: the YAML type of the label's value on the APISIX pods
   yq "select(.kind == \"Deployment\" or .kind == \"DaemonSet\") | .spec.template.metadata.labels[\"$1\"] | type" <<<"$OUT"
 }
-job_label() { # job_label <Job or CronJob name> <label>: the label's value on the job's pods
-  yq "select(.metadata.name == \"$1\") | (.spec.template.metadata.labels // .spec.jobTemplate.spec.template.metadata.labels)[\"$2\"]" <<<"$OUT"
+job_label() { # job_label <Job or CronJob name> <label>: the label's value on the job's pods, if it is a string
+  yq "select(.metadata.name == \"$1\") | (.spec.template.metadata.labels // .spec.jobTemplate.spec.template.metadata.labels)[\"$2\"] | select(type == \"!!str\")" <<<"$OUT"
 }
 policy_from() { # the "from" rules of the client port of the etcd NetworkPolicy, as JSON
   yq -o json -I0 "select(.kind == \"NetworkPolicy\" and .metadata.name == \"$1\") | .spec.ingress[0].from" <<<"$OUT"
@@ -122,11 +124,29 @@ check "a long release name: fails, the client label would be too long" fails_wit
   "$LONG_RELEASE"
 check "a long etcd.fullnameOverride: fails as well" fails_with "but a label key has at most 63 characters" \
   apisix --set etcd.fullnameOverride="etcd-$(printf '%052d' 0 | tr 0 b)"
-check "a long etcd.nameOverride: fails, and the message names it" \
-  fails_with "use a shorter release name, etcd.nameOverride or etcd.fullnameOverride" \
+check "a long etcd.nameOverride: fails, and the message does not suggest one" \
+  fails_with "use a shorter release name or etcd.fullnameOverride (APISIX does not find etcd under an etcd.nameOverride)" \
   apisix --set etcd.nameOverride="etcd-$(printf '%052d' 0 | tr 0 c)"
 check "a long release name with allowExternal: renders" render "$LONG_RELEASE" --set etcd.networkPolicy.allowExternal=true
 check "a long release name with allowExternal: every label key is valid" bash -c '[ "$1" -le 63 ]' _ "$(longest_label)"
+EDGE_RELEASE=apisix-$(printf '%044d' 0 | tr 0 a)   # 51 characters: the client label has exactly 63
+check "a client label of exactly 63 characters: renders" render "$EDGE_RELEASE"
+check "a client label of exactly 63 characters: the APISIX pods carry it" \
+  is "$(pod_label "$EDGE_RELEASE-etcd-client")" true
+check "a client label of exactly 63 characters: and the policy uses it" is \
+  "$(policy_from "$EDGE_RELEASE-etcd" | yq -p json '.[0].podSelector.matchLabels | keys | join(",")')" "$EDGE_RELEASE-etcd-client"
+
+# helm upgrade --reuse-values from chart 2.x renders with the old defaults, in
+# which the pre-upgrade job has no labels and etcd.networkPolicy.allowExternal is true
+check "pre-upgrade job without labels: fails" fails_with "etcd.preUpgradeJob.podLabels is empty" \
+  apisix --set etcd.preUpgradeJob.podLabels=null
+check "pre-upgrade job without labels, with allowExternal: fails too" fails_with "etcd.preUpgradeJob.podLabels is empty" \
+  apisix --set etcd.preUpgradeJob.podLabels=null --set etcd.networkPolicy.allowExternal=true
+check "pre-upgrade job without labels, but turned off: renders" render apisix --set etcd.preUpgradeJob.podLabels=null \
+  --set etcd.preUpgradeJob.enabled=false
+check "pre-upgrade job with labels of its own: renders" render apisix --set etcd.preUpgradeJob.podLabels.team=gateway
+check "pre-upgrade job with labels of its own: the client label is kept" \
+  is "$(job_label apisix-etcd-pre-upgrade apisix-etcd-client)" true
 
 check "etcd jobs: renders" render apisix --set etcd.disasterRecovery.enabled=true \
   --set etcd.disasterRecovery.pvc.existingClaim=snapshots --set etcd.defrag.enabled=true
@@ -165,8 +185,15 @@ check "client label set to false in podLabels: the chart's value stays" is "$(po
 check "hostNetwork: fails, the policy cannot select pods in the host network" \
   fails_with "hostNetwork: true: most network plugins cannot select pods in the host network" apisix --set hostNetwork=true
 check "hostNetwork with allowExternal: renders" render apisix --set hostNetwork=true --set etcd.networkPolicy.allowExternal=true
-check "hostNetwork with an extraIngress rule: renders" render apisix --set hostNetwork=true \
+check "hostNetwork with an ipBlock rule: renders" render apisix --set hostNetwork=true \
   --set-json 'etcd.networkPolicy.extraIngress=[{"ports":[{"port":2379}],"from":[{"ipBlock":{"cidr":"10.0.0.0/8"}}]}]'
+check "hostNetwork with only a podSelector rule, as for the dashboard: fails" \
+  fails_with "hostNetwork: true: most network plugins cannot select pods in the host network" apisix --set hostNetwork=true \
+  --set-json 'etcd.networkPolicy.extraIngress=[{"ports":[{"port":2379}],"from":[{"podSelector":{"matchLabels":{"app.kubernetes.io/name":"apisix-dashboard"}}}]}]'
+check "hostNetwork with the dashboard rule and an ipBlock rule: renders" render apisix --set hostNetwork=true \
+  --set-json 'etcd.networkPolicy.extraIngress=[{"ports":[{"port":2379}],"from":[{"podSelector":{"matchLabels":{"app.kubernetes.io/name":"apisix-dashboard"}}}]},{"ports":[{"port":2379}],"from":[{"ipBlock":{"cidr":"10.0.1.17/32"}}]}]'
+check "hostNetwork with a rule for every source: renders" render apisix --set hostNetwork=true \
+  --set-json 'etcd.networkPolicy.extraIngress=[{"ports":[{"port":2379}]}]'
 check "hostNetwork with external etcd: renders" render apisix --set hostNetwork=true --set etcd.enabled=false \
   --set 'externalEtcd.host[0]=http://etcd.example:2379'
 
