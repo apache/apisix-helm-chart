@@ -174,7 +174,7 @@ its NetworkPolicy cannot handle.
 {{- if and $etcd.networkPolicy.enabled (not $etcd.networkPolicy.allowExternal) -}}
 {{- $label := printf "%s-client" (include "common.names.fullname" .Subcharts.etcd) -}}
 {{- if gt (len $label) 63 -}}
-{{- fail (printf "The NetworkPolicy of the bundled etcd admits pods labelled %s, but a label key has at most 63 characters. Use a shorter release name or etcd.fullnameOverride for a new release, or set etcd.networkPolicy.allowExternal: true" $label) -}}
+{{- fail (printf "The NetworkPolicy of the bundled etcd admits pods labelled %s, but a label key has at most 63 characters. For a new release, use a shorter release name, etcd.nameOverride or etcd.fullnameOverride; otherwise set etcd.networkPolicy.allowExternal: true" $label) -}}
 {{- end -}}
 {{- if and $etcd.metrics.enabled (not $etcd.metrics.useSeparateEndpoint) -}}
 {{- fail "etcd.metrics.enabled serves the metrics on the etcd client port, and the etcd chart then opens that port to every pod. Set etcd.metrics.useSeparateEndpoint: true to serve them on a port of their own, or etcd.networkPolicy.allowExternal: true" -}}

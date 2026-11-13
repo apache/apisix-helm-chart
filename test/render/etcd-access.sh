@@ -61,6 +61,9 @@ pod_label() { # pod_label <label>: the label's value on the APISIX pods
   yq "select(.kind == \"Deployment\" or .kind == \"DaemonSet\") | .spec.template.metadata.labels[\"$1\"]" <<<"$OUT"
 }
 pod_labels() { yq 'select(.kind == "Deployment" or .kind == "DaemonSet") | .spec.template.metadata.labels | keys | join(",")' <<<"$OUT"; }
+pod_label_type() { # pod_label_type <label>: the YAML type of the label's value on the APISIX pods
+  yq "select(.kind == \"Deployment\" or .kind == \"DaemonSet\") | .spec.template.metadata.labels[\"$1\"] | type" <<<"$OUT"
+}
 job_label() { # job_label <Job or CronJob name> <label>: the label's value on the job's pods
   yq "select(.metadata.name == \"$1\") | (.spec.template.metadata.labels // .spec.jobTemplate.spec.template.metadata.labels)[\"$2\"]" <<<"$OUT"
 }
@@ -119,6 +122,9 @@ check "a long release name: fails, the client label would be too long" fails_wit
   "$LONG_RELEASE"
 check "a long etcd.fullnameOverride: fails as well" fails_with "but a label key has at most 63 characters" \
   apisix --set etcd.fullnameOverride="etcd-$(printf '%052d' 0 | tr 0 b)"
+check "a long etcd.nameOverride: fails, and the message names it" \
+  fails_with "use a shorter release name, etcd.nameOverride or etcd.fullnameOverride" \
+  apisix --set etcd.nameOverride="etcd-$(printf '%052d' 0 | tr 0 c)"
 check "a long release name with allowExternal: renders" render "$LONG_RELEASE" --set etcd.networkPolicy.allowExternal=true
 check "a long release name with allowExternal: every label key is valid" bash -c '[ "$1" -le 63 ]' _ "$(longest_label)"
 
@@ -146,9 +152,15 @@ check "release name with etcd in it: the label uses the etcd chart's name" is "$
 check "external etcd: renders" render apisix --set etcd.enabled=false --set 'externalEtcd.host[0]=http://etcd.example:2379'
 check "external etcd: no client label" is "$(pod_labels)" "app.kubernetes.io/name,app.kubernetes.io/instance"
 
-check "client label also in podLabels: renders" render apisix --set podLabels.apisix-etcd-client=true
+check "client label also in podLabels: renders" render apisix --set podLabels.apisix-etcd-client=true \
+  --set podLabels.team=gateway
 check "client label also in podLabels: it appears once" is \
   "$(yq 'select(.kind == "Deployment") | .spec.template.metadata.labels' <<<"$OUT" | grep -c '^apisix-etcd-client:')" 1
+check "client label also in podLabels: its value is the string the policy expects" \
+  is "$(pod_label_type apisix-etcd-client)" '!!str'
+check "client label also in podLabels: the other labels are kept" is "$(pod_label team)" gateway
+check "client label set to false in podLabels: renders" render apisix --set-string podLabels.apisix-etcd-client=false
+check "client label set to false in podLabels: the chart's value stays" is "$(pod_label apisix-etcd-client)" true
 
 check "hostNetwork: fails, the policy cannot select pods in the host network" \
   fails_with "hostNetwork: true: most network plugins cannot select pods in the host network" apisix --set hostNetwork=true

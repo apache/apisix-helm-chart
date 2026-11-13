@@ -177,8 +177,8 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
   [Access to the bundled etcd](#access-to-the-bundled-etcd). A DaemonSet with
   `updateStrategy.type: OnDelete` keeps its old pods, which cannot reach etcd, until you delete them.
 * The chart now refuses to render `etcd.metrics.enabled` with the metrics on the client port, a
-  release name or `etcd.fullnameOverride` that makes the etcd client label longer than 63
-  characters, and `hostNetwork: true` without an `etcd.networkPolicy.extraIngress` rule, unless
+  release name, `etcd.nameOverride` or `etcd.fullnameOverride` that makes the etcd client label
+  longer than 63 characters, and `hostNetwork: true` without an `etcd.networkPolicy.extraIngress` rule, unless
   `etcd.networkPolicy.allowExternal` is true. See
   [Access to the bundled etcd](#access-to-the-bundled-etcd).
 * With `etcd.auth.rbac.existingSecret`, APISIX now reads the root password from that Secret, as etcd
@@ -202,7 +202,10 @@ accept connections from any pod, as before 3.0.0, set `etcd.networkPolicy.allowE
 
 Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy.extraIngress`:
 
-- The apisix-dashboard chart connects to etcd directly, and its pods have no configurable labels:
+- The apisix-dashboard chart connects to etcd directly. Its pod labels are also the selector of its
+  Deployment (`labelsOverride` replaces both), which cannot change on an existing release, so admit
+  its pods by their default label instead; adjust `matchLabels` if you set `nameOverride` or
+  `labelsOverride` there:
 
   ```yaml
   etcd:
@@ -274,8 +277,8 @@ kubectl exec --namespace <namespace> apisix-etcd-0 -- etcdctl user delete root
 If you turn on the metrics of the etcd chart, also set `etcd.metrics.useSeparateEndpoint: true`.
 Otherwise etcd serves the metrics on its client port, and the etcd chart opens that port to every
 pod; the chart refuses to render that combination unless `etcd.networkPolicy.allowExternal` is
-true. It also refuses to render when the release name or `etcd.fullnameOverride` is so long that the
-client label has more than the 63 characters that Kubernetes allows.
+true. It also refuses to render when the release name, `etcd.nameOverride` or `etcd.fullnameOverride` is
+so long that the client label has more than the 63 characters that Kubernetes allows.
 
 ## Configure the wait-etcd init container
 

@@ -46,15 +46,16 @@ spec:
         {{- end }}
       labels:
         {{- include "apisix.selectorLabels" . | nindent 8 }}
+        {{- $podLabels := .Values.podLabels | default dict }}
         {{- if .Values.etcd.enabled }}
         {{- $etcdClientLabel := include "apisix.etcd.clientLabel" .Subcharts.etcd }}
-        {{- if not (hasKey (.Values.podLabels | default dict) $etcdClientLabel) }}
-        {{- /* lets the pods through the NetworkPolicy of the bundled etcd */}}
+        {{- /* lets the pods through the NetworkPolicy of the bundled etcd; a value
+             in podLabels, for example a boolean from --set, does not replace it */}}
         {{ $etcdClientLabel }}: "true"
+        {{- $podLabels = omit $podLabels $etcdClientLabel }}
         {{- end }}
-        {{- end }}
-        {{- if .Values.podLabels }}
-        {{- toYaml .Values.podLabels | nindent 8 }}
+        {{- with $podLabels }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
