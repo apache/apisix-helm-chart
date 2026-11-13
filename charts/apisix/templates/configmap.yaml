@@ -102,6 +102,9 @@ data:
       # which is used under Tomcat.
       # Turn this option on if you want to be compatible with servlet when matching URI path.
       normalize_uri_like_servlet: {{ .Values.apisix.normalizeURILikeServlet }}
+      {{- if not (kindIs "invalid" .Values.apisix.maxRequestHeadersReadable) }}
+      max_request_headers_readable: {{ .Values.apisix.maxRequestHeadersReadable }}  # max request headers plugins can read, 0 disables the limit
+      {{- end }}
 
       # fine tune the parameters of LRU cache for some features like secret
       lru:
