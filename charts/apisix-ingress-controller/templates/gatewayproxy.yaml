@@ -29,11 +29,11 @@ spec:
         {{- toYaml .Values.gatewayProxy.provider.controlPlane.endpoints | nindent 8 }}
       {{- else if .Values.gatewayProxy.provider.controlPlane.service.name }}
       service:
-        name: {{ .Values.gatewayProxy.provider.controlPlane.service.name }}
+        name: {{ .Values.gatewayProxy.provider.controlPlane.service.name | default (printf "%s-apisix-control-plane-admin" .Release.Name) }}
         port: {{ .Values.gatewayProxy.provider.controlPlane.service.port }}
       {{- else }}
       service:
-        name: {{ .Values.apisix.adminService.name }}
+        name: {{ .Values.apisix.adminService.name | default (printf "%s-apisix-control-plane-admin" .Release.Name) }}
         port: {{ .Values.apisix.adminService.port }}
       {{- end }}
 
@@ -46,9 +46,11 @@ spec:
         type: {{ .type }}
         {{- with .adminKey }}
         adminKey:
-          {{- if .valueFrom }}
+          {{- if .valueFrom.secretKeyRef }}
           valueFrom:
-            {{- toYaml .valueFrom | nindent 12 }}
+            secretKeyRef:
+              name: {{ .valueFrom.secretKeyRef.name | default (printf "%s-apisix-control-plane-admin-credentials" $.Release.Name) }}
+              key: {{ .valueFrom.secretKeyRef.key | default "admin" }}
           {{- else if .value }}
           value: {{ .value | quote }}
           {{- end }}

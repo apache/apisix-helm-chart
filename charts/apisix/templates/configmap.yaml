@@ -53,7 +53,7 @@ data:
         {{- end }}
       {{- end }}
       enable_heartbeat: true
-      enable_admin: {{ .Values.apisix.admin.enabled }}
+      enable_admin: {{ and .Values.apisix.admin.enabled (ne (include "apisix.deployment.role" $) "data_plane") }}
       enable_admin_cors: {{ .Values.apisix.admin.cors }}
       enable_debug: false
       {{- if or .Values.apisix.customPlugins.enabled .Values.apisix.luaModuleHook.enabled }}
@@ -398,7 +398,7 @@ data:
         admin_key:
           # admin: can everything for configuration data
           - name: "admin"
-            {{- if .Values.apisix.admin.credentials.secretName }}
+            {{- if .Values.apisix.admin.enabled }}
             key: ${{"{{"}}APISIX_ADMIN_KEY{{"}}"}}
             {{- else }}
             key: {{ .Values.apisix.admin.credentials.admin }}
@@ -406,7 +406,7 @@ data:
             role: admin
           # viewer: only can view configuration data
           - name: "viewer"
-            {{- if .Values.apisix.admin.credentials.secretName }}
+            {{- if .Values.apisix.admin.enabled }}
             key: ${{"{{"}}APISIX_VIEWER_KEY{{"}}"}}
             {{- else }}
             key: {{ .Values.apisix.admin.credentials.viewer }}

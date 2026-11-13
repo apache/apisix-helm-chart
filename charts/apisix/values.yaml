@@ -577,8 +577,10 @@ apisix:
       # so that the bundled ingress controller can reach the Admin API.
       # Narrow it to the ingress controller Pod CIDR, or set it to [] to append nothing.
       ingressControllerExtraIpList:
-        - 0.0.0.0/0
-        - "::/0"
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - fc00::/7
     # -- Using ingress access Apache APISIX admin service
     ingress:
       # -- Enable an Ingress resource in front of the Admin API service
@@ -947,7 +949,25 @@ etcd:
 # -- Ingress controller configuration
 ingress-controller:
   # -- Enable the apisix-ingress-controller sub-chart
-  enabled: false
+  enabled: true
+  gatewayProxy:
+    createDefault: true
+    provider:
+      controlPlane:
+        service:
+          name: ""
+        auth:
+          adminKey:
+            value: ""
+            valueFrom:
+              secretKeyRef:
+                name: ""
+                key: admin
+  apisix:
+    adminService:
+      namespace: ""
+      name: ""
+      port: 9180
   webhook:
     # Specifies whether to enable the validation webhook.
     # Note: This feature relies on the '/apisix/admin/configs/validate' endpoint.
