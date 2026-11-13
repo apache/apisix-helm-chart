@@ -87,7 +87,7 @@ jobs:
           rm -f ./helm-docs
 
   admin-credentials:
-    name: Admin API credentials (Helm ${{ matrix.helm }})
+    name: Admin API credentials and etcd access (Helm ${{ matrix.helm }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -122,6 +122,9 @@ jobs:
       - name: Render tests
         run: test/render/admin-credentials.sh
 
+      - name: Render tests (etcd access)
+        run: test/render/etcd-access.sh
+
       - name: Create Kubernetes cluster
         uses: ./.github/actions/setup-kind
         with:
@@ -130,3 +133,6 @@ jobs:
 
       - name: End-to-end tests
         run: test/e2e/admin-credentials.sh
+
+      - name: End-to-end tests (etcd access)
+        run: test/e2e/etcd-access.sh

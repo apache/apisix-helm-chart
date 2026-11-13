@@ -168,6 +168,57 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
 * The bundled apisix-ingress-controller chart moves from 1.3.0 to 1.5.0. Its Gateway API CRDs are
   no longer installed from `crds/`: they are rendered as templates (`ingress-controller.crds.gatewayAPI.enabled`),
   only when they are missing or belong to this release, and kept on uninstall.
+* The bundled etcd accepts client connections only from its own pods and the APISIX pods of this
+  release (`etcd.networkPolicy.allowExternal: false`). During the upgrade, APISIX pods of the
+  previous version cannot reach etcd until they are replaced, so Admin API requests can fail for a
+  few seconds; the gateway keeps serving its routes. If other pods connect to etcd, for example a
+  data plane installed as another release, allow them as described in
+  [Access to the bundled etcd](#access-to-the-bundled-etcd).
+* With `etcd.auth.rbac.existingSecret`, APISIX now reads the root password from that Secret, as etcd
+  does. Earlier versions read it from the Secret `<etcd fullname>`, which the etcd chart does not
+  create in that case.
+
+## Access to the bundled etcd
+
+APISIX keeps its configuration in etcd, including routes, consumers and their credentials. Unless
+etcd requires authentication, which it does not by default, a client that can connect to etcd can
+read and change all of it without an Admin API key. The bundled etcd therefore accepts client
+connections only from its own pods and from pods labelled `<etcd fullname>-client: "true"`, which
+the chart adds to the APISIX pods and to the pre-upgrade, snapshot and defragmentation jobs of the
+etcd chart. For a release named `apisix`, the label is `apisix-etcd-client: "true"`. This needs a
+network plugin that enforces NetworkPolicies.
+
+To let another pod in the release's namespace connect, add the label to it, for example with
+`podLabels` for a data plane installed as another release. For pods in other namespaces, set
+`etcd.networkPolicy.ingressNSMatchLabels` and `etcd.networkPolicy.ingressNSPodMatchLabels`. To
+accept connections from any pod, as before 3.0.0, set `etcd.networkPolicy.allowExternal: true`.
+
+etcd does not require authentication by default (`etcd.auth.rbac.create: false`). With
+`etcd.auth.rbac.create: true`, APISIX connects as `root` with the root password from
+`etcd.auth.rbac.rootPassword` or `etcd.auth.rbac.existingSecret`; when both are empty, the etcd chart
+generates a password into the Secret `<etcd fullname>`. Under Argo CD and other tools that render the
+chart without access to the cluster, a generated password changes on every render, so use
+`existingSecret` there.
+
+To turn authentication on for an existing release, create the Secret with the password before you
+upgrade:
+
+```shell
+kubectl create secret generic apisix-etcd-auth \
+  --from-literal=etcd-root-password="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24)"
+```
+
+```yaml
+etcd:
+  auth:
+    rbac:
+      create: true
+      existingSecret: apisix-etcd-auth
+```
+
+With `rootPassword` or a generated password instead, the upgrade of an existing release changes
+nothing and fails when `--timeout` expires: the etcd chart's pre-upgrade job waits for the password
+Secret, which only the upgrade itself would create.
 
 ## Configure the wait-etcd init container
 
@@ -435,10 +486,12 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | control.service.port | int | `9090` | which port to use for Apache APISIX Control API |
 | control.service.servicePort | int | `9090` | Service port to use for Apache APISIX Control API |
 | control.service.type | string | `"ClusterIP"` | Control service type |
-| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"enabled":true,"image":{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"startupRetry":2,"timeout":30,"watchTimeout":50}` | etcd configuration use the FQDN address or the IP of the etcd |
-| etcd.auth | object | `{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart |
-| etcd.auth.rbac.create | bool | `false` | No authentication by default. Switch to enable RBAC authentication |
-| etcd.auth.rbac.rootPassword | string | `""` | root password for etcd. Requires etcd.auth.rbac.create to be true. |
+| etcd | object | `{"auth":{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"defrag":{"cronjob":{"podLabels":{"{{ include \"common.names.fullname\" . }}-client":"true"}}},"disasterRecovery":{"cronjob":{"podLabels":{"{{ include \"common.names.fullname\" . }}-client":"true"}}},"enabled":true,"image":{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"},"networkPolicy":{"allowExternal":false},"preUpgradeJob":{"podLabels":{"{{ include \"common.names.fullname\" . }}-client":"true"}},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"startupRetry":2,"timeout":30,"watchTimeout":50}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd.auth | object | `{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart |
+| etcd.auth.rbac.create | bool | `false` | Require clients to authenticate to etcd. APISIX connects as root with the password from `rootPassword` or `existingSecret`; when both are empty, a password is generated into the Secret `<etcd fullname>`. For an existing release, read "Access to the bundled etcd" in the README first |
+| etcd.auth.rbac.existingSecret | string | `""` | Name of an existing Secret with the root password, used instead of rootPassword. Requires etcd.auth.rbac.create to be true |
+| etcd.auth.rbac.existingSecretPasswordKey | string | `""` | Key of existingSecret that holds the root password. The default is etcd-root-password |
+| etcd.auth.rbac.rootPassword | string | `""` | Root password for etcd. Requires etcd.auth.rbac.create to be true |
 | etcd.auth.tls.certFilename | string | `""` | Client certificate filename in existingSecret. Set together with certKeyFilename for mTLS; leave both empty for server-only TLS. |
 | etcd.auth.tls.certKeyFilename | string | `""` | Client private key filename in existingSecret. Required when certFilename is set. |
 | etcd.auth.tls.enabled | bool | `false` | Enable TLS settings for the APISIX etcd connection. For external etcd, also use https:// endpoints in externalEtcd.host. Client certificates are optional. |
@@ -448,9 +501,13 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | etcd.autoCompactionMode | string | `"periodic"` | Auto compaction mode (periodic or revision), only used when etcd.enabled is true |
 | etcd.autoCompactionRetention | string | `"1h"` | Auto compaction retention for mvcc key value store, only used when etcd.enabled is true |
 | etcd.containerSecurityContext | object | `{"enabled":false}` | added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19 |
+| etcd.defrag.cronjob.podLabels | object | `{"{{ include \"common.names.fullname\" . }}-client":"true"}` | Labels of the pods of the etcd chart's defragmentation job, used when etcd.defrag.enabled is true |
+| etcd.disasterRecovery.cronjob.podLabels | object | `{"{{ include \"common.names.fullname\" . }}-client":"true"}` | Labels of the pods of the etcd chart's snapshot job, used when etcd.disasterRecovery.enabled is true |
 | etcd.enabled | bool | `true` | install built-in etcd by default, set false if do not want to install built-in etcd together, this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes, if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it. |
 | etcd.image | object | `{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"}` | docker image for built-in etcd |
 | etcd.image.tag | string | `"latest"` | `bitnamilegacy/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267, you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags. |
+| etcd.networkPolicy.allowExternal | bool | `false` | Accept etcd client connections from any pod. When false, only etcd's own pods and pods labelled `<etcd fullname>-client: "true"` can connect; the chart adds that label to the APISIX pods and to the jobs of the etcd chart below |
+| etcd.preUpgradeJob.podLabels | object | `{"{{ include \"common.names.fullname\" . }}-client":"true"}` | Labels of the pods of the etcd chart's pre-upgrade job |
 | etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | etcd.replicaCount | int | `3` | Number of etcd replicas, only used when etcd.enabled is true |
 | etcd.service.port | int | `2379` | etcd client service port |

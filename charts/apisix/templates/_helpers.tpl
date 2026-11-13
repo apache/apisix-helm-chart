@@ -134,7 +134,7 @@ Return the name of etcd password secret
 */}}
 {{- define "apisix.etcd.secretName" -}}
 {{- if and .Values.etcd.enabled .Values.etcd.auth.rbac.create }}
-{{- template "common.names.fullname" .Subcharts.etcd }}
+{{- include "etcd.secretName" .Subcharts.etcd }}
 {{- else if .Values.externalEtcd.existingSecret }}
 {{- print .Values.externalEtcd.existingSecret }}
 {{- else if .Values.externalEtcd.user }}
@@ -147,7 +147,7 @@ Return the password key name of etcd secret
 */}}
 {{- define "apisix.etcd.secretPasswordKey" -}}
 {{- if .Values.etcd.enabled }}
-{{- print "etcd-root-password" }}
+{{- include "etcd.secretPasswordKey" .Subcharts.etcd }}
 {{- else }}
 {{- print .Values.externalEtcd.secretPasswordKey }}
 {{- end }}

@@ -46,6 +46,10 @@ spec:
         {{- end }}
       labels:
         {{- include "apisix.selectorLabels" . | nindent 8 }}
+        {{- if .Values.etcd.enabled }}
+        {{- /* lets the pods through the NetworkPolicy of the bundled etcd */}}
+        {{ include "common.names.fullname" .Subcharts.etcd }}-client: "true"
+        {{- end }}
         {{- if .Values.podLabels }}
         {{- toYaml .Values.podLabels | nindent 8 }}
         {{- end }}

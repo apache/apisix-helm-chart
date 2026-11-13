@@ -892,10 +892,14 @@ etcd:
   # -- if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart
   auth:
     rbac:
-      # -- No authentication by default. Switch to enable RBAC authentication
+      # -- Require clients to authenticate to etcd. APISIX connects as root with the password from `rootPassword` or `existingSecret`; when both are empty, a password is generated into the Secret `<etcd fullname>`. For an existing release, read "Access to the bundled etcd" in the README first
       create: false
-      # -- root password for etcd. Requires etcd.auth.rbac.create to be true.
+      # -- Root password for etcd. Requires etcd.auth.rbac.create to be true
       rootPassword: ""
+      # -- Name of an existing Secret with the root password, used instead of rootPassword. Requires etcd.auth.rbac.create to be true
+      existingSecret: ""
+      # -- Key of existingSecret that holds the root password. The default is etcd-root-password
+      existingSecretPasswordKey: ""
     tls:
       # -- Enable TLS settings for the APISIX etcd connection. For external etcd, also use https:// endpoints in externalEtcd.host. Client certificates are optional.
       enabled: false
@@ -918,6 +922,27 @@ etcd:
   service:
     # -- etcd client service port
     port: 2379
+
+  networkPolicy:
+    # -- Accept etcd client connections from any pod. When false, only etcd's own pods and pods labelled `<etcd fullname>-client: "true"` can connect; the chart adds that label to the APISIX pods and to the jobs of the etcd chart below
+    allowExternal: false
+
+  # The jobs of the etcd chart connect to etcd too, so they carry the client label.
+  # The etcd chart renders templates in these labels, keys included.
+  preUpgradeJob:
+    # -- Labels of the pods of the etcd chart's pre-upgrade job
+    podLabels:
+      '{{ include "common.names.fullname" . }}-client': "true"
+  disasterRecovery:
+    cronjob:
+      # -- Labels of the pods of the etcd chart's snapshot job, used when etcd.disasterRecovery.enabled is true
+      podLabels:
+        '{{ include "common.names.fullname" . }}-client': "true"
+  defrag:
+    cronjob:
+      # -- Labels of the pods of the etcd chart's defragmentation job, used when etcd.defrag.enabled is true
+      podLabels:
+        '{{ include "common.names.fullname" . }}-client': "true"
 
   # -- Number of etcd replicas, only used when etcd.enabled is true
   replicaCount: 3
