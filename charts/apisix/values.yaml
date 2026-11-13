@@ -539,10 +539,10 @@ apisix:
     cors: true
     # -- Admin API credentials
     credentials:
-      # -- Apache APISIX admin API admin role credentials
-      admin: edd1c9f034335f136f87ad84b625c8f1
-      # -- Apache APISIX admin API viewer role credentials
-      viewer: 4054f7cf07e344346cd3f287985e76a2
+      # -- Apache APISIX admin API admin role credentials. Empty generates a random value into the release Secret.
+      admin: ""
+      # -- Apache APISIX admin API viewer role credentials. Empty generates a random value into the release Secret.
+      viewer: ""
 
       # -- The APISIX Helm chart supports storing user credentials in a secret.
       # The secret needs to contain two keys, admin and viewer, with their respective values set.
@@ -927,7 +927,25 @@ etcd:
 # -- Ingress controller configuration
 ingress-controller:
   # -- Enable the apisix-ingress-controller sub-chart
-  enabled: false
+  enabled: true
+  gatewayProxy:
+    createDefault: true
+    provider:
+      controlPlane:
+        service:
+          name: ""
+        auth:
+          adminKey:
+            value: ""
+            valueFrom:
+              secretKeyRef:
+                name: ""
+                key: admin
+  apisix:
+    adminService:
+      namespace: ""
+      name: ""
+      port: 9180
   webhook:
     # Specifies whether to enable the validation webhook.
     # Note: This feature relies on the '/apisix/admin/configs/validate' endpoint.
