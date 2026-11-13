@@ -147,20 +147,26 @@ check "a client label of exactly 63 characters: and the policy uses it" is \
 # helm upgrade --reuse-values renders with the default values of the chart version
 # it upgrades from. Those of chart 2.x set no etcd.networkPolicy, so the etcd chart's
 # allowExternal: true applies (before 2.12, its networkPolicy.enabled: false), and
-# give the pre-upgrade job no client label.
-OLD_VALUES_ERROR="etcd.preUpgradeJob.podLabels lacks the entry"
+# give the etcd chart's jobs no client label.
+OLD_ETCD='del(.etcd.networkPolicy) | del(.etcd.preUpgradeJob) | del(.etcd.disasterRecovery) | del(.etcd.defrag)'
+OLD_VALUES_ERROR="None of the podLabels of the etcd chart's jobs"
 check "values of chart 2.x, as --reuse-values renders them: fails" with_values \
-  'del(.etcd.networkPolicy) | del(.etcd.preUpgradeJob)' fails_with "$OLD_VALUES_ERROR" apisix
+  "$OLD_ETCD" fails_with "$OLD_VALUES_ERROR" apisix
 check "values of chart 2.x with labels of their own on the pre-upgrade job: fails too" with_values \
-  'del(.etcd.networkPolicy) | .etcd.preUpgradeJob.podLabels = {"team": "gateway"}' fails_with "$OLD_VALUES_ERROR" apisix
+  "$OLD_ETCD"' | .etcd.preUpgradeJob.podLabels = {"team": "gateway"}' fails_with "$OLD_VALUES_ERROR" apisix
 check "values of chart 2.x with the pre-upgrade job turned off: fails too" with_values \
-  'del(.etcd.networkPolicy) | .etcd.preUpgradeJob = {"enabled": false}' fails_with "$OLD_VALUES_ERROR" apisix
+  "$OLD_ETCD"' | .etcd.preUpgradeJob = {"enabled": false}' fails_with "$OLD_VALUES_ERROR" apisix
 check "values of chart 2.x before 2.12, with the NetworkPolicy turned off: fails too" with_values \
-  'del(.etcd.preUpgradeJob) | .etcd.networkPolicy = {"enabled": false}' fails_with "$OLD_VALUES_ERROR" apisix
-check "values of chart 2.x before 2.16: the check runs before the templates that need newer values" \
-  fails_with "$OLD_VALUES_ERROR" apisix --set etcd.preUpgradeJob.podLabels=null --set apisix.proxyProtocol=null
-check "pre-upgrade job without labels: fails" fails_with "$OLD_VALUES_ERROR" apisix --set etcd.preUpgradeJob.podLabels=null
+  "$OLD_ETCD"' | .etcd.networkPolicy = {"enabled": false}' fails_with "$OLD_VALUES_ERROR" apisix
+check "values of chart 2.x before 2.16: the check runs before the templates that need newer values" with_values \
+  "$OLD_ETCD"' | del(.apisix.proxyProtocol)' fails_with "$OLD_VALUES_ERROR" apisix
+check "pre-upgrade job without the client label: fails, it could not reach etcd" \
+  fails_with "etcd.preUpgradeJob.podLabels lacks the entry" apisix --set etcd.preUpgradeJob.podLabels=null
 check "pre-upgrade job turned off: renders" render apisix --set etcd.preUpgradeJob.enabled=false
+check "pre-upgrade job turned off and without labels: renders" render apisix --set etcd.preUpgradeJob.enabled=false \
+  --set etcd.preUpgradeJob.podLabels=null
+check "pre-upgrade job without labels, with allowExternal: renders" render apisix --set etcd.preUpgradeJob.podLabels=null \
+  --set etcd.networkPolicy.allowExternal=true
 check "pre-upgrade job with labels of its own: renders" render apisix --set etcd.preUpgradeJob.podLabels.team=gateway
 check "pre-upgrade job with labels of its own: the client label is kept" \
   is "$(job_label apisix-etcd-pre-upgrade apisix-etcd-client)" true
@@ -213,7 +219,7 @@ check "hostNetwork with a rule for every source: renders" render apisix --set ho
   --set-json 'etcd.networkPolicy.extraIngress=[{"ports":[{"port":2379}]}]'
 check "hostNetwork with rules written as a templated string: fails, the chart cannot check them" \
   fails_with "hostNetwork: true: most network plugins cannot select pods in the host network" apisix --set hostNetwork=true \
-  --set-string 'etcd.networkPolicy.extraIngress=- from: [{podSelector: {}}]'
+  --set-string 'etcd.networkPolicy.extraIngress=- from: [{ipBlock: {cidr: 10.0.1.17/32}}]'
 check "hostNetwork with external etcd: renders" render apisix --set hostNetwork=true --set etcd.enabled=false \
   --set 'externalEtcd.host[0]=http://etcd.example:2379'
 
