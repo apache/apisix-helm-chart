@@ -85,3 +85,54 @@ jobs:
           fi
           git diff --exit-code
           rm -f ./helm-docs
+
+  admin-credentials:
+    name: Admin API credentials and etcd access (Helm ${{ matrix.helm }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - helm: v3.22.1
+            sha256: 896cf63684a42a723d61c980369d6e588330927deb13676ca0d85006dd6da0ea
+          - helm: v4.2.4
+            sha256: c306b46f719b0a4da32d0f78ee21bf90ce8d602f15b22ab753f0674d1670a7f3
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Helm ${{ matrix.helm }}
+        run: |
+          curl -fsSLO https://get.helm.sh/helm-${{ matrix.helm }}-linux-amd64.tar.gz
+          echo "${{ matrix.sha256 }}  helm-${{ matrix.helm }}-linux-amd64.tar.gz" | sha256sum -c
+          mkdir -p "$RUNNER_TEMP/helm"
+          tar -xzf helm-${{ matrix.helm }}-linux-amd64.tar.gz -C "$RUNNER_TEMP/helm"
+          echo "HELM=$RUNNER_TEMP/helm/linux-amd64/helm" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/helm/linux-amd64/helm" version --short
+
+      - name: Build chart dependencies
+        run: |
+          "$HELM" repo add bitnami https://charts.bitnami.com/bitnami
+          "$HELM" repo add apisix https://apache.github.io/apisix-helm-chart
+          "$HELM" dependency build charts/apisix
+
+      - name: Render tests
+        run: test/render/admin-credentials.sh
+
+      - name: Render tests (etcd access)
+        run: test/render/etcd-access.sh
+
+      - name: Create Kubernetes cluster
+        uses: ./.github/actions/setup-kind
+        with:
+          version: v0.33.0
+          image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
+
+      - name: End-to-end tests
+        run: test/e2e/admin-credentials.sh
+
+      - name: End-to-end tests (etcd access)
+        run: test/e2e/etcd-access.sh

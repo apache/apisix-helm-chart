@@ -11,7 +11,7 @@ This chart bootstraps all the components needed to run Apache APISIX on a Kubern
 ## Prerequisites
 
 * Kubernetes v1.14+
-* Helm v3+
+* Helm v3.8+
 
 ## Install
 
@@ -33,6 +33,309 @@ helm delete [RELEASE_NAME] --namespace ingress-apisix
  ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Admin API keys
+
+The chart does not ship a default Admin API key. When the release has an Admin API (the
+`traditional` and `control_plane` roles, without `apisix.fullCustomConfig`) and you don't set the
+keys yourself, the chart generates random keys for the `admin` and `viewer` roles when the release
+is installed and stores them in the Secret `<fullname>-admin-credentials`
+(`apisix-admin-credentials` for the release name `apisix`). `helm upgrade` keeps them, and the
+bundled ingress controller reads the admin key from the same Secret.
+
+To print the admin key:
+
+```sh
+kubectl get secret --namespace <namespace> apisix-admin-credentials -o jsonpath='{.data.admin}' | base64 -d
+```
+
+To use your own keys, either set `apisix.admin.credentials.admin` and
+`apisix.admin.credentials.viewer`, or store them in a Secret and set
+`apisix.admin.credentials.secretName` (plus `secretAdminKey` / `secretViewerKey` if the Secret
+uses other field names). The publicly known keys that chart versions before 3.0.0 used as defaults
+are rejected wherever the chart sees them: in `apisix.admin.credentials`, in
+`apisix.fullCustomConfig.config`, in the generated Secret, and in the Secret named by `secretName`
+when the chart can read it.
+
+On upgrade, a generated key that is missing from the Secret fails the release instead of being
+replaced (see [Upgrading](#upgrading)). The only exception is `apisix.admin.enabled: false`: no
+client can use the keys then, so missing ones are generated again. `helm uninstall` deletes the
+generated Secret, so a new install gets new keys.
+
+To let the chart manage keys that an existing release already uses (for example after taking them
+out of `apisix.admin.credentials`), create the Secret first and let Helm adopt it, then upgrade:
+
+```sh
+kubectl -n <namespace> create secret generic <fullname>-admin-credentials \
+  --from-literal=admin=<admin key> --from-literal=viewer=<viewer key>
+kubectl -n <namespace> label secret <fullname>-admin-credentials app.kubernetes.io/managed-by=Helm
+kubectl -n <namespace> annotate secret <fullname>-admin-credentials \
+  meta.helm.sh/release-name=<release> meta.helm.sh/release-namespace=<namespace>
+```
+
+Keys from a Secret reach APISIX as environment variables. Don't use a key made only of digits, or
+`true` / `false`: APISIX converts such values to a number or a boolean, and the key stops matching
+([apache/apisix#14178](https://github.com/apache/apisix/issues/14178)).
+
+### GitOps and offline rendering
+
+The chart keeps a generated key by reading the Secret with Helm's `lookup` function. `lookup`
+returns nothing when the chart is rendered without access to the cluster: `helm template`,
+`helm install --dry-run` (client side), and Argo CD, which renders every application with
+`helm template`. In those cases a new key is generated on every render. Under Argo CD, every sync
+then writes a new key into the Secret while the running APISIX pods keep the old one, and the
+bundled ingress controller, which follows the Secret, gets `401 Unauthorized` from the Admin API.
+
+With such tools, create the Secret yourself (for example with External Secrets or Sealed Secrets)
+and set `apisix.admin.credentials.secretName`. With Argo CD you can instead keep the first generated
+key by adding this to the Application:
+
+```yaml
+spec:
+  ignoreDifferences:
+    - kind: Secret
+      name: <fullname>-admin-credentials
+      jsonPointers:
+        - /data
+  syncPolicy:
+    syncOptions:
+      - RespectIgnoreDifferences=true
+```
+
+Flux runs `helm install` and `helm upgrade`, so generated keys are kept as with the Helm CLI.
+
+Previews that cannot read the cluster (`helm upgrade --dry-run=client`, `helm diff upgrade` on
+Helm 3, `helmfile diff`) show a newly generated key for the Secret, but the actual upgrade keeps the
+stored one. Such previews also cannot show an `ADMIN KEY ERROR` that the real upgrade would raise. To preview against the cluster, use `helm upgrade --dry-run=server --hide-secret`
+(Helm 3.15 or later; without `--hide-secret` the output contains the keys); with helmfile, pass
+`--template-args="--dry-run=server"`.
+
+### Rotating keys
+
+Keys set in `apisix.admin.credentials` are part of the APISIX ConfigMap, so `helm upgrade` restarts
+APISIX with the new keys. Keys from a Secret, including the generated Secret, are read when APISIX
+starts: after changing the Secret, run `kubectl rollout restart` on the APISIX workload. The bundled
+ingress controller watches the Secret and picks up the new admin key by itself. To rotate a
+generated key, change it in the Secret; later upgrades keep the new value.
+
+`helm rollback`, including the automatic rollback of `--atomic` (Helm 3) or `--rollback-on-failure`
+(Helm 4), re-applies the Secret stored in the target revision, so rolling back to a revision
+rendered before a rotation restores the old key. After rotating, run `helm upgrade` once so the
+release records the new key, and don't roll back past that revision. To keep keys out of the
+release history, use `apisix.admin.credentials.secretName`.
+
+## Upgrading
+
+### To 3.0.0
+
+Chart 3.0.0 no longer uses the publicly known default Admin API keys
+(`edd1c9f034335f136f87ad84b625c8f1` and `4054f7cf07e344346cd3f287985e76a2`).
+
+* If you already set `apisix.admin.credentials.admin` and `viewer`, or `secretName`, to other keys,
+  nothing changes, with one exception: inline keys are now used exactly as given. Earlier versions
+  rendered them unquoted, so YAML dropped leading and trailing spaces, tabs and line breaks (for
+  example the newline at the end of a file passed with `--set-file`), the quotes around a key that
+  starts with one, and a ` #` with everything after it. Such keys now fail with `ADMIN KEY ERROR`
+  instead of silently becoming a key that clients don't send; remove those parts.
+* If your release used the defaults, `helm upgrade` fails with `ADMIN KEY ERROR` before changing
+  anything. Choose new keys, pass them with `--set apisix.admin.credentials.admin=<key>
+  --set apisix.admin.credentials.viewer=<key>` or `apisix.admin.credentials.secretName`, upgrade
+  again, and give the new admin key to your Admin API clients.
+* Argo CD and other tools that render the chart with `helm template` cannot run this check: the
+  first sync of 3.0.0 replaces the public keys with random ones, cutting off Admin API clients, and
+  later renders replace them again (see [GitOps and offline rendering](#gitops-and-offline-rendering)).
+  Create a Secret with your keys and set `apisix.admin.credentials.secretName` in the same change
+  that moves the application to 3.0.0.
+* With the bundled ingress controller, remove `ingress-controller.gatewayProxy.createDefault` and
+  any admin key set under `ingress-controller.gatewayProxy`: the apisix chart now creates the
+  GatewayProxy with this release's Admin API Service and admin key. If you keep
+  `createDefault: true`, set its admin key yourself. When it uses this release's Admin API Service
+  (`<fullname>-admin`), directly or through `endpoints` that name it, it must be the key APISIX uses (the same value, or a `secretKeyRef` to the
+  same Secret and field), or the chart refuses to render. Without `endpoints` or
+  `ingress-controller.gatewayProxy.provider.controlPlane.service.name`, the controller chart uses
+  `ingress-controller.apisix.adminService.name`, which defaults to `apisix-admin`. If that default is
+  not this release's Service and this release has its own Admin API, the chart refuses to render and
+  asks you to set the Service name. A data-plane release can keep pointing its controller at a
+  control plane's Admin API Service this way.
+* With `apisix.admin.credentials.secretName`, the chart reads that Secret with `lookup` to reject
+  the public default keys, so the identity that runs Helm needs `get` on Secrets in the release
+  namespace. Helm's default storage driver keeps releases in Secrets and already needs it.
+* If the release has no Admin API (the `data_plane` role, `apisix.fullCustomConfig`, or
+  `apisix.admin.enabled: false`) and the bundled ingress controller is enabled, the chart cannot
+  create the GatewayProxy and refuses to render. Point the controller at your control plane with
+  `ingress-controller.gatewayProxy.createDefault: true` and its `endpoints` and admin key, or set
+  `ingress-controller.gatewayProxy.name: ""` to leave the IngressClass without a GatewayProxy.
+* The bundled apisix-ingress-controller chart moves from 1.3.0 to 1.5.0. Its Gateway API CRDs are
+  no longer installed from `crds/`: they are rendered as templates (`ingress-controller.crds.gatewayAPI.enabled`),
+  only when they are missing or belong to this release, and kept on uninstall.
+* The bundled etcd accepts client connections only from its own pods and the APISIX pods of this
+  release (`etcd.networkPolicy.allowExternal: false`). During the upgrade, APISIX pods of the
+  previous version cannot reach etcd until they are replaced: Admin API requests that reach them
+  fail, and they receive no configuration changes, but they keep serving the routes they have. With
+  one replica this lasts a few seconds; with several replicas or a DaemonSet, it lasts until the
+  rollout has replaced every old pod. If other pods connect to etcd, for example a data plane
+  installed as another release, the apisix-dashboard chart, APISIX pods with `hostNetwork: true`,
+  or a pod that runs etcdctl, allow them as described in
+  [Access to the bundled etcd](#access-to-the-bundled-etcd). A DaemonSet with
+  `updateStrategy.type: OnDelete` keeps its old pods, which cannot reach etcd, until you delete them.
+* Don't upgrade with `--reuse-values`, or with `spec.upgrade.preserveValues: true` in Flux: they
+  render with the default values of the chart version you upgrade from, in which etcd accepts every
+  pod, so the chart refuses to render (from 2.0 to 2.7, the etcd chart's image check fails first).
+  Use `--reset-then-reuse-values` (Helm 3.14 or later), or pass your values again;
+  `helm get values <release> --namespace <namespace> -o yaml` prints the ones you set. Don't add
+  `--all`: its output also holds the defaults of the old version, among them
+  `etcd.networkPolicy.allowExternal: true`, which keeps etcd open to every pod without an error. In
+  Flux, set `spec.upgrade.preserveValues: false`.
+* The chart now refuses to render `etcd.metrics.enabled` with the metrics on the client port, a
+  release name, `etcd.nameOverride` or `etcd.fullnameOverride` that makes the etcd client label
+  longer than 63 characters, and `hostNetwork: true` without an `etcd.networkPolicy.extraIngress`
+  rule that can admit the addresses of the nodes, unless `etcd.networkPolicy.allowExternal` is
+  true. See [Access to the bundled etcd](#access-to-the-bundled-etcd).
+* With `etcd.auth.rbac.existingSecret`, APISIX now reads the root password from that Secret, as etcd
+  does. Earlier versions read it from the Secret `<etcd fullname>`, which the etcd chart does not
+  create in that case.
+
+## Access to the bundled etcd
+
+APISIX keeps its configuration in etcd, including routes, consumers and their credentials. Unless
+etcd requires authentication, which it does not by default, a client that can connect to etcd can
+read and change all of it without an Admin API key. The bundled etcd therefore accepts client
+connections only from its own pods and from pods labelled `<etcd fullname>-client: "true"`, which
+the chart adds to the APISIX pods and to the pre-upgrade, snapshot and defragmentation jobs of the
+etcd chart. For a release named `apisix`, the label is `apisix-etcd-client: "true"`. This needs a
+network plugin that enforces NetworkPolicies.
+
+To let another pod in the release's namespace connect, add the label to it before you upgrade this
+release, for example with `podLabels` for a data plane installed as another release. Set the label
+as the string `"true"`, in a values file or with `--set-string`: `--set` makes it a boolean, which
+Kubernetes rejects. For pods in other namespaces, set both `etcd.networkPolicy.ingressNSMatchLabels`
+and `etcd.networkPolicy.ingressNSPodMatchLabels`: the first alone admits every pod in those
+namespaces, and the second has no effect without the first. Clients outside the cluster need an
+`etcd.networkPolicy.extraIngress` rule. To accept connections from any pod, as before 3.0.0, set
+`etcd.networkPolicy.allowExternal: true`.
+
+Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy.extraIngress`:
+
+- The apisix-dashboard chart connects to etcd directly. Its pod labels are also the selector of its
+  Deployment (`labelsOverride` replaces both), which cannot change on an existing release, so admit
+  its pods by their default label instead; adjust `matchLabels` if you set `nameOverride` or
+  `labelsOverride` there:
+
+  ```yaml
+  etcd:
+    networkPolicy:
+      extraIngress:
+        - ports:
+            - port: 2379
+          from:
+            - podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: apisix-dashboard
+  ```
+
+- With `hostNetwork: true`, most network plugins cannot select the APISIX pods by their labels:
+  etcd sees the addresses that the nodes connect from, and accepts connections only from its own
+  node. Admit the nodes that run APISIX with an `ipBlock` rule for those addresses, or set
+  `etcd.networkPolicy.allowExternal: true`:
+
+  ```yaml
+  etcd:
+    networkPolicy:
+      extraIngress:
+        - ports:
+            - port: 2379
+          from:
+            - ipBlock:
+                cidr: 10.0.1.17/32  # one entry for each address that a node connects from
+            - ipBlock:
+                cidr: 10.0.1.18/32
+  ```
+
+  Without encapsulation, a node connects from its own address. With encapsulation, it connects to
+  pods on other nodes from the address of its tunnel device, which the network plugin takes from the
+  pod address range: with Calico in IPIP or VXLAN mode, the address in the node annotation
+  `projectcalico.org/IPv4IPIPTunnelAddr` or `projectcalico.org/IPv4VXLANTunnelAddr`, and with
+  Calico's WireGuard encryption on, the one in `projectcalico.org/IPv4WireguardInterfaceAddr` (with
+  its host encryption on, Calico sets no such address and the node's own address applies); with
+  Flannel in VXLAN mode (also used by Canal, k3s and RKE2), the first address of the node's
+  `spec.podCIDR`, such as `10.42.1.0` for `10.42.1.0/24`. List those addresses as well. Some network plugins do not
+  match node addresses with `ipBlock` rules at all, for example Cilium in its default configuration;
+  use `allowExternal: true` there, and consider etcd authentication, described below.
+
+  Such a rule admits everything that connects from those addresses: every process and every
+  `hostNetwork` pod on those nodes, in any namespace. Update it when nodes are added or replaced. A
+  range is easier to keep, but don't use one that also holds addresses of pods (with the Amazon VPC
+  CNI, for example, pods get addresses from the VPC): the rule would admit those pods as well. The
+  chart refuses to render `hostNetwork: true` unless `allowExternal` is true or `extraIngress` is a
+  list with a rule that has an `ipBlock` or admits every source; it cannot check which addresses and
+  ports a rule admits. The policy also does not stop processes in the host network of the nodes that
+  run etcd.
+
+etcd does not require authentication by default (`etcd.auth.rbac.create: false`). With
+`etcd.auth.rbac.create: true`, APISIX connects as `root` with the root password from
+`etcd.auth.rbac.rootPassword` or `etcd.auth.rbac.existingSecret`; when both are empty, the etcd chart
+generates a password into the Secret `<etcd fullname>`. Under Argo CD and other tools that render the
+chart without access to the cluster, a generated password changes on every render, so use
+`existingSecret` there.
+
+To turn authentication on for an existing release, create the Secret with the password before you
+upgrade:
+
+```shell
+openssl rand -hex 16 | tr -d '\n' |
+  kubectl create secret generic apisix-etcd-auth --namespace <namespace> \
+    --from-file=etcd-root-password=/dev/stdin
+```
+
+The password must not end with a newline: to use one of your own, pipe it with `printf '%s'`, not
+with `echo`.
+
+```yaml
+etcd:
+  auth:
+    rbac:
+      create: true
+      existingSecret: apisix-etcd-auth
+```
+
+With `rootPassword` instead, the upgrade of an existing release changes nothing and fails when
+`--timeout` expires: the etcd chart's pre-upgrade job waits for the password Secret, which only the
+upgrade itself would create. With neither `rootPassword` nor `existingSecret`, the etcd chart
+refuses the upgrade at once with `PASSWORDS ERROR`; don't follow its hint to set
+`auth.rbac.rootPassword`, create the Secret as shown above.
+
+During the upgrade with `existingSecret`, the new APISIX pods restart until etcd requires the
+password. With the default three etcd replicas, etcd requires it only after `etcd-0`, the last pod of
+the rolling update, has restarted, and each etcd pod is ready no sooner than 60 seconds after it
+starts, so the upgrade takes several minutes. From the moment etcd requires the password until the
+new APISIX pods are ready, the APISIX pods of the previous revision cannot use etcd, and Admin API
+requests fail; the gateway keeps serving its routes. In a test on kind with three replicas, this
+lasted about 20 seconds, but it can be longer. Run this upgrade with `--timeout 10m`, and without
+`--atomic` or `--rollback-on-failure`: a rollback after etcd requires the password stops the gateway,
+as described below.
+
+Once etcd requires authentication, do not roll back to a revision without it. etcd keeps
+authentication on, so the APISIX pods of that revision, which connect without a password, cannot
+read their configuration, and the gateway stops routing requests. To turn authentication off again,
+turn it off in etcd and delete the `root` user, then upgrade with `etcd.auth.rbac.create: false`.
+Without deleting the user, `etcd-0` fails to start when you turn authentication on again later.
+
+```shell
+kubectl exec --namespace <namespace> apisix-etcd-0 -- \
+  sh -c 'ETCDCTL_PASSWORD="${ETCD_ROOT_PASSWORD:-$(cat "$ETCD_ROOT_PASSWORD_FILE")}" etcdctl --user root auth disable'
+kubectl exec --namespace <namespace> apisix-etcd-0 -- etcdctl user delete root
+```
+
+The first command reads the password in the etcd pod, so it does not appear in the command line or
+in the audit log of the Kubernetes API server. Run the upgrade right after these commands: until it
+has replaced the APISIX pods, they keep logging in with the password, which etcd refuses while
+authentication is off, so Admin API requests fail.
+
+If you turn on the metrics of the etcd chart, also set `etcd.metrics.useSeparateEndpoint: true`.
+Otherwise etcd serves the metrics on its client port, and the etcd chart opens that port to every
+pod; the chart refuses to render that combination unless `etcd.networkPolicy.allowExternal` is
+true. It also refuses to render when the release name, `etcd.nameOverride` or `etcd.fullnameOverride` is
+so long that the client label has more than the 63 characters that Kubernetes allows.
 
 ## Configure the wait-etcd init container
 
@@ -133,12 +436,12 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | apisix.admin.allow.ingressControllerExtraIpList | list | `["0.0.0.0/0","::/0"]` | Client IP CIDRs appended to ipList when ingress-controller.enabled is true, so that the bundled ingress controller can reach the Admin API. Narrow it to the ingress controller Pod CIDR, or set it to [] to append nothing. |
 | apisix.admin.allow.ipList | list | `["127.0.0.1/24"]` | The client IP CIDR allowed to access Apache APISIX Admin API service. |
 | apisix.admin.cors | bool | `true` | Admin API support CORS response headers |
-| apisix.admin.credentials | object | `{"admin":"edd1c9f034335f136f87ad84b625c8f1","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":"4054f7cf07e344346cd3f287985e76a2"}` | Admin API credentials |
-| apisix.admin.credentials.admin | string | `"edd1c9f034335f136f87ad84b625c8f1"` | Apache APISIX admin API admin role credentials |
+| apisix.admin.credentials | object | `{"admin":"","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":""}` | Admin API credentials. Leave `admin` and `viewer` empty to let the chart generate random keys. They are stored in the Secret `<fullname>-admin-credentials` and kept across upgrades. Tools that render the chart without access to the cluster (`helm template`, Argo CD) cannot keep generated keys; use `secretName` with them. The publicly known keys that chart versions before 3.0.0 used as defaults are rejected. |
+| apisix.admin.credentials.admin | string | `""` | Apache APISIX admin API admin role key. Leave empty to generate one. |
 | apisix.admin.credentials.secretAdminKey | string | `""` | Name of the admin role key in the secret, overrides the default key name "admin" |
 | apisix.admin.credentials.secretName | string | `""` | The APISIX Helm chart supports storing user credentials in a secret. The secret needs to contain two keys, admin and viewer, with their respective values set. |
 | apisix.admin.credentials.secretViewerKey | string | `""` | Name of the viewer role key in the secret, overrides the default key name "viewer" |
-| apisix.admin.credentials.viewer | string | `"4054f7cf07e344346cd3f287985e76a2"` | Apache APISIX admin API viewer role credentials |
+| apisix.admin.credentials.viewer | string | `""` | Apache APISIX admin API viewer role key. Leave empty to generate one. |
 | apisix.admin.enable_admin_ui | bool | `true` | Enable Embedded Admin UI |
 | apisix.admin.enabled | bool | `true` | Enable Admin API |
 | apisix.admin.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the servic |
@@ -301,10 +604,12 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | control.service.port | int | `9090` | which port to use for Apache APISIX Control API |
 | control.service.servicePort | int | `9090` | Service port to use for Apache APISIX Control API |
 | control.service.type | string | `"ClusterIP"` | Control service type |
-| etcd | object | `{"auth":{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"enabled":true,"image":{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"startupRetry":2,"timeout":30,"watchTimeout":50}` | etcd configuration use the FQDN address or the IP of the etcd |
-| etcd.auth | object | `{"rbac":{"create":false,"rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart |
-| etcd.auth.rbac.create | bool | `false` | No authentication by default. Switch to enable RBAC authentication |
-| etcd.auth.rbac.rootPassword | string | `""` | root password for etcd. Requires etcd.auth.rbac.create to be true. |
+| etcd | object | `{"auth":{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"defrag":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"disasterRecovery":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"enabled":true,"image":{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"},"networkPolicy":{"allowExternal":false},"preUpgradeJob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"startupRetry":2,"timeout":30,"watchTimeout":50}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd.auth | object | `{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart |
+| etcd.auth.rbac.create | bool | `false` | Require clients to authenticate to etcd. APISIX connects as root with the password from `rootPassword` or `existingSecret`; when both are empty, a password is generated into the Secret `<etcd fullname>`. For an existing release, read "Access to the bundled etcd" in the README first |
+| etcd.auth.rbac.existingSecret | string | `""` | Name of an existing Secret with the root password, used instead of rootPassword. Requires etcd.auth.rbac.create to be true |
+| etcd.auth.rbac.existingSecretPasswordKey | string | `""` | Key of existingSecret that holds the root password. The default is etcd-root-password |
+| etcd.auth.rbac.rootPassword | string | `""` | Root password for etcd. Requires etcd.auth.rbac.create to be true |
 | etcd.auth.tls.certFilename | string | `""` | Client certificate filename in existingSecret. Set together with certKeyFilename for mTLS; leave both empty for server-only TLS. |
 | etcd.auth.tls.certKeyFilename | string | `""` | Client private key filename in existingSecret. Required when certFilename is set. |
 | etcd.auth.tls.enabled | bool | `false` | Enable TLS settings for the APISIX etcd connection. For external etcd, also use https:// endpoints in externalEtcd.host. Client certificates are optional. |
@@ -314,9 +619,13 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | etcd.autoCompactionMode | string | `"periodic"` | Auto compaction mode (periodic or revision), only used when etcd.enabled is true |
 | etcd.autoCompactionRetention | string | `"1h"` | Auto compaction retention for mvcc key value store, only used when etcd.enabled is true |
 | etcd.containerSecurityContext | object | `{"enabled":false}` | added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19 |
+| etcd.defrag.cronjob.podLabels | object | `{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}` | Labels of the pods of the etcd chart's defragmentation job, used when etcd.defrag.enabled is true |
+| etcd.disasterRecovery.cronjob.podLabels | object | `{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}` | Labels of the pods of the etcd chart's snapshot job, used when etcd.disasterRecovery.enabled is true |
 | etcd.enabled | bool | `true` | install built-in etcd by default, set false if do not want to install built-in etcd together, this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes, if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it. |
 | etcd.image | object | `{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"}` | docker image for built-in etcd |
 | etcd.image.tag | string | `"latest"` | `bitnamilegacy/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267, you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags. |
+| etcd.networkPolicy.allowExternal | bool | `false` | Accept etcd client connections from any pod. When false, only etcd's own pods and pods labelled `<etcd fullname>-client: "true"` can connect; the chart adds that label to the APISIX pods and to the jobs of the etcd chart below |
+| etcd.preUpgradeJob.podLabels | object | `{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}` | Labels of the pods of the etcd chart's pre-upgrade job |
 | etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
 | etcd.replicaCount | int | `3` | Number of etcd replicas, only used when etcd.enabled is true |
 | etcd.service.port | int | `2379` | etcd client service port |
@@ -342,8 +651,10 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
 | image.tag | string | `"3.20.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
-| ingress-controller | object | `{"enabled":false,"webhook":{"enabled":false}}` | Ingress controller configuration |
+| ingress-controller | object | `{"enabled":false,"gatewayProxy":{"name":"{{ .Release.Name }}-config","provider":{"controlPlane":{"auth":{"adminKey":{"value":""}}}}},"webhook":{"enabled":false}}` | Ingress controller configuration |
 | ingress-controller.enabled | bool | `false` | Enable the apisix-ingress-controller sub-chart |
+| ingress-controller.gatewayProxy.name | string | `"{{ .Release.Name }}-config"` | Name of the GatewayProxy for the bundled controller. The apisix chart creates it, with this release's Admin API Service and admin key, and the controller's IngressClass references it. Set `ingress-controller.gatewayProxy.createDefault: true` only if you want the controller chart to create its own GatewayProxy instead; its admin key must then match `apisix.admin.credentials`. Set it to `""` to leave the IngressClass without a GatewayProxy. It is rendered with `tpl` by both charts with different `.Values`, so use only `.Release.*` in it. |
+| ingress-controller.gatewayProxy.provider.controlPlane.auth.adminKey.value | string | `""` | Admin key of the GatewayProxy that the controller chart creates when `createDefault` is true. There is no default; the GatewayProxy that the apisix chart creates gets this release's key automatically. |
 | ingress.annotations | object | `{}` | Ingress annotations |
 | ingress.enabled | bool | `false` | Enable an Ingress resource in front of the APISIX service |
 | ingress.hosts | list | `[{"host":"apisix.local","paths":[]}]` | Ingress host and path rules |

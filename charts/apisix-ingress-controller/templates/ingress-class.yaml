@@ -24,11 +24,11 @@ metadata:
   {{- end }}
 spec:
   controller: {{ .Values.config.controllerName | default "apisix.apache.org/apisix-ingress-controller" }}
-  {{- if .Values.gatewayProxy.createDefault }}
+  {{- if or .Values.gatewayProxy.createDefault (include "apisix-ingress-controller-manager.configuredGatewayProxyName" .) }}
   parameters:
     apiGroup: apisix.apache.org
     kind: GatewayProxy
-    name: {{ .Release.Name }}-config
+    name: {{ include "apisix-ingress-controller-manager.gatewayProxyName" . }}
     namespace: {{ .Release.Namespace }}
     scope: Namespace
   {{- end}}

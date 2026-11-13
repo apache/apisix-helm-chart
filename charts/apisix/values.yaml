@@ -537,12 +537,17 @@ apisix:
     servicePort: 9180
     # -- Admin API support CORS response headers
     cors: true
-    # -- Admin API credentials
+    # -- Admin API credentials.
+    # Leave `admin` and `viewer` empty to let the chart generate random keys. They are stored in
+    # the Secret `<fullname>-admin-credentials` and kept across upgrades. Tools that render the
+    # chart without access to the cluster (`helm template`, Argo CD) cannot keep generated keys;
+    # use `secretName` with them. The publicly known keys that chart versions before 3.0.0 used
+    # as defaults are rejected.
     credentials:
-      # -- Apache APISIX admin API admin role credentials
-      admin: edd1c9f034335f136f87ad84b625c8f1
-      # -- Apache APISIX admin API viewer role credentials
-      viewer: 4054f7cf07e344346cd3f287985e76a2
+      # -- Apache APISIX admin API admin role key. Leave empty to generate one.
+      admin: ""
+      # -- Apache APISIX admin API viewer role key. Leave empty to generate one.
+      viewer: ""
 
       # -- The APISIX Helm chart supports storing user credentials in a secret.
       # The secret needs to contain two keys, admin and viewer, with their respective values set.
@@ -890,10 +895,14 @@ etcd:
   # -- if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart
   auth:
     rbac:
-      # -- No authentication by default. Switch to enable RBAC authentication
+      # -- Require clients to authenticate to etcd. APISIX connects as root with the password from `rootPassword` or `existingSecret`; when both are empty, a password is generated into the Secret `<etcd fullname>`. For an existing release, read "Access to the bundled etcd" in the README first
       create: false
-      # -- root password for etcd. Requires etcd.auth.rbac.create to be true.
+      # -- Root password for etcd. Requires etcd.auth.rbac.create to be true
       rootPassword: ""
+      # -- Name of an existing Secret with the root password, used instead of rootPassword. Requires etcd.auth.rbac.create to be true
+      existingSecret: ""
+      # -- Key of existingSecret that holds the root password. The default is etcd-root-password
+      existingSecretPasswordKey: ""
     tls:
       # -- Enable TLS settings for the APISIX etcd connection. For external etcd, also use https:// endpoints in externalEtcd.host. Client certificates are optional.
       enabled: false
@@ -917,6 +926,29 @@ etcd:
     # -- etcd client service port
     port: 2379
 
+  networkPolicy:
+    # -- Accept etcd client connections from any pod. When false, only etcd's own pods and pods labelled `<etcd fullname>-client: "true"` can connect; the chart adds that label to the APISIX pods and to the jobs of the etcd chart below
+    allowExternal: false
+
+  # The jobs of the etcd chart connect to etcd too, so they carry the client label.
+  # The etcd chart renders templates in these labels, keys included. The chart
+  # refuses to render when none of these three jobs has the entry below, as with
+  # the values of chart 2.x under helm upgrade --reuse-values, so keep the entries.
+  preUpgradeJob:
+    # -- Labels of the pods of the etcd chart's pre-upgrade job
+    podLabels:
+      '{{ include "apisix.etcd.clientLabel" . }}': "true"
+  disasterRecovery:
+    cronjob:
+      # -- Labels of the pods of the etcd chart's snapshot job, used when etcd.disasterRecovery.enabled is true
+      podLabels:
+        '{{ include "apisix.etcd.clientLabel" . }}': "true"
+  defrag:
+    cronjob:
+      # -- Labels of the pods of the etcd chart's defragmentation job, used when etcd.defrag.enabled is true
+      podLabels:
+        '{{ include "apisix.etcd.clientLabel" . }}': "true"
+
   # -- Number of etcd replicas, only used when etcd.enabled is true
   replicaCount: 3
   # -- Auto compaction retention for mvcc key value store, only used when etcd.enabled is true
@@ -934,3 +966,19 @@ ingress-controller:
     # It requires APISIX version 3.17.0 or later to function correctly.
     # Ensure your cluster's APISIX deployment meets this version requirement before enabling.
     enabled: false
+  gatewayProxy:
+    # -- Name of the GatewayProxy for the bundled controller. The apisix chart creates it, with
+    # this release's Admin API Service and admin key, and the controller's IngressClass references
+    # it. Set `ingress-controller.gatewayProxy.createDefault: true` only if you want the controller
+    # chart to create its own GatewayProxy instead; its admin key must then match
+    # `apisix.admin.credentials`. Set it to `""` to leave the IngressClass without a GatewayProxy.
+    # It is rendered with `tpl` by both charts with different `.Values`, so use only `.Release.*` in it.
+    name: "{{ .Release.Name }}-config"
+    provider:
+      controlPlane:
+        auth:
+          adminKey:
+            # -- Admin key of the GatewayProxy that the controller chart creates when
+            # `createDefault` is true. There is no default; the GatewayProxy that the apisix
+            # chart creates gets this release's key automatically.
+            value: ""
