@@ -20,13 +20,16 @@
 # kubectl, helm and curl. Run from the repository root after
 # `helm dependency build charts/apisix`.
 #
-#   KEEP_NAMESPACES=1  keep the test namespace for debugging
+#   OLD_CHART_VERSION  released chart version to upgrade from (default 2.18.2)
+#   KEEP_NAMESPACES=1  keep the test namespaces for debugging
 
 set -uo pipefail
 
 HELM=${HELM:-helm}
 CHART=${CHART:-charts/apisix}
 NS=etcd-e2e
+NAMESPACES=(etcd-e2e etcd-e2e-upgrade)
+OLD_CHART_VERSION=${OLD_CHART_VERSION:-2.18.2}
 random_letters() { LC_ALL=C tr -dc 'A-Za-z' </dev/urandom | head -c "$1"; }
 ADMIN_KEY=$(random_letters 32)
 ROOT_PASSWORD=$(random_letters 24)
@@ -43,8 +46,10 @@ PF_PIDS=()
 cleanup() {
   stop_port_forwards
   if [ "${KEEP_NAMESPACES:-}" != 1 ]; then
-    $HELM uninstall --namespace "$NS" apisix --wait >/dev/null 2>&1
-    kubectl delete namespace "$NS" --wait=false >/dev/null 2>&1
+    for ns in "${NAMESPACES[@]}"; do
+      $HELM uninstall --namespace "$ns" apisix --wait >/dev/null 2>&1
+      kubectl delete namespace "$ns" --wait=false >/dev/null 2>&1
+    done
   fi
 }
 trap cleanup EXIT
@@ -111,7 +116,7 @@ routes_in_etcd() { # routes_in_etcd [etcdctl flags...]: number of route keys etc
   local out
   out=$(kubectl --namespace "$NS" exec apisix-etcd-0 -- env -u ETCDCTL_USER etcdctl "$@" get /apisix/routes --prefix --keys-only 2>&1) ||
     { echo "       etcdctl failed: $(tail -1 <<<"$out")" >&2; return 1; }
-  grep -c '^/apisix/routes/' <<<"$out"
+  grep -c '^/apisix/routes/.' <<<"$out"   # route keys, not the /apisix/routes/ key that APISIX creates
 }
 refuses_anonymous() { # etcdctl without credentials fails with etcd's own error, not because the command is broken
   local out
@@ -122,8 +127,10 @@ refuses_anonymous() { # etcdctl without credentials fails with etcd's own error,
 }
 
 upgrade() { $HELM upgrade apisix "$CHART" --namespace "$NS" "${COMMON[@]}" "$@" >/dev/null; }
+namespace_gone() { ! kubectl get namespace "$NS" >/dev/null 2>&1; }
 
 echo "# the bundled etcd accepts only the APISIX pods"
+wait_for 300 namespace_gone || { echo "the namespace $NS of an earlier run still exists" >&2; exit 1; }
 kubectl create namespace "$NS" >/dev/null
 $HELM install apisix "$CHART" --namespace "$NS" "${COMMON[@]}" >/dev/null
 check "install with the defaults succeeds" is $? 0
@@ -152,11 +159,40 @@ check "APISIX still writes to etcd" writes third
 
 echo "# turn etcd authentication off again, as the README describes"
 auth_disable() { kubectl --namespace "$NS" exec apisix-etcd-0 -- etcdctl --user "root:$ROOT_PASSWORD" auth disable >/dev/null; }
+delete_root() { kubectl --namespace "$NS" exec apisix-etcd-0 -- etcdctl user delete root >/dev/null; }
 check "authentication is turned off in etcd" auth_disable
+check "the root user is deleted" delete_root
 check "upgrade with RBAC off succeeds" upgrade --set etcd.auth.rbac.create=false
 check "connected to the Admin API" connect
 check "APISIX writes to etcd without a password" writes fourth
 check "etcd lists the routes without credentials again" is "$(routes_in_etcd)" 4
+
+echo "# turn etcd authentication on again"
+check "upgrade with RBAC and the existing Secret succeeds again" \
+  upgrade --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
+check "connected to the Admin API" connect
+check "APISIX writes to etcd with the password again" writes fifth
+check "etcd accepts root with the password again" is "$(routes_in_etcd --user "root:$ROOT_PASSWORD")" 5
+check "etcd refuses a client without credentials again" refuses_anonymous
+
+echo "# upgrade a $OLD_CHART_VERSION release that uses the bundled etcd"
+NS=etcd-e2e-upgrade
+OLD_KEYS=(--set apisix.admin.credentials.admin="$ADMIN_KEY" --set apisix.admin.credentials.viewer="$(random_letters 32)")
+$HELM repo add apisix https://apache.github.io/apisix-helm-chart >/dev/null 2>&1
+$HELM repo update apisix >/dev/null 2>&1
+wait_for 300 namespace_gone || { echo "the namespace $NS of an earlier run still exists" >&2; exit 1; }
+kubectl create namespace "$NS" >/dev/null
+$HELM install apisix apisix/apisix --version "$OLD_CHART_VERSION" --namespace "$NS" "${OLD_KEYS[@]}" \
+  --set etcd.replicaCount=1 --wait --timeout 10m >/dev/null
+check "chart $OLD_CHART_VERSION installs with the bundled etcd" is $? 0
+check "connected to the Admin API" connect
+check "APISIX writes to etcd before the upgrade" writes before-upgrade
+check "before the upgrade, a pod without the client label can reach etcd" reaches_etcd outsider
+check "upgrade to this chart succeeds" upgrade "${OLD_KEYS[@]}"
+check "connected to the Admin API" connect
+check "APISIX writes to etcd after the upgrade" writes after-upgrade
+check "after the upgrade, a pod with the client label can reach etcd" reaches_etcd labelled apisix-etcd-client=true
+check "after the upgrade, a pod without the label cannot" blocked outsider
 
 echo
 echo "passed: $passed, failed: $failed"
