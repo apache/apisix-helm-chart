@@ -1,0 +1,52 @@
+{{- if and .Values.networkPolicy.apisix.enabled (or .Values.networkPolicy.apisix.ingress.enabled .Values.networkPolicy.apisix.egress.enabled) }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "apisix.fullname" . }}-apisix
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "apisix.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "apisix.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+  {{- if .Values.networkPolicy.apisix.ingress.enabled }}
+    - Ingress
+  {{- end }}
+  {{- if .Values.networkPolicy.apisix.egress.enabled }}
+    - Egress
+  {{- end }}
+  {{- if .Values.networkPolicy.apisix.ingress.enabled }}
+  ingress:
+    - ports:
+      {{- range .Values.networkPolicy.apisix.ingress.ports }}
+        - protocol: TCP
+          port: {{ . }}
+      {{- end }}
+      {{- with .Values.networkPolicy.apisix.ingress.from }}
+      from:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- end }}
+  {{- if .Values.networkPolicy.apisix.egress.enabled }}
+  egress:
+    {{- if .Values.networkPolicy.apisix.egress.allowDNS }}
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    {{- end }}
+    {{- with .Values.networkPolicy.apisix.egress.to }}
+    - to:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+  {{- end }}
+{{- end }}
