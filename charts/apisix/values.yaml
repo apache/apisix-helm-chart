@@ -928,6 +928,15 @@ etcd:
 ingress-controller:
   # -- Enable the apisix-ingress-controller sub-chart
   enabled: false
+  crds:
+    # -- Install APISIX Ingress Controller CRDs. Existing CRDs are retained on uninstall.
+    install: true
+    upgrade:
+      # -- Render CRD changes during Helm upgrades. Keep false when CRDs are managed by the platform.
+      enabled: false
+    gatewayAPI:
+      # -- Enable or disable installing the Gateway API standard channel CRDs.
+      enabled: false
   webhook:
     # Specifies whether to enable the validation webhook.
     # Note: This feature relies on the '/apisix/admin/configs/validate' endpoint.
