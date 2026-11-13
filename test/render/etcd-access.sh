@@ -77,6 +77,20 @@ etcd_password_ref() { # "<secret>/<key>" that etcd reads its root password from:
   file=$(yq '.spec.template.spec.containers[] | select(.name == "etcd") | .env[] | select(.name == "ETCD_ROOT_PASSWORD_FILE") | .value' <<<"$sts")
   echo "$secret/${file##*/}"
 }
+policy() { yq "select(.kind == \"NetworkPolicy\" and .metadata.name == \"$1\")" <<<"$OUT"; }
+open_client_rules() { # open_client_rules <policy name>: ingress rules that admit any pod to the client or peer port
+  policy "$1" | yq '[.spec.ingress[] | select((.from // []) | length == 0)
+    | select((.ports // [{"port": 2379}]) | map(.port) | any_c(. == 2379 or . == 2380))] | length'
+}
+longest_label() { # the longest label key of the pods of the chart and of the etcd chart's jobs
+  yq 'select(.kind == "Deployment" or .kind == "DaemonSet" or .kind == "Job") | .spec.template.metadata.labels | keys | .[]' <<<"$OUT" |
+    awk '{ if (length($0) > m) m = length($0) } END { print m + 0 }'
+}
+fails_with() { # fails_with <message part> <release> [helm args...]
+  local text=$1; shift
+  if render "$@" 2>/dev/null; then echo "       rendered without an error" >&2; return 1; fi
+  grep -qF -- "$text" <<<"$ERR" || { echo "       error was: $ERR" >&2; return 1; }
+}
 etcd_config() { yq 'select(.kind == "ConfigMap" and .data["config.yaml"] != null) | .data["config.yaml"]' <<<"$OUT" | yq "$1"; }
 secret_exists() { [ -n "$(yq "select(.kind == \"Secret\" and .metadata.name == \"$1\") | .metadata.name" <<<"$OUT")" ]; }
 no_secret() { ! secret_exists "$1"; }
@@ -88,7 +102,25 @@ check "default: the APISIX pods carry the etcd client label" is "$(pod_label api
 check "default: etcd accepts only the client label and its own pods" is "$(policy_from apisix-etcd)" \
   '[{"podSelector":{"matchLabels":{"apisix-etcd-client":"true"}}},{"podSelector":{"matchLabels":{"app.kubernetes.io/instance":"apisix","app.kubernetes.io/name":"etcd","app.kubernetes.io/component":"etcd"}}}]'
 
+check "default: no rule admits any pod to the client or peer port" is "$(open_client_rules apisix-etcd)" 0
 check "default: the etcd chart's pre-upgrade job carries the label too" is "$(job_label apisix-etcd-pre-upgrade apisix-etcd-client)" true
+
+check "metrics on the client port: fails" fails_with "etcd.metrics.enabled serves the metrics on the etcd client port" \
+  apisix --set etcd.metrics.enabled=true
+check "metrics on a port of their own: renders" render apisix --set etcd.metrics.enabled=true --set etcd.metrics.useSeparateEndpoint=true
+check "metrics on a port of their own: no rule admits any pod to the client or peer port" is "$(open_client_rules apisix-etcd)" 0
+check "metrics on the client port with allowExternal: renders" render apisix --set etcd.metrics.enabled=true \
+  --set etcd.networkPolicy.allowExternal=true
+check "metrics with the NetworkPolicy turned off: renders" render apisix --set etcd.metrics.enabled=true \
+  --set etcd.networkPolicy.enabled=false
+
+LONG_RELEASE=apisix-$(printf '%046d' 0 | tr 0 a)   # 53 characters, the longest name Helm allows
+check "a long release name: fails, the client label would be too long" fails_with "but a label key has at most 63 characters" \
+  "$LONG_RELEASE"
+check "a long etcd.fullnameOverride: fails as well" fails_with "but a label key has at most 63 characters" \
+  apisix --set etcd.fullnameOverride="etcd-$(printf '%052d' 0 | tr 0 b)"
+check "a long release name with allowExternal: renders" render "$LONG_RELEASE" --set etcd.networkPolicy.allowExternal=true
+check "a long release name with allowExternal: every label key is valid" bash -c '[ "$1" -le 63 ]' _ "$(longest_label)"
 
 check "etcd jobs: renders" render apisix --set etcd.disasterRecovery.enabled=true \
   --set etcd.disasterRecovery.pvc.existingClaim=snapshots --set etcd.defrag.enabled=true

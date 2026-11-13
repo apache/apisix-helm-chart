@@ -218,7 +218,24 @@ etcd:
 
 With `rootPassword` or a generated password instead, the upgrade of an existing release changes
 nothing and fails when `--timeout` expires: the etcd chart's pre-upgrade job waits for the password
-Secret, which only the upgrade itself would create.
+Secret, which only the upgrade itself would create. During the upgrade with `existingSecret`, the new
+APISIX pods restart until etcd requires the password, and Admin API requests can fail meanwhile (for
+about 20 seconds in a test on kind); the gateway keeps serving its routes.
+
+Once etcd requires authentication, do not roll back to a revision without it. etcd keeps
+authentication on, so the APISIX pods of that revision, which connect without a password, cannot
+read their configuration, and the gateway stops routing requests. To turn authentication off again,
+first turn it off in etcd, then upgrade with `etcd.auth.rbac.create: false`:
+
+```shell
+kubectl exec apisix-etcd-0 -- etcdctl --user "root:$ROOT_PASSWORD" auth disable
+```
+
+If you turn on the metrics of the etcd chart, also set `etcd.metrics.useSeparateEndpoint: true`.
+Otherwise etcd serves the metrics on its client port, and the etcd chart opens that port to every
+pod; the chart refuses to render that combination unless `etcd.networkPolicy.allowExternal` is
+true. It also refuses to render when the release name or `etcd.fullnameOverride` is so long that the
+client label has more than the 63 characters that Kubernetes allows.
 
 ## Configure the wait-etcd init container
 

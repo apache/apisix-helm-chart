@@ -154,6 +154,36 @@ Return the password key name of etcd secret
 {{- end -}}
 
 {{/*
+The label that lets pods through the NetworkPolicy of the bundled etcd:
+`<etcd fullname>-client`, as the etcd chart writes it. A label key has at most
+63 characters, so a longer one is shortened; "apisix.etcd.validate" makes sure
+that this only happens when the NetworkPolicy does not use the label.
+Call it with the context of the etcd chart.
+*/}}
+{{- define "apisix.etcd.clientLabel" -}}
+{{- printf "%s-client" (include "common.names.fullname" . | trunc 56 | trimSuffix "-") -}}
+{{- end -}}
+
+{{/*
+Fail on values for the bundled etcd that would open it to every pod, or that
+its NetworkPolicy cannot handle.
+*/}}
+{{- define "apisix.etcd.validate" -}}
+{{- if .Values.etcd.enabled -}}
+{{- $etcd := .Subcharts.etcd.Values -}}
+{{- if and $etcd.networkPolicy.enabled (not $etcd.networkPolicy.allowExternal) -}}
+{{- $label := printf "%s-client" (include "common.names.fullname" .Subcharts.etcd) -}}
+{{- if gt (len $label) 63 -}}
+{{- fail (printf "The NetworkPolicy of the bundled etcd admits pods labelled %s, but a label key has at most 63 characters. Use a shorter release name or etcd.fullnameOverride for a new release, or set etcd.networkPolicy.allowExternal: true" $label) -}}
+{{- end -}}
+{{- if and $etcd.metrics.enabled (not $etcd.metrics.useSeparateEndpoint) -}}
+{{- fail "etcd.metrics.enabled serves the metrics on the etcd client port, and the etcd chart then opens that port to every pod. Set etcd.metrics.useSeparateEndpoint: true to serve them on a port of their own, or etcd.networkPolicy.allowExternal: true" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Key to use to fetch admin token from secret
 */}}
 {{- define "apisix.admin.credentials.secretAdminKey" -}}

@@ -107,11 +107,19 @@ reaches_etcd() { is "$(probe_etcd "$@")" REACHED; }
 # failure means the probe itself is broken
 blocked() { is "$(probe_etcd "$@")" TIMEOUT; }
 
-routes_in_etcd() { # routes_in_etcd [etcdctl flags...]: number of route keys etcdctl in the etcd pod can list
-  kubectl --namespace "$NS" exec apisix-etcd-0 -- env -u ETCDCTL_USER etcdctl "$@" get /apisix/routes --prefix --keys-only 2>/dev/null |
-    grep -c '^/apisix/routes/'
+routes_in_etcd() { # routes_in_etcd [etcdctl flags...]: number of route keys etcdctl in the etcd pod lists; fails if etcdctl fails
+  local out
+  out=$(kubectl --namespace "$NS" exec apisix-etcd-0 -- env -u ETCDCTL_USER etcdctl "$@" get /apisix/routes --prefix --keys-only 2>&1) ||
+    { echo "       etcdctl failed: $(tail -1 <<<"$out")" >&2; return 1; }
+  grep -c '^/apisix/routes/' <<<"$out"
 }
-refuses_anonymous() { is "$(routes_in_etcd)" 0; }
+refuses_anonymous() { # etcdctl without credentials fails with etcd's own error, not because the command is broken
+  local out
+  if out=$(kubectl --namespace "$NS" exec apisix-etcd-0 -- env -u ETCDCTL_USER etcdctl get /apisix/routes --prefix --keys-only 2>&1); then
+    echo "       etcdctl without credentials succeeded" >&2; return 1
+  fi
+  grep -q "user name is empty" <<<"$out" || { echo "       unexpected error: $(tail -1 <<<"$out")" >&2; return 1; }
+}
 
 upgrade() { $HELM upgrade apisix "$CHART" --namespace "$NS" "${COMMON[@]}" "$@" >/dev/null; }
 
@@ -135,12 +143,20 @@ check "upgrade with RBAC and the root password in an existing Secret succeeds" \
   upgrade --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
 check "connected to the Admin API" connect
 check "APISIX writes to etcd with the password" writes second
-check "etcd refuses a client without credentials" refuses_anonymous
 check "etcd accepts root with the password" is "$(routes_in_etcd --user "root:$ROOT_PASSWORD")" 2
+check "etcd refuses a client without credentials" refuses_anonymous
 check "a later upgrade with the same values succeeds" \
   upgrade --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
 check "connected to the Admin API" connect
 check "APISIX still writes to etcd" writes third
+
+echo "# turn etcd authentication off again, as the README describes"
+auth_disable() { kubectl --namespace "$NS" exec apisix-etcd-0 -- etcdctl --user "root:$ROOT_PASSWORD" auth disable >/dev/null; }
+check "authentication is turned off in etcd" auth_disable
+check "upgrade with RBAC off succeeds" upgrade --set etcd.auth.rbac.create=false
+check "connected to the Admin API" connect
+check "APISIX writes to etcd without a password" writes fourth
+check "etcd lists the routes without credentials again" is "$(routes_in_etcd)" 4
 
 echo
 echo "passed: $passed, failed: $failed"

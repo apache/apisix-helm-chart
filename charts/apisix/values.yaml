@@ -932,17 +932,17 @@ etcd:
   preUpgradeJob:
     # -- Labels of the pods of the etcd chart's pre-upgrade job
     podLabels:
-      '{{ include "common.names.fullname" . }}-client': "true"
+      '{{ include "apisix.etcd.clientLabel" . }}': "true"
   disasterRecovery:
     cronjob:
       # -- Labels of the pods of the etcd chart's snapshot job, used when etcd.disasterRecovery.enabled is true
       podLabels:
-        '{{ include "common.names.fullname" . }}-client': "true"
+        '{{ include "apisix.etcd.clientLabel" . }}': "true"
   defrag:
     cronjob:
       # -- Labels of the pods of the etcd chart's defragmentation job, used when etcd.defrag.enabled is true
       podLabels:
-        '{{ include "common.names.fullname" . }}-client': "true"
+        '{{ include "apisix.etcd.clientLabel" . }}': "true"
 
   # -- Number of etcd replicas, only used when etcd.enabled is true
   replicaCount: 3
