@@ -57,6 +57,7 @@ spec:
         {{- end }}
       {{- end }}
       serviceAccountName: {{ include "apisix.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- . | toYaml | nindent 8 }}
