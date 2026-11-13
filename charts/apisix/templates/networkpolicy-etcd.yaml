@@ -1,0 +1,52 @@
+{{- if and .Values.etcd.enabled .Values.networkPolicy.etcd.enabled (or .Values.networkPolicy.etcd.ingress.enabled .Values.networkPolicy.etcd.egress.enabled) }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "apisix.fullname" . }}-etcd
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "apisix.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: etcd
+  policyTypes:
+  {{- if .Values.networkPolicy.etcd.ingress.enabled }}
+    - Ingress
+  {{- end }}
+  {{- if .Values.networkPolicy.etcd.egress.enabled }}
+    - Egress
+  {{- end }}
+  {{- if .Values.networkPolicy.etcd.ingress.enabled }}
+  ingress:
+    - ports:
+      {{- range .Values.networkPolicy.etcd.ingress.ports }}
+        - protocol: TCP
+          port: {{ . }}
+      {{- end }}
+      {{- with .Values.networkPolicy.etcd.ingress.from }}
+      from:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- end }}
+  {{- if .Values.networkPolicy.etcd.egress.enabled }}
+  egress:
+    {{- if .Values.networkPolicy.etcd.egress.allowDNS }}
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    {{- end }}
+    {{- with .Values.networkPolicy.etcd.egress.to }}
+    - to:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

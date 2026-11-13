@@ -974,3 +974,50 @@ ingress-controller:
     # It requires APISIX version 3.17.0 or later to function correctly.
     # Ensure your cluster's APISIX deployment meets this version requirement before enabling.
     enabled: false
+
+# -- Network policy settings for the APISIX release. Each component has independent ingress/egress switches.
+networkPolicy:
+  apisix:
+    enabled: true
+    ingress:
+      enabled: true
+      # Empty means any source. Restrict this list for the Admin API and gateway in your cluster.
+      from: []
+      ports:
+        - 9080
+        - 9443
+        - 9180
+        - 9090
+        - 7085
+    egress:
+      enabled: true
+      # Kubernetes DNS is always allowed when this is true.
+      allowDNS: true
+      to:
+        - {}
+  etcd:
+    enabled: true
+    ingress:
+      enabled: true
+      from: []
+      ports:
+        - 2379
+        - 2380
+    egress:
+      enabled: true
+      allowDNS: true
+      to:
+        - {}
+  ingressController:
+    enabled: true
+    ingress:
+      enabled: true
+      from: []
+      ports:
+        - 8080
+        - 8081
+        - 9443
+    egress:
+      enabled: true
+      allowDNS: true
+      to: []
