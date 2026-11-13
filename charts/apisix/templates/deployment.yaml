@@ -175,25 +175,34 @@ spec:
               protocol: TCP
             {{- end}}
 
-          {{- if ne (include "apisix.deployment.role" $) "control_plane" }}
-          readinessProbe:
-            failureThreshold: 6
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            {{- if $useTraditionalYaml }}
+          {{- if .Values.apisix.status.enabled }}
+          startupProbe:
             httpGet:
               path: /status/ready
-              port: {{ default 7085 .Values.apisix.status.port }}
-            {{- else }}
-            tcpSocket:
-              port: {{ .Values.service.http.containerPort }}
-            {{- end}}
-            timeoutSeconds: 1
+              port: status
+            failureThreshold: 60
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: status
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /status/ready
+              port: status
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 6
           {{- end }}
           {{- with .Values.lifecycle }}
           lifecycle:
-            {{- toYaml . | nindent 12 }}
+            {{- tpl (. | toYaml) $ | nindent 12 }}
           {{- end }}
           volumeMounts:
           {{- if eq .Values.apisix.deployment.mode "standalone" }}
