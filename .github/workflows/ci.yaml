@@ -39,6 +39,9 @@ jobs:
                   --charts charts/apisix-dashboard \
                   --charts charts/apisix-ingress-controller'
 
+      - name: Test ingress controller rendered defaults
+        run: bash test/ingress-controller-config-defaults.sh
+
       - name: fix permissions
         run: |
           sudo mkdir -p $HOME/.kube
