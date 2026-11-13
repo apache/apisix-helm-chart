@@ -981,6 +981,12 @@ ingress-controller:
       namespace: ""
       name: ""
       port: 9180
+  crds:
+    install: true
+    upgrade:
+      enabled: false
+    gatewayAPI:
+      enabled: false
   webhook:
     # Specifies whether to enable the validation webhook.
     # Note: This feature relies on the '/apisix/admin/configs/validate' endpoint.

@@ -197,6 +197,11 @@ gatewayProxy:
     # - "10.0.0.2"
 
 crds:
+  # -- Install APISIX Ingress Controller CRDs on chart install. Existing CRDs are retained on uninstall.
+  install: true
+  upgrade:
+    # -- Render CRD changes during Helm upgrades. Keep false when CRDs are managed by the platform.
+    enabled: false
   gatewayAPI:
     # -- Enable or disable installing the Gateway API standard channel CRDs
     enabled: true
