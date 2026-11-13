@@ -154,7 +154,7 @@ check "values of chart 2.x, as --reuse-values renders them: fails" with_values \
   "$OLD_ETCD" fails_with "$OLD_VALUES_ERROR" apisix
 check "values of chart 2.x with labels of their own on the pre-upgrade job: fails too" with_values \
   "$OLD_ETCD"' | .etcd.preUpgradeJob.podLabels = {"team": "gateway"}' fails_with "$OLD_VALUES_ERROR" apisix
-check "values of chart 2.x with the client label set by hand on the pre-upgrade job: fails too" with_values \
+check "values of chart 2.x with the rendered client label set by hand on the pre-upgrade job: fails too" with_values \
   "$OLD_ETCD"' | .etcd.preUpgradeJob.podLabels = {"apisix-etcd-client": "true"}' fails_with "$OLD_VALUES_ERROR" apisix
 check "values of chart 2.x with the pre-upgrade job turned off: fails too" with_values \
   "$OLD_ETCD"' | .etcd.preUpgradeJob = {"enabled": false}' fails_with "$OLD_VALUES_ERROR" apisix

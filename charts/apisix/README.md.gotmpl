@@ -255,7 +255,8 @@ Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy
   pods on other nodes from the address of its tunnel device, which the network plugin takes from the
   pod address range: with Calico in IPIP or VXLAN mode, the address in the node annotation
   `projectcalico.org/IPv4IPIPTunnelAddr` or `projectcalico.org/IPv4VXLANTunnelAddr`, and with
-  Calico's WireGuard encryption on, the one in `projectcalico.org/IPv4WireguardInterfaceAddr`; with
+  Calico's WireGuard encryption on, the one in `projectcalico.org/IPv4WireguardInterfaceAddr` (with
+  its host encryption on, Calico sets no such address and the node's own address applies); with
   Flannel in VXLAN mode (also used by Canal, k3s and RKE2), the first address of the node's
   `spec.podCIDR`, such as `10.42.1.0` for `10.42.1.0/24`. List those addresses as well. Some network plugins do not
   match node addresses with `ipBlock` rules at all, for example Cilium in its default configuration;
