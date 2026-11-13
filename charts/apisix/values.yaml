@@ -29,8 +29,8 @@ image:
   pullPolicy: IfNotPresent
   # -- Apache APISIX image tag.
   tag: 3.19.0-ubuntu
-  # -- Immutable multi-architecture manifest digest for the pinned tag.
-  digest: "sha256:bb4958b943949b3543353481eff1333e10b3323c6095dd0af4406de2b8cf738e"
+  # -- Immutable multi-architecture manifest digest for the pinned tag. Set this in the release values after verifying it in your registry.
+  digest: ""
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
