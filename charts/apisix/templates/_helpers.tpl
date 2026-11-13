@@ -176,13 +176,15 @@ its NetworkPolicy cannot handle.
      version before 3.0.0 renders with the default values of that version,
      which have none of these entries and leave etcd open to every pod; before
      2.12 they even turn the NetworkPolicy off, so this check does not depend
-     on it. Look for the key as it is written in values.yaml */}}
+     on it. Look for the key as it is written in values.yaml. Keep that text in
+     later chart versions: --reuse-values from 3.x renders with the values of the
+     version it upgrades from, and a changed key would look like values of 2.x */}}
 {{- $clientLabelKey := "{{ include \"apisix.etcd.clientLabel\" . }}" -}}
 {{- $preUpgradeJobLabelled := hasKey (get $etcd.preUpgradeJob "podLabels" | default dict) $clientLabelKey -}}
 {{- $cronJobsLabelled := or (hasKey (dig "cronjob" "podLabels" dict $etcd.disasterRecovery) $clientLabelKey) (hasKey (dig "cronjob" "podLabels" dict $etcd.defrag) $clientLabelKey) -}}
 {{- $clientLabel := include "apisix.etcd.clientLabel" .Subcharts.etcd -}}
 {{- if not (or $preUpgradeJobLabelled $cronJobsLabelled) -}}
-{{- fail (printf "None of the podLabels of the etcd chart's jobs (etcd.preUpgradeJob, etcd.disasterRecovery.cronjob and etcd.defrag.cronjob) has the entry that this chart's values.yaml sets there for the label %s, so the values of this release probably come from an earlier chart version. helm upgrade --reuse-values does that, and so does spec.upgrade.preserveValues: true in Flux: Helm then renders with the default values of the chart version you upgrade from, which before 3.0.0 leave etcd open to every pod. Upgrade with --reset-then-reuse-values (Helm 3.14 or later) or pass your values again with -f; in Flux, set spec.upgrade.preserveValues: false" $clientLabel) -}}
+{{- fail (printf "None of the podLabels of the etcd chart's jobs (etcd.preUpgradeJob, etcd.disasterRecovery.cronjob and etcd.defrag.cronjob) has the entry that this chart's values.yaml sets there for the label %s, so the values of this release probably come from an earlier chart version. helm upgrade --reuse-values does that, and so does spec.upgrade.preserveValues: true in Flux: Helm then renders with the default values of the chart version you upgrade from, which before 3.0.0 leave etcd open to every pod; adding those entries by hand does not change that, because the other defaults of that version, such as etcd.networkPolicy.allowExternal: true, still apply. Upgrade with --reset-then-reuse-values (Helm 3.14 or later) or pass your values again with -f; in Flux, set spec.upgrade.preserveValues: false. If your own values set those podLabels to null, keep the entries instead" $clientLabel) -}}
 {{- end -}}
 {{- if and $etcd.networkPolicy.enabled (not $etcd.networkPolicy.allowExternal) -}}
 {{- /* the CronJobs need no such check: the etcd chart itself fails to render

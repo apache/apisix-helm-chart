@@ -182,8 +182,10 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
   render with the default values of the chart version you upgrade from, in which etcd accepts every
   pod, so the chart refuses to render (from 2.0 to 2.7, the etcd chart's image check fails first).
   Use `--reset-then-reuse-values` (Helm 3.14 or later), or pass your values again;
-  `helm get values <release> --namespace <namespace> -o yaml` prints the ones you set. In Flux, set
-  `spec.upgrade.preserveValues: false`.
+  `helm get values <release> --namespace <namespace> -o yaml` prints the ones you set. Don't add
+  `--all`: its output also holds the defaults of the old version, among them
+  `etcd.networkPolicy.allowExternal: true`, which keeps etcd open to every pod without an error. In
+  Flux, set `spec.upgrade.preserveValues: false`.
 * The chart now refuses to render `etcd.metrics.enabled` with the metrics on the client port, a
   release name, `etcd.nameOverride` or `etcd.fullnameOverride` that makes the etcd client label
   longer than 63 characters, and `hostNetwork: true` without an `etcd.networkPolicy.extraIngress`
@@ -252,9 +254,10 @@ Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy
   Without encapsulation, a node connects from its own address. With encapsulation, it connects to
   pods on other nodes from the address of its tunnel device, which the network plugin takes from the
   pod address range: with Calico in IPIP or VXLAN mode, the address in the node annotation
-  `projectcalico.org/IPv4IPIPTunnelAddr` or `projectcalico.org/IPv4VXLANTunnelAddr`; with Flannel in
-  VXLAN mode (also used by Canal, k3s and RKE2), the first address of the node's `spec.podCIDR`,
-  such as `10.42.1.0` for `10.42.1.0/24`. List those addresses as well. Some network plugins do not
+  `projectcalico.org/IPv4IPIPTunnelAddr` or `projectcalico.org/IPv4VXLANTunnelAddr`, and with
+  Calico's WireGuard encryption on, the one in `projectcalico.org/IPv4WireguardInterfaceAddr`; with
+  Flannel in VXLAN mode (also used by Canal, k3s and RKE2), the first address of the node's
+  `spec.podCIDR`, such as `10.42.1.0` for `10.42.1.0/24`. List those addresses as well. Some network plugins do not
   match node addresses with `ipBlock` rules at all, for example Cilium in its default configuration;
   use `allowExternal: true` there, and consider etcd authentication, described below.
 
@@ -278,10 +281,13 @@ To turn authentication on for an existing release, create the Secret with the pa
 upgrade:
 
 ```shell
-LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24 |
+openssl rand -hex 16 | tr -d '\n' |
   kubectl create secret generic apisix-etcd-auth --namespace <namespace> \
     --from-file=etcd-root-password=/dev/stdin
 ```
+
+The password must not end with a newline: to use one of your own, pipe it with `printf '%s'`, not
+with `echo`.
 
 ```yaml
 etcd:

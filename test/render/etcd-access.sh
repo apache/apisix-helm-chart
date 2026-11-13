@@ -154,12 +154,17 @@ check "values of chart 2.x, as --reuse-values renders them: fails" with_values \
   "$OLD_ETCD" fails_with "$OLD_VALUES_ERROR" apisix
 check "values of chart 2.x with labels of their own on the pre-upgrade job: fails too" with_values \
   "$OLD_ETCD"' | .etcd.preUpgradeJob.podLabels = {"team": "gateway"}' fails_with "$OLD_VALUES_ERROR" apisix
+check "values of chart 2.x with the client label set by hand on the pre-upgrade job: fails too" with_values \
+  "$OLD_ETCD"' | .etcd.preUpgradeJob.podLabels = {"apisix-etcd-client": "true"}' fails_with "$OLD_VALUES_ERROR" apisix
 check "values of chart 2.x with the pre-upgrade job turned off: fails too" with_values \
   "$OLD_ETCD"' | .etcd.preUpgradeJob = {"enabled": false}' fails_with "$OLD_VALUES_ERROR" apisix
 check "values of chart 2.x before 2.12, with the NetworkPolicy turned off: fails too" with_values \
   "$OLD_ETCD"' | .etcd.networkPolicy = {"enabled": false}' fails_with "$OLD_VALUES_ERROR" apisix
 check "values of chart 2.x before 2.16: the check runs before the templates that need newer values" with_values \
   "$OLD_ETCD"' | del(.apisix.proxyProtocol)' fails_with "$OLD_VALUES_ERROR" apisix
+check "the entries keep the key that releases of 3.x store, which --reuse-values brings back" is \
+  "$(yq '[.etcd.preUpgradeJob.podLabels, .etcd.disasterRecovery.cronjob.podLabels, .etcd.defrag.cronjob.podLabels] | map(keys | join(",")) | join(";")' "$CHART/values.yaml")" \
+  '{{ include "apisix.etcd.clientLabel" . }};{{ include "apisix.etcd.clientLabel" . }};{{ include "apisix.etcd.clientLabel" . }}'
 check "pre-upgrade job without the client label: fails, it could not reach etcd" \
   fails_with "etcd.preUpgradeJob.podLabels lacks the entry" apisix --set etcd.preUpgradeJob.podLabels=null
 check "pre-upgrade job turned off: renders" render apisix --set etcd.preUpgradeJob.enabled=false
