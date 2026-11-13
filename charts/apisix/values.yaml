@@ -27,9 +27,10 @@ image:
   repository: apache/apisix
   # -- Apache APISIX image pull policy
   pullPolicy: IfNotPresent
-  # -- Apache APISIX image tag
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- Apache APISIX image tag.
   tag: 3.19.0-ubuntu
+  # -- Immutable multi-architecture manifest digest for the pinned tag.
+  digest: "sha256:bb4958b943949b3543353481eff1333e10b3323c6095dd0af4406de2b8cf738e"
 
 # -- set false to use `Deployment`, set true to use `DaemonSet`
 useDaemonSet: false
@@ -873,17 +874,18 @@ externalEtcd:
 # -- etcd configuration
 # use the FQDN address or the IP of the etcd
 etcd:
-  # -- install built-in etcd by default, set false if do not want to install built-in etcd together,
+  # -- Install the bundled etcd. Production deployments should use external etcd and keep this false.
   # this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes,
   # if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it.
-  enabled: true
+  enabled: false
   # -- docker image for built-in etcd
   image:
     registry: docker.io
     repository: bitnamilegacy/etcd
-    # -- `bitnamilegacy/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267,
-    # you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags.
-    tag: latest
+    # -- Pinned etcd image tag. Override repository and digest for your registry.
+    tag: 3.5.17-debian-12-r2
+    # -- Optional immutable etcd image digest.
+    digest: ""
 
   # -- apisix configurations prefix
   prefix: "/apisix"
