@@ -147,6 +147,7 @@ The same for container level, you need to set:
 | deployment.topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |
 | fullnameOverride | string | `""` |  |
 | gatewayProxy.createDefault | bool | `false` | Controls whether to create a default GatewayProxy custom resource. |
+| gatewayProxy.name | string | `""` | Name of the GatewayProxy that the IngressClass references, in the release namespace. Defaults to `<release name>-config`. Rendered with `tpl`. Set it with `createDefault: false` to reference a GatewayProxy that is created outside this chart, for example by the apisix chart. |
 | gatewayProxy.pluginMetadata | object | `{}` | Global plugin metadata shared by all instances of the same plugin. |
 | gatewayProxy.plugins | list | `[]` | List of global plugins to be enabled on the GatewayProxy. |
 | gatewayProxy.provider | object | `{"controlPlane":{"auth":{"adminKey":{"value":"edd1c9f034335f136f87ad84b625c8f1","valueFrom":{}},"type":"AdminKey"},"endpoints":[],"service":{"name":"","port":9180}},"type":"ControlPlane"}` | Configuration for the GatewayProxy provider connection |
