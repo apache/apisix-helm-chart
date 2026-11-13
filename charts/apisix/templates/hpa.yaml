@@ -1,3 +1,4 @@
+{{- define "apisix.hpa" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -66,4 +67,17 @@ spec:
     {{- end }}
 
   {{- end}}
+{{- end }}
+
+{{- end }}
+
+{{- if eq .Values.apisix.deployment.mode "decoupled" }}
+{{- if .Values.apisix.deployment.controlPlane.enabled }}
+{{ include "apisix.hpa" (merge (dict "componentRole" "control_plane" "componentName" "control-plane") .) }}
+{{- end }}
+{{- if .Values.apisix.deployment.dataPlane.enabled }}
+{{ include "apisix.hpa" (merge (dict "componentRole" "data_plane" "componentName" "data-plane") .) }}
+{{- end }}
+{{- else }}
+{{ include "apisix.hpa" . }}
 {{- end }}

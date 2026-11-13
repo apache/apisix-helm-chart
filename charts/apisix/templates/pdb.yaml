@@ -1,3 +1,4 @@
+{{- define "apisix.pdb" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -27,12 +28,27 @@ metadata:
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
-{{- if .Values.podDisruptionBudget.minAvailable }}
+{{- if ne (toString .Values.podDisruptionBudget.minAvailable) "" }}
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
-{{- else }}
+{{- else if ne (toString .Values.podDisruptionBudget.maxUnavailable) "" }}
   maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+{{- else }}
+  maxUnavailable: 1
 {{- end }}
   selector:
     matchLabels:
 {{- include "apisix.selectorLabels" . | nindent 6 }}
+{{- end }}
+
+{{- end }}
+
+{{- if eq .Values.apisix.deployment.mode "decoupled" }}
+{{- if .Values.apisix.deployment.controlPlane.enabled }}
+{{ include "apisix.pdb" (merge (dict "componentRole" "control_plane" "componentName" "control-plane") .) }}
+{{- end }}
+{{- if .Values.apisix.deployment.dataPlane.enabled }}
+{{ include "apisix.pdb" (merge (dict "componentRole" "data_plane" "componentName" "data-plane") .) }}
+{{- end }}
+{{- else }}
+{{ include "apisix.pdb" . }}
 {{- end }}
