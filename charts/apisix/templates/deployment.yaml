@@ -86,16 +86,16 @@ spec:
           {{- include "apisix.tplvalues.render" (dict "value" .Values.extraEnvVars "context" $) | nindent 12 }}
           {{- end }}
 
-          {{- if .Values.apisix.admin.credentials.secretName }}
+          {{- if and .Values.apisix.admin.enabled (ne (include "apisix.deployment.role" $) "data_plane") }}
             - name: APISIX_ADMIN_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.apisix.admin.credentials.secretName }}
+                  name: {{ include "apisix.admin.credentials.secretName" . }}
                   key: {{ include "apisix.admin.credentials.secretAdminKey" . }}
             - name: APISIX_VIEWER_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.apisix.admin.credentials.secretName }}
+                  name: {{ include "apisix.admin.credentials.secretName" . }}
                   key: {{ include "apisix.admin.credentials.secretViewerKey" . }}
           {{- end }}
 

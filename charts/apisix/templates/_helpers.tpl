@@ -153,6 +153,15 @@ Return the password key name of etcd secret
 {{- end }}
 {{- end -}}
 
+{{/* Return the Admin API credential Secret name. */}}
+{{- define "apisix.admin.credentials.secretName" -}}
+{{- if .Values.apisix.admin.credentials.secretName -}}
+{{- .Values.apisix.admin.credentials.secretName -}}
+{{- else -}}
+{{- printf "%s-admin-credentials" (include "apisix.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
 {{/*
 Key to use to fetch admin token from secret
 */}}
