@@ -15,10 +15,19 @@
 # limitations under the License.
 #
 {{- if .Values.webhook.enabled }}
+{{- /* webhook.certManager is missing from the values of chart versions before 1.6.0, which
+     helm upgrade --reuse-values renders with */}}
+{{- $certManager := .Values.webhook.certManager | default dict -}}
+{{- $certManagerEnabled := $certManager.enabled | default false -}}
+{{- if and $certManagerEnabled .Values.webhook.certificate.provided }}
+{{- fail "webhook.certManager.enabled and webhook.certificate.provided cannot both be true" }}
+{{- end }}
+{{- /* the chart only generates a certificate when neither the user nor cert-manager provides one */}}
+{{- $generateCert := and (not .Values.webhook.certificate.provided) (not $certManagerEnabled) -}}
 {{- $certCert := "" -}}
 {{- $certKey := "" -}}
 {{- $caCert := "" -}}
-{{- if not .Values.webhook.certificate.provided }}
+{{- if $generateCert }}
 {{- $cn := printf "%s.%s.svc" (include "apisix-ingress-controller-manager.webhook.serviceName" .) .Release.Namespace -}}
 {{- $ca := genCA "apisix-ingress-webhook-ca" 3650 -}}
 {{- $cert := genSignedCert $cn nil (list $cn) 3650 $ca -}}
@@ -39,7 +48,11 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ include "apisix-ingress-controller-manager.name.fullname" . }}-webhook
-  {{- with .Values.webhook.annotations }}
+  {{- $annotations := deepCopy (.Values.webhook.annotations | default dict) }}
+  {{- if $certManagerEnabled }}
+  {{- $_ := set $annotations "cert-manager.io/inject-ca-from" (printf "%s/%s" .Release.Namespace (include "apisix-ingress-controller-manager.webhook.secretName" .)) }}
+  {{- end }}
+  {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -49,9 +62,9 @@ webhooks:
 - name: vapisixroute-v2.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -71,9 +84,9 @@ webhooks:
 - name: vapisixconsumer-v2.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -93,9 +106,9 @@ webhooks:
 - name: vapisixtls-v2.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -115,9 +128,9 @@ webhooks:
 - name: vconsumer-v1alpha1.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -137,9 +150,9 @@ webhooks:
 - name: vgatewayproxy-v1alpha1.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -159,9 +172,9 @@ webhooks:
 - name: vingress-v1.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -181,9 +194,9 @@ webhooks:
 - name: vingressclass-v1.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -203,9 +216,9 @@ webhooks:
 - name: vgateway-v1.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -225,9 +238,9 @@ webhooks:
 - name: vgrpcroute-v1.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -247,9 +260,9 @@ webhooks:
 - name: vhttproute-v1.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -269,9 +282,9 @@ webhooks:
 - name: vtcproute-v1.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -291,9 +304,9 @@ webhooks:
 - name: vudproute-v1.kb.io
   admissionReviewVersions: ["v1"]
   clientConfig:
-    {{- if not .Values.webhook.certificate.provided }}
+    {{- if $generateCert }}
     caBundle: {{ b64enc $caCert }}
-    {{- else }}
+    {{- else if not $certManagerEnabled }}
     caBundle: {{ .Values.webhook.certificate.caBundle }}
     {{- end }}
     service:
@@ -328,7 +341,7 @@ spec:
   selector:
     {{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 4 }}
 
-{{- if not .Values.webhook.certificate.provided }}
+{{- if $generateCert }}
 ---
 apiVersion: v1
 kind: Secret
@@ -342,5 +355,48 @@ data:
   tls.crt: {{ b64enc $certCert }}
   tls.key: {{ b64enc $certKey }}
   ca.crt: {{ b64enc $caCert }}
+{{- end }}
+{{- if $certManagerEnabled }}
+{{- $issuerRef := $certManager.issuerRef | default dict }}
+{{- if not $issuerRef.name }}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "apisix-ingress-controller-manager.webhook.issuerName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+{{- end }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "apisix-ingress-controller-manager.webhook.secretName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "apisix-ingress-controller-manager.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "apisix-ingress-controller-manager.webhook.secretName" . }}
+  {{- with $certManager.duration }}
+  duration: {{ . }}
+  {{- end }}
+  commonName: apisix-ingress-webhook
+  dnsNames:
+    - {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}
+    - {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}.{{ .Release.Namespace }}
+    - {{ include "apisix-ingress-controller-manager.webhook.serviceName" . }}.{{ .Release.Namespace }}.svc
+  issuerRef:
+    {{- if $issuerRef.name }}
+    name: {{ $issuerRef.name }}
+    kind: {{ $issuerRef.kind | default "Issuer" }}
+    group: {{ $issuerRef.group | default "cert-manager.io" }}
+    {{- else }}
+    name: {{ include "apisix-ingress-controller-manager.webhook.issuerName" . }}
+    kind: Issuer
+    group: cert-manager.io
+    {{- end }}
 {{- end }}
 {{- end }}
