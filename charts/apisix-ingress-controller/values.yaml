@@ -119,6 +119,13 @@ webhook:
   failurePolicy: Ignore
   # -- Timeout in seconds for the webhook
   timeoutSeconds: 10
+  certManager:
+    # -- Use cert-manager to issue the webhook certificate and inject its CA into the webhook configuration. The chart then renders the same manifests every time instead of generating a certificate at render time, which keeps GitOps tools such as Argo CD in sync. Requires cert-manager in the cluster. Cannot be combined with `certificate.provided`.
+    enabled: false
+    # -- Issuer for the webhook certificate, e.g. `{name: my-issuer, kind: ClusterIssuer}`. When empty, the chart creates a self-signed Issuer.
+    issuerRef: {}
+    # -- Lifetime of the webhook certificate. cert-manager renews it before it expires.
+    duration: 8760h
   certificate:
     # -- Set to true if you want to provide your own certificate
     provided: false

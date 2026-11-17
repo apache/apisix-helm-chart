@@ -81,6 +81,13 @@ Webhook service name - ensure it stays within 63 character limit
 {{/*
 Webhook secret name - use value from values.yaml if provided, otherwise generate one
 */}}
+{{- define "apisix-ingress-controller-manager.webhook.issuerName" -}}
+{{- $suffix := "-webhook-issuer" -}}
+{{- $maxLen := sub 63 (len $suffix) | int -}}
+{{- $baseName := include "apisix-ingress-controller-manager.name.fullname" . | trunc $maxLen | trimSuffix "-" -}}
+{{- printf "%s%s" $baseName $suffix -}}
+{{- end }}
+
 {{- define "apisix-ingress-controller-manager.webhook.secretName" -}}
 {{- if and .Values.webhook.certificate.provided .Values.webhook.certificate.secretName -}}
 {{- .Values.webhook.certificate.secretName -}}

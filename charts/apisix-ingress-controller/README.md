@@ -174,6 +174,9 @@ The same for container level, you need to set:
 | serviceMonitor.metricRelabelings | object | `{}` | @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion. ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs |
 | serviceMonitor.namespace | string | `"monitoring"` | @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor |
 | webhook.annotations | object | `{}` | Annotations for the ValidatingWebhookConfiguration, e.g. `cert-manager.io/inject-ca-from: <namespace>/<certificate>` so cert-manager's cainjector maintains the webhook caBundle. Only use CA injection with `certificate.provided: true` and `certificate.caBundle` unset; otherwise the injected CA replaces the chart-generated one and the webhook TLS handshake fails. |
+| webhook.certManager.duration | string | `"8760h"` | Lifetime of the webhook certificate. cert-manager renews it before it expires. |
+| webhook.certManager.enabled | bool | `false` | Use cert-manager to issue the webhook certificate and inject its CA into the webhook configuration. The chart then renders the same manifests every time instead of generating a certificate at render time, which keeps GitOps tools such as Argo CD in sync. Requires cert-manager in the cluster. Cannot be combined with `certificate.provided`. |
+| webhook.certManager.issuerRef | object | `{}` | Issuer for the webhook certificate, e.g. `{name: my-issuer, kind: ClusterIssuer}`. When empty, the chart creates a self-signed Issuer. |
 | webhook.certificate.provided | bool | `false` | Set to true if you want to provide your own certificate |
 | webhook.enabled | bool | `true` | Enable or disable admission webhook |
 | webhook.failurePolicy | string | `"Ignore"` | Failure policy for the webhook (Fail or Ignore) |
