@@ -28,7 +28,7 @@ spec:
   parameters:
     apiGroup: apisix.apache.org
     kind: GatewayProxy
-    name: {{ include "apisix-ingress-controller-manager.gatewayProxyName" . }}
+    name: {{ include "apisix-ingress-controller-manager.gatewayProxyName" . | quote }}
     namespace: {{ .Release.Namespace }}
     scope: Namespace
   {{- end}}
