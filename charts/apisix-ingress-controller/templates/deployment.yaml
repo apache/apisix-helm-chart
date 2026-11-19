@@ -40,7 +40,8 @@ spec:
         {{- end }}
         {{- end }}
       labels:
-        {{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 8 }}
+        {{- $selectorLabels := include "apisix-ingress-controller-manager.selectorLabels" . | fromYaml }}
+        {{- merge $selectorLabels (.Values.deployment.podLabels | default dict) | toYaml | nindent 8 }}
     spec:
       {{- with .Values.deployment.priorityClassName }}
       priorityClassName: {{ . }}
@@ -64,6 +65,13 @@ spec:
               fieldPath: metadata.name
         - name: ADC_SERVER_URL
           value: "unix:/sockets/adc.sock"
+        {{- with .Values.deployment.extraEnvVars }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        {{- with .Values.deployment.extraEnvFrom }}
+        envFrom:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
         image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         ports:

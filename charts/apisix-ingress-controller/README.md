@@ -133,12 +133,15 @@ The same for container level, you need to set:
 | deployment.adcContainer | object | `{"config":{"logLevel":"info"},"image":{"repository":"ghcr.io/api7/adc","tag":"0.27.1"}}` | Set adc sidecar container configuration |
 | deployment.affinity | object | `{}` |  |
 | deployment.annotations | object | `{}` | Add annotations to Apache APISIX ingress controller resource |
+| deployment.extraEnvFrom | list | `[]` | Extra `envFrom` sources (ConfigMaps or Secrets) for the ingress controller container, rendered through `tpl` |
+| deployment.extraEnvVars | list | `[]` | Extra environment variables for the ingress controller container, rendered through `tpl` |
 | deployment.image.pullPolicy | string | `"IfNotPresent"` |  |
 | deployment.image.repository | string | `"apache/apisix-ingress-controller"` |  |
 | deployment.image.tag | string | `"2.2.0"` |  |
 | deployment.imagePullSecrets | list | `[]` |  |
 | deployment.nodeSelector | object | `{}` |  |
 | deployment.podAnnotations | object | `{}` |  |
+| deployment.podLabels | object | `{}` | Extra labels to add to the ingress controller pods. Keys that collide with the selector labels are ignored. |
 | deployment.podSecurityContext | object | `{"fsGroup":2000}` | Set security context for the pod fsGroup: 2000 ensures containers can share Unix socket files via a common group. |
 | deployment.priorityClassName | string | `""` | Set the [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for the ingress controller pods |
 | deployment.replicas | int | `1` |  |
