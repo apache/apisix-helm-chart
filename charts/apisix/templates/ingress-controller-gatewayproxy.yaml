@@ -25,7 +25,7 @@
 apiVersion: apisix.apache.org/v1alpha1
 kind: GatewayProxy
 metadata:
-  name: {{ include "apisix.ingressController.gatewayProxy.name" . }}
+  name: {{ include "apisix.ingressController.gatewayProxy.name" . | quote }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}

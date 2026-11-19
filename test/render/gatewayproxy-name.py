@@ -77,6 +77,57 @@ class GatewayProxyNameTest(unittest.TestCase):
                             self.assertIsInstance(actual, str)
                             self.assertEqual(actual, expected)
 
+    def test_parent_names(self):
+        chart = Path(__file__).resolve().parents[2] / "charts/apisix"
+        release = "parent-gatewayproxy-test"
+        cases = [
+            ("numeric", "123", "123"),
+            ("boolean-like", "true", "true"),
+            ("release-template", "{{ .Release.Name }}-config", release + "-config"),
+            ("template-context", '{{ base .Template.Name | trimSuffix ".yaml" }}-config', None),
+            ("random-template", "{{ randAlphaNum 12 | lower }}", None),
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            values_file = Path(directory) / "values.yaml"
+            for create_default in (False, True):
+                for label, name, expected in cases:
+                    with self.subTest(createDefault=create_default, name=label):
+                        key = "AdminKeyForGatewayProxyTests12345"
+                        values = {
+                            "etcd": {"enabled": False},
+                            "apisix": {"admin": {"credentials": {"admin": key}}},
+                            "ingress-controller": {
+                                "enabled": True,
+                                "gatewayProxy": {
+                                    "name": name,
+                                    "createDefault": create_default,
+                                    "provider": {"controlPlane": {
+                                        "service": {"name": release + "-apisix-admin"},
+                                        "auth": {"adminKey": {"value": key}},
+                                    }},
+                                },
+                            },
+                        }
+                        values_file.write_text(yaml.safe_dump(values))
+                        result = subprocess.run(
+                            [os.environ.get("HELM_BIN", "helm"), "template", release,
+                             str(chart), "--values", str(values_file)],
+                            capture_output=True, text=True,
+                        )
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                        docs = [doc for doc in yaml.safe_load_all(result.stdout) if doc]
+                        classes = [doc for doc in docs if doc["kind"] == "IngressClass"]
+                        proxies = [doc for doc in docs if doc["kind"] == "GatewayProxy"]
+                        self.assertEqual(len(classes), 1)
+                        self.assertEqual(len(proxies), 1)
+                        reference = classes[0]["spec"]["parameters"]["name"]
+                        actual = proxies[0]["metadata"]["name"]
+                        self.assertIsInstance(reference, str)
+                        self.assertIsInstance(actual, str)
+                        self.assertEqual(actual, reference)
+                        if expected is not None:
+                            self.assertEqual(actual, expected)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

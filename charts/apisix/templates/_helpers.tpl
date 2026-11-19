@@ -407,12 +407,11 @@ it can be read (lookup returns nothing under helm template).
 
 {{/*
 Name of the GatewayProxy that the bundled controller's IngressClass references
-(ingress-controller.gatewayProxy.name, rendered with tpl). Empty when the user
-sets it to "".
+(ingress-controller.gatewayProxy.name, rendered once in the controller chart's
+context). Both charts reuse that name. Empty when the user sets it to "".
 */}}
 {{- define "apisix.ingressController.gatewayProxy.name" -}}
-{{- $gp := (index .Values "ingress-controller").gatewayProxy -}}
-{{- tpl ($gp.name | default "" | toString) . -}}
+{{- include "apisix-ingress-controller-manager.configuredGatewayProxyName" (index .Subcharts "ingress-controller") -}}
 {{- end -}}
 
 {{/*
