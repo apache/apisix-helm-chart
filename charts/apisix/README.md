@@ -207,9 +207,12 @@ To move an existing release off the built-in keyring, or to rotate your own
 key:
 
 1. Back up etcd, for example with `etcdctl snapshot save`.
-2. While the release still runs with its current keyring, GET each resource
-   that configures a plugin with encrypted fields, for example each consumer and
-   its credentials, and keep the bodies. Remove their `create_time` and
+2. Pause all other Admin API writers, including ingress controllers, before
+   collecting the resource bodies, and keep them paused until step 4 is complete.
+   Otherwise, restoring a saved body can overwrite a change made after it was
+   collected. While the release still runs with its current keyring, GET each
+   resource that configures a plugin with encrypted fields, for example each
+   consumer and its credentials, and keep the bodies. Remove their `create_time` and
    `update_time` fields, which a PUT rejects. The bodies hold the secrets in
    plain text, so keep them safe and delete them at the end. For a consumer:
 
@@ -245,11 +248,11 @@ key:
        secretKeys: [key1, key2, key3]
    ```
 
-   Until every APISIX pod runs with the new keyring, avoid changes through the
-   Admin API, including those of the ingress controller. In a decoupled
-   deployment, upgrade the data planes before the control plane. When you rotate
-   your own key, you can avoid that pause: first add the new key after the
-   current one, and move it to the front in a second upgrade.
+   In a decoupled deployment, upgrade the data planes before the control plane.
+   When rotating your own key, first adding the new key after the current one
+   and moving it to the front in a second upgrade lets all pods learn the new
+   key before it is used to encrypt data. This does not remove the need to pause
+   other writers from step 2 until step 4 is complete.
 
 4. PUT the bodies from step 2, not the result of a new GET:
 
@@ -257,14 +260,16 @@ key:
    curl -s -X PUT http://127.0.0.1:9180/apisix/admin/consumers -H "X-API-KEY: $ADMIN_KEY" -d @"consumer-$CONSUMER.json"
    ```
 
-   Then upload each SSL object, and each upstream, route and service that sets
-   `tls.client_key`, again with its PEM key, for example from the Kubernetes
-   Secret it came from: the Admin API cannot re-encrypt them from what it stores.
+   Then upload each SSL object, and each upstream, HTTP route, stream route
+   and service whose upstream configuration sets `tls.client_key`, again with
+   its PEM key, for example from the Kubernetes Secret it came from: the Admin
+   API cannot re-encrypt them from what it stores.
    Until this step is done, the gateway can reject some of the credentials stored
    before step 3, and APISIX cannot load about one SSL object in 256 (its log
    says `failed to parse key`), so TLS handshakes for that object's SNIs fail.
    Private keys that are still encrypted with the built-in keys can be read by
-   anyone who can read etcd.
+   anyone who can read etcd. Resume other configuration writers only after
+   every resource in this step has been restored.
 
 5. You can keep the old keys after the new one; that does not weaken the new
    key. Remove them only after step 4 is done for every resource: APISIX cannot
