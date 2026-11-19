@@ -133,6 +133,14 @@ gatewayProxy:
   # -- Controls whether to create a default GatewayProxy custom resource.
   createDefault: false
 
+  # -- Name of the GatewayProxy that the IngressClass references, in the release namespace.
+  # Rendered once per chart with `tpl`. An unset name or one that renders to empty
+  # defaults to `<release name>-config` only with `createDefault: true`.
+  # With `createDefault: false`, an empty name omits the IngressClass parameters.
+  # Set a non-empty name with `createDefault: false` to reference a GatewayProxy
+  # created outside this chart, for example by the apisix chart.
+  name: ""
+
   # -- Configuration for the GatewayProxy provider connection
   provider:
     # -- Specifies the provider type for the GatewayProxy.
