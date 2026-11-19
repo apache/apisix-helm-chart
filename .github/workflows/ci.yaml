@@ -31,6 +31,7 @@ jobs:
               --workdir /workdir/charts/apisix \
               quay.io/helmpack/chart-testing:v3.13.0 sh -c 'helm dependency update \
                && cd ../.. \
+               && python3 test/render/gatewayproxy-name.py \
                && helm repo add bitnami https://charts.bitnami.com/bitnami \
                && helm repo add apisix https://apache.github.io/apisix-helm-chart \
                && ct lint \
