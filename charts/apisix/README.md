@@ -182,9 +182,9 @@ that looks like a number into a number, whether it is quoted or not, and then
 refuses to start.
 
 The chart fails to render when the first key is one of the built-in keys, or
-when a key is not 16 or 32 bytes long. It cannot check keys in a Secret: APISIX
-ignores a key of another length in bytes, and stores the data unencrypted when no
-key is left.
+when a key is not 16 or 32 bytes long. It cannot check keys in a Secret.
+APISIX 3.20.0 validates those keys after resolving the environment variables
+and rejects invalid key lengths during startup.
 
 Use the same keyring for every release that reads the same etcd, for example
 the control plane and the data plane of a decoupled deployment. Encryption only
