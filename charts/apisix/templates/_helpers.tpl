@@ -130,6 +130,19 @@ true
 {{- end -}}
 
 {{/*
+Return the address of the bundled etcd Service. The name comes from the etcd
+chart's own helpers, so nameOverride, fullnameOverride, namespaceOverride and
+release names that already contain "etcd" resolve to the Service it creates.
+*/}}
+{{- define "apisix.etcd.host" -}}
+{{- if and .Values.etcd.fullnameOverride (not .Values.etcd.namespaceOverride) -}}
+{{- include "common.names.fullname" .Subcharts.etcd -}}
+{{- else -}}
+{{- printf "%s.%s.svc.%s" (include "common.names.fullname" .Subcharts.etcd) (include "common.names.namespace" .Subcharts.etcd) .Values.etcd.clusterDomain -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the name of etcd password secret
 */}}
 {{- define "apisix.etcd.secretName" -}}
