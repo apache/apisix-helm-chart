@@ -39,6 +39,7 @@ class GatewayProxyNameTest(unittest.TestCase):
             ("boolean-like", "true", "true"),
             ("null-like", "null", "null"),
             ("numeric-template", '{{ "123" }}', "123"),
+            ("template-context", '{{ base .Template.Name | trimSuffix ".yaml" }}-config', None),
         ]
         with tempfile.TemporaryDirectory() as directory:
             values_file = Path(directory) / "values.yaml"
@@ -60,7 +61,11 @@ class GatewayProxyNameTest(unittest.TestCase):
                         proxies = [doc for doc in docs if doc["kind"] == "GatewayProxy"]
                         self.assertEqual(len(classes), 1)
                         self.assertEqual(len(proxies), int(create_default))
-                        expected = rendered or (release + "-config" if create_default else None)
+                        if label == "template-context":
+                            expected = classes[0]["spec"]["parameters"]["name"]
+                            self.assertIn(expected, ("ingress-class-config", "gatewayproxy-config"))
+                        else:
+                            expected = rendered or (release + "-config" if create_default else None)
                         if expected is None:
                             self.assertNotIn("parameters", classes[0]["spec"])
                         else:
