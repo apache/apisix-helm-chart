@@ -46,8 +46,16 @@ spec:
         {{- end }}
       labels:
         {{- include "apisix.selectorLabels" . | nindent 8 }}
-        {{- if .Values.podLabels }}
-        {{- toYaml .Values.podLabels | nindent 8 }}
+        {{- $podLabels := .Values.podLabels | default dict }}
+        {{- if .Values.etcd.enabled }}
+        {{- $etcdClientLabel := include "apisix.etcd.clientLabel" .Subcharts.etcd }}
+        {{- /* lets the pods through the NetworkPolicy of the bundled etcd; a value
+             in podLabels, for example a boolean from --set, does not replace it */}}
+        {{ $etcdClientLabel }}: "true"
+        {{- $podLabels = omit $podLabels $etcdClientLabel }}
+        {{- end }}
+        {{- with $podLabels }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
@@ -97,6 +105,21 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.apisix.admin.credentials.secretName }}
                   key: {{ include "apisix.admin.credentials.secretViewerKey" . }}
+          {{- else if include "apisix.admin.credentials.generated" . }}
+          {{- if eq (include "apisix.admin.credentials.source" (dict "role" "admin" "context" $)) "generated" }}
+            - name: APISIX_ADMIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "apisix.admin.credentials.generatedSecretName" . }}
+                  key: admin
+          {{- end }}
+          {{- if eq (include "apisix.admin.credentials.source" (dict "role" "viewer" "context" $)) "generated" }}
+            - name: APISIX_VIEWER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "apisix.admin.credentials.generatedSecretName" . }}
+                  key: viewer
+          {{- end }}
           {{- end }}
 
           {{- if or (and .Values.etcd.enabled .Values.etcd.auth.rbac.create) (and (not .Values.etcd.enabled) .Values.externalEtcd.user) }}
