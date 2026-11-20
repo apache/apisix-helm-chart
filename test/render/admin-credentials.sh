@@ -58,6 +58,11 @@ render() { # render <release> [helm args...]; sets OUT (manifests) and ERR (stde
 }
 
 q() { yq "$1" <<<"$OUT"; }
+ingress_class_parameters() {
+  local value
+  value=$(q 'select(.kind == "IngressClass") | .spec.parameters')
+  printf '%s\n' "${value:-none}"
+}
 config() { q 'select(.kind == "ConfigMap" and .data["config.yaml"] != null) | .data["config.yaml"]' | yq "$1"; }
 key_of() { config ".deployment.admin.admin_key[] | select(.name == \"$1\") | .key"; }
 env_ref() { # env_ref <env name>  ->  "<secret>/<key>"
@@ -294,12 +299,12 @@ for extra in "--set apisix.deployment.mode=standalone" "--set apisix.admin.enabl
 done
 render apisix --set ingress-controller.enabled=true --set etcd.enabled=false --set apisix.deployment.mode=standalone --set-string ingress-controller.gatewayProxy.name=
 check "renders with gatewayProxy.name set to empty" eq $? 0
-check "the IngressClass then has no parameters" eq "$(q 'select(.kind == "IngressClass") | (.spec.parameters // "none")')" "none"
+check "the IngressClass then has no parameters" eq "$(ingress_class_parameters)" "none"
 check "no GatewayProxy" eq "$(count GatewayProxy)" 0
 render apisix --set ingress-controller.enabled=true --set etcd.enabled=false --set apisix.deployment.mode=standalone \
   --set-json 'ingress-controller.gatewayProxy.name="{{ \"\" }}"'
 check "a name that renders to an empty string renders" eq $? 0
-check "...and the IngressClass then has no parameters" eq "$(q 'select(.kind == "IngressClass") | (.spec.parameters // "none")')" "none"
+check "...and the IngressClass then has no parameters" eq "$(ingress_class_parameters)" "none"
 
 echo "# releases without an Admin API"
 render apisix --set apisix.deployment.mode=standalone
