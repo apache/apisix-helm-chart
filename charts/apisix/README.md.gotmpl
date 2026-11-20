@@ -355,6 +355,15 @@ pod; the chart refuses to render that combination unless `etcd.networkPolicy.all
 true. It also refuses to render when the release name, `etcd.nameOverride` or `etcd.fullnameOverride` is
 so long that the client label has more than the 63 characters that Kubernetes allows.
 
+## GatewayProxy published address
+
+The bundled controller's release-local GatewayProxy defaults `publishService`
+to this release's Gateway Service (`<namespace>/<gateway-service-name>`).
+The Service and reference share the same name helper, including name overrides.
+Set `ingress-controller.gatewayProxy.publishService` for an explicitly managed
+Service, or `ingress-controller.gatewayProxy.statusAddress` for static addresses.
+Static addresses suppress automatic publishService selection.
+
 ## Configure the wait-etcd init container
 
 When `etcd.enabled` is true, `initContainer.resources` and

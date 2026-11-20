@@ -531,3 +531,8 @@ needs etcd and cannot run standalone.
 {{- end -}}
 {{- $role -}}
 {{- end -}}
+
+{{/* Keep GatewayProxy publication and the generated Gateway Service in sync. */}}
+{{- define "apisix.service.gatewayName" -}}
+{{- printf "%s-gateway" (include "apisix.fullname" .) -}}
+{{- end -}}

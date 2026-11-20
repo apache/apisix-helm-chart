@@ -17,7 +17,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "apisix.fullname" . }}-gateway
+  name: {{ include "apisix.service.gatewayName" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
     {{- range $key, $value := .Values.service.annotations }}

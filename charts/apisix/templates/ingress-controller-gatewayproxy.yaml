@@ -56,7 +56,11 @@ spec:
               key: admin
           {{- end }}
 
-  {{- with $gp.publishService }}
+  {{- $publishService := $gp.publishService | default "" }}
+  {{- if and (not $publishService) (not $gp.statusAddress) }}
+  {{- $publishService = printf "%s/%s" .Release.Namespace (include "apisix.service.gatewayName" .) }}
+  {{- end }}
+  {{- with $publishService }}
   publishService: {{ . | quote }}
   {{- end }}
 
