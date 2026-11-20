@@ -18,10 +18,12 @@ an upgrade does not depend on chart defaults:
 ```sh
 helm upgrade my-apisix apisix/apisix \
   --namespace ingress-apisix \
-  --reuse-values \
+  --values production-values.yaml \
   --set apisix.deployment.mode=traditional
 ```
 
+Supply the reviewed production values file again, following the chart version
+upgrade guide; do not use `--reuse-values` across the 3.0.0 upgrade boundary.
 Before upgrading an existing release, inspect `helm get values --all` and set
 its intended mode explicitly. An implicit mode from an earlier chart default
 can be replaced when chart defaults or upgrade flags change; do not rely on a
