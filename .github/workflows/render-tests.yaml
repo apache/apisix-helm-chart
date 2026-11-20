@@ -1,0 +1,33 @@
+name: Chart rendering regressions
+on:
+  pull_request:
+    paths: ["charts/apisix/**", "charts/apisix-ingress-controller/**", "test/render/**", ".github/workflows/render-tests.yaml"]
+  push:
+    paths: ["charts/apisix/**", "charts/apisix-ingress-controller/**", "test/render/**", ".github/workflows/render-tests.yaml"]
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: azure/setup-helm@v4.3.0
+        with:
+          version: v3.17.3
+      - name: Install render test parser
+        run: python -m pip install PyYAML==6.0.3
+      - name: Verify dependency lock and published archives
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add apisix https://apache.github.io/apisix-helm-chart
+          helm dependency build charts/apisix --skip-refresh
+          git diff --exit-code -- charts/apisix/Chart.lock charts/apisix/charts
+      - name: Lint chart and check rendered resources
+        run: |
+          helm lint charts/apisix --set etcd.auth.token.enabled=false
+          for test_file in test/render/*.py; do
+            python "$test_file"
+          done
