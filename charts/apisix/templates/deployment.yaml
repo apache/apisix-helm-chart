@@ -190,27 +190,38 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
-            {{- if $useTraditionalYaml }}
+            {{- if .Values.apisix.status.enabled }}
             - name: status
               containerPort: {{ default 7085 .Values.apisix.status.port }}
               protocol: TCP
             {{- end}}
 
-          {{- if ne (include "apisix.deployment.role" $) "control_plane" }}
-          readinessProbe:
-            failureThreshold: 6
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            {{- if $useTraditionalYaml }}
-            httpGet:
-              path: /status/ready
-              port: {{ default 7085 .Values.apisix.status.port }}
-            {{- else }}
-            tcpSocket:
-              port: {{ .Values.service.http.containerPort }}
-            {{- end}}
-            timeoutSeconds: 1
+          {{- if .Values.apisix.status.enabled }}
+          {{- $defaults := dict "startupProbe" (dict "httpGet" (dict "path" "/status" "port" "status") "failureThreshold" 60 "periodSeconds" 5 "timeoutSeconds" 2) "livenessProbe" (dict "httpGet" (dict "path" "/status" "port" "status") "periodSeconds" 10 "timeoutSeconds" 2 "failureThreshold" 3) "readinessProbe" (dict "httpGet" (dict "path" "/status/ready" "port" "status") "periodSeconds" 5 "timeoutSeconds" 2 "failureThreshold" 6) }}
+          {{- $overrides := deepCopy .Values.apisix.status.probes -}}
+          {{- range $name, $probe := $overrides -}}
+          {{- if not (hasKey $defaults $name) -}}
+          {{- fail (printf "apisix.status.probes: unsupported probe %s" $name) -}}
+          {{- end -}}
+          {{- if ne $probe nil -}}
+          {{- $handlers := list "httpGet" "tcpSocket" "exec" "grpc" -}}
+          {{- $selected := list -}}
+          {{- range $handler := $handlers -}}
+          {{- if and (hasKey $probe $handler) (ne (index $probe $handler) nil) -}}
+          {{- $selected = append $selected $handler -}}
+          {{- end -}}
+          {{- end -}}
+          {{- if gt (len $selected) 1 -}}
+          {{- fail (printf "apisix.status.probes.%s requires exactly one handler" $name) -}}
+          {{- end -}}
+          {{- if eq (len $selected) 1 -}}
+          {{- range $handler := $handlers -}}
+          {{- $_ := unset (index $defaults $name) $handler -}}
+          {{- end -}}
+          {{- end -}}
+          {{- end -}}
+          {{- end -}}
+          {{- mergeOverwrite $defaults $overrides | toYaml | nindent 10 }}
           {{- end }}
           {{- with .Values.lifecycle }}
           lifecycle:

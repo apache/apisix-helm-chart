@@ -8,6 +8,20 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Health probes
+
+The status listener is enabled on the Pod IP in every deployment role. Startup
+and liveness use `/status`; readiness uses `/status/ready`, so a temporary etcd
+outage does not itself trigger a liveness restart. `apisix.status.port` configures
+both the listener and the named container port. No Service exposes this listener.
+Set `apisix.status.enabled=false` to omit the listener port and default probes.
+Use `apisix.status.probes` to override individual Kubernetes probe fields (or set
+a probe to null). Specifying a different handler (`tcpSocket`, `exec` or `grpc`)
+replaces the default HTTP handler; multiple handlers are rejected. The gRPC
+handler requires Kubernetes 1.27+. Startup probes require Kubernetes 1.16+.
+Full custom configurations must provide the matching status
+listener themselves, or disable these probes.
+
 ## Prerequisites
 
 * Kubernetes v1.14+

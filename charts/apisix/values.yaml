@@ -842,6 +842,10 @@ apisix:
               path: "mount-path"
 
   status:
+    # -- Enable the APISIX status endpoint used by Kubernetes probes
+    enabled: true
+    # -- Probe overrides; null disables an individual probe. Requires a matching listener in fullCustomConfig.
+    probes: {}
     # -- The IP address on which the status endpoint (`/status`, `/status/ready`) listens
     ip: "0.0.0.0"
     # -- The port on which the status endpoint listens
