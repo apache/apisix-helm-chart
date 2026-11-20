@@ -562,7 +562,7 @@ first key of the keyring, so that key must not be a public one. The public keys
 may follow it, so that data encrypted with them can still be decrypted.
 */}}
 {{- define "apisix.dataEncryption.validate" -}}
-{{- $encryption := .Values.apisix.dataEncryption -}}
+{{- $encryption := mergeOverwrite (dict "enableEncryptFields" true "secretKeys" (list "key1")) (.Values.apisix.dataEncryption | default dict) -}}
 {{- if and $encryption.secretName $encryption.keyring -}}
 {{- fail "apisix.dataEncryption: set either keyring or secretName, not both" -}}
 {{- end -}}

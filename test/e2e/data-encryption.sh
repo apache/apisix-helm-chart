@@ -228,6 +228,14 @@ install() { # install <namespace> [helm args...]
   $HELM install apisix "$CHART" --namespace "$ns" "${COMMON[@]}" "$@" >/dev/null
 }
 
+install_previous() { # install_previous <namespace> [helm args...]
+  local ns=$1; shift
+  mkdir -p "$CERTS/previous-chart" || return 1
+  $HELM pull apisix --repo https://apache.github.io/apisix-helm-chart --version 3.0.0 \
+    --untar --untardir "$CERTS/previous-chart" &&
+    $HELM install apisix "$CERTS/previous-chart/apisix" --namespace "$ns" "${COMMON[@]}" "$@" >/dev/null
+}
+
 upgrade() { # upgrade <namespace> [helm args...]
   local ns=$1; shift
   $HELM upgrade apisix "$CHART" --namespace "$ns" "${COMMON[@]}" "$@" >/dev/null
@@ -264,7 +272,7 @@ NS=de-migrate
 new_namespace "$NS"
 WITH_TLS=1
 TLS=(--set apisix.ssl.enabled=true)
-check "built-in: the release installs with the default values" install "$NS" "${TLS[@]}"
+check "built-in: chart 3.0.0 installs with its default keyring" install_previous "$NS" "${TLS[@]}"
 check "built-in: connected" connect "$NS"
 check "built-in: route created" add_route
 check "built-in: consumer old created" add_consumer old old-key
@@ -276,6 +284,17 @@ check "built-in: and so is the SSL private key" ssl_encrypted_with "$NS" 1 "$BUI
 check "built-in: TLS works" serves_tls tls.test
 OLD_BODY=$(consumer_body old)
 check "built-in: the body saved before the change holds the decrypted key" holds_key "$OLD_BODY" old-key
+
+# The released chart has no dataEncryption defaults. Exercise Helm's real
+# --reuse-values path before opting into the new keyring configuration.
+check "reuse-values: chart 3.0.0 upgrades without setting dataEncryption" upgrade "$NS" --reuse-values
+check "reuse-values: connected to the upgraded release" connect "$NS"
+check "reuse-values: the old consumer still works" accepts old-key
+check "reuse-values: TLS still works" serves_tls tls.test
+check "reuse-values: a new consumer can be created" add_consumer reused reused-key
+check "reuse-values: new data still uses the built-in key" encrypted_with "$NS" reused "$BUILTIN_KEY" reused-key
+check "reuse-values: the gateway accepts the new consumer" accepts reused-key
+check "reuse-values: the gateway rejects a wrong key" rejects wrong-key
 
 check "migration: the upgrade with a new key first and the built-in key after it succeeds" \
   upgrade "$NS" "${TLS[@]}" --set-json "apisix.dataEncryption.keyring=[\"$KEY_1\",\"$BUILTIN_KEY\"]"

@@ -60,7 +60,9 @@ render() { # render [helm args...]; sets OUT (manifests) and ERR (stderr), retur
 # needs a reachable cluster with Helm 3. So render it from a copy of the chart
 # in which a ConfigMap template carries the rendered NOTES.txt.
 NOTES_CHART=$(mktemp -d) || exit 2
-trap 'rm -rf "$NOTES_CHART"' EXIT
+ORIGINAL_NOTES_CHART=$NOTES_CHART
+REUSED_CHART=$(mktemp -d) || { rm -rf "$NOTES_CHART"; exit 2; }
+trap 'rm -rf "$ORIGINAL_NOTES_CHART" "$REUSED_CHART"' EXIT
 cp -R "$CHART"/. "$NOTES_CHART"/
 {
   printf '%s\n' 'apiVersion: v1' 'kind: ConfigMap' 'metadata:' '  name: rendered-notes' 'data:' \
@@ -100,6 +102,39 @@ check "default: encryption stays enabled" is "$(config '.apisix.data_encryption.
 check "default: no keyring is rendered, APISIX keeps its built-in one" is "$(config '.apisix.data_encryption.keyring')" null
 check "default: no keyring environment variable" is "$(key_envs)" ""
 check "default: NOTES warns that the built-in keyring is public" warns
+
+# --- upgrading with chart 3.0.0 defaults ----------------------------------------
+
+# --reuse-values replaces the new chart defaults with the previous chart's
+# coalesced values. Merely passing an old values file with -f would merge in the
+# new defaults and miss this regression. Remove the new map from a chart copy.
+cp -R "$NOTES_CHART"/. "$REUSED_CHART"/
+yq -i 'del(.apisix.dataEncryption)' "$REUSED_CHART/values.yaml" || exit 2
+ORIGINAL_CHART=$CHART
+CHART=$REUSED_CHART
+NOTES_CHART=$REUSED_CHART
+
+check "reuse-values: renders without the new map" render
+check "reuse-values: encryption stays enabled" is "$(config '.apisix.data_encryption.enable_encrypt_fields')" true
+check "reuse-values: keeps the built-in keyring" is "$(config '.apisix.data_encryption.keyring')" null
+check "reuse-values: no keyring environment variable" is "$(key_envs)" ""
+check "reuse-values: NOTES still warns" warns
+check "reuse-values, disabled: renders" render --set apisix.dataEncryption.enableEncryptFields=false
+check "reuse-values: explicit false is preserved" is "$(config '.apisix.data_encryption.enable_encrypt_fields')" false
+check "reuse-values, disabled: NOTES still warns for SSL keys" warns --set apisix.dataEncryption.enableEncryptFields=false
+check "reuse-values, secret: renders with only secretName" render --set apisix.dataEncryption.secretName=apisix-keyring
+check "reuse-values, secret: defaults to key1" is "$(env_ref APISIX_DATA_ENCRYPTION_KEY_1)" apisix-keyring/key1
+check "reuse-values, secret: config refers to the variable" is "$(config '.apisix.data_encryption.keyring | join(",")')" '${{APISIX_DATA_ENCRYPTION_KEY_1}}'
+check "reuse-values, secret: no built-in warning" does_not_warn --set apisix.dataEncryption.secretName=apisix-keyring
+check "reuse-values: explicit empty secretKeys still fails" fails_with "apisix.dataEncryption.secretKeys must list the keys" \
+  --set apisix.dataEncryption.secretName=apisix-keyring --set-json 'apisix.dataEncryption.secretKeys=[]'
+check "reuse-values, inline: renders" render --set-json "apisix.dataEncryption.keyring=[\"$NEW\",\"$BUILTIN_1\"]"
+check "reuse-values, inline: keeps key order" is "$(config '.apisix.data_encryption.keyring | join(",")')" "$NEW,$BUILTIN_1"
+check "reuse-values, fullCustomConfig: renders" render --set apisix.fullCustomConfig.enabled=true --set apisix.dataEncryption.secretName=apisix-keyring
+check "reuse-values, fullCustomConfig: still injects the Secret key" is "$(env_ref APISIX_DATA_ENCRYPTION_KEY_1)" apisix-keyring/key1
+
+CHART=$ORIGINAL_CHART
+NOTES_CHART=$ORIGINAL_NOTES_CHART
 
 # --- a keyring in the values ---------------------------------------------------
 

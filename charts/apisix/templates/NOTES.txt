@@ -38,7 +38,7 @@
   APISIX uses the keys set in apisix.admin.credentials.
 {{- end }}
 {{- end }}
-{{- $encryption := .Values.apisix.dataEncryption }}
+{{- $encryption := mergeOverwrite (dict "enableEncryptFields" true "secretKeys" (list "key1")) (.Values.apisix.dataEncryption | default dict) }}
 {{- if and (not .Values.apisix.fullCustomConfig.enabled) (not $encryption.keyring) (not $encryption.secretName) (eq (include "apisix.deployment.configProvider" .) "etcd") }}
 
 WARNING: APISIX encrypts SSL private keys and sensitive plugin fields, such as
