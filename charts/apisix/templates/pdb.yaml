@@ -27,10 +27,27 @@ metadata:
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
 spec:
-{{- if .Values.podDisruptionBudget.minAvailable }}
-  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+{{- $min := not (eq .Values.podDisruptionBudget.minAvailable nil) }}
+{{- $max := not (eq .Values.podDisruptionBudget.maxUnavailable nil) }}
+{{- /* Old chart defaults set both fields but rendered only minAvailable. */}}
+{{- $legacyDefaults := and $min $max (eq (toString .Values.podDisruptionBudget.minAvailable) "90%") (eq (toString .Values.podDisruptionBudget.maxUnavailable) "1") }}
+{{- if and (eq $min $max) (not $legacyDefaults) }}
+{{- fail "podDisruptionBudget requires exactly one of minAvailable and maxUnavailable (set the other to null)" }}
+{{- end }}
+{{- $value := ternary .Values.podDisruptionBudget.minAvailable .Values.podDisruptionBudget.maxUnavailable $min }}
+{{- if not (regexMatch "^[0-9]+%?$" (toString $value)) }}
+{{- fail "podDisruptionBudget must be a non-negative integer or percentage" }}
+{{- end }}
+{{- if and (kindIs "string" $value) (not (hasSuffix "%" $value)) }}
+{{- fail "podDisruptionBudget string values must be percentages; use an integer for counts" }}
+{{- end }}
+{{- if and (hasSuffix "%" (toString $value)) (gt (trimSuffix "%" (toString $value) | int) 100) }}
+{{- fail "podDisruptionBudget percentages must be at most 100%" }}
+{{- end }}
+{{- if $min }}
+  minAvailable: {{ $value | toJson }}
 {{- else }}
-  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ $value | toJson }}
 {{- end }}
   selector:
     matchLabels:
