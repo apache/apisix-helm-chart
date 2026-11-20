@@ -8,6 +8,20 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Health probes
+
+The status listener is enabled on the Pod IP in every deployment role. Startup
+and liveness use `/status`; readiness uses `/status/ready`, so a temporary etcd
+outage does not itself trigger a liveness restart. `apisix.status.port` configures
+both the listener and the named container port. No Service exposes this listener.
+Set `apisix.status.enabled=false` to omit the listener port and default probes.
+Use `apisix.status.probes` to override individual Kubernetes probe fields (or set
+a probe to null). Specifying a different handler (`tcpSocket`, `exec` or `grpc`)
+replaces the default HTTP handler; multiple handlers are rejected. The gRPC
+handler requires Kubernetes 1.27+. Startup probes require Kubernetes 1.16+.
+Full custom configurations must provide the matching status
+listener themselves, or disable these probes.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -592,8 +606,10 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | apisix.ssl.sslCiphers | string | `"ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"` | TLS ciphers allowed to use. |
 | apisix.ssl.sslProtocols | string | `"TLSv1.2 TLSv1.3"` | TLS protocols allowed to use. |
 | apisix.ssl.sslSessionTickets | bool | `false` | Enable or disable TLS session tickets. Disabled by default because session tickets defeat Perfect Forward Secrecy (see https://github.com/mozilla/server-side-tls/issues/135) |
+| apisix.status.enabled | bool | `true` | Enable the APISIX status endpoint used by Kubernetes probes |
 | apisix.status.ip | string | `"0.0.0.0"` | The IP address on which the status endpoint (`/status`, `/status/ready`) listens |
 | apisix.status.port | int | `7085` | The port on which the status endpoint listens |
+| apisix.status.probes | object | `{}` | Probe overrides; null disables an individual probe. Requires a matching listener in fullCustomConfig. |
 | apisix.stream_plugins | list | `[]` | Customize the list of APISIX stream_plugins to enable. By default, APISIX's [default stream_plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L294) are automatically used. |
 | apisix.tracing | bool | `false` | Enable comprehensive request lifecycle tracing (SSL/SNI, rewrite, access, header_filter, body_filter, and log). When disabled, OpenTelemetry collects only a single span per request. |
 | apisix.trustedAddresses | list | `["127.0.0.1"]` | When configured, APISIX will trust the `X-Forwarded-*` Headers passed in requests from the IP/CIDR in the list. |
