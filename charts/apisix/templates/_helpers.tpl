@@ -536,3 +536,59 @@ needs etcd and cannot run standalone.
 {{- define "apisix.service.gatewayName" -}}
 {{- printf "%s-gateway" (include "apisix.fullname" .) -}}
 {{- end -}}
+
+{{/*
+The config provider APISIX runs with, following the config_provider values
+that configmap.yaml renders for each role.
+*/}}
+{{- define "apisix.deployment.configProvider" -}}
+{{- $role := include "apisix.deployment.role" . -}}
+{{- if eq $role "traditional" -}}
+{{- default "etcd" .Values.apisix.deployment.role_traditional.config_provider -}}
+{{- else if eq $role "data_plane" -}}
+{{- eq .Values.apisix.deployment.mode "standalone" | ternary "yaml" "etcd" -}}
+{{- else -}}
+{{- "etcd" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+The keys of the keyring that APISIX uses when none is configured. They are
+published in the APISIX source code, so data encrypted with them is not
+protected.
+*/}}
+{{- define "apisix.dataEncryption.publicKeys" -}}
+{{- list "qeddd145sfvddff3" "edd1c9f0985e76a2" | toJson -}}
+{{- end -}}
+
+{{/*
+Fail on apisix.dataEncryption values that cannot work. APISIX encrypts with the
+first key of the keyring, so that key must not be a public one. The public keys
+may follow it, so that data encrypted with them can still be decrypted.
+*/}}
+{{- define "apisix.dataEncryption.validate" -}}
+{{- $encryption := mergeOverwrite (dict "enableEncryptFields" true "secretKeys" (list "key1")) (.Values.apisix.dataEncryption | default dict) -}}
+{{- if and $encryption.secretName $encryption.keyring -}}
+{{- fail "apisix.dataEncryption: set either keyring or secretName, not both" -}}
+{{- end -}}
+{{- if and $encryption.secretName (not $encryption.secretKeys) -}}
+{{- fail "apisix.dataEncryption.secretKeys must list the keys of the Secret that hold the keyring" -}}
+{{- end -}}
+{{- if and $encryption.keyring .Values.apisix.fullCustomConfig.enabled -}}
+{{- fail "apisix.dataEncryption.keyring is not used with apisix.fullCustomConfig: set data_encryption in apisix.fullCustomConfig.config, or use secretName and refer to the APISIX_DATA_ENCRYPTION_KEY_<n> variables there" -}}
+{{- end -}}
+{{- if and $encryption.keyring (not (kindIs "slice" $encryption.keyring)) -}}
+{{- fail "apisix.dataEncryption.keyring must be a list of keys" -}}
+{{- end -}}
+{{- range $index, $key := $encryption.keyring -}}
+{{- if not (kindIs "string" $key) -}}
+{{- fail (printf "apisix.dataEncryption.keyring: entry %d is not a string. Quote it, so that YAML keeps the key exactly as written" (add1 $index)) -}}
+{{- end -}}
+{{- if not (has (len $key) (list 16 32)) -}}
+{{- fail (printf "apisix.dataEncryption.keyring: entry %d is %d bytes long; APISIX accepts keys of 16 or 32 bytes" (add1 $index) (len $key)) -}}
+{{- end -}}
+{{- end -}}
+{{- if and $encryption.keyring (has (first $encryption.keyring) (include "apisix.dataEncryption.publicKeys" . | fromJsonArray)) -}}
+{{- fail "apisix.dataEncryption.keyring: the first key, which APISIX encrypts with, is one of the built-in keys of APISIX. They are public and do not protect the data. Put a new key first; you can keep the built-in keys after it to decrypt the data stored so far" -}}
+{{- end -}}
+{{- end -}}
