@@ -1,0 +1,45 @@
+{{/*
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+{{- $policy := .Values.etcdNetworkPolicy -}}
+{{- if and .Values.etcd.enabled (or $policy.ingress.enabled $policy.egress.enabled) }}
+{{- if .Values.etcd.networkPolicy.enabled -}}
+{{- fail "etcdNetworkPolicy requires etcd.networkPolicy.enabled=false: exactly one owner must manage etcd policies" -}}
+{{- end -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "apisix.fullname" . | trunc 51 | trimSuffix "-" }}-etcd-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "common.labels.matchLabels" (dict "customLabels" (include "common.tplvalues.merge" (dict "values" (list .Subcharts.etcd.Values.podLabels .Subcharts.etcd.Values.commonLabels) "context" .Subcharts.etcd) | fromYaml) "context" .Subcharts.etcd) | nindent 6 }}
+      app.kubernetes.io/component: etcd
+  policyTypes:
+    {{- if $policy.ingress.enabled }}
+    - Ingress
+    {{- end }}
+    {{- if $policy.egress.enabled }}
+    - Egress
+    {{- end }}
+  {{- if $policy.ingress.enabled }}
+  ingress: {{- $policy.ingress.rules | toYaml | nindent 4 }}
+  {{- end }}
+  {{- if $policy.egress.enabled }}
+  egress: {{- $policy.egress.rules | toYaml | nindent 4 }}
+  {{- end }}
+{{- end }}

@@ -956,6 +956,17 @@ etcd:
   # -- Auto compaction mode (periodic or revision), only used when etcd.enabled is true
   autoCompactionMode: "periodic"
 
+# -- Optional etcd policy. Each direction accepts complete Kubernetes NetworkPolicy rules.
+etcdNetworkPolicy:
+  ingress:
+    # -- Enable ingress isolation; an empty rules list denies ingress.
+    enabled: false
+    rules: []
+  egress:
+    # -- Enable egress isolation; an empty rules list denies egress, including DNS.
+    enabled: false
+    rules: []
+
 # -- Ingress controller configuration
 ingress-controller:
   # -- Enable the apisix-ingress-controller sub-chart
