@@ -377,7 +377,7 @@ it can be read (lookup returns nothing under helm template).
 {{- $c := .Values.apisix.admin.credentials -}}
 {{- $public := splitList " " (include "apisix.admin.credentials.publicDefaults" .) -}}
 {{- if .Values.apisix.fullCustomConfig.enabled -}}
-{{- /* the ConfigMap renders this config with tpl, so check the rendered text */ -}}
+{{- /* Check the selected source; literal and external configuration must not run through tpl. */ -}}
 {{- $custom := .Values.apisix.fullCustomConfig -}}
 {{- $source := "config" -}}
 {{- $rendered := "" -}}
