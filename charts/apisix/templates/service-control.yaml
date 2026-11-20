@@ -1,3 +1,5 @@
+{{- define "apisix.service.control" -}}
+{{- if or (ne .Values.apisix.deployment.mode "decoupled") (eq .componentRole "control_plane") }}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -17,7 +19,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "apisix.fullname" . }}-control
+  name: {{ include "apisix.suffixedName" (dict "context" . "suffix" "control") }}
   namespace: {{ .Release.Namespace }}
   annotations:
     {{- range $key, $value := .Values.control.service.annotations }}
@@ -56,3 +58,8 @@ spec:
   selector:
     {{- include "apisix.selectorLabels" . | nindent 4 }}
 {{ end }}
+
+{{- end }}
+{{- end }}
+
+{{ include "apisix.renderPlanes" (dict "template" "apisix.service.control" "root" .) }}

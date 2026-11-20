@@ -11,18 +11,44 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
+{{- define "apisix.baseFullname" -}}
+{{- if .Values.fullnameOverride -}}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}{{ .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else -}}{{ printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}{{- end -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "apisix.fullname" -}}
-{{- if .Values.fullnameOverride }}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
-{{- if contains $name .Release.Name }}
-{{- .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{- $base := include "apisix.baseFullname" . -}}
+{{- if .componentName -}}
+{{/* Plane Services and Ingress names add a suffix; reserve space for the longest suffix. */}}
+{{- $limit := sub 43 (len .componentName) | int -}}
+{{- printf "%s-%s" ($base | trunc $limit | trimSuffix "-") .componentName -}}
+{{- else -}}{{ $base }}{{- end -}}
+{{- end -}}
+
+{{- define "apisix.suffixedName" -}}
+{{- $suffix := .suffix -}}
+{{- $name := include "apisix.fullname" .context -}}
+{{- $limit := sub 62 (len $suffix) | int -}}
+{{- printf "%s-%s" ($name | trunc $limit | trimSuffix "-") $suffix | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "apisix.service.gatewayName" -}}
+{{- if and (eq .Values.apisix.deployment.mode "decoupled") (not .componentName) -}}
+{{- if .Values.apisix.deployment.dataPlane.enabled -}}
+{{- $ctx := merge (dict "componentName" "data-plane" "componentRole" "data_plane") (deepCopy (omit . "Subcharts")) -}}
+{{- include "apisix.service.gatewayName" $ctx -}}
+{{- end -}}
+{{- else if .Values.service.gateway.name -}}
+{{- tpl .Values.service.gateway.name . | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- include "apisix.suffixedName" (dict "context" . "suffix" "gateway") -}}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Create chart name and version as used by the chart label.
@@ -48,10 +74,16 @@ Selector labels
 */}}
 {{- define "apisix.selectorLabels" -}}
 {{- if .Values.service.labelsOverride }}
+{{- if and .componentName (hasKey .Values.service.labelsOverride "app.kubernetes.io/component") }}
+{{- fail "labelsOverride cannot override app.kubernetes.io/component in decoupled mode" }}
+{{- end }}
 {{- tpl (.Values.service.labelsOverride | toYaml) . }}
 {{- else }}
 app.kubernetes.io/name: {{ include "apisix.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+{{- if .componentName }}
+app.kubernetes.io/component: {{ .componentName }}
 {{- end }}
 {{- end }}
 
@@ -60,12 +92,19 @@ Create the name of the service account to use
 */}}
 {{- define "apisix.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "apisix.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "apisix.baseFullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
+
+{{/* Return the replica count for the selected component. */}}
+{{- define "apisix.replicaCount" -}}
+{{- if eq .componentName "control-plane" -}}{{ .Values.apisix.deployment.controlPlane.replicaCount }}
+{{- else if eq .componentName "data-plane" -}}{{ .Values.apisix.deployment.dataPlane.replicaCount }}
+{{- else -}}{{ .Values.replicaCount }}{{- end -}}
+{{- end -}}
 {{/*
 Renders a value that contains template.
 Usage:
@@ -138,7 +177,7 @@ Return the name of etcd password secret
 {{- else if .Values.externalEtcd.existingSecret }}
 {{- print .Values.externalEtcd.existingSecret }}
 {{- else if .Values.externalEtcd.user }}
-{{- printf "etcd-%s" (include "apisix.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- printf "etcd-%s" (include "apisix.baseFullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end -}}
 
@@ -265,7 +304,7 @@ true
 Name of the Secret that holds the keys the chart generates.
 */}}
 {{- define "apisix.admin.credentials.generatedSecretName" -}}
-{{- printf "%s-admin-credentials" (include "apisix.fullname" .) -}}
+{{- printf "%s-admin-credentials" (include "apisix.baseFullname" .) -}}
 {{- end -}}
 
 {{/*
@@ -461,7 +500,7 @@ GatewayProxy that does not exist.
 {{- end -}}
 {{- $cp := $gp.provider.controlPlane -}}
 {{- /* the Service the controller chart's gatewayproxy.yaml uses when there are no endpoints */ -}}
-{{- $localService := printf "%s-admin" (include "apisix.fullname" .) -}}
+{{- $localService := include "apisix.service.adminName" . -}}
 {{- $explicitService := ($cp.service | default dict).name | default "" | toString -}}
 {{- $fallbackService := (($ic.apisix | default dict).adminService | default dict).name | default "" | toString -}}
 {{- $service := default $fallbackService $explicitService -}}
@@ -520,7 +559,10 @@ yaml provider (API-driven standalone) is kept as configured; a control plane
 needs etcd and cannot run standalone.
 */}}
 {{- define "apisix.deployment.role" -}}
-{{- $role := .Values.apisix.deployment.role -}}
+{{- $role := default .Values.apisix.deployment.role .componentRole -}}
+{{- if and (eq .Values.apisix.deployment.mode "decoupled") (not .componentName) -}}
+{{- $role = ternary "control_plane" "data_plane" .Values.apisix.deployment.controlPlane.enabled -}}
+{{- end -}}
 {{- if eq .Values.apisix.deployment.mode "standalone" -}}
 {{- if eq $role "control_plane" -}}
 {{- fail "apisix.deployment.mode \"standalone\" cannot run with apisix.deployment.role \"control_plane\": a control plane needs etcd" -}}
@@ -530,6 +572,37 @@ needs etcd and cannot run standalone.
 {{- end -}}
 {{- end -}}
 {{- $role -}}
+{{- end -}}
+
+{{- define "apisix.renderPlanes" -}}
+{{- $root := .root -}}
+{{- if eq $root.Values.apisix.deployment.mode "decoupled" -}}
+{{- range $key, $name := dict "controlPlane" "control-plane" "dataPlane" "data-plane" -}}
+{{- $plane := index $root.Values.apisix.deployment $key -}}
+{{- if $plane.enabled -}}
+{{- $ctx := merge (dict "componentName" $name "componentRole" (replace "-" "_" $name) "rootContext" $root) (deepCopy (omit $root "Subcharts")) -}}
+{{- $_ := set $ctx "Subcharts" $root.Subcharts -}}
+{{- $_ := set $ctx.Values "autoscaling" (mergeOverwrite (deepCopy $root.Values.autoscaling) (deepCopy $plane.autoscaling)) -}}
+{{- $_ := set $ctx.Values "podDisruptionBudget" (mergeOverwrite (deepCopy $root.Values.podDisruptionBudget) (deepCopy $plane.podDisruptionBudget)) -}}
+{{- $manifest := include $.template $ctx | trim -}}
+{{- if $manifest }}
+---
+{{ $manifest }}
+{{ end -}}
+{{- end -}}
+{{- end -}}
+{{- else -}}
+{{ include .template $root }}
+{{- end -}}
+{{- end -}}
+
+{{/* The Admin Service is owned by the control plane in a composed release. */}}
+{{- define "apisix.service.adminName" -}}
+{{- $ctx := . -}}
+{{- if and (eq .Values.apisix.deployment.mode "decoupled") (not .componentName) -}}
+{{- $ctx = merge (dict "componentName" "control-plane" "componentRole" "control_plane") (deepCopy (omit . "Subcharts")) -}}
+{{- end -}}
+{{- include "apisix.suffixedName" (dict "context" $ctx "suffix" "admin") -}}
 {{- end -}}
 
 {{/*

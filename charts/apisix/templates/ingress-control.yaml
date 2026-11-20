@@ -1,3 +1,5 @@
+{{- define "apisix.ingress.control" -}}
+{{- if or (ne .Values.apisix.deployment.mode "decoupled") (eq .componentRole "control_plane") }}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,7 +17,7 @@
 # limitations under the License.
 
 {{- if (and .Values.control.enabled .Values.control.ingress.enabled) -}}
-{{- $fullName := include "apisix.fullname" . -}}
+{{- $serviceName := include "apisix.suffixedName" (dict "context" . "suffix" "control") -}}
 {{- $svcPort := .Values.control.service.servicePort -}}
 {{- if and .Values.control.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.control.ingress.annotations "kubernetes.io/ingress.class") }}
@@ -31,7 +33,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}-control
+  name: {{ $serviceName }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
   {{- with .Values.control.ingress.annotations }}
@@ -63,14 +65,19 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ $fullName }}-control
+                name: {{ $serviceName }}
                 port:
                   number:  {{ $svcPort }}
             {{- else }}
             backend:
-              serviceName: {{ $fullName }}-control
+              serviceName: {{ $serviceName }}
               servicePort: {{ $svcPort }}
             {{- end }}
           {{- end }}
     {{- end }}
   {{- end }}
+
+{{- end }}
+
+{{- end }}
+{{ include "apisix.renderPlanes" (dict "template" "apisix.ingress.control" "root" .) }}
