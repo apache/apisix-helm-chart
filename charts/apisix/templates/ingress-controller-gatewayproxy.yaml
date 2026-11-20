@@ -57,8 +57,9 @@ spec:
           {{- end }}
 
   {{- $publishService := $gp.publishService | default "" }}
-  {{- if and (not $publishService) (not $gp.statusAddress) }}
-  {{- $publishService = printf "%s/%s" .Release.Namespace (include "apisix.service.gatewayName" .) }}
+  {{- $gatewayService := include "apisix.service.gatewayName" . }}
+  {{- if and (not $publishService) (not $gp.statusAddress) $gatewayService }}
+  {{- $publishService = printf "%s/%s" .Release.Namespace $gatewayService }}
   {{- end }}
   {{- with $publishService }}
   publishService: {{ . | quote }}
