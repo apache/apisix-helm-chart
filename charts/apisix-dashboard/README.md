@@ -38,6 +38,13 @@ helm install [RELEASE_NAME] apisix/apisix-dashboard --namespace ingress-apisix -
 
 The command deploys apisix-dashboard on the Kubernetes cluster in the default configuration.
 
+> [!WARNING]
+> The default configuration signs login tokens with the secret `secret` and
+> creates the user `admin` with the password `admin`. These values are public,
+> so anyone who can reach the dashboard can log in. Set
+> `config.authentication.secret` and `config.authentication.users` to your own
+> values when you install the chart.
+
 _See [configuration](#configuration) below._
 
 _See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation._

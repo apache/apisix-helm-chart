@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- $encryption := mergeOverwrite (dict "enableEncryptFields" true "secretKeys" (list "key1")) (.Values.apisix.dataEncryption | default dict) }}
+{{- include "apisix.dataEncryption.validate" . }}
 {{- include "apisix.admin.credentials.validate" . }}
 {{- include "apisix.ingressController.validate" . }}
 {{- $custom := .Values.apisix.fullCustomConfig -}}
@@ -125,6 +127,20 @@ data:
           count: {{ .Values.apisix.lru.secret.count }}
           neg_ttl: {{ .Values.apisix.lru.secret.neg_ttl }}
           neg_count: {{ .Values.apisix.lru.secret.neg_count }}
+
+      data_encryption:      # encryption of sensitive plugin fields stored in etcd
+        enable_encrypt_fields: {{ $encryption.enableEncryptFields }}
+        {{- if $encryption.secretName }}
+        keyring:
+          {{- range $index, $_ := $encryption.secretKeys }}
+          - ${{"{{"}}APISIX_DATA_ENCRYPTION_KEY_{{ add1 $index }}{{"}}"}}
+          {{- end }}
+        {{- else if $encryption.keyring }}
+        keyring:
+          {{- range $encryption.keyring }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
 
       tracing: {{ .Values.apisix.tracing }}    # Enable comprehensive request lifecycle tracing (SSL/SNI, rewrite, access, header_filter, body_filter, and log).
                                                # When disabled, OpenTelemetry collects only a single span per request.
