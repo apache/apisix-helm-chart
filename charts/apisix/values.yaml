@@ -982,3 +982,15 @@ ingress-controller:
             # `createDefault` is true. There is no default; the GatewayProxy that the apisix
             # chart creates gets this release's key automatically.
             value: ""
+
+
+# -- Optional ingress-controller policy. Each direction accepts complete Kubernetes NetworkPolicy rules.
+ingressControllerNetworkPolicy:
+  ingress:
+    # -- Enable ingress isolation; an empty rules list denies ingress.
+    enabled: false
+    rules: []
+  egress:
+    # -- Enable egress isolation; an empty rules list denies egress, including DNS.
+    enabled: false
+    rules: []
