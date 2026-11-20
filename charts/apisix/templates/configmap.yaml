@@ -1,3 +1,4 @@
+{{- define "apisix.configmap" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -14,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- include "apisix.admin.credentials.validate" . }}
-{{- include "apisix.ingressController.validate" . }}
+{{- include "apisix.admin.credentials.validate" (.rootContext | default .) }}
+{{- include "apisix.ingressController.validate" (.rootContext | default .) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -54,7 +55,7 @@ data:
         {{- end }}
       {{- end }}
       enable_heartbeat: true
-      enable_admin: {{ .Values.apisix.admin.enabled }}
+      enable_admin: {{ and .Values.apisix.admin.enabled (or (ne .Values.apisix.deployment.mode "decoupled") (ne (include "apisix.deployment.role" $) "data_plane")) }}
       enable_admin_cors: {{ .Values.apisix.admin.cors }}
       enable_debug: false
       {{- if or .Values.apisix.customPlugins.enabled .Values.apisix.luaModuleHook.enabled }}
@@ -419,11 +420,7 @@ data:
       etcd:
       {{- if .Values.etcd.enabled }}
         host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
-          {{- if .Values.etcd.fullnameOverride }}
-          - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
-          {{- else }}
-          - "{{ include "apisix.etcd.auth.scheme" . }}://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
-          {{- end}}
+          - "{{ include "apisix.etcd.auth.scheme" . }}://{{ include "common.names.fullname" .Subcharts.etcd }}.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
       {{- else }}
         host:                          # it's possible to define multiple etcd hosts addresses of the same etcd cluster.
           {{- range $value := .Values.externalEtcd.host }}
@@ -455,3 +452,7 @@ data:
       {{- end }}
       {{- end }}
      
+
+{{- end }}
+
+{{ include "apisix.renderPlanes" (dict "template" "apisix.configmap" "root" .) }}

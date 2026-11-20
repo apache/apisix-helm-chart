@@ -8,6 +8,73 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Deployment modes and upgrade considerations
+
+The default is `apisix.deployment.mode=traditional`. It keeps Apache APISIX in
+one workload with the established Gateway, Admin, Control and Metrics
+Service naming scheme. Existing releases should set the mode explicitly in production so that
+an upgrade does not depend on chart defaults:
+
+```sh
+helm upgrade my-apisix apisix/apisix \
+  --namespace ingress-apisix \
+  --reuse-values \
+  --set apisix.deployment.mode=traditional
+```
+
+Before upgrading an existing release, inspect `helm get values --all` and set
+its intended mode explicitly. An implicit mode from an earlier chart default
+can be replaced when chart defaults or upgrade flags change; do not rely on a
+plain upgrade to preserve an unrecorded topology choice.
+
+The `decoupled` mode deploys separate control-plane and data-plane workloads in
+a single release. Switching an existing release between `traditional` and
+`decoupled` changes the workloads, selectors and component Service names. This
+can change in-cluster DNS names and can create new Services with new ClusterIP,
+NodePort or LoadBalancer allocations. Clients, Ingress backends, Gateway API
+references and monitoring integrations that use Service names must be updated.
+A short traffic interruption is also possible while selectors or load balancer
+endpoints converge.
+
+For an intentional migration to `decoupled`, preserve the existing Gateway
+Service identity with `service.gateway.name` and keep its type, ports,
+annotations, external traffic policy and load balancer settings aligned with
+the existing Service:
+
+```yaml
+apisix:
+  deployment:
+    mode: decoupled
+service:
+  type: LoadBalancer
+  gateway:
+    name: my-apisix-gateway
+```
+
+For an existing Apache APISIX traditional release, the current Gateway Service
+name is normally `<release>-gateway`. Reusing that name lets Helm patch the
+existing Gateway Service and retain its ClusterIP or load balancer allocation
+while the data-plane workload is updated. `service.gateway.name` only covers
+the Gateway Service; Admin, Control and Metrics Service names still change in
+decoupled mode. Use a separate release and an explicit traffic cutover when a
+reversible production migration is required. Do not use `--reset-values` during
+this change unless the target mode and Service migration have been planned.
+
+Each plane has its own Deployment, configuration, selectors, Services, replicas,
+`autoscaling` and `podDisruptionBudget` overrides. Overrides inherit the top-level
+settings. Both planes share the release ServiceAccount and etcd credentials.
+Gateway ingress targets the data plane; Admin and Control ingress target the
+control plane. The data plane Admin API is disabled in decoupled mode, and the
+Admin Service is rendered only for the control plane. The Control listener still
+requires `control.enabled=true` and an appropriate `control.service.ip` if
+accessed outside the Pod.
+
+Disable either plane with `controlPlane.enabled` or `dataPlane.enabled`. Both
+cannot be disabled. Decoupled mode currently rejects DaemonSet, host networking,
+host ports and full custom configuration. Bundled Controller integration is
+configured separately; this option alone does not discover another release's
+Admin endpoint.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -481,6 +548,8 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | apisix.customPlugins.plugins[0].configMap.mounts | list | `[{"key":"the-file-name","path":"mount-path"}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
 | apisix.deleteURITailSlash | bool | `false` | Delete the '/' at the end of the URI |
+| apisix.deployment.controlPlane | object | `{"autoscaling":{},"enabled":true,"podDisruptionBudget":{},"replicaCount":1}` | Deploy the APISIX control plane component when mode is decoupled. |
+| apisix.deployment.dataPlane | object | `{"autoscaling":{},"enabled":true,"podDisruptionBudget":{},"replicaCount":2}` | Deploy the APISIX data plane component when mode is decoupled. |
 | apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone standalone is file-driven standalone: rules are read from the mounted apisix.yaml, and the default traditional role is rendered as data_plane. For API-driven standalone, keep mode traditional and set role_traditional.config_provider to yaml.  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role_traditional.config_provider | string | `"etcd"` | Config provider for the traditional role. enum: etcd, yaml |
@@ -706,6 +775,7 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | securityContext | object | `{}` | Set the securityContext for Apache APISIX container |
 | service.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the service |
 | service.externalTrafficPolicy | string | `"Cluster"` | Setting how the Service route external traffic. If you want to keep the client source IP, you can set this to Local, ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
+| service.gateway | object | `{"name":""}` | Override the gateway Service name. Set this to an existing gateway Service name during a chart migration. |
 | service.http | object | `{"additionalContainerPorts":[],"containerPort":9080,"enabled":true,"hostPort":null,"servicePort":80}` | Apache APISIX service settings for http |
 | service.http.additionalContainerPorts | list | `[]` | Support multiple http ports, See [Configuration](https://github.com/apache/apisix/blob/0bc65ea9acd726f79f80ae0abd8f50b7eb172e3d/conf/config-default.yaml#L24) |
 | service.http.containerPort | int | `9080` | Container port APISIX listens on for HTTP traffic |

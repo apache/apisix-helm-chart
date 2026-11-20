@@ -1,3 +1,4 @@
+{{- define "apisix.pdb" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -36,3 +37,6 @@ spec:
     matchLabels:
 {{- include "apisix.selectorLabels" . | nindent 6 }}
 {{- end }}
+
+{{- end }}
+{{ include "apisix.renderPlanes" (dict "template" "apisix.pdb" "root" .) }}

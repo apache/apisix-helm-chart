@@ -1,3 +1,5 @@
+{{- define "apisix.ingress.admin" -}}
+{{- if or (ne .Values.apisix.deployment.mode "decoupled") (eq .componentRole "control_plane") }}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,7 +17,7 @@
 # limitations under the License.
 
 {{- if (and .Values.apisix.admin.enabled .Values.apisix.admin.ingress.enabled) -}}
-{{- $fullName := include "apisix.fullname" . -}}
+{{- $serviceName := include "apisix.suffixedName" (dict "context" . "suffix" "admin") -}}
 {{- $svcPort := .Values.apisix.admin.servicePort -}}
 {{- if and .Values.apisix.admin.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.apisix.admin.ingress.annotations "kubernetes.io/ingress.class") }}
@@ -31,7 +33,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}-admin
+  name: {{ $serviceName }}
   labels:
     {{- include "apisix.labels" . | nindent 4 }}
   {{- with .Values.apisix.admin.ingress.annotations }}
@@ -63,14 +65,19 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ $fullName }}-admin
+                name: {{ $serviceName }}
                 port:
                   number:  {{ $svcPort }}
             {{- else }}
             backend:
-              serviceName: {{ $fullName }}-admin
+              serviceName: {{ $serviceName }}
               servicePort: {{ $svcPort }}
             {{- end }}
           {{- end }}
     {{- end }}
   {{- end }}
+
+{{- end }}
+
+{{- end }}
+{{ include "apisix.renderPlanes" (dict "template" "apisix.ingress.admin" "root" .) }}

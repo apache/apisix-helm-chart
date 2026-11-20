@@ -18,3 +18,15 @@ limitations under the License.
      so these checks run before the other templates of this chart, which fail
      with less helpful errors on the values of chart versions before 2.16 */}}
 {{- include "apisix.etcd.validate" . }}
+
+{{- if eq .Values.apisix.deployment.mode "decoupled" -}}
+{{- if not (or .Values.apisix.deployment.controlPlane.enabled .Values.apisix.deployment.dataPlane.enabled) -}}
+{{- fail "decoupled mode requires at least one enabled plane" -}}
+{{- end -}}
+{{- if or .Values.hostNetwork .Values.useDaemonSet .Values.service.http.hostPort .Values.apisix.ssl.hostPort -}}
+{{- fail "decoupled mode requires Deployments without hostNetwork or hostPort" -}}
+{{- end -}}
+{{- if .Values.apisix.fullCustomConfig.enabled -}}
+{{- fail "decoupled mode requires role-specific generated configuration; fullCustomConfig is not supported" -}}
+{{- end -}}
+{{- end -}}
