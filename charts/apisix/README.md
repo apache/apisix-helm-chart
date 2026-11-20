@@ -8,6 +8,21 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Pinned images and external etcd
+
+The default APISIX and bundled etcd images use immutable multi-architecture
+manifest digests. The etcd image is 3.6.4, matching the 12.0.18 dependency's
+pre-upgrade hook. When changing a repository or tag, also set its matching
+digest, or explicitly clear the digest to select by tag. Mirror both manifests
+and layers when using a private registry.
+
+Bundled etcd remains enabled to preserve existing installations. To use an
+externally managed cluster set `etcd.enabled=false`, configure real
+`externalEtcd.host` endpoints and credentials, and migrate and verify data first.
+Disabling bundled etcd during an upgrade removes its release-managed workloads;
+this is not a data migration. Back up and test restoration before etcd upgrades;
+a downgrade from etcd 3.6 to 3.5 is not a Helm rollback procedure.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -622,7 +637,7 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | control.service.port | int | `9090` | which port to use for Apache APISIX Control API |
 | control.service.servicePort | int | `9090` | Service port to use for Apache APISIX Control API |
 | control.service.type | string | `"ClusterIP"` | Control service type |
-| etcd | object | `{"auth":{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"defrag":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"disasterRecovery":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"enabled":true,"image":{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"},"networkPolicy":{"allowExternal":false},"preUpgradeJob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"startupRetry":2,"timeout":30,"watchTimeout":50}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd | object | `{"auth":{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"defrag":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"disasterRecovery":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"enabled":true,"image":{"digest":"sha256:db0fec3c3fa1d508faf8d1b03e4976ea54e4e3f368335d66f4b1313662f37483","registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"3.6.4-debian-12-r3"},"networkPolicy":{"allowExternal":false},"preUpgradeJob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"startupRetry":2,"timeout":30,"watchTimeout":50}` | etcd configuration use the FQDN address or the IP of the etcd |
 | etcd.auth | object | `{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart |
 | etcd.auth.rbac.create | bool | `false` | Require clients to authenticate to etcd. APISIX connects as root with the password from `rootPassword` or `existingSecret`; when both are empty, a password is generated into the Secret `<etcd fullname>`. For an existing release, read "Access to the bundled etcd" in the README first |
 | etcd.auth.rbac.existingSecret | string | `""` | Name of an existing Secret with the root password, used instead of rootPassword. Requires etcd.auth.rbac.create to be true |
@@ -639,9 +654,10 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | etcd.containerSecurityContext | object | `{"enabled":false}` | added for backward compatibility with old kubernetes versions, as seccompProfile is not supported in kubernetes < 1.19 |
 | etcd.defrag.cronjob.podLabels | object | `{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}` | Labels of the pods of the etcd chart's defragmentation job, used when etcd.defrag.enabled is true |
 | etcd.disasterRecovery.cronjob.podLabels | object | `{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}` | Labels of the pods of the etcd chart's snapshot job, used when etcd.disasterRecovery.enabled is true |
-| etcd.enabled | bool | `true` | install built-in etcd by default, set false if do not want to install built-in etcd together, this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes, if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it. |
-| etcd.image | object | `{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"}` | docker image for built-in etcd |
-| etcd.image.tag | string | `"latest"` | `bitnamilegacy/etcd` only provide `latest` tag now, ref: https://github.com/bitnami/containers/issues/83267, you can switch `etcd.image.repository` to `bitnamilegacy/etcd` to use old versioned tags. |
+| etcd.enabled | bool | `true` | Install the bundled etcd; disable explicitly when supplying externalEtcd endpoints. this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes, if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it. |
+| etcd.image | object | `{"digest":"sha256:db0fec3c3fa1d508faf8d1b03e4976ea54e4e3f368335d66f4b1313662f37483","registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"3.6.4-debian-12-r3"}` | docker image for built-in etcd |
+| etcd.image.digest | string | `"sha256:db0fec3c3fa1d508faf8d1b03e4976ea54e4e3f368335d66f4b1313662f37483"` | Immutable multi-architecture manifest digest for the pinned tag. |
+| etcd.image.tag | string | `"3.6.4-debian-12-r3"` | Pinned etcd image tag. Override repository and digest for your registry. |
 | etcd.networkPolicy.allowExternal | bool | `false` | Accept etcd client connections from any pod. When false, only etcd's own pods and pods labelled `<etcd fullname>-client: "true"` can connect; the chart adds that label to the APISIX pods and to the jobs of the etcd chart below |
 | etcd.preUpgradeJob.podLabels | object | `{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}` | Labels of the pods of the etcd chart's pre-upgrade job |
 | etcd.prefix | string | `"/apisix"` | apisix configurations prefix |
@@ -665,6 +681,7 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | fullnameOverride | string | `""` | String to fully override the chart fullname |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
 | hostNetwork | bool | `false` | Use the host's network namespace |
+| image.digest | string | `"sha256:398ded33cde36b60ca7f5dd58e8d8132b41afffaf7ac4bb72db8491fc316fe55"` | Immutable multi-architecture manifest digest for the pinned tag. |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
 | image.tag | string | `"3.21.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
@@ -678,6 +695,7 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | ingress.hosts | list | `[{"host":"apisix.local","paths":[]}]` | Ingress host and path rules |
 | ingress.servicePort | number | `nil` | Service port to send traffic. Defaults to `service.http.servicePort`. |
 | ingress.tls | list | `[]` | Ingress TLS settings |
+| initContainer.digest | string | `"sha256:141c253bc4c3fd0a201d32dc1f493bcf3fff003b6df416dea4f41046e0f37d47"` | Immutable multi-architecture manifest digest for the pinned tag. |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.resources | object | `{}` | Resource requests and limits for the wait-etcd init container (only used when etcd.enabled is true) |
 | initContainer.securityContext | object | `{}` | Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings. |

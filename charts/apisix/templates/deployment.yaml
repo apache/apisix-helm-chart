@@ -80,7 +80,7 @@ spec:
           securityContext:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}{{ if .Values.image.digest }}@{{ .Values.image.digest }}{{ else }}:{{ default .Chart.AppVersion .Values.image.tag }}{{ end }}"
           {{- if eq .Values.apisix.deployment.mode "standalone" }}
           command: ["sh", "-c","ln -s /apisix-config/apisix.yaml /usr/local/apisix/conf/apisix.yaml && exec /docker-entrypoint.sh docker-start"]
           {{- end }}
@@ -272,7 +272,7 @@ spec:
       initContainers:
         {{- if .Values.etcd.enabled }}
         - name: wait-etcd
-          image: {{ .Values.initContainer.image }}:{{ .Values.initContainer.tag }}
+          image: {{ .Values.initContainer.image }}{{ if .Values.initContainer.digest }}@{{ .Values.initContainer.digest }}{{ else }}:{{ .Values.initContainer.tag }}{{ end }}
           {{- with .Values.initContainer.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
