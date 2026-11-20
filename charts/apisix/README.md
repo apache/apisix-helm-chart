@@ -8,6 +8,27 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Independent etcd CA trust
+
+For server-authenticated etcd TLS configure `etcd.auth.tls.enabled=true`,
+`caSecret` and `caFilename`, plus HTTPS external endpoints. This does not require
+`apisix.ssl.enabled`. Client certificates remain separately optional for mTLS.
+
+APISIX has one shared nginx trust bundle. At container startup the chart combines
+the image's system CA store, the etcd CA and any enabled existing APISIX upstream
+CA into `/tmp/apisix-etcd-ca-bundle.pem`. This preserves simultaneous upstream
+trust instead of silently replacing it with the etcd CA. `includeSystemCA=false`
+opts out of system roots; custom images can set `systemCAPath` explicitly.
+This trust is global, so each bundled CA can authenticate other outbound TLS
+connections too. A raw full custom config must reference this bundle itself.
+
+The Secret uses a directory mount. Rotate it with an explicit Pod rollout to
+rebuild the bundle and reload nginx trust; projection alone does not reload
+APISIX TLS state. `/tmp` must be writable; the secure workload defaults supply
+an emptyDir for read-only root filesystems. Keep PEM files newline-terminated.
+The generated command retains standalone symlink initialization and delegates
+to the official image entrypoint.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -403,16 +424,13 @@ certificates are optional: leave `existingSecret`, `certFilename` and
 For example, to connect to an IP endpoint using a CA stored in a Secret:
 
 ```yaml
-apisix:
-  ssl:
-    enabled: true
-    existingCASecret: etcd-ca
-    certCAFilename: ca.crt
 etcd:
   enabled: false
   auth:
     tls:
       enabled: true
+      caSecret: etcd-ca
+      caFilename: ca.crt
       existingSecret: ""
       certFilename: ""
       certKeyFilename: ""
@@ -438,7 +456,7 @@ For mTLS, keep `etcd.auth.tls.enabled: true` and set `existingSecret`,
 `certFilename` and `certKeyFilename` under `etcd.auth.tls`. The certificate and key
 must be configured together. When TLS is enabled, a non-empty `existingSecret`
 is mounted at `/etcd-ssl`, including when certificate paths are supplied through
-`apisix.fullCustomConfig`. The CA Secret above is configured separately.
+`apisix.fullCustomConfig`. The CA Secret above is configured separately from optional client certificates.
 
 With `etcd.auth.tls.enabled: false`, the APISIX etcd TLS settings and
 client-certificate mount are omitted as before. This flag does not rewrite
@@ -622,17 +640,21 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | control.service.port | int | `9090` | which port to use for Apache APISIX Control API |
 | control.service.servicePort | int | `9090` | Service port to use for Apache APISIX Control API |
 | control.service.type | string | `"ClusterIP"` | Control service type |
-| etcd | object | `{"auth":{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"defrag":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"disasterRecovery":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"enabled":true,"image":{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"},"networkPolicy":{"allowExternal":false},"preUpgradeJob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"startupRetry":2,"timeout":30,"watchTimeout":50}` | etcd configuration use the FQDN address or the IP of the etcd |
-| etcd.auth | object | `{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart |
+| etcd | object | `{"auth":{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"caFilename":"ca.crt","caSecret":"","certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","includeSystemCA":true,"sni":"","systemCAPath":"/etc/ssl/certs/ca-certificates.crt","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"defrag":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"disasterRecovery":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"enabled":true,"image":{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"},"networkPolicy":{"allowExternal":false},"preUpgradeJob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"startupRetry":2,"timeout":30,"watchTimeout":50}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd.auth | object | `{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"caFilename":"ca.crt","caSecret":"","certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","includeSystemCA":true,"sni":"","systemCAPath":"/etc/ssl/certs/ca-certificates.crt","verify":true}}` | if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart |
 | etcd.auth.rbac.create | bool | `false` | Require clients to authenticate to etcd. APISIX connects as root with the password from `rootPassword` or `existingSecret`; when both are empty, a password is generated into the Secret `<etcd fullname>`. For an existing release, read "Access to the bundled etcd" in the README first |
 | etcd.auth.rbac.existingSecret | string | `""` | Name of an existing Secret with the root password, used instead of rootPassword. Requires etcd.auth.rbac.create to be true |
 | etcd.auth.rbac.existingSecretPasswordKey | string | `""` | Key of existingSecret that holds the root password. The default is etcd-root-password |
 | etcd.auth.rbac.rootPassword | string | `""` | Root password for etcd. Requires etcd.auth.rbac.create to be true |
+| etcd.auth.tls.caFilename | string | `"ca.crt"` | PEM certificate key in caSecret. |
+| etcd.auth.tls.caSecret | string | `""` | Secret containing the etcd server CA, independent of apisix.ssl. |
 | etcd.auth.tls.certFilename | string | `""` | Client certificate filename in existingSecret. Set together with certKeyFilename for mTLS; leave both empty for server-only TLS. |
 | etcd.auth.tls.certKeyFilename | string | `""` | Client private key filename in existingSecret. Required when certFilename is set. |
 | etcd.auth.tls.enabled | bool | `false` | Enable TLS settings for the APISIX etcd connection. For external etcd, also use https:// endpoints in externalEtcd.host. Client certificates are optional. |
 | etcd.auth.tls.existingSecret | string | `""` | Secret containing the optional etcd client certificate and key. Mounted when TLS is enabled and the name is non-empty, including with fullCustomConfig. Required when certFilename and certKeyFilename are set. |
+| etcd.auth.tls.includeSystemCA | bool | `true` | Include the image system trust store in the generated bundle. |
 | etcd.auth.tls.sni | string | `""` | TLS server name used when etcd.auth.tls.enabled is true. Omitted when empty so the endpoint hostname is used. For IP endpoints, set a DNS name covered by every endpoint certificate, since IP SANs are not matched. |
+| etcd.auth.tls.systemCAPath | string | `"/etc/ssl/certs/ca-certificates.crt"` | System trust store path in the APISIX image. |
 | etcd.auth.tls.verify | bool | `true` | Whether to verify the etcd endpoint certificate when etcd.auth.tls.enabled is true. |
 | etcd.autoCompactionMode | string | `"periodic"` | Auto compaction mode (periodic or revision), only used when etcd.enabled is true |
 | etcd.autoCompactionRetention | string | `"1h"` | Auto compaction retention for mvcc key value store, only used when etcd.enabled is true |

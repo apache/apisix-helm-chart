@@ -8,6 +8,27 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Independent etcd CA trust
+
+For server-authenticated etcd TLS configure `etcd.auth.tls.enabled=true`,
+`caSecret` and `caFilename`, plus HTTPS external endpoints. This does not require
+`apisix.ssl.enabled`. Client certificates remain separately optional for mTLS.
+
+APISIX has one shared nginx trust bundle. At container startup the chart combines
+the image's system CA store, the etcd CA and any enabled existing APISIX upstream
+CA into `/tmp/apisix-etcd-ca-bundle.pem`. This preserves simultaneous upstream
+trust instead of silently replacing it with the etcd CA. `includeSystemCA=false`
+opts out of system roots; custom images can set `systemCAPath` explicitly.
+This trust is global, so each bundled CA can authenticate other outbound TLS
+connections too. A raw full custom config must reference this bundle itself.
+
+The Secret uses a directory mount. Rotate it with an explicit Pod rollout to
+rebuild the bundle and reload nginx trust; projection alone does not reload
+APISIX TLS state. `/tmp` must be writable; the secure workload defaults supply
+an emptyDir for read-only root filesystems. Keep PEM files newline-terminated.
+The generated command retains standalone symlink initialization and delegates
+to the official image entrypoint.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -403,16 +424,13 @@ certificates are optional: leave `existingSecret`, `certFilename` and
 For example, to connect to an IP endpoint using a CA stored in a Secret:
 
 ```yaml
-apisix:
-  ssl:
-    enabled: true
-    existingCASecret: etcd-ca
-    certCAFilename: ca.crt
 etcd:
   enabled: false
   auth:
     tls:
       enabled: true
+      caSecret: etcd-ca
+      caFilename: ca.crt
       existingSecret: ""
       certFilename: ""
       certKeyFilename: ""
@@ -438,7 +456,7 @@ For mTLS, keep `etcd.auth.tls.enabled: true` and set `existingSecret`,
 `certFilename` and `certKeyFilename` under `etcd.auth.tls`. The certificate and key
 must be configured together. When TLS is enabled, a non-empty `existingSecret`
 is mounted at `/etcd-ssl`, including when certificate paths are supplied through
-`apisix.fullCustomConfig`. The CA Secret above is configured separately.
+`apisix.fullCustomConfig`. The CA Secret above is configured separately from optional client certificates.
 
 With `etcd.auth.tls.enabled: false`, the APISIX etcd TLS settings and
 client-certificate mount are omitted as before. This flag does not rewrite
