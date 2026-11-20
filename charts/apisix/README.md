@@ -126,6 +126,24 @@ release history, use `apisix.admin.credentials.secretName`.
 
 ## Upgrading
 
+### To 3.1.0
+
+This chart upgrades the default gateway to Apache APISIX 3.21.0.
+
+* If you set `apisix.fullCustomConfig.enabled: true` for a `traditional` or `control_plane`
+  deployment with `deployment.admin.admin_key_required` enabled, give every entry in
+  `deployment.admin.admin_key` an explicit `role` of `admin` or `viewer`. Quote numeric-looking
+  key values in YAML, for example `key: "1234567890123456"`. These checks also apply to
+  traditional deployments with the Admin API disabled.
+* If you use configuration encryption, back up etcd before upgrading. Pause Admin API writes
+  while old and new gateway versions run together. APISIX 3.21.0 prefixes newly encrypted
+  plugin configuration and metadata values with `$ENC$v1$`. If you have re-saved encrypted
+  resources and need to roll back to a gateway build that cannot read this prefix, restore
+  the pre-upgrade etcd data before starting that build.
+
+See the [APISIX 3.21.0 release notes](https://github.com/apache/apisix/releases/tag/3.21.0)
+for the full upstream upgrade guidance.
+
 ### To 3.0.0
 
 Chart 3.0.0 no longer uses the publicly known default Admin API keys
@@ -649,7 +667,7 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | hostNetwork | bool | `false` | Use the host's network namespace |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.20.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.21.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"enabled":false,"gatewayProxy":{"name":"{{ .Release.Name }}-config","provider":{"controlPlane":{"auth":{"adminKey":{"value":""}}}}},"webhook":{"enabled":false}}` | Ingress controller configuration |
 | ingress-controller.enabled | bool | `false` | Enable the apisix-ingress-controller sub-chart |
