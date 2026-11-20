@@ -61,7 +61,10 @@ q() { yq "$1" <<<"$OUT"; }
 ingress_class_parameters() {
   local value
   value=$(q 'select(.kind == "IngressClass") | .spec.parameters')
-  printf '%s\n' "${value:-none}"
+  if [ -z "$value" ] || [ "$value" = "null" ]; then
+    value=none
+  fi
+  printf '%s\n' "$value"
 }
 config() { q 'select(.kind == "ConfigMap" and .data["config.yaml"] != null) | .data["config.yaml"]' | yq "$1"; }
 key_of() { config ".deployment.admin.admin_key[] | select(.name == \"$1\") | .key"; }
