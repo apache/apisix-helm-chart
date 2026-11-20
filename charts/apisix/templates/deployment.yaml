@@ -216,7 +216,9 @@ spec:
           {{- end -}}
           {{- if eq (len $selected) 1 -}}
           {{- range $handler := $handlers -}}
+          {{- if ne $handler (index $selected 0) -}}
           {{- $_ := unset (index $defaults $name) $handler -}}
+          {{- end -}}
           {{- end -}}
           {{- end -}}
           {{- end -}}

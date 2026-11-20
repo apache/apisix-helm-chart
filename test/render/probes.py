@@ -88,4 +88,7 @@ c = objects(docs, "Deployment")[0]["spec"]["template"]["spec"]["containers"][0]
 assert not c.get("livenessProbe")
 assert c["readinessProbe"]["periodSeconds"] == 7
 assert c["readinessProbe"]["httpGet"]["path"] == "/status/ready"
+docs = render({"apisix": {"status": {"probes": {"readinessProbe": {"httpGet": {"path": "/custom"}}}}}})
+probe = objects(docs, "Deployment")[0]["spec"]["template"]["spec"]["containers"][0]["readinessProbe"]
+assert probe["httpGet"] == {"path": "/custom", "port": "status"}
 print("probes: passed")
