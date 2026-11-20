@@ -52,3 +52,16 @@ Control plane only: this release has no gateway Service.
   APISIX uses the keys set in apisix.admin.credentials.
 {{- end }}
 {{- end }}
+{{- $encryption := mergeOverwrite (dict "enableEncryptFields" true "secretKeys" (list "key1")) (.Values.apisix.dataEncryption | default dict) }}
+{{- if and (not .Values.apisix.fullCustomConfig.enabled) (not $encryption.keyring) (not $encryption.secretName) (eq (include "apisix.deployment.configProvider" .) "etcd") }}
+
+WARNING: APISIX encrypts SSL private keys and sensitive plugin fields, such as
+consumer credentials, with its built-in keyring, which is public. Set
+apisix.dataEncryption.secretName or apisix.dataEncryption.keyring. If this
+release already stores encrypted data, follow "Changing the keyring of an
+existing release" in the chart README; otherwise APISIX can lose that data.
+{{- end }}
+{{- if hasKey .Values.apisix "data_encryption" }}
+
+WARNING: apisix.data_encryption is not read by this chart. Use apisix.dataEncryption.
+{{- end }}
