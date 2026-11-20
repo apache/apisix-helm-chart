@@ -60,7 +60,11 @@ Create the name of the service account to use
 */}}
 {{- define "apisix.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "apisix.fullname" .) .Values.serviceAccount.name }}
+{{- $name := include "apisix.fullname" (omit . "componentName" "componentRole") -}}
+{{- if and (index .Values "ingress-controller" "enabled") (eq $name .Release.Name) -}}
+{{- $name = printf "%s-gateway" ($name | trunc 55 | trimSuffix "-") -}}
+{{- end -}}
+{{- default $name .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
