@@ -42,7 +42,18 @@ controls static `crds/`, not CRDs rendered by templates.
 
 ## Prerequisites
 
-Apisix ingress controller requires Kubernetes version 1.16+.
+Check the controller image and the exact CRD bundle against the target API
+server before installation. The default Gateway API bundle includes
+`ValidatingAdmissionPolicy` and `ValidatingAdmissionPolicyBinding` at
+`admissionregistration.k8s.io/v1`; Kubernetes 1.16 alone does not satisfy this
+default installation requirement. Confirm these APIs with `kubectl api-resources
+--api-group=admissionregistration.k8s.io` and review the selected Gateway API
+bundle's Kubernetes compatibility requirements.
+
+These admission policies are cluster-scoped resources with the same owner and
+upgrade lifecycle as the Gateway API bundle. `--skip-crds` does not skip them.
+When the platform owns that bundle, set `crds.gatewayAPI.enabled=false` to skip
+both its CRDs and admission policies, and supply a compatible installation.
 
 ## Get Repo Info
 
