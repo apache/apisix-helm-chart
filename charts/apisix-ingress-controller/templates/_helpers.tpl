@@ -104,3 +104,24 @@ Port of the controller health probe server, taken from config.probeAddr
 {{- end -}}
 {{- $port -}}
 {{- end -}}
+
+{{/*
+gatewayProxy.name rendered with tpl, so a parent chart can pass
+"{{ .Release.Name }}-...". Empty when it is not set or renders to nothing.
+Render once per chart so the created GatewayProxy and its reference agree.
+*/}}
+{{- define "apisix-ingress-controller-manager.configuredGatewayProxyName" -}}
+{{- $key := "_apisixIngressControllerConfiguredGatewayProxyName" -}}
+{{- if not (hasKey . $key) -}}
+{{- $_ := set . $key (tpl (.Values.gatewayProxy.name | default "" | toString) .) -}}
+{{- end -}}
+{{- get . $key -}}
+{{- end -}}
+
+{{/*
+Name of the GatewayProxy that the IngressClass references, in the release
+namespace: gatewayProxy.name, or "<release name>-config".
+*/}}
+{{- define "apisix-ingress-controller-manager.gatewayProxyName" -}}
+{{- default (printf "%s-config" .Release.Name) (include "apisix-ingress-controller-manager.configuredGatewayProxyName" .) -}}
+{{- end -}}
