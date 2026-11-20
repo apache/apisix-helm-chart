@@ -797,6 +797,9 @@ apisix:
     metricPrefix: apisix_
     # -- container port where the metrics are exposed
     containerPort: 9091
+    service:
+      # -- Metrics Service type
+      type: ClusterIP
 
   # -- Customize the list of APISIX plugins to enable. By default, APISIX's [default plugins](https://github.com/apache/apisix/blob/master/apisix/cli/config.lua#L196) are automatically used.
   plugins: []
