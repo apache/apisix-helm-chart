@@ -35,8 +35,11 @@ a single release. Switching an existing release between `traditional` and
 can change in-cluster DNS names and can create new Services with new ClusterIP,
 NodePort or LoadBalancer allocations. Clients, Ingress backends, Gateway API
 references and monitoring integrations that use Service names must be updated.
-A short traffic interruption is also possible while selectors or load balancer
-endpoints converge.
+Helm can update the Gateway selector before the new data-plane Pods are Ready,
+leaving the Service without ready endpoints. Keeping its name and address does
+not make this a zero-downtime switch, and the chart provides no outage bound.
+Use a separate release and an explicit traffic cutover when uninterrupted
+traffic or a reversible production migration is required.
 
 For an intentional migration to `decoupled`, preserve the existing Gateway
 Service identity with `service.gateway.name` and keep its type, ports,
@@ -54,12 +57,15 @@ service:
 ```
 
 For an existing Apache APISIX traditional release, the current Gateway Service
-name is normally `<release>-gateway`. Reusing that name lets Helm patch the
+name is `<chart fullname>-gateway`; the fullname depends on the release name,
+`nameOverride` and `fullnameOverride`. For example, release `apisix` normally
+uses `apisix-gateway`, while release `edge` normally uses `edge-apisix-gateway`.
+Read the actual name from the existing release before setting the override.
+Reusing that name lets Helm patch the
 existing Gateway Service and retain its ClusterIP or load balancer allocation
 while the data-plane workload is updated. `service.gateway.name` only covers
 the Gateway Service; Admin, Control and Metrics Service names still change in
-decoupled mode. Use a separate release and an explicit traffic cutover when a
-reversible production migration is required. Do not use `--reset-values` during
+decoupled mode. Do not use `--reset-values` during
 this change unless the target mode and Service migration have been planned.
 
 Each plane has its own Deployment, configuration, selectors, Services, replicas,
