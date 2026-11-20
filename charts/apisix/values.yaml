@@ -74,7 +74,7 @@ podDisruptionBudget:
   # for more details
   minAvailable: 90%
   # -- Set the maxUnavailable of podDisruptionBudget
-  maxUnavailable: 1
+  maxUnavailable: null
 
 # -- Set pod resource requests & limits
 resources: {}
