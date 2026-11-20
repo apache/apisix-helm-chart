@@ -8,9 +8,30 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Workload security defaults
+
+The official APISIX 3.21 Ubuntu image uses UID/GID 636. The Pod explicitly sets
+these numeric IDs so Kubernetes can enforce `runAsNonRoot` even though the image
+metadata names the user `apisix`. Custom images and admission-assigned IDs must
+supply compatible Pod and init-container settings. `seccompProfile` requires
+Kubernetes 1.19+ and `fsGroupChangePolicy` requires 1.20+. Older clusters must clear
+unsupported fields and separately verify compatibility of the enabled dependencies.
+
+The container drops all capabilities, disables privilege escalation and uses a
+read-only root filesystem. Writable emptyDir mounts hold configuration generated
+by `apisix init`, logs, PID/socket files, nginx temporary files and `/tmp`.
+A non-root init container using the same image copies packaged configuration
+and stdout/stderr log symlinks before the mounted config.yaml overrides it.
+Custom cache and plugin write paths need additional writable mounts.
+
+ServiceAccount creation retains its existing default. Token automount defaults
+to false on the Pod, independently of the account. Kubernetes discovery requires
+explicitly enabling `serviceAccount.automountServiceAccountToken` and suitable
+RBAC. The Ingress Controller has its own ServiceAccount and token settings.
+
 ## Prerequisites
 
-* Kubernetes v1.14+
+* Kubernetes v1.20+ for the default security settings
 * Helm v3.8+
 
 ## Install
@@ -362,8 +383,9 @@ When `etcd.enabled` is true, `initContainer.resources` and
 both Deployment and DaemonSet workloads. They are independent of the top-level
 `resources` and `securityContext`, which configure the APISIX container.
 
-Both options default to `{}` and are omitted from the rendered container when
-empty. Applicable `podSecurityContext` settings still apply to `wait-etcd`.
+The wait container resources default to `{}`; its security context defaults to
+non-root UID/GID 636, no capabilities, no privilege escalation and a read-only
+root filesystem. Set its security context to `{}` to inherit Pod settings. Applicable `podSecurityContext` settings still apply to `wait-etcd`.
 For example:
 
 ```yaml
@@ -680,7 +702,7 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | ingress.tls | list | `[]` | Ingress TLS settings |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.resources | object | `{}` | Resource requests and limits for the wait-etcd init container (only used when etcd.enabled is true) |
-| initContainer.securityContext | object | `{}` | Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings. |
+| initContainer.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":636,"runAsNonRoot":true,"runAsUser":636}` | Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings. |
 | initContainer.tag | float | `1.28` | Init container tag |
 | lifecycle | object | `{"preStop":{"exec":{"command":["/bin/sh","-c","sleep 30"]}}}` | Lifecycle hooks for the Apache APISIX container |
 | metrics | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"15s","labels":{},"name":"","namespace":""}}` | Observability configuration. |
@@ -698,12 +720,12 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
 | podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
 | podLabels | object | `{}` | Labels to add to each pod |
-| podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
+| podSecurityContext | object | `{"fsGroup":636,"fsGroupChangePolicy":"OnRootMismatch","runAsGroup":636,"runAsNonRoot":true,"runAsUser":636,"seccompProfile":{"type":"RuntimeDefault"}}` | Set the securityContext for Apache APISIX pods |
 | priorityClassName | string | `""` | Set [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for Apache APISIX pods |
 | rbac.create | bool | `false` | Whether RBAC resources (ClusterRole and ClusterRoleBinding) should be created |
 | replicaCount | int | `1` | if useDaemonSet is true or autoscaling.enabled is true, replicaCount not become effective |
 | resources | object | `{}` | Set pod resource requests & limits |
-| securityContext | object | `{}` | Set the securityContext for Apache APISIX container |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true}` | Set the securityContext for Apache APISIX container |
 | service.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the service |
 | service.externalTrafficPolicy | string | `"Cluster"` | Setting how the Service route external traffic. If you want to keep the client source IP, you can set this to Local, ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
 | service.http | object | `{"additionalContainerPorts":[],"containerPort":9080,"enabled":true,"hostPort":null,"servicePort":80}` | Apache APISIX service settings for http |
@@ -721,6 +743,7 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | service.tls.servicePort | int | `443` | Kubernetes service port for HTTPS traffic |
 | service.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
+| serviceAccount.automountServiceAccountToken | bool | `false` | Whether to mount the ServiceAccount token into APISIX pods |
 | serviceAccount.create | bool | `false` | Whether a ServiceAccount should be created for the APISIX pods |
 | serviceAccount.name | string | `""` | Name of the ServiceAccount to use. If not set and create is true, a name is generated from the chart fullname |
 | terminationGracePeriodSeconds | int | `30` | Number of seconds Kubernetes waits for Apache APISIX to terminate gracefully |

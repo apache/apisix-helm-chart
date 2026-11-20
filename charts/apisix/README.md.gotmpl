@@ -8,9 +8,30 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Workload security defaults
+
+The official APISIX 3.21 Ubuntu image uses UID/GID 636. The Pod explicitly sets
+these numeric IDs so Kubernetes can enforce `runAsNonRoot` even though the image
+metadata names the user `apisix`. Custom images and admission-assigned IDs must
+supply compatible Pod and init-container settings. `seccompProfile` requires
+Kubernetes 1.19+ and `fsGroupChangePolicy` requires 1.20+. Older clusters must clear
+unsupported fields and separately verify compatibility of the enabled dependencies.
+
+The container drops all capabilities, disables privilege escalation and uses a
+read-only root filesystem. Writable emptyDir mounts hold configuration generated
+by `apisix init`, logs, PID/socket files, nginx temporary files and `/tmp`.
+A non-root init container using the same image copies packaged configuration
+and stdout/stderr log symlinks before the mounted config.yaml overrides it.
+Custom cache and plugin write paths need additional writable mounts.
+
+ServiceAccount creation retains its existing default. Token automount defaults
+to false on the Pod, independently of the account. Kubernetes discovery requires
+explicitly enabling `serviceAccount.automountServiceAccountToken` and suitable
+RBAC. The Ingress Controller has its own ServiceAccount and token settings.
+
 ## Prerequisites
 
-* Kubernetes v1.14+
+* Kubernetes v1.20+ for the default security settings
 * Helm v3.8+
 
 ## Install
@@ -362,8 +383,9 @@ When `etcd.enabled` is true, `initContainer.resources` and
 both Deployment and DaemonSet workloads. They are independent of the top-level
 `resources` and `securityContext`, which configure the APISIX container.
 
-Both options default to `{}` and are omitted from the rendered container when
-empty. Applicable `podSecurityContext` settings still apply to `wait-etcd`.
+The wait container resources default to `{}`; its security context defaults to
+non-root UID/GID 636, no capabilities, no privilege escalation and a read-only
+root filesystem. Set its security context to `{}` to inherit Pod settings. Applicable `podSecurityContext` settings still apply to `wait-etcd`.
 For example:
 
 ```yaml
