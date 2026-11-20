@@ -8,6 +8,17 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## ServiceMonitor discovery
+
+Enable both `apisix.prometheus.enabled` and `metrics.serviceMonitor.enabled`.
+The ServiceMonitor can live in a monitoring namespace, while its namespace
+selector always targets the Services in this release's namespace. Discovery uses
+stable selector labels rather than chart version labels, so upgrades do not
+silently detach metrics targets. The endpoint references the Service's named
+`prometheus` port. Scrape timeout and target/metric relabeling are configurable.
+The Prometheus operator and its CRDs must already be installed; its Prometheus
+resource must select this ServiceMonitor and permit the target namespace.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -683,13 +694,16 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | initContainer.securityContext | object | `{}` | Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings. |
 | initContainer.tag | float | `1.28` | Init container tag |
 | lifecycle | object | `{"preStop":{"exec":{"command":["/bin/sh","-c","sleep 30"]}}}` | Lifecycle hooks for the Apache APISIX container |
-| metrics | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"15s","labels":{},"name":"","namespace":""}}` | Observability configuration. |
+| metrics | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"15s","labels":{},"metricRelabelings":[],"name":"","namespace":"","relabelings":[],"scrapeTimeout":""}}` | Observability configuration. |
 | metrics.serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
 | metrics.serviceMonitor.enabled | bool | `false` | Enable or disable Apache APISIX serviceMonitor |
 | metrics.serviceMonitor.interval | string | `"15s"` | interval at which metrics should be scraped |
 | metrics.serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
+| metrics.serviceMonitor.metricRelabelings | list | `[]` | Metric relabeling rules. |
 | metrics.serviceMonitor.name | string | `""` | name of the serviceMonitor, by default, it is the same as the apisix fullname |
 | metrics.serviceMonitor.namespace | string | `""` | namespace where the serviceMonitor is deployed, by default, it is the same as the namespace of the apisix |
+| metrics.serviceMonitor.relabelings | list | `[]` | Target relabeling rules. |
+| metrics.serviceMonitor.scrapeTimeout | string | `""` | Optional scrape timeout; must not exceed interval. |
 | nameOverride | string | `""` | String to partially override the chart fullname |
 | nodeSelector | object | `{}` | Node labels for Apache APISIX pod assignment |
 | podAnnotations | object | `{}` | Annotations to add to each pod |
