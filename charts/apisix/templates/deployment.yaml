@@ -37,7 +37,11 @@ spec:
   template:
     metadata:
       annotations:
+        {{- if and .Values.apisix.fullCustomConfig.enabled .Values.apisix.fullCustomConfig.existingConfigMap }}
+        checksum/config: {{ .Values.apisix.fullCustomConfig.revision | quote }}
+        {{- else }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- end }}
         {{- if and (eq .Values.apisix.deployment.mode "standalone") (not .Values.apisix.deployment.standalone.existingConfigMap) }}
         checksum/standalone-config: {{ include (print $.Template.BasePath "/apisix-config-cm.yaml") . | sha256sum }}
         {{- end }}
@@ -297,7 +301,7 @@ spec:
           name: apisix-admin
         {{- end }}
         - configMap:
-            name: {{ include "apisix.fullname" . }}
+            name: {{ .Values.apisix.fullCustomConfig.existingConfigMap | default (include "apisix.fullname" .) }}
           name: apisix-config
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
         - secret:

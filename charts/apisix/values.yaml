@@ -475,6 +475,12 @@ apisix:
   fullCustomConfig:
     # -- Enable full customized config.yaml
     enabled: false
+    # -- Existing ConfigMap containing config.yaml; when set, the chart creates no runtime ConfigMap.
+    existingConfigMap: ""
+    # -- Full config.yaml as a literal YAML string. Mutually exclusive with config and existingConfigMap. No tpl interpolation.
+    configString: ""
+    # -- Optional external ConfigMap revision; changing it triggers a Pod rollout.
+    revision: ""
     # -- If apisix.fullCustomConfig.enabled is true, full customized config.yaml.
     # Please note that other settings about APISIX config will be ignored
     config: {}

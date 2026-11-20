@@ -8,6 +8,29 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Complete runtime configuration
+
+For all APISIX options enable `apisix.fullCustomConfig` and choose exactly one
+source: the existing templated `config` map, a literal `configString`, or an
+`existingConfigMap` with a `config.yaml` key. Literal strings are passed without
+`tpl`, so APISIX placeholders and Lua snippets are preserved. With an external
+ConfigMap no unused runtime ConfigMap is generated; set `revision` to trigger a
+rollout when it changes.
+
+Publicly known default Admin keys are rejected for both `config` and literal
+`configString`. An external ConfigMap is checked when Helm can read it; offline
+renderers cannot inspect external objects, so its owner must validate it before
+applying the release.
+
+Full configuration replaces generated APISIX settings; the operator owns the
+role, Admin keys/env references, listeners, status and CA paths. Deployment
+ports, Secrets, volumes and probes still require matching chart values. When
+combining with status probes provide their listener explicitly. A single shared
+raw file is not valid for both decoupled roles; use generated configurations for
+the single-release decoupled mode, or separate single-role releases when owning
+the complete raw configuration. This restriction prevents silently starting two
+Pods with the same role.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -499,7 +522,10 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | apisix.extPlugin.cmd | list | `["/path/to/apisix-plugin-runner/runner","run"]` | the command and its arguements to run as a subprocess |
 | apisix.extPlugin.enabled | bool | `false` | Enable External Plugins. See [external plugin](https://apisix.apache.org/docs/apisix/next/external-plugin/) |
 | apisix.fullCustomConfig.config | object | `{}` | If apisix.fullCustomConfig.enabled is true, full customized config.yaml. Please note that other settings about APISIX config will be ignored |
+| apisix.fullCustomConfig.configString | string | `""` | Full config.yaml as a literal YAML string. Mutually exclusive with config and existingConfigMap. No tpl interpolation. |
 | apisix.fullCustomConfig.enabled | bool | `false` | Enable full customized config.yaml |
+| apisix.fullCustomConfig.existingConfigMap | string | `""` | Existing ConfigMap containing config.yaml; when set, the chart creates no runtime ConfigMap. |
+| apisix.fullCustomConfig.revision | string | `""` | Optional external ConfigMap revision; changing it triggers a Pod rollout. |
 | apisix.graphql.maxSize | int | `1048576` | The maximum size in bytes of GraphQL queries APISIX parses when matching routes by GraphQL attributes (default 1MiB) |
 | apisix.lru | object | `{"secret":{"count":512,"neg_count":512,"neg_ttl":60,"ttl":300}}` | fine tune the parameters of LRU cache for some features like secret |
 | apisix.lru.secret.count | int | `512` | Maximum number of cached secret values |

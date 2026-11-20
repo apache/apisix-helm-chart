@@ -378,10 +378,22 @@ it can be read (lookup returns nothing under helm template).
 {{- $public := splitList " " (include "apisix.admin.credentials.publicDefaults" .) -}}
 {{- if .Values.apisix.fullCustomConfig.enabled -}}
 {{- /* the ConfigMap renders this config with tpl, so check the rendered text */ -}}
-{{- $rendered := include "apisix.tplvalues.render" (dict "value" .Values.apisix.fullCustomConfig.config "context" .) -}}
+{{- $custom := .Values.apisix.fullCustomConfig -}}
+{{- $source := "config" -}}
+{{- $rendered := "" -}}
+{{- if $custom.configString -}}
+{{- $source = "configString" -}}
+{{- $rendered = $custom.configString -}}
+{{- else if $custom.existingConfigMap -}}
+{{- $source = "existingConfigMap" -}}
+{{- $data := (lookup "v1" "ConfigMap" .Release.Namespace $custom.existingConfigMap).data | default dict -}}
+{{- $rendered = get $data "config.yaml" | default "" -}}
+{{- else -}}
+{{- $rendered = include "apisix.tplvalues.render" (dict "value" $custom.config "context" .) -}}
+{{- end -}}
 {{- range $key := $public -}}
 {{- if contains $key $rendered -}}
-{{- fail "\nADMIN KEY ERROR: apisix.fullCustomConfig.config contains a publicly known default Admin API key. Use a different key." -}}
+{{- fail (printf "\nADMIN KEY ERROR: apisix.fullCustomConfig.%s contains a publicly known default Admin API key. Use a different key." $source) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

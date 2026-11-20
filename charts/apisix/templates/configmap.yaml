@@ -16,6 +16,14 @@
 
 {{- include "apisix.admin.credentials.validate" . }}
 {{- include "apisix.ingressController.validate" . }}
+{{- $custom := .Values.apisix.fullCustomConfig -}}
+{{- if and (not $custom.enabled) (or $custom.existingConfigMap $custom.configString) -}}
+{{- fail "fullCustomConfig.enabled=true is required for external or literal runtime configuration" -}}
+{{- end -}}
+{{- if and $custom.enabled (ne (add (ternary 1 0 (not (empty $custom.existingConfigMap))) (ternary 1 0 (not (empty $custom.configString))) (ternary 1 0 (not (empty $custom.config)))) 1) -}}
+{{- fail "fullCustomConfig: choose exactly one of config, configString and existingConfigMap" -}}
+{{- end -}}
+{{- if not (and $custom.enabled $custom.existingConfigMap) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -40,9 +48,13 @@ data:
     # limitations under the License.
     #
     {{- if .Values.apisix.fullCustomConfig.enabled }}
+    {{- if .Values.apisix.fullCustomConfig.configString }}
+    {{- .Values.apisix.fullCustomConfig.configString | nindent 4 }}
+    {{- else }}
     {{- range $key, $value := .Values.apisix.fullCustomConfig.config }}
     {{ $key }}:
       {{- include "apisix.tplvalues.render" (dict "value" $value "context" $) | nindent 6 }}
+    {{- end }}
     {{- end }}
     {{- else }}
     apisix:    # universal configurations
@@ -455,3 +467,5 @@ data:
       {{- end }}
       {{- end }}
      
+
+{{- end }}
