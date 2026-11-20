@@ -14,7 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if and .Values.autoscaling.enabled (not .Values.useDaemonSet) }}
+{{- if .Values.autoscaling.enabled }}
+{{- if .Values.useDaemonSet -}}
+{{- fail "autoscaling requires a Deployment, not useDaemonSet=true" -}}
+{{- end -}}
+{{- if or (lt (int .Values.autoscaling.minReplicas) 1) (lt (int .Values.autoscaling.maxReplicas) (int .Values.autoscaling.minReplicas)) -}}
+{{- fail "autoscaling requires 1 <= minReplicas <= maxReplicas" -}}
+{{- end -}}
+{{- if not .Values.autoscaling.metrics -}}
+{{- $requests := .Values.resources.requests | default dict -}}
+{{- if or (and .Values.autoscaling.targetCPUUtilizationPercentage (not $requests.cpu)) (and .Values.autoscaling.targetMemoryUtilizationPercentage (not $requests.memory)) -}}
+{{- fail "utilization autoscaling requires resources.requests for every targeted CPU/memory resource" -}}
+{{- end -}}
+{{- if not (or .Values.autoscaling.targetCPUUtilizationPercentage .Values.autoscaling.targetMemoryUtilizationPercentage) -}}
+{{- fail "autoscaling requires at least one metric" -}}
+{{- end -}}
+{{- end -}}
+{{- if and .Values.autoscaling.behavior (ne .Values.autoscaling.version "v2") -}}
+{{- fail "autoscaling.behavior requires autoscaling.version=v2" -}}
+{{- end }}
 
 apiVersion: autoscaling/{{ .Values.autoscaling.version }}
 kind: HorizontalPodAutoscaler
@@ -30,7 +48,13 @@ spec:
     name: {{ include "apisix.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  {{- with .Values.autoscaling.behavior }}
+  behavior: {{- toYaml . | nindent 4 }}
+  {{- end }}
   metrics:
+  {{- if .Values.autoscaling.metrics }}
+    {{- toYaml .Values.autoscaling.metrics | nindent 4 }}
+  {{- else }}
   {{- if eq .Values.autoscaling.version "v2" }}
     {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
@@ -66,4 +90,5 @@ spec:
     {{- end }}
 
   {{- end}}
+  {{- end }}
 {{- end }}

@@ -8,6 +8,18 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Autoscaling metrics and behavior
+
+HPA utilization metrics require CPU and memory requests for every targeted
+resource. Enabling HPA without those requests now reports an actionable render
+error instead of creating an HPA that cannot compute utilization. Configure
+`autoscaling.metrics` to provide complete custom/external metrics instead; a
+non-empty list replaces the default utilization metrics. Custom metrics require
+a working metrics adapter. `autoscaling.behavior` configures v2 stabilization
+and scaling policies. DaemonSet workloads reject HPA, and replica bounds are
+validated. HPA owns replicas while enabled; the Deployment omits its replicas
+field. Metrics server and the chosen HPA API must exist in the target cluster.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -604,8 +616,10 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | apisix.vault.token | string | `""` | The generated token from vault instance that can grant access to read data from the vault. |
 | apisix.wasm.enabled | bool | `false` | Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/) |
 | apisix.wasm.plugins | list | `[]` | List of Wasm plugins, each item with `name`, `priority` and `file` (path or URL of the wasm binary) |
+| autoscaling.behavior | object | `{}` | HPA v2 scaling behavior (stabilization and policies). |
 | autoscaling.enabled | bool | `false` | Enable HorizontalPodAutoscaler for APISIX (only when useDaemonSet is false) |
 | autoscaling.maxReplicas | int | `100` | Maximum number of APISIX replicas |
+| autoscaling.metrics | list | `[]` | Complete HPA metrics. Non-empty overrides utilization metrics below. |
 | autoscaling.minReplicas | int | `1` | Minimum number of APISIX replicas |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target average CPU utilization percentage that triggers scaling |
 | autoscaling.targetMemoryUtilizationPercentage | int | `80` | Target average memory utilization percentage that triggers scaling |
