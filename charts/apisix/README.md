@@ -649,7 +649,7 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | hostNetwork | bool | `false` | Use the host's network namespace |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
-| image.tag | string | `"3.20.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
+| image.tag | string | `"3.21.0-ubuntu"` | Apache APISIX image tag Overrides the image tag whose default is the chart appVersion. |
 | ingress | object | `{"annotations":{},"enabled":false,"hosts":[{"host":"apisix.local","paths":[]}],"servicePort":null,"tls":[]}` | Using ingress access Apache APISIX service |
 | ingress-controller | object | `{"enabled":false,"gatewayProxy":{"name":"{{ .Release.Name }}-config","provider":{"controlPlane":{"auth":{"adminKey":{"value":""}}}}},"webhook":{"enabled":false}}` | Ingress controller configuration |
 | ingress-controller.enabled | bool | `false` | Enable the apisix-ingress-controller sub-chart |
