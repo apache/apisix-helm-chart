@@ -72,8 +72,8 @@ data:
       lua_module_hook: {{ .Values.apisix.luaModuleHook.hookPoint | quote }}
       {{- end }}
 
-      enable_dev_mode: false                       # Sets nginx worker_processes to 1 if set to true
-      enable_reuseport: true                       # Enable nginx SO_REUSEPORT switch if set to true.
+      enable_dev_mode: {{ .Values.apisix.enableDevMode }}                       # Sets nginx worker_processes to 1 if set to true
+      enable_reuseport: {{ .Values.apisix.enableReuseport }}                       # Enable nginx SO_REUSEPORT switch if set to true.
       enable_ipv6: {{ .Values.apisix.enableIPv6 }} # Enable nginx IPv6 resolver
       enable_http2: {{ .Values.apisix.enableHTTP2 }}
       enable_server_tokens: {{ .Values.apisix.enableServerTokens }} # Whether the APISIX version number should be shown in Server header

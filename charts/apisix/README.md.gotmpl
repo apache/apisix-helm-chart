@@ -355,6 +355,12 @@ pod; the chart refuses to render that combination unless `etcd.networkPolicy.all
 true. It also refuses to render when the release name, `etcd.nameOverride` or `etcd.fullnameOverride` is
 so long that the client label has more than the 63 characters that Kubernetes allows.
 
+## Generated runtime flags
+
+`apisix.enableDevMode` controls development mode (one nginx worker) and defaults
+to `false`. `apisix.enableReuseport` controls nginx SO_REUSEPORT and defaults to
+`true`. Full custom configuration replaces these generated settings.
+
 ## Configure the wait-etcd init container
 
 When `etcd.enabled` is true, `initContainer.resources` and
