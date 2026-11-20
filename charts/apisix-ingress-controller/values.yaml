@@ -48,6 +48,8 @@ deployment:
   # -- Add annotations to Apache APISIX ingress controller resource
   annotations: {}
   podAnnotations: {}
+  # -- Extra labels to add to the ingress controller pods. Keys that collide with the selector labels are ignored.
+  podLabels: {}
   # -- Set the [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for the ingress controller pods
   priorityClassName: ""
   replicas: 1
@@ -70,6 +72,16 @@ deployment:
     tag: "2.2.0"
   # -- Set pod resource requests & limits
   resources: {}
+  # extraEnvVars:
+  #   - name: TZ
+  #     value: "Europe/Berlin"
+  # -- Extra environment variables for the ingress controller container, rendered through `tpl`
+  extraEnvVars: []
+  # extraEnvFrom:
+  #   - secretRef:
+  #       name: ingress-controller-env
+  # -- Extra `envFrom` sources (ConfigMaps or Secrets) for the ingress controller container, rendered through `tpl`
+  extraEnvFrom: []
 
   # -- Set adc sidecar container configuration
   adcContainer:
