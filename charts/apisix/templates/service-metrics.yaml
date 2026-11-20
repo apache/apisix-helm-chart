@@ -23,7 +23,7 @@ metadata:
     {{- include "apisix.labels" . | nindent 4 }}
     app.kubernetes.io/service: apisix-prometheus-metrics
 spec:
-  type: ClusterIP
+  type: {{ .Values.apisix.prometheus.service.type }}
   ports:
   - name: prometheus
     port: {{ .Values.apisix.prometheus.containerPort }}
