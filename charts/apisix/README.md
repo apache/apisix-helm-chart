@@ -444,6 +444,164 @@ With `etcd.auth.tls.enabled: false`, the APISIX etcd TLS settings and
 client-certificate mount are omitted as before. This flag does not rewrite
 external endpoint URLs; use `http://` endpoints for HTTP connections.
 
+## Data encryption
+
+APISIX encrypts the private keys of SSL objects and of upstream client
+certificates (`tls.client_key`), and sensitive plugin fields such as the
+credentials of authentication plugins, before it stores them in etcd. It
+encrypts with the first key of `apisix.dataEncryption.keyring` and tries every
+key when it decrypts. Each key is 16 or 32 bytes long (AES-128 or AES-256), for
+example 16 or 32 ASCII letters, and is used as its own IV. With
+`apisix.dataEncryption.enableEncryptFields: false`, plugin fields are stored in
+plain text; private keys are still encrypted with the keyring.
+
+When no keyring is set, APISIX uses its built-in keyring, `qeddd145sfvddff3`
+and `edd1c9f0985e76a2`. These keys are published in the APISIX source code, so
+anyone who can read etcd can decrypt the data. Set your own keyring, preferably
+in an existing Secret: keys set in the values are stored in plain text in the
+APISIX ConfigMap, which the Kubernetes `view` role can read, and in every
+revision of the Helm release. For a release that stores no encrypted data yet:
+
+```shell
+kubectl create secret generic apisix-keyring \
+  --from-literal=key1="$(LC_ALL=C tr -dc 'A-Za-z' </dev/urandom | head -c 16)"
+```
+
+```yaml
+apisix:
+  dataEncryption:
+    secretName: apisix-keyring
+    secretKeys:
+      - key1
+```
+
+The chart passes each key to APISIX as an environment variable,
+`APISIX_DATA_ENCRYPTION_KEY_1` for the first one and so on, and APISIX reads
+them when a pod starts: after you change the keys in the Secret, restart the
+APISIX pods. With `apisix.fullCustomConfig`, the chart does not render
+`data_encryption`; refer to these variables in your own configuration instead.
+The chart renders `apisix.fullCustomConfig.config` as a template, so escape the
+braces:
+
+```yaml
+apisix:
+  dataEncryption:
+    secretName: apisix-keyring
+  fullCustomConfig:
+    enabled: true
+    config:
+      apisix:
+        data_encryption:
+          keyring:
+            - '${{ "{{" }}APISIX_DATA_ENCRYPTION_KEY_1{{ "}}" }}'
+```
+
+Until [apache/apisix#14178](https://github.com/apache/apisix/issues/14178) is
+fixed in the APISIX version you run, use keys that do not look like a number,
+such as keys made of letters: APISIX turns a value from an environment variable
+that looks like a number into a number, whether it is quoted or not, and then
+refuses to start.
+
+The chart fails to render when the first key is one of the built-in keys, or
+when a key is not 16 or 32 bytes long. It cannot check keys in a Secret.
+APISIX 3.20.0 validates those keys after resolving the environment variables
+and rejects invalid key lengths during startup.
+
+Use the same keyring for every release that reads the same etcd, for example
+the control plane and the data plane of a decoupled deployment. Encryption only
+applies when APISIX reads its configuration from etcd.
+
+### Changing the keyring of an existing release
+
+Data can only be decrypted with the key that encrypted it, and three more
+things make a change of the keyring delicate:
+
+- APISIX tries the keys in order, and about one value in 256 passes the check
+  of AES-CBC decryption with a wrong key. APISIX then uses garbage for that
+  value: the gateway rejects the credential, APISIX cannot load such an SSL
+  object, and a GET returns the garbage, which a PUT would store for good.
+- A pod that does not have a key cannot read what other pods encrypt with it.
+- The Admin API does not return SSL private keys, so they cannot be read back
+  and saved again.
+
+To move an existing release off the built-in keyring, or to rotate your own
+key:
+
+1. Back up etcd, for example with `etcdctl snapshot save`.
+2. Pause all other Admin API writers, including ingress controllers, before
+   collecting the resource bodies, and keep them paused until step 4 is complete.
+   Otherwise, restoring a saved body can overwrite a change made after it was
+   collected. While the release still runs with its current keyring, GET each
+   resource that configures a plugin with encrypted fields, for example each
+   consumer and its credentials, and keep the bodies. Remove their `create_time` and
+   `update_time` fields, which a PUT rejects. The bodies hold the secrets in
+   plain text, so keep them safe and delete them at the end. For a consumer:
+
+   ```shell
+   curl -s "http://127.0.0.1:9180/apisix/admin/consumers/$CONSUMER" -H "X-API-KEY: $ADMIN_KEY" |
+     jq '.value | del(.create_time, .update_time)' >"consumer-$CONSUMER.json"
+   ```
+
+3. Upgrade with the new key first and the current keys after it:
+
+   ```yaml
+   apisix:
+     dataEncryption:
+       keyring:
+         - "<new key>"
+         - qeddd145sfvddff3
+         - edd1c9f0985e76a2
+   ```
+
+   With a Secret, put the current keys in it after the new one:
+
+   ```shell
+   kubectl create secret generic apisix-keyring \
+     --from-literal=key1="<new key>" \
+     --from-literal=key2=qeddd145sfvddff3 \
+     --from-literal=key3=edd1c9f0985e76a2
+   ```
+
+   ```yaml
+   apisix:
+     dataEncryption:
+       secretName: apisix-keyring
+       secretKeys: [key1, key2, key3]
+   ```
+
+   In a decoupled deployment, upgrade the data planes before the control plane.
+   When rotating your own key, first adding the new key after the current one
+   and moving it to the front in a second upgrade lets all pods learn the new
+   key before it is used to encrypt data. This does not remove the need to pause
+   other writers from step 2 until step 4 is complete.
+
+4. PUT the bodies from step 2, not the result of a new GET:
+
+   ```shell
+   curl -s -X PUT http://127.0.0.1:9180/apisix/admin/consumers -H "X-API-KEY: $ADMIN_KEY" -d @"consumer-$CONSUMER.json"
+   ```
+
+   Then upload each SSL object, and each upstream, HTTP route, stream route
+   and service whose upstream configuration sets `tls.client_key`, again with
+   its PEM key, for example from the Kubernetes Secret it came from: the Admin
+   API cannot re-encrypt them from what it stores.
+   Until this step is done, the gateway can reject some of the credentials stored
+   before step 3, and APISIX cannot load about one SSL object in 256 (its log
+   says `failed to parse key`), so TLS handshakes for that object's SNIs fail.
+   Private keys that are still encrypted with the built-in keys can be read by
+   anyone who can read etcd. Resume other configuration writers only after
+   every resource in this step has been restored.
+
+5. You can keep the old keys after the new one; that does not weaken the new
+   key. Remove them only after step 4 is done for every resource: APISIX cannot
+   decrypt anything that is still encrypted with a key that is no longer in the
+   keyring.
+
+A rollback to a revision from before the change, with `helm rollback` or by
+reverting the values, removes the new key, and APISIX can no longer read what was
+encrypted with it. Undo other changes with an upgrade that keeps the current
+keyring.
+
 ## Parameters
 
 ## Values
@@ -480,6 +638,10 @@ external endpoint URLs; use `http://` endpoints for HTTP connections.
 | apisix.customPlugins.plugins[0].configMap | object | `{"mounts":[{"key":"the-file-name","path":"mount-path"}],"name":"configmap-name"}` | plugin codes can be saved inside configmap object. |
 | apisix.customPlugins.plugins[0].configMap.mounts | list | `[{"key":"the-file-name","path":"mount-path"}]` | since keys in configmap is flat, mountPath allows to define the mount path, so that plugin codes can be mounted hierarchically. |
 | apisix.customPlugins.plugins[0].configMap.name | string | `"configmap-name"` | name of configmap. |
+| apisix.dataEncryption.enableEncryptFields | bool | `true` | Encrypt sensitive plugin fields before storing them in etcd. APISIX encrypts SSL private keys with the keyring either way |
+| apisix.dataEncryption.keyring | list | `[]` | Keys that encrypt and decrypt, each 16 or 32 bytes long, for example ASCII letters. APISIX encrypts with the first key and tries every key when decrypting. When this and `secretName` are both empty, APISIX uses its built-in keyring, which is public. Keys set here are stored in plain text in the APISIX ConfigMap; prefer `secretName` |
+| apisix.dataEncryption.secretKeys | list | `["key1"]` | Keys of the Secret `secretName` that hold the keyring, in keyring order |
+| apisix.dataEncryption.secretName | string | `""` | Name of an existing Secret that holds the keyring. Use it instead of `keyring` |
 | apisix.deleteURITailSlash | bool | `false` | Delete the '/' at the end of the URI |
 | apisix.deployment.mode | string | `"traditional"` | Apache APISIX deployment mode Optional: traditional, decoupled, standalone standalone is file-driven standalone: rules are read from the mounted apisix.yaml, and the default traditional role is rendered as data_plane. For API-driven standalone, keep mode traditional and set role_traditional.config_provider to yaml.  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
 | apisix.deployment.role | string | `"traditional"` | Deployment role Optional: traditional, data_plane, control_plane  ref: https://apisix.apache.org/docs/apisix/deployment-modes/ |
