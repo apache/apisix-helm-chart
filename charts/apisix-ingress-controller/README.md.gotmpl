@@ -82,7 +82,12 @@ _See [helm install](https://helm.sh/docs/helm/helm_install/) for command documen
 helm uninstall [RELEASE_NAME] --namespace ingress-apisix
 ```
 
-This removes all the Kubernetes components associated with the chart and deletes the release.
+This deletes the release and its application resources. APISIX CRDs from the
+static `crds/` directory remain installed. Gateway API CRDs and admission policies
+rendered by this chart also remain because they carry
+`helm.sh/resource-policy: keep`. Their lifecycle belongs to the cluster platform
+owner described above; review retained resources and their ownership before
+reinstalling the chart or transferring management to another release.
 
 _See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation._
 
