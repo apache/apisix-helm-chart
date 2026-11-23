@@ -10,7 +10,7 @@ This chart bootstraps all the components needed to run Apache APISIX on a Kubern
 
 ## Optional workload security and upgrades
 
-Chart 3.2.0 adds opt-in writable runtime volumes. Upgrading an existing release
+This change adds opt-in writable runtime volumes. Upgrading an existing release
 keeps `podSecurityContext`, `securityContext` and `initContainer.securityContext`
 empty by default, leaves token automount to Kubernetes/the selected ServiceAccount,
 and does not add runtime volumes. This is an additive minor release; secure
