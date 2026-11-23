@@ -105,6 +105,16 @@ with_values() { # with_values <yq expression> <command...>: run the command on a
   rm -rf "$dir"
   return $rc
 }
+etcd_service() { # the name of the client Service that the etcd subchart renders
+  yq 'select(.kind == "Service" and .spec.ports[0].port == 2379 and (.metadata.name | test("headless") | not)) | .metadata.name' <<<"$OUT"
+}
+config_etcd_host() { # the Service name in the etcd host of the APISIX ConfigMap, without scheme, namespace and port
+  local h; h=$(etcd_config '.deployment.etcd.host[0]'); h=${h#*://}; h=${h%:*}; echo "${h%%.*}"
+}
+wait_etcd_target() { # the Service name that the wait-etcd init container waits for
+  local h; h=$(yq 'select(.kind == "Deployment") | .spec.template.spec.initContainers[] | select(.name == "wait-etcd") | .command[2]' <<<"$OUT" |
+    sed -n 's/^until nc -z \([^ ]*\) .*/\1/p'); echo "${h%%.*}"
+}
 secret_exists() { [ -n "$(yq "select(.kind == \"Secret\" and .metadata.name == \"$1\") | .metadata.name" <<<"$OUT")" ]; }
 no_secret() { ! secret_exists "$1"; }
 
@@ -132,8 +142,8 @@ check "a long release name: fails, the client label would be too long" fails_wit
   "$LONG_RELEASE"
 check "a long etcd.fullnameOverride: fails as well" fails_with "but a label key has at most 63 characters" \
   apisix --set etcd.fullnameOverride="etcd-$(printf '%052d' 0 | tr 0 b)"
-check "a long etcd.nameOverride: fails, and the message does not suggest one" \
-  fails_with "use a shorter release name or etcd.fullnameOverride (APISIX does not find etcd under an etcd.nameOverride)" \
+check "a long etcd.nameOverride: fails, and the message suggests a shorter one" \
+  fails_with "use a shorter release name, etcd.nameOverride or etcd.fullnameOverride" \
   apisix --set etcd.nameOverride="etcd-$(printf '%052d' 0 | tr 0 c)"
 check "a long release name with allowExternal: renders" render "$LONG_RELEASE" --set etcd.networkPolicy.allowExternal=true
 check "a long release name with allowExternal: every label key is valid" bash -c '[ "$1" -le 63 ]' _ "$(longest_label)"
@@ -230,6 +240,23 @@ check "hostNetwork with external etcd: renders" render apisix --set hostNetwork=
 
 check "DaemonSet: renders" render apisix --set useDaemonSet=true
 check "DaemonSet: the pods carry the etcd client label" is "$(pod_label apisix-etcd-client)" true
+
+# --- the Service name that APISIX and wait-etcd use ---------------------------------
+
+check "etcd host, default: renders" render demo
+check "etcd host, default: the ConfigMap uses the etcd Service" is "$(config_etcd_host)" "$(etcd_service)"
+check "etcd host, default: wait-etcd waits for the etcd Service" is "$(wait_etcd_target)" "$(etcd_service)"
+check "etcd host, nameOverride: renders" render demo --set etcd.nameOverride=store
+check "etcd host, nameOverride: the Service is named after it" is "$(etcd_service)" demo-store
+check "etcd host, nameOverride: the ConfigMap uses the etcd Service" is "$(config_etcd_host)" "$(etcd_service)"
+check "etcd host, nameOverride: wait-etcd waits for the etcd Service" is "$(wait_etcd_target)" "$(etcd_service)"
+check "etcd host, release name with etcd in it: renders" render demo-etcd
+check "etcd host, release name with etcd in it: the Service is demo-etcd" is "$(etcd_service)" demo-etcd
+check "etcd host, release name with etcd in it: the ConfigMap uses the etcd Service" is "$(config_etcd_host)" "$(etcd_service)"
+check "etcd host, release name with etcd in it: wait-etcd waits for the etcd Service" is "$(wait_etcd_target)" "$(etcd_service)"
+check "etcd host, fullnameOverride: renders" render demo --set etcd.fullnameOverride=kv
+check "etcd host, fullnameOverride: the ConfigMap uses the etcd Service" is "$(config_etcd_host)" "$(etcd_service)"
+check "etcd host, fullnameOverride: wait-etcd waits for the etcd Service" is "$(wait_etcd_target)" "$(etcd_service)"
 
 # --- the root password ---------------------------------------------------------------
 
