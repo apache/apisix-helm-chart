@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Render regression checks; run with Python 3, PyYAML and Helm 3."""
 """Render compatibility checks; run with Python 3, PyYAML and Helm 3/4."""
 import copy
 import os
@@ -103,6 +102,9 @@ def main():
     assert "automountServiceAccountToken" not in pod
     assert "securityContext" not in pod["initContainers"][0]
     assert not any(v["name"].startswith("runtime-") for v in pod["volumes"])
+    # Old release values (including --reuse-values) may not contain the new map.
+    _, inherited = render({"runtimeVolumes": None})
+    assert inherited == pod
     # Existing readOnlyRootFilesystem values must not implicitly enable new mounts.
     _, pod = render({"securityContext": {"readOnlyRootFilesystem": True}})
     assert not any(v["name"].startswith("runtime-") for v in pod["volumes"])
@@ -127,6 +129,11 @@ def main():
             if bundled_etcd:
                 wait = next(c for c in pod["initContainers"] if c["name"] == "wait-etcd")
                 assert wait["securityContext"]["runAsUser"] == 636
+    values = copy.deepcopy(PROFILE)
+    values["image"] = {"repository": "registry.example.test/apisix", "tag": "custom"}
+    _, pod = render(values)
+    prepare = next(c for c in pod["initContainers"] if c["name"] == "prepare-runtime")
+    assert prepare["image"] == pod["containers"][0]["image"]
     for enabled in [False, True]:
         values = legacy_values()
         values["runtimeVolumes"]["enabled"] = enabled

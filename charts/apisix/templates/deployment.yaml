@@ -15,7 +15,7 @@
 # limitations under the License.
 {{- $encryption := mergeOverwrite (dict "enableEncryptFields" true "secretKeys" (list "key1")) (.Values.apisix.dataEncryption | default dict) }}
 {{- $runtimeVolumes := list }}
-{{- if .Values.runtimeVolumes.enabled }}
+{{- if (default dict .Values.runtimeVolumes).enabled }}
 {{- $customPaths := dict }}
 {{- range .Values.extraVolumeMounts }}
 {{- $_ := set $customPaths (clean .mountPath) true }}

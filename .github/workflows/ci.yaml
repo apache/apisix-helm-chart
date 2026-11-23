@@ -120,6 +120,11 @@ jobs:
           "$HELM" repo add apisix https://apache.github.io/apisix-helm-chart
           "$HELM" dependency build charts/apisix
 
+      - name: Set up Python for security tests
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Install security test dependencies
         run: python3 -m pip install PyYAML==6.0.2
 

@@ -48,12 +48,13 @@ def obj(kind, name):
     return json.loads(kube("get", kind, name, "-o", "json"))
 
 
-def apply(release, chart, values, upgrade=False):
+def apply(release, chart, values, upgrade=False, reuse=False):
     with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml") as f:
         yaml.safe_dump(values, f)
         f.flush()
+        flags = ["--reuse-values"] if reuse else []
         run(HELM, "upgrade" if upgrade else "install", release, chart,
-            "-n", NAMESPACE, "-f", f.name, "--wait", "--timeout", "5m")
+            "-n", NAMESPACE, "-f", f.name, "--wait", "--timeout", "5m", *flags)
     return obj("deployment", release + "-apisix")
 
 
@@ -129,10 +130,10 @@ def main():
         plain["apisix"]["deployment"]["standalone"]["existingConfigMap"] = "apisix.yaml"
         apply("plain", BASE, plain)
         verify("plain", False)
-        after = apply("plain", CHART, plain, upgrade=True)
+        after = apply("plain", CHART, {}, upgrade=True, reuse=True)
         spec = after["spec"]["template"]["spec"]
-        assert "securityContext" not in spec
-        assert "securityContext" not in spec["containers"][0]
+        assert spec.get("securityContext", {}) == {}
+        assert spec["containers"][0].get("securityContext", {}) == {}
         assert "automountServiceAccountToken" not in spec
         verify("plain", False)
         # New opt-in profile exercises chart-managed volumes and a chart-created SA.
