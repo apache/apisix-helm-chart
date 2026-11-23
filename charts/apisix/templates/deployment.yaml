@@ -13,6 +13,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+{{- $runtimeVolumes := list }}
+{{- if .Values.runtimeVolumes.enabled }}
+{{- $customPaths := dict }}
+{{- range .Values.extraVolumeMounts }}
+{{- $_ := set $customPaths (clean .mountPath) true }}
+{{- end }}
+{{- range $dir := list "conf" "logs" "tmp" "client_body_temp" "proxy_temp" "fastcgi_temp" "uwsgi_temp" "scgi_temp" }}
+{{- $path := ternary "/tmp" (printf "/usr/local/apisix/%s" $dir) (eq $dir "tmp") }}
+{{- if not (hasKey $customPaths $path) }}
+{{- $name := printf "runtime-%s" ($dir | replace "_" "-") }}
+{{- range $.Values.extraVolumes }}
+{{- if eq .name $name }}
+{{- fail (printf "runtimeVolumes.enabled: extraVolumes name %q conflicts with an automatic runtime volume; supply its extraVolumeMounts entry or rename it" $name) }}
+{{- end }}
+{{- end }}
+{{- $runtimeVolumes = append $runtimeVolumes (dict "name" $name "mountPath" $path "directory" $dir) }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- $prepareVolumes := list }}
+{{- range $runtimeVolumes }}
+{{- if has .directory (list "conf" "logs") }}
+{{- $prepareVolumes = append $prepareVolumes . }}
+{{- end }}
+{{- end }}
 apiVersion: apps/v1
 kind: {{ ternary "DaemonSet" "Deployment" .Values.useDaemonSet }}
 metadata:
@@ -65,7 +90,9 @@ spec:
         {{- end }}
       {{- end }}
       serviceAccountName: {{ include "apisix.serviceAccountName" . }}
+      {{- if ne .Values.serviceAccount.automountServiceAccountToken nil }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+      {{- end }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- . | toYaml | nindent 8 }}
@@ -218,17 +245,9 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-          {{- if .Values.securityContext.readOnlyRootFilesystem }}
-            - name: runtime-conf
-              mountPath: /usr/local/apisix/conf
-            - name: runtime-logs
-              mountPath: /usr/local/apisix/logs
-            - name: runtime-tmp
-              mountPath: /tmp
-            {{- range list "client_body_temp" "proxy_temp" "fastcgi_temp" "uwsgi_temp" "scgi_temp" }}
-            - name: runtime-{{ . | replace "_" "-" }}
-              mountPath: /usr/local/apisix/{{ . }}
-            {{- end }}
+          {{- range $runtimeVolumes }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
           {{- end }}
           {{- if eq .Values.apisix.deployment.mode "standalone" }}
             - mountPath: /apisix-config
@@ -283,22 +302,26 @@ spec:
       {{- end }}
       hostNetwork: {{ .Values.hostNetwork }}
       initContainers:
-        {{- if .Values.securityContext.readOnlyRootFilesystem }}
+        {{- if $prepareVolumes }}
         - name: prepare-runtime
           image: "{{ .Values.image.repository }}{{ if .Values.image.digest }}@{{ .Values.image.digest }}{{ else }}:{{ default .Chart.AppVersion .Values.image.tag }}{{ end }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-ec"]
           args:
-            - cp -R /usr/local/apisix/conf/. /runtime-conf/; cp -R /usr/local/apisix/logs/. /runtime-logs/
+            - {{ range $prepareVolumes }}cp -R /usr/local/apisix/{{ .directory }}/. /{{ .name }}/; {{ end }}
+          {{- with .Values.securityContext }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.initContainer.resources }}
           resources:
-            {{- toYaml .Values.initContainer.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
-            - name: runtime-conf
-              mountPath: /runtime-conf
-            - name: runtime-logs
-              mountPath: /runtime-logs
+            {{- range $prepareVolumes }}
+            - name: {{ .name }}
+              mountPath: /{{ .name }}
+            {{- end }}
         {{- end }}
         {{- if .Values.etcd.enabled }}
         - name: wait-etcd
@@ -321,11 +344,9 @@ spec:
         {{- toYaml .Values.extraInitContainers | nindent 8 }}
         {{- end }}
       volumes:
-        {{- if .Values.securityContext.readOnlyRootFilesystem }}
-        {{- range list "conf" "logs" "tmp" "client_body_temp" "proxy_temp" "fastcgi_temp" "uwsgi_temp" "scgi_temp" }}
-        - name: runtime-{{ . | replace "_" "-" }}
+        {{- range $runtimeVolumes }}
+        - name: {{ .name }}
           emptyDir: {}
-        {{- end }}
         {{- end }}
         {{- if eq .Values.apisix.deployment.mode "standalone" }}
         - configMap:

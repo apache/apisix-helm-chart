@@ -120,6 +120,12 @@ jobs:
           "$HELM" repo add apisix https://apache.github.io/apisix-helm-chart
           "$HELM" dependency build charts/apisix
 
+      - name: Install security test dependencies
+        run: python3 -m pip install PyYAML==6.0.2
+
+      - name: Render tests (runtime volume compatibility)
+        run: python3 test/render/security.py
+
       - name: Render tests
         run: test/render/admin-credentials.sh
 
@@ -131,6 +137,18 @@ jobs:
         with:
           version: v0.33.0
           image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
+
+      - name: Checkout base chart for upgrade compatibility
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.base.sha || 'master' }}
+          path: .security-base
+          persist-credentials: false
+
+      - name: End-to-end tests (runtime volumes and ServiceAccount)
+        env:
+          SECURITY_BASE_CHART: .security-base/charts/apisix
+        run: python3 test/e2e/security.py
 
       - name: End-to-end tests
         run: test/e2e/admin-credentials.sh

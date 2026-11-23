@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exercise the pinned image without a Kubernetes cluster; requires Docker."""
+"""Exercise the configured image without a Kubernetes cluster; requires Docker."""
 import subprocess, tempfile, pathlib, os, time, json
 import yaml
 chart = pathlib.Path(__file__).resolve().parents[2] / 'charts/apisix'
