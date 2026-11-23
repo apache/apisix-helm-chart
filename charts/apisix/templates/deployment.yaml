@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+{{- $encryption := mergeOverwrite (dict "enableEncryptFields" true "secretKeys" (list "key1")) (.Values.apisix.dataEncryption | default dict) }}
 {{- $runtimeVolumes := list }}
 {{- if .Values.runtimeVolumes.enabled }}
 {{- $customPaths := dict }}
@@ -147,6 +148,16 @@ spec:
                 secretKeyRef:
                   name: {{ include "apisix.admin.credentials.generatedSecretName" . }}
                   key: viewer
+          {{- end }}
+          {{- end }}
+
+          {{- if $encryption.secretName }}
+          {{- range $index, $key := $encryption.secretKeys }}
+            - name: APISIX_DATA_ENCRYPTION_KEY_{{ add1 $index }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $encryption.secretName | quote }}
+                  key: {{ $key | quote }}
           {{- end }}
           {{- end }}
 
