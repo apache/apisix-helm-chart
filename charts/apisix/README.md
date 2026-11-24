@@ -135,10 +135,10 @@ The generated Secret and the pre-upgrade, snapshot and defragmentation jobs use 
 Authentication also applies when NetworkPolicy is unavailable or a pod carries a forged client
 label: a label controls network admission, not identity.
 
-For an existing release, create the password Secret before upgrading and set
-`etcd.auth.rbac.existingSecret` to its name. APISIX and the etcd chart read that Secret, so there is
-no generated password to rotate or lose during the upgrade. `existingSecretPasswordKey` defaults to
-`etcd-root-password`.
+To enable authentication on an existing release that currently runs without it, create the
+password Secret before upgrading and set `etcd.auth.rbac.existingSecret` to its name. APISIX and
+the etcd chart read that Secret, so there is no generated password to rotate or lose during the
+upgrade. `existingSecretPasswordKey` defaults to `etcd-root-password`.
 
 ```shell
 openssl rand -hex 16 | tr -d '\n' |
@@ -154,8 +154,9 @@ etcd:
       existingSecret: apisix-etcd-auth
 ```
 
-With `--reuse-values`, set `etcd.auth.rbac.create: true` explicitly as in the example above;
-otherwise Helm preserves the previous `false` value even though the new chart enables it by default.
+With `--reuse-values` or `--reset-then-reuse-values`, set `etcd.auth.rbac.create: true` explicitly
+as in the example above. Both modes retain an explicitly configured old `false`; `--reuse-values`
+also reuses the old chart's default `false` instead of the new chart default.
 
 Do not switch an existing release to `rootPassword`: its pre-upgrade job waits for a Secret that
 the upgrade itself creates and fails at the timeout. Run the upgrade with `--timeout 10m`, not with
@@ -254,9 +255,9 @@ Chart 3.0.0 no longer uses the publicly known default Admin API keys
 
 ## Access to the bundled etcd
 
-APISIX keeps its configuration in etcd, including routes, consumers and their credentials. Unless
-etcd requires authentication, which it does not by default, a client that can connect to etcd can
-read and change all of it without an Admin API key. The bundled etcd therefore accepts client
+APISIX keeps its configuration in etcd, including routes, consumers and their credentials. If
+etcd authentication is disabled, a client that can connect to etcd can read and change all of it
+without an Admin API key. The bundled etcd therefore accepts client
 connections only from its own pods and from pods labelled `<etcd fullname>-client: "true"`, which
 the chart adds to the APISIX pods and to the pre-upgrade, snapshot and defragmentation jobs of the
 etcd chart. For a release named `apisix`, the label is `apisix-etcd-client: "true"`. This needs a

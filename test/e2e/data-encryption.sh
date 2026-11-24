@@ -138,6 +138,15 @@ etcdctl_auth() { # etcdctl_auth <namespace> <etcdctl args...>: use the root pass
   ' sh "$@"
 }
 
+refuses_anonymous() { # refuses_anonymous <namespace>: unauthenticated reads must fail with etcd's own error
+  local namespace=$1 out
+  if out=$(kubectl --namespace "$namespace" exec apisix-etcd-0 -- \
+    env -u ETCDCTL_USER etcdctl get /apisix/consumers --prefix --keys-only 2>&1); then
+    echo "       etcdctl without credentials succeeded" >&2; return 1
+  fi
+  grep -q "user name is empty" <<<"$out" || { echo "       unexpected error: $(tail -1 <<<"$out")" >&2; return 1; }
+}
+
 stored_ssl_key() { # stored_ssl_key <namespace> <id>: the private key of an SSL object as stored in etcd
   etcdctl_auth "$1" get "/apisix/ssls/$2" --print-value-only |
     yq -p json '.key'
@@ -304,6 +313,7 @@ printf '%s' "$ETCD_PASSWORD" |
   kubectl --namespace "$NS" create secret generic apisix-etcd-auth --from-file=etcd-root-password=/dev/stdin >/dev/null
 check "reuse-values: chart 3.0.0 upgrades without setting dataEncryption" \
   upgrade "$NS" --reuse-values --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
+check "reuse-values: the upgraded etcd refuses anonymous reads" refuses_anonymous "$NS"
 check "reuse-values: connected to the upgraded release" connect "$NS"
 check "reuse-values: the old consumer still works" accepts old-key
 check "reuse-values: TLS still works" serves_tls tls.test

@@ -112,10 +112,15 @@ reaches_etcd() { is "$(probe_etcd "$@")" REACHED; }
 # failure means the probe itself is broken
 blocked() { is "$(probe_etcd "$@")" TIMEOUT; }
 
-routes_in_etcd() { # routes_in_etcd [etcdctl flags...]: number of route keys etcdctl in the etcd pod lists; fails if etcdctl fails
+routes_in_etcd() { # routes_in_etcd [root password]: number of route keys; fails if etcdctl fails
   local out
-  out=$(kubectl --namespace "$NS" exec apisix-etcd-0 -- env -u ETCDCTL_USER etcdctl "$@" get /apisix/routes --prefix --keys-only 2>&1) ||
-    { echo "       etcdctl failed: $(tail -1 <<<"$out")" >&2; return 1; }
+  if [ "$#" -gt 0 ]; then
+    out=$(printf '%s' "$1" |
+      kubectl --namespace "$NS" exec -i apisix-etcd-0 -- \
+        sh -c 'export ETCDCTL_PASSWORD="$(cat)"; exec etcdctl --user root get /apisix/routes --prefix --keys-only' 2>&1)
+  else
+    out=$(kubectl --namespace "$NS" exec apisix-etcd-0 -- env -u ETCDCTL_USER etcdctl get /apisix/routes --prefix --keys-only 2>&1)
+  fi || { echo "       etcdctl failed: $(tail -1 <<<"$out")" >&2; return 1; }
   grep -c '^/apisix/routes/.' <<<"$out"   # route keys, not the /apisix/routes/ key that APISIX creates
 }
 refuses_anonymous() { # etcdctl without credentials fails with etcd's own error, not because the command is broken
@@ -156,10 +161,10 @@ check "the chart generates an etcd root password Secret" \
   kubectl --namespace "$NS" get secret apisix-etcd -o name
 ROOT_PASSWORD=$(kubectl --namespace "$NS" get secret apisix-etcd -o jsonpath='{.data.etcd-root-password}' | base64 -d)
 check "APISIX writes to etcd with the generated password" writes first
-check "etcd accepts root with the generated password" is "$(routes_in_etcd --user "root:$ROOT_PASSWORD")" 1
+check "etcd accepts root with the generated password" is "$(routes_in_etcd "$ROOT_PASSWORD")" 1
 check "etcd refuses a client without credentials" refuses_anonymous
 check "a forged-label write without credentials is rejected" forged_write_rejected
-check "the rejected write leaves no forged route" is "$(routes_in_etcd --user "root:$ROOT_PASSWORD")" 1
+check "the rejected write leaves no forged route" is "$(routes_in_etcd "$ROOT_PASSWORD")" 1
 check "a pod with the client label can reach etcd" reaches_etcd labelled apisix-etcd-client=true
 check "a pod without the client label cannot" blocked outsider
 
@@ -175,7 +180,7 @@ check "upgrade with RBAC and the root password in an existing Secret succeeds" \
   upgrade --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
 check "connected to the Admin API" connect
 check "APISIX writes to etcd with the password" writes second
-check "etcd accepts root with the password" is "$(routes_in_etcd --user "root:$ROOT_PASSWORD")" 2
+check "etcd accepts root with the password" is "$(routes_in_etcd "$ROOT_PASSWORD")" 2
 check "etcd refuses a client without credentials" refuses_anonymous
 check "a later upgrade with the same values succeeds" \
   upgrade --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
@@ -201,7 +206,7 @@ check "upgrade with RBAC and the existing Secret succeeds again" \
   upgrade --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
 check "connected to the Admin API" connect
 check "APISIX writes to etcd with the password again" writes fifth
-check "etcd accepts root with the password again" is "$(routes_in_etcd --user "root:$ROOT_PASSWORD")" 5
+check "etcd accepts root with the password again" is "$(routes_in_etcd "$ROOT_PASSWORD")" 5
 check "etcd refuses a client without credentials again" refuses_anonymous
 
 echo "# upgrade a $OLD_CHART_VERSION release that uses the bundled etcd"
@@ -212,7 +217,7 @@ $HELM repo update apisix >/dev/null 2>&1
 wait_for 300 namespace_gone || { echo "the namespace $NS of an earlier run still exists" >&2; exit 1; }
 kubectl create namespace "$NS" >/dev/null
 $HELM install apisix apisix/apisix --version "$OLD_CHART_VERSION" --namespace "$NS" "${OLD_KEYS[@]}" \
-  --set etcd.replicaCount=1 --wait --timeout 10m >/dev/null
+  --set etcd.replicaCount=1 --set etcd.auth.rbac.create=false --wait --timeout 10m >/dev/null
 check "chart $OLD_CHART_VERSION installs with the bundled etcd" is $? 0
 check "connected to the Admin API" connect
 check "APISIX writes to etcd before the upgrade" writes before-upgrade
@@ -220,14 +225,14 @@ check "before the upgrade, a pod without the client label can reach etcd" reache
 check "upgrade with --reuse-values is refused, it would keep etcd open" \
   upgrade_fails_with "None of the podLabels of the etcd chart's jobs" --reuse-values
 check "upgrade without a pre-created password Secret is refused" \
-  upgrade_fails_with "must provide your current passwords" --reset-then-reuse-values
+  upgrade_fails_with "must provide your current passwords" --reset-then-reuse-values --set etcd.auth.rbac.create=true
 printf '%s' "$ROOT_PASSWORD" |
   kubectl --namespace "$NS" create secret generic apisix-etcd-auth --from-file=etcd-root-password=/dev/stdin >/dev/null
 check "upgrade with --reset-then-reuse-values and an existing password Secret succeeds" \
-  upgrade --reset-then-reuse-values --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
+  upgrade --reset-then-reuse-values --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
 check "connected to the Admin API" connect
 check "APISIX writes to etcd after the upgrade" writes after-upgrade
-check "the upgraded etcd accepts root with the pre-created password" is "$(routes_in_etcd --user "root:$ROOT_PASSWORD")" 2
+check "the upgraded etcd accepts root with the pre-created password" is "$(routes_in_etcd "$ROOT_PASSWORD")" 2
 check "the upgraded etcd refuses a client without credentials" refuses_anonymous
 check "after the upgrade, a pod with the client label can reach etcd" reaches_etcd labelled apisix-etcd-client=true
 check "after the upgrade, a pod without the label cannot" blocked outsider
