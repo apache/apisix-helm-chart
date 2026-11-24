@@ -132,6 +132,9 @@ The bundled etcd now requires authentication by default (`etcd.auth.rbac.create:
 installs generate a root password into the Secret `<etcd fullname>`. APISIX reads that Secret
 through `secretKeyRef` as the `APISIX_ETCD_PASSWORD` environment variable and connects as `root`.
 The generated Secret and the pre-upgrade, snapshot and defragmentation jobs use the same password.
+On the default HTTP path, an init container waits for an authenticated etcd read before APISIX
+starts, so APISIX does not initialize while etcd is still enabling authentication. Custom TLS client
+configuration is unchanged.
 Authentication also applies when NetworkPolicy is unavailable or a pod carries a forged client
 label: a label controls network admission, not identity.
 

@@ -28,7 +28,7 @@ set -uo pipefail
 HELM=${HELM:-helm}
 CHART=${CHART:-charts/apisix}
 NS=etcd-e2e
-NAMESPACES=(etcd-e2e etcd-e2e-upgrade)
+NAMESPACES=(etcd-e2e-startup etcd-e2e etcd-e2e-upgrade)
 OLD_CHART_VERSION=${OLD_CHART_VERSION:-2.18.2}
 random_letters() { LC_ALL=C tr -dc 'A-Za-z' </dev/urandom | head -c "$1"; }
 ADMIN_KEY=$(random_letters 32)
@@ -152,7 +152,25 @@ upgrade_fails_with() { # upgrade_fails_with <message part> [helm args...]: the u
 }
 namespace_gone() { ! kubectl get namespace "$NS" >/dev/null 2>&1; }
 
+echo "# fresh install with the default three-node etcd"
+NS=etcd-e2e-startup
+wait_for 300 namespace_gone || { echo "the namespace $NS of an earlier run still exists" >&2; exit 1; }
+kubectl create namespace "$NS" >/dev/null
+$HELM install apisix "$CHART" --namespace "$NS" \
+  --set apisix.admin.credentials.admin="$ADMIN_KEY" --wait --timeout 10m >/dev/null
+check "the default three-replica installation succeeds" is $? 0
+check "connected to the Admin API" connect
+ROOT_PASSWORD=$(kubectl --namespace "$NS" get secret apisix-etcd -o jsonpath='{.data.etcd-root-password}' | base64 -d)
+check "APISIX writes to etcd with the generated password" writes startup
+check "etcd accepts root with the generated password" is "$(routes_in_etcd "$ROOT_PASSWORD")" 1
+check "APISIX does not crash while etcd enables authentication" \
+  is "$(kubectl --namespace "$NS" get pods -l app.kubernetes.io/name=apisix -o jsonpath='{.items[0].status.containerStatuses[?(@.name=="apisix")].restartCount}')" 0
+check "the default three-replica etcd refuses anonymous reads" refuses_anonymous
+$HELM uninstall --namespace "$NS" apisix --wait >/dev/null
+kubectl delete namespace "$NS" --wait=true --timeout=300s >/dev/null
+
 echo "# the bundled etcd accepts only the APISIX pods"
+NS=etcd-e2e
 wait_for 300 namespace_gone || { echo "the namespace $NS of an earlier run still exists" >&2; exit 1; }
 kubectl create namespace "$NS" >/dev/null
 $HELM install apisix "$CHART" --namespace "$NS" "${COMMON[@]}" >/dev/null
