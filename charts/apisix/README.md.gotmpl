@@ -381,8 +381,9 @@ upgrade itself would create. With neither `rootPassword` nor `existingSecret`, t
 refuses the upgrade at once with `PASSWORDS ERROR`; don't follow its hint to set
 `auth.rbac.rootPassword`, create the Secret as shown above.
 
-During the upgrade with `existingSecret`, the new APISIX pods restart until etcd requires the
-password. With the default three etcd replicas, etcd requires it only after `etcd-0`, the last pod of
+During the upgrade with `existingSecret`, new APISIX pods on the default HTTP path wait in
+`wait-etcd-auth` until an authenticated read succeeds; custom TLS client configurations retain their
+previous startup behavior. With the default three etcd replicas, etcd requires it only after `etcd-0`, the last pod of
 the rolling update, has restarted, and each etcd pod is ready no sooner than 60 seconds after it
 starts, so the upgrade takes several minutes. From the moment etcd requires the password until the
 new APISIX pods are ready, the APISIX pods of the previous revision cannot use etcd, and Admin API
@@ -414,15 +415,17 @@ pod; the chart refuses to render that combination unless `etcd.networkPolicy.all
 true. It also refuses to render when the release name, `etcd.nameOverride` or `etcd.fullnameOverride` is
 so long that the client label has more than the 63 characters that Kubernetes allows.
 
-## Configure the wait-etcd init container
+## Configure the etcd init containers
 
 When `etcd.enabled` is true, `initContainer.resources` and
-`initContainer.securityContext` configure the built-in `wait-etcd` container for
-both Deployment and DaemonSet workloads. They are independent of the top-level
-`resources` and `securityContext`, which configure the APISIX container.
+`initContainer.securityContext` configure the built-in `wait-etcd` and, on the default HTTP path
+with RBAC enabled, `wait-etcd-auth` containers for both Deployment and DaemonSet workloads. They
+are independent of the top-level `resources` and `securityContext`, which configure the APISIX
+container. `wait-etcd-auth` uses the same image as the bundled etcd and is omitted for external
+etcd, RBAC-off, and custom TLS client configurations.
 
 Both options default to `{}` and are omitted from the rendered container when
-empty. Applicable `podSecurityContext` settings still apply to `wait-etcd`.
+empty. Applicable `podSecurityContext` settings still apply to both init containers.
 For example:
 
 ```yaml

@@ -251,6 +251,13 @@ check "default: the authenticated startup check uses the etcd image" is "$(auth_
 check "default: the authenticated startup check reads the same Secret" is "$(auth_init_password_ref)" apisix-etcd/etcd-root-password
 check "default: the authenticated startup check connects as root" \
   is "$(auth_init | yq '.env[] | select(.name == "ETCDCTL_USER") | .value')" root
+check "etcd image pull Secret: renders" render apisix --set 'etcd.image.pullSecrets[0]=etcd-private-pull'
+check "APISIX uses the etcd image pull Secret" \
+  is "$(yq 'select(.kind == "Deployment") | .spec.template.spec.imagePullSecrets[0].name' <<<"$OUT")" etcd-private-pull
+check "global and etcd image pull Secrets: renders" render apisix \
+  --set 'global.imagePullSecrets[0]=global-pull' --set 'etcd.image.pullSecrets[0]=etcd-private-pull'
+check "APISIX keeps both image pull Secrets" \
+  is "$(yq 'select(.kind == "Deployment") | .spec.template.spec.imagePullSecrets | map(.name) | sort | join(",")' <<<"$OUT")" "etcd-private-pull,global-pull"
 
 check "RBAC, generated password: renders" render apisix --set etcd.auth.rbac.create=true
 check "RBAC, generated password: APISIX reads the etcd chart's Secret" is "$(password_ref)" apisix-etcd/etcd-root-password

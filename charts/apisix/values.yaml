@@ -153,7 +153,7 @@ initContainer:
   image: busybox
   # -- Init container tag
   tag: 1.28
-  # -- Resource requests and limits for the wait-etcd init container (only used when etcd.enabled is true)
+  # -- Resource requests and limits for the wait-etcd and wait-etcd-auth init containers (only used when etcd.enabled is true; wait-etcd-auth is used on the default HTTP path with RBAC enabled)
   resources: {}
     # requests:
     #   cpu: 10m
@@ -161,7 +161,7 @@ initContainer:
     # limits:
     #   cpu: 100m
     #   memory: 32Mi
-  # -- Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings.
+  # -- Container security context for wait-etcd and wait-etcd-auth. Empty by default to inherit applicable podSecurityContext settings.
   securityContext: {}
     # allowPrivilegeEscalation: false
     # capabilities:

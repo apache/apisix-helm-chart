@@ -59,11 +59,15 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.etcd.enabled }}
+      {{- include "etcd.imagePullSecrets" .Subcharts.etcd | nindent 6 }}
+      {{- else }}
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- range $.Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
+      {{- end }}
       {{- end }}
       serviceAccountName: {{ include "apisix.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
@@ -325,7 +329,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "apisix.etcd.secretName" . }}
                   key: {{ include "apisix.etcd.secretPasswordKey" . }}
-          command: ['sh', '-c', "until etcdctl --command-timeout=5s get /apisix --prefix --keys-only; do echo waiting for authenticated etcd `date`; sleep 2; done;"]
+          command: ['sh', '-c', "until etcdctl --command-timeout=5s get /apisix --prefix --keys-only >/dev/null; do echo waiting for authenticated etcd `date`; sleep 2; done;"]
         {{- end }}
         {{- if .Values.extraInitContainers }}
         {{- toYaml .Values.extraInitContainers | nindent 8 }}
