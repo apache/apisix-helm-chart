@@ -78,12 +78,13 @@ stop_port_forwards() {
   PF_PIDS=()
 }
 
-connect() { # port-forward the Admin API of the ready release
+connect() { # port-forward and wait for an authenticated Admin API read
   stop_port_forwards
   kubectl --namespace "$NS" rollout status deployment/apisix --timeout=300s >/dev/null
   kubectl --namespace "$NS" port-forward svc/apisix-admin "$ADMIN_PORT:9180" >/dev/null 2>&1 &
   PF_PIDS+=($!)
-  wait_for 60 curl -s -o /dev/null "http://127.0.0.1:$ADMIN_PORT/"
+  wait_for 60 curl -sf -o /dev/null -H "X-API-KEY: $ADMIN_KEY" \
+    "http://127.0.0.1:$ADMIN_PORT/apisix/admin/routes"
 }
 
 writes() { # writes <route id>: the Admin API stores a route, so APISIX can write to etcd
