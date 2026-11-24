@@ -49,6 +49,12 @@ helm upgrade [RELEASE_NAME] [CHART] --install
 
 _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation._
 
+### ServiceMonitor namespace
+
+Starting with chart 2.0.0, an enabled ServiceMonitor defaults to the release namespace.
+If you relied on the previous `monitoring` default, set `serviceMonitor.namespace` to `monitoring`
+in your upgrade values to keep the ServiceMonitor in that namespace.
+
 ## Configuration
 
 See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:

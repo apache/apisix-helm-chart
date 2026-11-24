@@ -49,6 +49,12 @@ helm upgrade [RELEASE_NAME] [CHART] --install
 
 _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation._
 
+### ServiceMonitor namespace
+
+Starting with chart 2.0.0, an enabled ServiceMonitor defaults to the release namespace.
+If you relied on the previous `monitoring` default, set `serviceMonitor.namespace` to `monitoring`
+in your upgrade values to keep the ServiceMonitor in that namespace.
+
 ## Configuration
 
 See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
@@ -173,7 +179,7 @@ The same for container level, you need to set:
 | serviceMonitor.interval | string | `"15s"` | @param serviceMonitor.interval Interval at which metrics should be scraped |
 | serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
 | serviceMonitor.metricRelabelings | object | `{}` | @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion. ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs |
-| serviceMonitor.namespace | string | `"monitoring"` | @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor |
+| serviceMonitor.namespace | string | `""` | @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor. Leave empty to use the release namespace. |
 | webhook.annotations | object | `{}` | Annotations for the ValidatingWebhookConfiguration, e.g. `cert-manager.io/inject-ca-from: <namespace>/<certificate>` so cert-manager's cainjector maintains the webhook caBundle. Only use CA injection with `certificate.provided: true` and `certificate.caBundle` unset; otherwise the injected CA replaces the chart-generated one and the webhook TLS handshake fails. |
 | webhook.certificate.provided | bool | `false` | Set to true if you want to provide your own certificate |
 | webhook.enabled | bool | `true` | Enable or disable admission webhook |
