@@ -234,8 +234,10 @@ check "DaemonSet: the pods carry the etcd client label" is "$(pod_label apisix-e
 # --- the root password ---------------------------------------------------------------
 
 check "default again: renders" render apisix
-check "default: no etcd user for APISIX" is "$(etcd_config '.deployment.etcd | has("user")')" false
-check "default: no password variable" is "$(password_ref)" ""
+check "default: APISIX reads the generated etcd Secret" is "$(password_ref)" apisix-etcd/etcd-root-password
+check "default: etcd reads the same generated Secret" is "$(etcd_password_ref)" apisix-etcd/etcd-root-password
+check "default: the generated Secret is rendered" secret_exists apisix-etcd
+check "default: APISIX connects as root" is "$(etcd_config '.deployment.etcd.user')" root
 
 check "RBAC, generated password: renders" render apisix --set etcd.auth.rbac.create=true
 check "RBAC, generated password: APISIX reads the etcd chart's Secret" is "$(password_ref)" apisix-etcd/etcd-root-password

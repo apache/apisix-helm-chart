@@ -154,12 +154,14 @@ check "a key with a leading tab fails" failed_with $? "apisix.admin.credentials.
 
 echo "# upgrades never replace a generated key"
 render apisix --is-upgrade
-check "an upgrade render without cluster access (helm diff, --dry-run=client) does not fail" eq $? 0
-render apisix --is-upgrade --set apisix.admin.credentials.admin=MyAdminKey123 --set apisix.admin.credentials.viewer=MyViewerKey456
+check "an upgrade without an existing etcd Secret fails with migration instructions" failed_with $? "must provide your current passwords"
+render apisix --is-upgrade --set etcd.auth.rbac.existingSecret=my-etcd
+check "an upgrade with an existing etcd Secret renders without cluster access" eq $? 0
+render apisix --is-upgrade --set etcd.auth.rbac.existingSecret=my-etcd --set apisix.admin.credentials.admin=MyAdminKey123 --set apisix.admin.credentials.viewer=MyViewerKey456
 check "upgrade with both keys set inline renders" eq $? 0
-render apisix --is-upgrade --set apisix.admin.credentials.secretName=my-admin
+render apisix --is-upgrade --set etcd.auth.rbac.existingSecret=my-etcd --set apisix.admin.credentials.secretName=my-admin
 check "upgrade with an existing Secret renders" eq $? 0
-render apisix --is-upgrade --set apisix.admin.enabled=false
+render apisix --is-upgrade --set etcd.auth.rbac.existingSecret=my-etcd --set apisix.admin.enabled=false
 check "upgrade with the Admin API disabled renders (no client can be cut off)" eq $? 0
 
 echo "# bundled ingress controller (the getting-started guide's values)"

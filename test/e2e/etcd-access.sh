@@ -32,7 +32,7 @@ NAMESPACES=(etcd-e2e etcd-e2e-upgrade)
 OLD_CHART_VERSION=${OLD_CHART_VERSION:-2.18.2}
 random_letters() { LC_ALL=C tr -dc 'A-Za-z' </dev/urandom | head -c "$1"; }
 ADMIN_KEY=$(random_letters 32)
-ROOT_PASSWORD=$(random_letters 24)
+ROOT_PASSWORD=""
 COMMON=(--set apisix.admin.credentials.admin="$ADMIN_KEY"
         --set etcd.replicaCount=1
         --wait --timeout 10m)
@@ -126,6 +126,16 @@ refuses_anonymous() { # etcdctl without credentials fails with etcd's own error,
   grep -q "user name is empty" <<<"$out" || { echo "       unexpected error: $(tail -1 <<<"$out")" >&2; return 1; }
 }
 
+forged_write_rejected() { # a forged client label admits the pod to the network, but cannot authenticate the write
+  local name="forged-$RANDOM$RANDOM" payload='{"uri":"/forged","upstream":{"nodes":{"127.0.0.1:1980":1}}}' out
+  kubectl --namespace "$NS" run "$name" --image=bitnamilegacy/etcd:latest --image-pull-policy=IfNotPresent --restart=Never \
+    --labels=apisix-etcd-client=true --command -- \
+    sh -c "etcdctl --endpoints=http://apisix-etcd:2379 put /apisix/routes/forged '$payload'" >/dev/null 2>&1
+  kubectl --namespace "$NS" wait --for=jsonpath='{.status.phase}'=Failed "pod/$name" --timeout=90s >/dev/null 2>&1
+  out=$(kubectl --namespace "$NS" logs "$name" 2>/dev/null | tail -1)
+  grep -q "user name is empty" <<<"$out" || { echo "       unexpected result: $out" >&2; return 1; }
+}
+
 upgrade() { $HELM upgrade apisix "$CHART" --namespace "$NS" "${COMMON[@]}" "$@" >/dev/null; }
 upgrade_fails_with() { # upgrade_fails_with <message part> [helm args...]: the upgrade fails with that message
   local text=$1 out; shift
@@ -142,8 +152,14 @@ kubectl create namespace "$NS" >/dev/null
 $HELM install apisix "$CHART" --namespace "$NS" "${COMMON[@]}" >/dev/null
 check "install with the defaults succeeds" is $? 0
 check "connected to the Admin API" connect
-check "APISIX writes to etcd" writes first
-check "etcd lists the route without credentials, before RBAC" is "$(routes_in_etcd)" 1
+check "the chart generates an etcd root password Secret" \
+  kubectl --namespace "$NS" get secret apisix-etcd -o name
+ROOT_PASSWORD=$(kubectl --namespace "$NS" get secret apisix-etcd -o jsonpath='{.data.etcd-root-password}' | base64 -d)
+check "APISIX writes to etcd with the generated password" writes first
+check "etcd accepts root with the generated password" is "$(routes_in_etcd --user "root:$ROOT_PASSWORD")" 1
+check "etcd refuses a client without credentials" refuses_anonymous
+check "a forged-label write without credentials is rejected" forged_write_rejected
+check "the rejected write leaves no forged route" is "$(routes_in_etcd --user "root:$ROOT_PASSWORD")" 1
 check "a pod with the client label can reach etcd" reaches_etcd labelled apisix-etcd-client=true
 check "a pod without the client label cannot" blocked outsider
 
@@ -203,9 +219,16 @@ check "APISIX writes to etcd before the upgrade" writes before-upgrade
 check "before the upgrade, a pod without the client label can reach etcd" reaches_etcd outsider
 check "upgrade with --reuse-values is refused, it would keep etcd open" \
   upgrade_fails_with "None of the podLabels of the etcd chart's jobs" --reuse-values
-check "upgrade with --reset-then-reuse-values succeeds" upgrade --reset-then-reuse-values
+check "upgrade without a pre-created password Secret is refused" \
+  upgrade_fails_with "must provide your current passwords" --reset-then-reuse-values
+printf '%s' "$ROOT_PASSWORD" |
+  kubectl --namespace "$NS" create secret generic apisix-etcd-auth --from-file=etcd-root-password=/dev/stdin >/dev/null
+check "upgrade with --reset-then-reuse-values and an existing password Secret succeeds" \
+  upgrade --reset-then-reuse-values --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
 check "connected to the Admin API" connect
 check "APISIX writes to etcd after the upgrade" writes after-upgrade
+check "the upgraded etcd accepts root with the pre-created password" is "$(routes_in_etcd --user "root:$ROOT_PASSWORD")" 2
+check "the upgraded etcd refuses a client without credentials" refuses_anonymous
 check "after the upgrade, a pod with the client label can reach etcd" reaches_etcd labelled apisix-etcd-client=true
 check "after the upgrade, a pod without the label cannot" blocked outsider
 

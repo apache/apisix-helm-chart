@@ -34,6 +34,7 @@ random_letters() { LC_ALL=C tr -dc 'A-Za-z' </dev/urandom | head -c "$1"; }
 ADMIN_KEY=$(random_letters 32)
 KEY_1=$(random_letters 16)
 KEY_2=$(random_letters 16)
+ETCD_PASSWORD=$(random_letters 24)
 COMMON=(--set apisix.admin.credentials.admin="$ADMIN_KEY"
         --set etcd.replicaCount=1
         --wait --timeout 10m)
@@ -126,8 +127,19 @@ tls_works() { [ "$(tls_code "$1")" != 000 ]; }
 serves_tls() { wait_for 30 tls_works "$1"; }   # serves_tls <host>
 tls_fails() { is "$(tls_code "$1")" 000; }      # check only after serves_tls on the same pods
 
+etcdctl_auth() { # etcdctl_auth <namespace> <etcdctl args...>: use the root password when the release has one
+  local namespace=$1
+  shift
+  kubectl --namespace "$namespace" exec apisix-etcd-0 -- sh -c '
+    if [ -n "${ETCD_ROOT_PASSWORD:-}" ] || [ -n "${ETCD_ROOT_PASSWORD_FILE:-}" ]; then
+      export ETCDCTL_USER="root:${ETCD_ROOT_PASSWORD:-$(cat "$ETCD_ROOT_PASSWORD_FILE")}"
+    fi
+    exec etcdctl "$@"
+  ' sh "$@"
+}
+
 stored_ssl_key() { # stored_ssl_key <namespace> <id>: the private key of an SSL object as stored in etcd
-  kubectl --namespace "$1" exec apisix-etcd-0 -- etcdctl get "/apisix/ssls/$2" --print-value-only |
+  etcdctl_auth "$1" get "/apisix/ssls/$2" --print-value-only |
     yq -p json '.key'
 }
 ssl_encrypted_with() { # ssl_encrypted_with <namespace> <id> <key> <PEM key>
@@ -178,7 +190,7 @@ rejects() { is "$(gateway_code "$1")" 401; }
 is() { [ "$1" = "$2" ] || { echo "       expected '$2', got '$1'" >&2; return 1; }; }
 
 stored_key() { # stored_key <namespace> <consumer>: the key-auth key as stored in etcd
-  kubectl --namespace "$1" exec apisix-etcd-0 -- etcdctl get "/apisix/consumers/$2" --print-value-only |
+  etcdctl_auth "$1" get "/apisix/consumers/$2" --print-value-only |
     yq -p json '.plugins."key-auth".key'
 }
 
@@ -286,8 +298,12 @@ OLD_BODY=$(consumer_body old)
 check "built-in: the body saved before the change holds the decrypted key" holds_key "$OLD_BODY" old-key
 
 # The released chart has no dataEncryption defaults. Exercise Helm's real
-# --reuse-values path before opting into the new keyring configuration.
-check "reuse-values: chart 3.0.0 upgrades without setting dataEncryption" upgrade "$NS" --reuse-values
+# --reuse-values path before opting into the new keyring configuration. The new
+# chart also enables etcd authentication, so migrate with an existing Secret.
+printf '%s' "$ETCD_PASSWORD" |
+  kubectl --namespace "$NS" create secret generic apisix-etcd-auth --from-file=etcd-root-password=/dev/stdin >/dev/null
+check "reuse-values: chart 3.0.0 upgrades without setting dataEncryption" \
+  upgrade "$NS" --reuse-values --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=apisix-etcd-auth
 check "reuse-values: connected to the upgraded release" connect "$NS"
 check "reuse-values: the old consumer still works" accepts old-key
 check "reuse-values: TLS still works" serves_tls tls.test
@@ -297,7 +313,8 @@ check "reuse-values: the gateway accepts the new consumer" accepts reused-key
 check "reuse-values: the gateway rejects a wrong key" rejects wrong-key
 
 check "migration: the upgrade with a new key first and the built-in key after it succeeds" \
-  upgrade "$NS" "${TLS[@]}" --set-json "apisix.dataEncryption.keyring=[\"$KEY_1\",\"$BUILTIN_KEY\"]"
+  upgrade "$NS" "${TLS[@]}" --set etcd.auth.rbac.existingSecret=apisix-etcd-auth \
+  --set-json "apisix.dataEncryption.keyring=[\"$KEY_1\",\"$BUILTIN_KEY\"]"
 check "migration: connected to the new pods" connect "$NS"
 check "migration: the old consumers still work" accepts old-key
 check "migration: the old consumers still work (stale)" accepts stale-key
@@ -310,7 +327,8 @@ check "migration: its private key is now encrypted with the new key" ssl_encrypt
 check "migration: consumer new created" add_consumer new new-key
 check "migration: new data is encrypted with the new key" encrypted_with "$NS" new "$KEY_1" new-key
 
-check "dropping the built-in key: the upgrade succeeds" upgrade "$NS" "${TLS[@]}" --set-json "apisix.dataEncryption.keyring=[\"$KEY_1\"]"
+check "dropping the built-in key: the upgrade succeeds" upgrade "$NS" "${TLS[@]}" \
+  --set etcd.auth.rbac.existingSecret=apisix-etcd-auth --set-json "apisix.dataEncryption.keyring=[\"$KEY_1\"]"
 check "dropping the built-in key: connected to the new pods" connect "$NS"
 check "dropping the built-in key: data encrypted with the new key works" accepts new-key
 check "dropping the built-in key: data saved again works" accepts old-key

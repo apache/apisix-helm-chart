@@ -126,6 +126,45 @@ release history, use `apisix.admin.credentials.secretName`.
 
 ## Upgrading
 
+### To 4.0.0
+
+The bundled etcd now requires authentication by default (`etcd.auth.rbac.create: true`). Fresh
+installs generate a root password into the Secret `<etcd fullname>`. APISIX reads that Secret
+through `secretKeyRef` as the `APISIX_ETCD_PASSWORD` environment variable and connects as `root`.
+The generated Secret and the pre-upgrade, snapshot and defragmentation jobs use the same password.
+Authentication also applies when NetworkPolicy is unavailable or a pod carries a forged client
+label: a label controls network admission, not identity.
+
+For an existing release, create the password Secret before upgrading and set
+`etcd.auth.rbac.existingSecret` to its name. APISIX and the etcd chart read that Secret, so there is
+no generated password to rotate or lose during the upgrade. `existingSecretPasswordKey` defaults to
+`etcd-root-password`.
+
+```shell
+openssl rand -hex 16 | tr -d '\n' |
+  kubectl create secret generic apisix-etcd-auth --namespace <namespace> \
+    --from-file=etcd-root-password=/dev/stdin
+```
+
+```yaml
+etcd:
+  auth:
+    rbac:
+      create: true
+      existingSecret: apisix-etcd-auth
+```
+
+With `--reuse-values`, set `etcd.auth.rbac.create: true` explicitly as in the example above;
+otherwise Helm preserves the previous `false` value even though the new chart enables it by default.
+
+Do not switch an existing release to `rootPassword`: its pre-upgrade job waits for a Secret that
+the upgrade itself creates and fails at the timeout. Run the upgrade with `--timeout 10m`, not with
+`--atomic` or `--rollback-on-failure`. While authentication is being enabled, old APISIX pods cannot
+use etcd until they are replaced; Admin API writes fail during that window, while the gateway keeps
+serving its routes. After authentication is enabled, do not roll back to a revision without it: the
+old APISIX pods cannot read their configuration. Follow [Access to the bundled etcd](#access-to-the-bundled-etcd)
+to turn authentication off before rolling back.
+
 ### To 3.1.0
 
 This chart upgrades the default gateway to Apache APISIX 3.21.0.
@@ -289,7 +328,7 @@ Pods that cannot carry the label need a rule of their own in `etcd.networkPolicy
   ports a rule admits. The policy also does not stop processes in the host network of the nodes that
   run etcd.
 
-etcd does not require authentication by default (`etcd.auth.rbac.create: false`). With
+etcd requires authentication by default (`etcd.auth.rbac.create: true`). With
 `etcd.auth.rbac.create: true`, APISIX connects as `root` with the root password from
 `etcd.auth.rbac.rootPassword` or `etcd.auth.rbac.existingSecret`; when both are empty, the etcd chart
 generates a password into the Secret `<etcd fullname>`. Under Argo CD and other tools that render the
@@ -784,9 +823,9 @@ keyring.
 | control.service.port | int | `9090` | which port to use for Apache APISIX Control API |
 | control.service.servicePort | int | `9090` | Service port to use for Apache APISIX Control API |
 | control.service.type | string | `"ClusterIP"` | Control service type |
-| etcd | object | `{"auth":{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"defrag":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"disasterRecovery":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"enabled":true,"image":{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"},"networkPolicy":{"allowExternal":false},"preUpgradeJob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"startupRetry":2,"timeout":30,"watchTimeout":50}` | etcd configuration use the FQDN address or the IP of the etcd |
-| etcd.auth | object | `{"rbac":{"create":false,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart |
-| etcd.auth.rbac.create | bool | `false` | Require clients to authenticate to etcd. APISIX connects as root with the password from `rootPassword` or `existingSecret`; when both are empty, a password is generated into the Secret `<etcd fullname>`. For an existing release, read "Access to the bundled etcd" in the README first |
+| etcd | object | `{"auth":{"rbac":{"create":true,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}},"autoCompactionMode":"periodic","autoCompactionRetention":"1h","containerSecurityContext":{"enabled":false},"defrag":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"disasterRecovery":{"cronjob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}}},"enabled":true,"image":{"registry":"docker.io","repository":"bitnamilegacy/etcd","tag":"latest"},"networkPolicy":{"allowExternal":false},"preUpgradeJob":{"podLabels":{"{{ include \"apisix.etcd.clientLabel\" . }}":"true"}},"prefix":"/apisix","replicaCount":3,"service":{"port":2379},"startupRetry":2,"timeout":30,"watchTimeout":50}` | etcd configuration use the FQDN address or the IP of the etcd |
+| etcd.auth | object | `{"rbac":{"create":true,"existingSecret":"","existingSecretPasswordKey":"","rootPassword":""},"tls":{"certFilename":"","certKeyFilename":"","enabled":false,"existingSecret":"","sni":"","verify":true}}` | if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart |
+| etcd.auth.rbac.create | bool | `true` | Require clients to authenticate to etcd. APISIX connects as root with the password from `rootPassword` or `existingSecret`; when both are empty, a password is generated into the Secret `<etcd fullname>`. For an existing release, read "To 4.0.0" in the README first |
 | etcd.auth.rbac.existingSecret | string | `""` | Name of an existing Secret with the root password, used instead of rootPassword. Requires etcd.auth.rbac.create to be true |
 | etcd.auth.rbac.existingSecretPasswordKey | string | `""` | Key of existingSecret that holds the root password. The default is etcd-root-password |
 | etcd.auth.rbac.rootPassword | string | `""` | Root password for etcd. Requires etcd.auth.rbac.create to be true |
