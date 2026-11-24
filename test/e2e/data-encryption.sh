@@ -293,7 +293,8 @@ NS=de-migrate
 new_namespace "$NS"
 WITH_TLS=1
 TLS=(--set apisix.ssl.enabled=true)
-check "built-in: chart 3.0.0 installs with its default keyring" install_previous "$NS" "${TLS[@]}"
+check "built-in: chart 3.0.0 installs with its default keyring" \
+  install_previous "$NS" "${TLS[@]}" --set etcd.auth.rbac.create=false
 check "built-in: connected" connect "$NS"
 check "built-in: route created" add_route
 check "built-in: consumer old created" add_consumer old old-key
