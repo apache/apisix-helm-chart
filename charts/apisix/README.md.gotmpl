@@ -158,6 +158,22 @@ With `--reuse-values` or `--reset-then-reuse-values`, set `etcd.auth.rbac.create
 as in the example above. Both modes retain an explicitly configured old `false`; `--reuse-values`
 also reuses the old chart's default `false` instead of the new chart default.
 
+With `apisix.fullCustomConfig.enabled: true`, the chart does not add etcd credentials to your custom
+`deployment.etcd`. Keep your existing `host`, `prefix` and other settings, and add `user: root` and
+a reference to the same environment variable. The chart renders the custom configuration as a
+template, so escape the password as shown:
+
+```yaml
+apisix:
+  fullCustomConfig:
+    enabled: true
+    config:
+      deployment:
+        etcd:
+          user: root
+          password: '{{ `${{APISIX_ETCD_PASSWORD}}` }}'
+```
+
 Do not switch an existing release to `rootPassword`: its pre-upgrade job waits for a Secret that
 the upgrade itself creates and fails at the timeout. Run the upgrade with `--timeout 10m`, not with
 `--atomic` or `--rollback-on-failure`. While authentication is being enabled, old APISIX pods cannot
