@@ -218,8 +218,8 @@ apisix:
 serviceMonitor:
   # -- Enable or disable ServiceMonitor
   enabled: false
-  # -- @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor. Leave empty to use the release namespace.
-  namespace: ""
+  # -- @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor
+  namespace: "monitoring"
   # -- @param serviceMonitor.interval Interval at which metrics should be scraped
   interval: 15s
   # -- @param serviceMonitor.labels ServiceMonitor extra labels
