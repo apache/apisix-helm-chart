@@ -171,7 +171,7 @@ apisix:
       deployment:
         etcd:
           user: root
-          password: '${{APISIX_ETCD_PASSWORD}}'
+          password: '{{ `${{APISIX_ETCD_PASSWORD}}` }}'
 ```
 
 Do not switch an existing release to `rootPassword`: its pre-upgrade job waits for a Secret that

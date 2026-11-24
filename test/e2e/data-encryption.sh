@@ -106,7 +106,7 @@ connect() { # connect <namespace>: port-forward the Admin API and the gateway of
     kubectl --namespace "$1" port-forward svc/apisix-gateway "$TLS_PORT:443" >/dev/null 2>&1 &
     PF_PIDS+=($!)
   fi
-  wait_for 60 curl -sf -o /dev/null -H "X-API-KEY: $ADMIN_KEY" \
+  wait_for 60 curl -sf --connect-timeout 2 --max-time 5 -o /dev/null -H "X-API-KEY: $ADMIN_KEY" \
     "http://127.0.0.1:$ADMIN_PORT/apisix/admin/routes" &&
     wait_for 60 curl -s -o /dev/null "http://127.0.0.1:$GATEWAY_PORT/" &&
     { [ "$WITH_TLS" != 1 ] || wait_for 60 tcp_open "$TLS_PORT"; }

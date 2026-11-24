@@ -255,14 +255,24 @@ check "RBAC, existing Secret with its own key: renders" render apisix --set etcd
 check "RBAC, existing Secret with its own key: APISIX reads that key" is "$(password_ref)" etcd-auth/password
 check "RBAC, existing Secret with its own key: the same one as etcd" is "$(etcd_password_ref)" etcd-auth/password
 
-check "fullCustomConfig with etcd authentication: renders" render apisix \
-  --set apisix.fullCustomConfig.enabled=true \
-  --set apisix.fullCustomConfig.config.deployment.etcd.user=root \
-  --set-json 'apisix.fullCustomConfig.config.deployment.etcd.password="{{ `${{APISIX_ETCD_PASSWORD}}` }}"'
+full_custom_values=$(mktemp)
+awk '
+  /^### / { migrating = 0 }
+  /^### To 4\.0\.0$/ { migrating = 1 }
+  migrating && /^```yaml$/ { in_example = 1; block = ""; next }
+  in_example && /^```$/ {
+    if (block ~ /fullCustomConfig:/) { printf "%s", block; exit }
+    in_example = 0
+  }
+  in_example { block = block $0 ORS }
+' charts/apisix/README.md > "$full_custom_values"
+check "the generated README has a fullCustomConfig values example" test -s "$full_custom_values"
+check "fullCustomConfig example in the generated README: renders" render apisix -f "$full_custom_values"
 check "fullCustomConfig: APISIX connects as root" is "$(etcd_config '.deployment.etcd.user')" root
 check "fullCustomConfig: the password uses the environment variable" \
   is "$(etcd_config '.deployment.etcd.password')" '${{APISIX_ETCD_PASSWORD}}'
 check "fullCustomConfig: APISIX reads the generated etcd Secret" is "$(password_ref)" apisix-etcd/etcd-root-password
+rm -f "$full_custom_values"
 
 echo
 echo "passed: $passed, failed: $failed"
