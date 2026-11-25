@@ -59,11 +59,15 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.etcd.enabled }}
+      {{- include "etcd.imagePullSecrets" .Subcharts.etcd | nindent 6 }}
+      {{- else }}
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- range $.Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
+      {{- end }}
       {{- end }}
       serviceAccountName: {{ include "apisix.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
@@ -297,6 +301,35 @@ spec:
           {{ else }}
           command: ['sh', '-c', "until nc -z {{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
           {{- end }}
+        {{- end }}
+        {{- /* The default HTTP path needs an authenticated readiness check; custom TLS client setup is left unchanged. */}}
+        {{- if and .Values.etcd.enabled .Values.etcd.auth.rbac.create (not .Values.etcd.auth.tls.enabled) }}
+        - name: wait-etcd-auth
+          image: {{ include "etcd.image" .Subcharts.etcd }}
+          imagePullPolicy: {{ .Values.etcd.image.pullPolicy }}
+          {{- with .Values.initContainer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.initContainer.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: ETCDCTL_ENDPOINTS
+              {{- if .Values.etcd.fullnameOverride }}
+              value: "http://{{ .Values.etcd.fullnameOverride }}:{{ .Values.etcd.service.port }}"
+              {{- else }}
+              value: "http://{{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }}:{{ .Values.etcd.service.port }}"
+              {{- end }}
+            - name: ETCDCTL_USER
+              value: root
+            - name: ETCDCTL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "apisix.etcd.secretName" . }}
+                  key: {{ include "apisix.etcd.secretPasswordKey" . }}
+          command: ['sh', '-c', "until etcdctl --command-timeout=5s get /apisix --prefix --keys-only >/dev/null; do echo waiting for authenticated etcd `date`; sleep 2; done;"]
         {{- end }}
         {{- if .Values.extraInitContainers }}
         {{- toYaml .Values.extraInitContainers | nindent 8 }}

@@ -153,7 +153,7 @@ initContainer:
   image: busybox
   # -- Init container tag
   tag: 1.28
-  # -- Resource requests and limits for the wait-etcd init container (only used when etcd.enabled is true)
+  # -- Resource requests and limits for the wait-etcd and wait-etcd-auth init containers (only used when etcd.enabled is true; wait-etcd-auth is used on the default HTTP path with RBAC enabled)
   resources: {}
     # requests:
     #   cpu: 10m
@@ -161,7 +161,7 @@ initContainer:
     # limits:
     #   cpu: 100m
     #   memory: 32Mi
-  # -- Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings.
+  # -- Container security context for wait-etcd and wait-etcd-auth. Empty by default to inherit applicable podSecurityContext settings.
   securityContext: {}
     # allowPrivilegeEscalation: false
     # capabilities:
@@ -915,8 +915,8 @@ etcd:
   # -- if etcd.enabled is true, set more values of bitnamilegacy/etcd helm chart
   auth:
     rbac:
-      # -- Require clients to authenticate to etcd. APISIX connects as root with the password from `rootPassword` or `existingSecret`; when both are empty, a password is generated into the Secret `<etcd fullname>`. For an existing release, read "Access to the bundled etcd" in the README first
-      create: false
+      # -- Require clients to authenticate to etcd. APISIX connects as root with the password from `rootPassword` or `existingSecret`; when both are empty, a password is generated into the Secret `<etcd fullname>`. For an existing release, read "To 4.0.0" in the README first
+      create: true
       # -- Root password for etcd. Requires etcd.auth.rbac.create to be true
       rootPassword: ""
       # -- Name of an existing Secret with the root password, used instead of rootPassword. Requires etcd.auth.rbac.create to be true

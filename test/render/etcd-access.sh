@@ -75,6 +75,11 @@ policy_from() { # the "from" rules of the client port of the etcd NetworkPolicy,
 password_ref() { # "<secret>/<key>" that APISIX reads its etcd password from
   yq 'select(.kind == "Deployment") | .spec.template.spec.containers[] | select(.name == "apisix") | .env[] | select(.name == "APISIX_ETCD_PASSWORD") | .valueFrom.secretKeyRef | .name + "/" + .key' <<<"$OUT"
 }
+auth_init() { # the init container that waits for authenticated etcd access
+  yq 'select(.kind == "Deployment" or .kind == "DaemonSet") | .spec.template.spec.initContainers[] | select(.name == "wait-etcd-auth")' <<<"$OUT"
+}
+auth_init_password_ref() { auth_init | yq '.env[] | select(.name == "ETCDCTL_PASSWORD") | .valueFrom.secretKeyRef | .name + "/" + .key'; }
+no_auth_init() { [ -z "$(auth_init)" ]; }
 etcd_password_ref() { # "<secret>/<key>" that etcd reads its root password from: a file of a projected Secret
   local sts secret file
   sts=$(yq 'select(.kind == "StatefulSet")' <<<"$OUT")
@@ -193,12 +198,16 @@ check "fullnameOverride: renders" render apisix --set etcd.fullnameOverride=kv
 check "fullnameOverride: the label follows the etcd name" is "$(pod_label kv-client)" true
 check "fullnameOverride: and so does the policy" is "$(policy_from kv | yq -p json '.[0].podSelector.matchLabels | keys | join(",")')" kv-client
 check "fullnameOverride: and the pre-upgrade job's label" is "$(job_label kv-pre-upgrade kv-client)" true
+check "fullnameOverride: the authenticated startup check uses that Secret" is "$(auth_init_password_ref)" kv/etcd-root-password
+check "fullnameOverride: the authenticated startup check uses that endpoint" \
+  is "$(auth_init | yq '.env[] | select(.name == "ETCDCTL_ENDPOINTS") | .value')" http://kv:2379
 
 check "release name with etcd in it: renders" render my-etcd
 check "release name with etcd in it: the label uses the etcd chart's name" is "$(pod_label my-etcd-client)" true
 
 check "external etcd: renders" render apisix --set etcd.enabled=false --set 'externalEtcd.host[0]=http://etcd.example:2379'
 check "external etcd: no client label" is "$(pod_labels)" "app.kubernetes.io/name,app.kubernetes.io/instance"
+check "external etcd: no authenticated startup check" no_auth_init
 
 check "client label also in podLabels: renders" render apisix --set podLabels.apisix-etcd-client=true \
   --set podLabels.team=gateway
@@ -234,8 +243,21 @@ check "DaemonSet: the pods carry the etcd client label" is "$(pod_label apisix-e
 # --- the root password ---------------------------------------------------------------
 
 check "default again: renders" render apisix
-check "default: no etcd user for APISIX" is "$(etcd_config '.deployment.etcd | has("user")')" false
-check "default: no password variable" is "$(password_ref)" ""
+check "default: APISIX reads the generated etcd Secret" is "$(password_ref)" apisix-etcd/etcd-root-password
+check "default: etcd reads the same generated Secret" is "$(etcd_password_ref)" apisix-etcd/etcd-root-password
+check "default: the generated Secret is rendered" secret_exists apisix-etcd
+check "default: APISIX connects as root" is "$(etcd_config '.deployment.etcd.user')" root
+check "default: the authenticated startup check uses the etcd image" is "$(auth_init | yq '.image')" docker.io/bitnamilegacy/etcd:latest
+check "default: the authenticated startup check reads the same Secret" is "$(auth_init_password_ref)" apisix-etcd/etcd-root-password
+check "default: the authenticated startup check connects as root" \
+  is "$(auth_init | yq '.env[] | select(.name == "ETCDCTL_USER") | .value')" root
+check "etcd image pull Secret: renders" render apisix --set 'etcd.image.pullSecrets[0]=etcd-private-pull'
+check "APISIX uses the etcd image pull Secret" \
+  is "$(yq 'select(.kind == "Deployment") | .spec.template.spec.imagePullSecrets[0].name' <<<"$OUT")" etcd-private-pull
+check "global and etcd image pull Secrets: renders" render apisix \
+  --set 'global.imagePullSecrets[0]=global-pull' --set 'etcd.image.pullSecrets[0]=etcd-private-pull'
+check "APISIX keeps both image pull Secrets" \
+  is "$(yq 'select(.kind == "Deployment") | .spec.template.spec.imagePullSecrets | map(.name) | sort | join(",")' <<<"$OUT")" "etcd-private-pull,global-pull"
 
 check "RBAC, generated password: renders" render apisix --set etcd.auth.rbac.create=true
 check "RBAC, generated password: APISIX reads the etcd chart's Secret" is "$(password_ref)" apisix-etcd/etcd-root-password
@@ -246,12 +268,38 @@ check "RBAC: APISIX connects as root" is "$(etcd_config '.deployment.etcd.user')
 check "RBAC, existing Secret: renders" render apisix --set etcd.auth.rbac.create=true --set etcd.auth.rbac.existingSecret=etcd-auth
 check "RBAC, existing Secret: APISIX reads it" is "$(password_ref)" etcd-auth/etcd-root-password
 check "RBAC, existing Secret: the same one as etcd" is "$(etcd_password_ref)" etcd-auth/etcd-root-password
+check "RBAC, existing Secret: the authenticated startup check reads it too" is "$(auth_init_password_ref)" etcd-auth/etcd-root-password
 check "RBAC, existing Secret: no Secret is generated" no_secret apisix-etcd
 
 check "RBAC, existing Secret with its own key: renders" render apisix --set etcd.auth.rbac.create=true \
   --set etcd.auth.rbac.existingSecret=etcd-auth --set etcd.auth.rbac.existingSecretPasswordKey=password
 check "RBAC, existing Secret with its own key: APISIX reads that key" is "$(password_ref)" etcd-auth/password
 check "RBAC, existing Secret with its own key: the same one as etcd" is "$(etcd_password_ref)" etcd-auth/password
+check "RBAC, existing Secret with its own key: the authenticated startup check reads that key too" is "$(auth_init_password_ref)" etcd-auth/password
+
+check "RBAC off: renders" render apisix --set etcd.auth.rbac.create=false
+check "RBAC off: no authenticated startup check" no_auth_init
+check "RBAC with custom TLS client settings: renders" render apisix --set etcd.auth.tls.enabled=true
+check "RBAC with custom TLS client settings: startup behavior is unchanged" no_auth_init
+
+full_custom_values=$(mktemp)
+awk '
+  /^### / { migrating = 0 }
+  /^### To 4\.0\.0$/ { migrating = 1 }
+  migrating && /^```yaml$/ { in_example = 1; block = ""; next }
+  in_example && /^```$/ {
+    if (block ~ /fullCustomConfig:/) { printf "%s", block; exit }
+    in_example = 0
+  }
+  in_example { block = block $0 ORS }
+' charts/apisix/README.md > "$full_custom_values"
+check "the generated README has a fullCustomConfig values example" test -s "$full_custom_values"
+check "fullCustomConfig example in the generated README: renders" render apisix -f "$full_custom_values"
+check "fullCustomConfig: APISIX connects as root" is "$(etcd_config '.deployment.etcd.user')" root
+check "fullCustomConfig: the password uses the environment variable" \
+  is "$(etcd_config '.deployment.etcd.password')" '${{APISIX_ETCD_PASSWORD}}'
+check "fullCustomConfig: APISIX reads the generated etcd Secret" is "$(password_ref)" apisix-etcd/etcd-root-password
+rm -f "$full_custom_values"
 
 echo
 echo "passed: $passed, failed: $failed"
