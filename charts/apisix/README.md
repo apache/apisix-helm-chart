@@ -355,6 +355,15 @@ pod; the chart refuses to render that combination unless `etcd.networkPolicy.all
 true. It also refuses to render when the release name, `etcd.nameOverride` or `etcd.fullnameOverride` is
 so long that the client label has more than the 63 characters that Kubernetes allows.
 
+## APISIX ServiceAccount ownership
+
+When `serviceAccount.create=true`, APISIX creates its own account. If its generated
+name would equal the bundled controller's account (`<release>`), it uses
+`<release>-gateway` instead. The controller keeps its own account and RBAC.
+An explicit `serviceAccount.name` must be distinct from the controller's account.
+Enabling the controller can therefore change the generated APISIX account name
+and roll its Pods; configure a stable, distinct name when that matters.
+
 ## Configure the wait-etcd init container
 
 When `etcd.enabled` is true, `initContainer.resources` and
