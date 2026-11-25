@@ -34,7 +34,7 @@ spec:
     type: ControlPlane
     controlPlane:
       service:
-        name: {{ include "apisix.fullname" . }}-admin
+        name: {{ include "apisix.service.adminName" . }}
         port: {{ .Values.apisix.admin.servicePort }}
       {{- with $gp.provider.controlPlane.tlsVerify }}
       tlsVerify: {{ . }}

@@ -249,6 +249,9 @@ service:
   #  - secretName: apisix-tls
   #    hosts:
   #      - chart-example.local
+  # -- Override the gateway Service name. Set this to an existing gateway Service name during a chart migration.
+  gateway:
+    name: ""
   # -- Override default labels assigned to Apache APISIX gateway resources
   labelsOverride: {}
   # labelsOverride:
@@ -513,6 +516,20 @@ apisix:
     role_traditional:
       # -- Config provider for the traditional role. enum: etcd, yaml
       config_provider: "etcd"
+
+    # -- Deploy the APISIX control plane component when mode is decoupled.
+    controlPlane:
+      enabled: true
+      replicaCount: 1
+      autoscaling: {}
+      podDisruptionBudget: {}
+
+    # -- Deploy the APISIX data plane component when mode is decoupled.
+    dataPlane:
+      enabled: true
+      replicaCount: 2
+      autoscaling: {}
+      podDisruptionBudget: {}
 
     # -- Standalone rules configuration
     #

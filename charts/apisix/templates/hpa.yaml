@@ -1,3 +1,4 @@
+{{- define "apisix.hpa" -}}
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -67,3 +68,6 @@ spec:
 
   {{- end}}
 {{- end }}
+
+{{- end }}
+{{ include "apisix.renderPlanes" (dict "template" "apisix.hpa" "root" .) }}
