@@ -8,6 +8,22 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Disruption budget values
+
+`podDisruptionBudget` requires exactly one non-null `minAvailable` or
+`maxUnavailable`. The existing default `minAvailable: 90%` is retained;
+`maxUnavailable` now defaults to null. For upgrades that retain the old defaults
+(`minAvailable: 90%` together with `maxUnavailable: 1`), the chart preserves the
+old behavior and emits only `minAvailable: 90%`. Other configurations specifying
+both fields fail rather than silently discarding one.
+
+When updating an old values file, remove `maxUnavailable` or set it to `null` to
+keep minAvailable. To use maxUnavailable, explicitly clear
+minAvailable. Counts of zero are preserved; percentages remain strings.
+A PDB only protects voluntary evictions and can block node drains when too few
+replicas are healthy. Choose budgets together with replica count and HPA minima;
+one control-plane replica with minAvailable 1 cannot be voluntarily evicted.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -855,9 +871,9 @@ keyring.
 | nameOverride | string | `""` | String to partially override the chart fullname |
 | nodeSelector | object | `{}` | Node labels for Apache APISIX pod assignment |
 | podAnnotations | object | `{}` | Annotations to add to each pod |
-| podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |
+| podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":null,"minAvailable":"90%"}` | See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details |
 | podDisruptionBudget.enabled | bool | `false` | Enable or disable podDisruptionBudget |
-| podDisruptionBudget.maxUnavailable | int | `1` | Set the maxUnavailable of podDisruptionBudget |
+| podDisruptionBudget.maxUnavailable | string | `nil` | Set the maxUnavailable of podDisruptionBudget |
 | podDisruptionBudget.minAvailable | string | `"90%"` | Set the `minAvailable` of podDisruptionBudget. You can specify only one of `maxUnavailable` and `minAvailable` in a single PodDisruptionBudget. See [Specifying a Disruption Budget for your Application](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) for more details |
 | podLabels | object | `{}` | Labels to add to each pod |
 | podSecurityContext | object | `{}` | Set the securityContext for Apache APISIX pods |
