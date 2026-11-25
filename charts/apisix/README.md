@@ -8,6 +8,22 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Admin API source networks
+
+The default allowlist includes loopback. With the bundled ingress controller
+enabled it additionally allows RFC1918 IPv4 and IPv6 ULA networks instead of
+all Internet addresses. These are private ranges, not discovered Pod CIDRs.
+Set `apisix.admin.allow.ipList` and `ingressControllerExtraIpList` to the actual
+source CIDRs observed in your cluster, including SNAT and hostNetwork traffic.
+An empty `ipList` falls back to loopback; set the extra list to `[]` to append
+nothing. Public access requires explicitly specifying `0.0.0.0/0` or `::/0`.
+
+Kubernetes namespaces have no inherent CIDR. Use NetworkPolicy namespace and
+Pod selectors for namespace identity, together with APISIX's IP allowlist.
+Clusters with non-private Pod ranges need explicit CIDRs before enabling the
+controller. Review existing Admin clients when upgrading: private ranges do not
+authorize authentication and the Admin key is still required.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -609,7 +625,7 @@ keyring.
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Set affinity for Apache APISIX deploy |
-| apisix.admin.allow.ingressControllerExtraIpList | list | `["0.0.0.0/0","::/0"]` | Client IP CIDRs appended to ipList when ingress-controller.enabled is true, so that the bundled ingress controller can reach the Admin API. Narrow it to the ingress controller Pod CIDR, or set it to [] to append nothing. |
+| apisix.admin.allow.ingressControllerExtraIpList | list | `["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","fc00::/7"]` | Client IP CIDRs appended to ipList when ingress-controller.enabled is true, so that the bundled ingress controller can reach the Admin API. Narrow it to the ingress controller Pod CIDR, or set it to [] to append nothing. |
 | apisix.admin.allow.ipList | list | `["127.0.0.1/24"]` | The client IP CIDR allowed to access Apache APISIX Admin API service. |
 | apisix.admin.cors | bool | `true` | Admin API support CORS response headers |
 | apisix.admin.credentials | object | `{"admin":"","secretAdminKey":"","secretName":"","secretViewerKey":"","viewer":""}` | Admin API credentials. Leave `admin` and `viewer` empty to let the chart generate random keys. They are stored in the Secret `<fullname>-admin-credentials` and kept across upgrades. Tools that render the chart without access to the cluster (`helm template`, Argo CD) cannot keep generated keys; use `secretName` with them. The publicly known keys that chart versions before 3.0.0 used as defaults are rejected. |
