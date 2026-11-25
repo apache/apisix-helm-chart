@@ -890,6 +890,11 @@ etcd:
   # this etcd is based on bitnamilegacy/etcd helm chart and latest bitnami docker image, only for development and testing purposes,
   # if you want to use etcd in production, we recommend you to install etcd by yourself and use `externalEtcd` to connect it.
   enabled: true
+
+  # To use a custom StorageClass for the bundled etcd PVCs, uncomment and set:
+  # persistence:
+  #   storageClass: "my-storage-class"
+
   # -- docker image for built-in etcd
   image:
     registry: docker.io
