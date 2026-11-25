@@ -292,11 +292,7 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.etcd.fullnameOverride }}
-          command: ['sh', '-c', "until nc -z {{ .Values.etcd.fullnameOverride }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
-          {{ else }}
-          command: ['sh', '-c', "until nc -z {{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
-          {{- end }}
+          command: ['sh', '-c', "until nc -z {{ include "apisix.etcd.host" . }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
         {{- end }}
         {{- if .Values.extraInitContainers }}
         {{- toYaml .Values.extraInitContainers | nindent 8 }}

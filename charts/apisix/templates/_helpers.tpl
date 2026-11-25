@@ -130,6 +130,19 @@ true
 {{- end -}}
 
 {{/*
+Return the address of the bundled etcd Service. The name comes from the etcd
+chart's own helpers, so nameOverride, fullnameOverride, namespaceOverride and
+release names that already contain "etcd" resolve to the Service it creates.
+*/}}
+{{- define "apisix.etcd.host" -}}
+{{- if and .Values.etcd.fullnameOverride (not .Values.etcd.namespaceOverride) -}}
+{{- include "common.names.fullname" .Subcharts.etcd -}}
+{{- else -}}
+{{- printf "%s.%s.svc.%s" (include "common.names.fullname" .Subcharts.etcd) (include "common.names.namespace" .Subcharts.etcd) .Values.etcd.clusterDomain -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the name of etcd password secret
 */}}
 {{- define "apisix.etcd.secretName" -}}
@@ -194,7 +207,7 @@ its NetworkPolicy cannot handle.
 {{- end -}}
 {{- $label := printf "%s-client" (include "common.names.fullname" .Subcharts.etcd) -}}
 {{- if gt (len $label) 63 -}}
-{{- fail (printf "The NetworkPolicy of the bundled etcd admits pods labelled %s, but a label key has at most 63 characters. For a new release, use a shorter release name or etcd.fullnameOverride (APISIX does not find etcd under an etcd.nameOverride); otherwise set etcd.networkPolicy.allowExternal: true" $label) -}}
+{{- fail (printf "The NetworkPolicy of the bundled etcd admits pods labelled %s, but a label key has at most 63 characters. For a new release, use a shorter release name, etcd.nameOverride or etcd.fullnameOverride; otherwise set etcd.networkPolicy.allowExternal: true" $label) -}}
 {{- end -}}
 {{- if and $etcd.metrics.enabled (not $etcd.metrics.useSeparateEndpoint) -}}
 {{- fail "etcd.metrics.enabled serves the metrics on the etcd client port, and the etcd chart then opens that port to every pod. Set etcd.metrics.useSeparateEndpoint: true to serve them on a port of their own, or etcd.networkPolicy.allowExternal: true" -}}
