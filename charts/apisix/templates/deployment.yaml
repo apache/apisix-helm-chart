@@ -293,9 +293,9 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- if .Values.etcd.fullnameOverride }}
-          command: ['sh', '-c', "until nc -z {{ .Values.etcd.fullnameOverride }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
+          command: ['sh', '-c', "until nc -z -w 2 {{ .Values.etcd.fullnameOverride }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
           {{ else }}
-          command: ['sh', '-c', "until nc -z {{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
+          command: ['sh', '-c', "until nc -z -w 2 {{ .Release.Name }}-etcd.{{ .Release.Namespace }}.svc.{{ .Values.etcd.clusterDomain }} {{ .Values.etcd.service.port }}; do echo waiting for etcd `date`; sleep 2; done;"]
           {{- end }}
         {{- end }}
         {{- if .Values.extraInitContainers }}
