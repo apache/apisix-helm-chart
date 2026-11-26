@@ -8,9 +8,53 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Optional workload security and upgrades
+
+This change adds opt-in writable runtime volumes. Upgrading an existing release
+keeps `podSecurityContext`, `securityContext` and `initContainer.securityContext`
+empty by default, leaves token automount to Kubernetes/the selected ServiceAccount,
+and does not add runtime volumes. This is an additive minor release; secure
+settings are not new defaults. Continue passing your production values on upgrade.
+
+To enable the example security profile, review
+[`examples/security-values.yaml`](examples/security-values.yaml), then apply it
+alongside your deployment values:
+
+```sh
+helm upgrade --install my-apisix apisix/apisix -f production-values.yaml -f security-values.yaml
+```
+
+The example targets the official APISIX 3.21 Ubuntu image (UID/GID 636), with
+non-root execution, RuntimeDefault seccomp, dropped capabilities, no privilege
+escalation and a read-only root filesystem. It requires Kubernetes 1.20+ because
+of `fsGroupChangePolicy`. Custom images, admission-assigned IDs and writable
+plugin/cache paths require corresponding adjustments. Enabling these settings
+changes Pod permissions and triggers a rollout; test them before production.
+
+`runtimeVolumes.enabled: true` supplies writable emptyDirs for packaged config,
+logs, PID/socket files, nginx temporary files and `/tmp`. A `prepare-runtime`
+init container uses the APISIX image to copy packaged config and stdout/stderr
+log symlinks only into chart-managed config/log volumes. The generated
+`config.yaml` still mounts from the ConfigMap afterward.
+
+Existing `extraVolumeMounts` take precedence for matching directory paths,
+including trailing slashes. The chart skips both automatic mounts and volume
+initialization for those paths. Existing read-only filesystem workarounds
+(including issue [#805](https://github.com/apache/apisix-helm-chart/issues/805))
+can retain their volumes and `extraInitContainers` unchanged. Adopt automatic
+volumes by removing the corresponding custom mounts, volumes and copy init
+container together. Merely setting `securityContext.readOnlyRootFilesystem`
+does not enable automatic volumes.
+
+`serviceAccount.automountServiceAccountToken: null` omits the field on Pods and
+chart-created ServiceAccounts, preserving account/admission defaults. Set it to
+`false` to opt out, or `true` for Kubernetes discovery with suitable RBAC. This
+setting does not modify an externally managed ServiceAccount. The Ingress
+Controller retains its own ServiceAccount and token settings.
+
 ## Prerequisites
 
-* Kubernetes v1.14+
+* Kubernetes v1.14+ (the optional example security profile requires v1.20+)
 * Helm v3.8+
 
 ## Install
@@ -362,8 +406,8 @@ When `etcd.enabled` is true, `initContainer.resources` and
 both Deployment and DaemonSet workloads. They are independent of the top-level
 `resources` and `securityContext`, which configure the APISIX container.
 
-Both options default to `{}` and are omitted from the rendered container when
-empty. Applicable `podSecurityContext` settings still apply to `wait-etcd`.
+The wait container resources and security context both default to `{}`.
+Applicable `podSecurityContext` settings still apply to `wait-etcd`.
 For example:
 
 ```yaml
@@ -865,6 +909,7 @@ keyring.
 | rbac.create | bool | `false` | Whether RBAC resources (ClusterRole and ClusterRoleBinding) should be created |
 | replicaCount | int | `1` | if useDaemonSet is true or autoscaling.enabled is true, replicaCount not become effective |
 | resources | object | `{}` | Set pod resource requests & limits |
+| runtimeVolumes | object | `{"enabled":false}` | Add writable emptyDir mounts for the packaged APISIX runtime paths. Explicit extraVolumeMounts take precedence. |
 | securityContext | object | `{}` | Set the securityContext for Apache APISIX container |
 | service.externalIPs | list | `[]` | IPs for which nodes in the cluster will also accept traffic for the service |
 | service.externalTrafficPolicy | string | `"Cluster"` | Setting how the Service route external traffic. If you want to keep the client source IP, you can set this to Local, ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
@@ -883,6 +928,7 @@ keyring.
 | service.tls.servicePort | int | `443` | Kubernetes service port for HTTPS traffic |
 | service.type | string | `"NodePort"` | Apache APISIX service type for user access itself |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
+| serviceAccount.automountServiceAccountToken | string | `nil` | Set true/false to override token automount on APISIX pods and a chart-created ServiceAccount; null preserves Kubernetes/ServiceAccount defaults |
 | serviceAccount.create | bool | `false` | Whether a ServiceAccount should be created for the APISIX pods |
 | serviceAccount.name | string | `""` | Name of the ServiceAccount to use. If not set and create is true, a name is generated from the chart fullname |
 | terminationGracePeriodSeconds | int | `30` | Number of seconds Kubernetes waits for Apache APISIX to terminate gracefully |

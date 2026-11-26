@@ -44,17 +44,14 @@ podAnnotations: {}
 podLabels: {}
 # -- Set the securityContext for Apache APISIX pods
 podSecurityContext: {}
-  # fsGroup: 2000
 # -- Number of seconds Kubernetes waits for Apache APISIX to terminate gracefully
 terminationGracePeriodSeconds: 30
 # -- Set the securityContext for Apache APISIX container
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+
+# -- Add writable emptyDir mounts for the packaged APISIX runtime paths. Explicit extraVolumeMounts take precedence.
+runtimeVolumes:
+  enabled: false
 
 # -- Lifecycle hooks for the Apache APISIX container
 lifecycle:
@@ -163,14 +160,6 @@ initContainer:
     #   memory: 32Mi
   # -- Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings.
   securityContext: {}
-    # allowPrivilegeEscalation: false
-    # capabilities:
-    #   drop:
-    #     - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # Set runAsUser to a non-zero UID unless the pod or admission policy supplies one.
-    # runAsUser: 1000
 
 autoscaling:
   # -- Enable HorizontalPodAutoscaler for APISIX (only when useDaemonSet is false)
@@ -194,6 +183,8 @@ fullnameOverride: ""
 serviceAccount:
   # -- Whether a ServiceAccount should be created for the APISIX pods
   create: false
+  # -- Set true/false to override token automount on APISIX pods and a chart-created ServiceAccount; null preserves Kubernetes/ServiceAccount defaults
+  automountServiceAccountToken: null
   # -- Annotations to add to the ServiceAccount
   annotations: {}
   # -- Name of the ServiceAccount to use. If not set and create is true, a name is generated from the chart fullname
