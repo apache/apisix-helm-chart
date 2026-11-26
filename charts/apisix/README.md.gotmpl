@@ -8,6 +8,21 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Pinned images and external etcd
+
+The default APISIX and bundled etcd images use immutable multi-architecture
+manifest digests. The etcd image is 3.6.4, matching the 12.0.18 dependency's
+pre-upgrade hook. When changing a repository or tag, also set its matching
+digest, or explicitly clear the digest to select by tag. Mirror both manifests
+and layers when using a private registry.
+
+Bundled etcd remains enabled to preserve existing installations. To use an
+externally managed cluster set `etcd.enabled=false`, configure real
+`externalEtcd.host` endpoints and credentials, and migrate and verify data first.
+Disabling bundled etcd during an upgrade removes its release-managed workloads;
+this is not a data migration. Back up and test restoration before etcd upgrades;
+a downgrade from etcd 3.6 to 3.5 is not a Helm rollback procedure.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
