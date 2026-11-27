@@ -355,6 +355,12 @@ pod; the chart refuses to render that combination unless `etcd.networkPolicy.all
 true. It also refuses to render when the release name, `etcd.nameOverride` or `etcd.fullnameOverride` is
 so long that the client label has more than the 63 characters that Kubernetes allows.
 
+## Generated runtime flags
+
+`apisix.enableDevMode` controls development mode (one nginx worker) and defaults
+to `false`. `apisix.enableReuseport` controls nginx SO_REUSEPORT and defaults to
+`true`. Full custom configuration replaces these generated settings.
+
 ## Configure the wait-etcd init container
 
 When `etcd.enabled` is true, `initContainer.resources` and
@@ -655,8 +661,10 @@ keyring.
 | apisix.dns.resolvers | list | `[]` | Nameservers used by APISIX to resolve upstream domain names. When empty (default), nameservers are read from `/etc/resolv.conf`, which is usually what you want inside Kubernetes |
 | apisix.dns.timeout | int | `5` | DNS resolver timeout in seconds |
 | apisix.dns.validity | int | `30` | Override the TTL in seconds of valid DNS records |
+| apisix.enableDevMode | bool | `false` | Enable APISIX development mode (one nginx worker). |
 | apisix.enableHTTP2 | bool | `true` | Enable HTTP/2 on the HTTP listeners |
 | apisix.enableIPv6 | bool | `true` | Enable nginx IPv6 resolver |
+| apisix.enableReuseport | bool | `true` | Enable nginx SO_REUSEPORT. |
 | apisix.enableServerTokens | bool | `true` | Whether the APISIX version number should be shown in Server header |
 | apisix.extPlugin.cmd | list | `["/path/to/apisix-plugin-runner/runner","run"]` | the command and its arguements to run as a subprocess |
 | apisix.extPlugin.enabled | bool | `false` | Enable External Plugins. See [external plugin](https://apisix.apache.org/docs/apisix/next/external-plugin/) |

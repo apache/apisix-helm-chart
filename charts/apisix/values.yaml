@@ -334,6 +334,10 @@ metrics:
     annotations: {}
 
 apisix:
+  # -- Enable APISIX development mode (one nginx worker).
+  enableDevMode: false
+  # -- Enable nginx SO_REUSEPORT.
+  enableReuseport: true
   # -- Enable nginx IPv6 resolver
   enableIPv6: true
   # -- Enable HTTP/2 on the HTTP listeners
