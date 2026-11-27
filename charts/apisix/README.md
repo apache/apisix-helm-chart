@@ -8,6 +8,56 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## apisix network isolation
+
+`apisixNetworkPolicy.ingress.enabled` and `egress.enabled` independently enable
+isolation. Both default to false. Each `rules` value is a complete Kubernetes
+NetworkPolicy rule list; `[]` denies that direction, while `[{}]` allows it.
+Rules support selectors, CIDRs, named/numeric ports and TCP/UDP/SCTP directly.
+No fixed gateway, Admin, metrics, stream, QUIC or DNS ports are assumed.
+
+Before enabling egress isolation, provide the actual DNS (including NodeLocal
+DNS), API server, Admin API, etcd and upstream paths needed by this component.
+API server destination matching before/after Service NAT depends on your CNI.
+An egress policy is not functional just because DNS succeeds. Run connectivity
+and denial tests with the production CNI and all configured listener ports.
+An ingress policy permits Kubernetes node probe traffic according to CNI policy
+semantics; validate that behavior in the target cluster as well.
+
+Example rules (replace destinations and ports with this cluster's values):
+
+```yaml
+apisixNetworkPolicy:
+  ingress:
+    enabled: true
+    rules:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: trusted-clients
+        ports:
+          - port: 9080
+            protocol: TCP
+          - port: 9100
+            protocol: UDP
+  egress:
+    enabled: true
+    rules:
+      - to:
+          - ipBlock:
+              cidr: 10.96.0.10/32
+        ports:
+          - port: 53
+            protocol: UDP
+          - port: 53
+            protocol: TCP
+      # Add etcd, Admin, API server and application upstream rules as needed.
+```
+
+The selector follows `service.labelsOverride`, preserving existing installations.
+In decoupled mode a shared release selector can select both planes; use additional
+explicit policies to distinguish Admin sources from gateway and metrics clients.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -766,6 +816,9 @@ keyring.
 | apisix.vault.token | string | `""` | The generated token from vault instance that can grant access to read data from the vault. |
 | apisix.wasm.enabled | bool | `false` | Enable Wasm Plugins. See [wasm plugin](https://apisix.apache.org/docs/apisix/next/wasm/) |
 | apisix.wasm.plugins | list | `[]` | List of Wasm plugins, each item with `name`, `priority` and `file` (path or URL of the wasm binary) |
+| apisixNetworkPolicy | object | `{"egress":{"enabled":false,"rules":[]},"ingress":{"enabled":false,"rules":[]}}` | Optional apisix policy. Each direction accepts complete Kubernetes NetworkPolicy rules. |
+| apisixNetworkPolicy.egress.enabled | bool | `false` | Enable egress isolation; an empty rules list denies egress, including DNS. |
+| apisixNetworkPolicy.ingress.enabled | bool | `false` | Enable ingress isolation; an empty rules list denies ingress. |
 | autoscaling.enabled | bool | `false` | Enable HorizontalPodAutoscaler for APISIX (only when useDaemonSet is false) |
 | autoscaling.maxReplicas | int | `100` | Maximum number of APISIX replicas |
 | autoscaling.minReplicas | int | `1` | Minimum number of APISIX replicas |

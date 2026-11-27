@@ -866,6 +866,17 @@ apisix:
   trustedAddresses:
     - 127.0.0.1
 
+# -- Optional apisix policy. Each direction accepts complete Kubernetes NetworkPolicy rules.
+apisixNetworkPolicy:
+  ingress:
+    # -- Enable ingress isolation; an empty rules list denies ingress.
+    enabled: false
+    rules: []
+  egress:
+    # -- Enable egress isolation; an empty rules list denies egress, including DNS.
+    enabled: false
+    rules: []
+
 # -- external etcd configuration. If etcd.enabled is false, these configuration will be used.
 externalEtcd:
   # -- if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379.
