@@ -6,9 +6,54 @@ If you have installed multiple ingress controller, add the `kubernetes.io/ingres
 
 This chart bootstraps an apisix-ingress-controller deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
+## Cluster-owned CRD lifecycle
+
+APISIX CRDs stay in the chart's static `crds/` directory. Helm installs missing
+CRDs before rendering resources such as GatewayProxy. Existing CRDs are skipped;
+Helm neither upgrades nor deletes these CRDs when upgrading or uninstalling the
+application release. Do not move them into workload templates or add application
+release ownership annotations to shared definitions.
+
+Choose one cluster platform owner to manage APISIX CRD upgrades. Application
+releases managed by that owner should install with `--skip-crds`. Before an
+upgrade, back up CRs, inspect `status.storedVersions`, review schema and served
+version changes, and apply the CRDs from the exact target chart artifact:
+
+```sh
+helm pull apisix/apisix-ingress-controller --version <target-version> --untar
+kubectl diff -f apisix-ingress-controller/crds/
+kubectl apply --server-side --field-manager=apisix-crd-owner -f apisix-ingress-controller/crds/
+kubectl wait --for=condition=Established --timeout=60s -f apisix-ingress-controller/crds/
+# Then upgrade controller/application releases using the same target version.
+```
+
+Run these commands against the intended cluster with platform authorization.
+Do not use `--force-conflicts` without reviewing field ownership. Validate
+existing custom resources against the new schema and follow a storage-version
+migration before removing a stored version. Roll back workloads separately;
+automatically reverting CRD schemas can make persisted resources unreadable.
+Uninstalling an application is not permission to delete cluster CRDs or CRs.
+
+Gateway API definitions have a separate owner and release lifecycle. For a
+platform-managed Gateway API installation, disable
+`crds.gatewayAPI.enabled` before installing this controller. Review the
+`gateway-api-crds.yaml` template when choosing that setting; `--skip-crds` only
+controls static `crds/`, not CRDs rendered by templates.
+
 ## Prerequisites
 
-Apisix ingress controller requires Kubernetes version 1.16+.
+Check the controller image and the exact CRD bundle against the target API
+server before installation. The default Gateway API bundle includes
+`ValidatingAdmissionPolicy` and `ValidatingAdmissionPolicyBinding` at
+`admissionregistration.k8s.io/v1`; Kubernetes 1.16 alone does not satisfy this
+default installation requirement. Confirm these APIs with `kubectl api-resources
+--api-group=admissionregistration.k8s.io` and review the selected Gateway API
+bundle's Kubernetes compatibility requirements.
+
+These admission policies are cluster-scoped resources with the same owner and
+upgrade lifecycle as the Gateway API bundle. `--skip-crds` does not skip them.
+When the platform owns that bundle, set `crds.gatewayAPI.enabled=false` to skip
+both its CRDs and admission policies, and supply a compatible installation.
 
 ## Get Repo Info
 
@@ -37,7 +82,12 @@ _See [helm install](https://helm.sh/docs/helm/helm_install/) for command documen
 helm uninstall [RELEASE_NAME] --namespace ingress-apisix
 ```
 
-This removes all the Kubernetes components associated with the chart and deletes the release.
+This deletes the release and its application resources. APISIX CRDs from the
+static `crds/` directory remain installed. Gateway API CRDs and admission policies
+rendered by this chart also remain because they carry
+`helm.sh/resource-policy: keep`. Their lifecycle belongs to the cluster platform
+owner described above; review retained resources and their ownership before
+reinstalling the chart or transferring management to another release.
 
 _See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation._
 
