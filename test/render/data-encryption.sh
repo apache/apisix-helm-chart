@@ -31,6 +31,9 @@ NEW=AbCdEfGhIjKlMnOp
 BUILTIN_1=qeddd145sfvddff3
 BUILTIN_2=edd1c9f0985e76a2
 WARNING="WARNING: APISIX encrypts SSL private keys and sensitive plugin fields"
+# Full configuration must select a non-empty source, even when only checking env injection.
+CUSTOM_CONFIG=(--set apisix.fullCustomConfig.enabled=true
+               --set-json 'apisix.fullCustomConfig.config={"apisix":{"node_listen":[9080]}}')
 
 passed=0
 failed=0
@@ -130,7 +133,7 @@ check "reuse-values: explicit empty secretKeys still fails" fails_with "apisix.d
   --set apisix.dataEncryption.secretName=apisix-keyring --set-json 'apisix.dataEncryption.secretKeys=[]'
 check "reuse-values, inline: renders" render --set-json "apisix.dataEncryption.keyring=[\"$NEW\",\"$BUILTIN_1\"]"
 check "reuse-values, inline: keeps key order" is "$(config '.apisix.data_encryption.keyring | join(",")')" "$NEW,$BUILTIN_1"
-check "reuse-values, fullCustomConfig: renders" render --set apisix.fullCustomConfig.enabled=true --set apisix.dataEncryption.secretName=apisix-keyring
+check "reuse-values, fullCustomConfig: renders" render "${CUSTOM_CONFIG[@]}" --set apisix.dataEncryption.secretName=apisix-keyring
 check "reuse-values, fullCustomConfig: still injects the Secret key" is "$(env_ref APISIX_DATA_ENCRYPTION_KEY_1)" apisix-keyring/key1
 
 CHART=$ORIGINAL_CHART
@@ -162,7 +165,7 @@ check "secret: one variable per key, in keyring order" is "$(env_ref APISIX_DATA
 check "secret: config.yaml lists the variables in the same order" is "$(config '.apisix.data_encryption.keyring | join(",")')" '${{APISIX_DATA_ENCRYPTION_KEY_1}},${{APISIX_DATA_ENCRYPTION_KEY_2}}'
 check "secret: no warning about the built-in keyring" does_not_warn --set apisix.dataEncryption.secretName=apisix-keyring
 
-check "secret with fullCustomConfig: renders" render --set apisix.fullCustomConfig.enabled=true --set apisix.dataEncryption.secretName=apisix-keyring
+check "secret with fullCustomConfig: renders" render "${CUSTOM_CONFIG[@]}" --set apisix.dataEncryption.secretName=apisix-keyring
 check "secret with fullCustomConfig: the variable is still set for the custom config" is "$(env_ref APISIX_DATA_ENCRYPTION_KEY_1)" apisix-keyring/key1
 
 # --- values that cannot work -----------------------------------------------------
@@ -184,7 +187,7 @@ check "fail: a key that is not 16 or 32 bytes long" fails_with "entry 2 is 15 by
 check "fail: that error does not print the key" bash -c '! grep -qF "$2" <<<"$1"' _ "$ERR" "${NEW:0:15}"
 check "a 32-byte key: renders" render --set-json "apisix.dataEncryption.keyring=[\"$NEW$NEW\"]"
 check "fail: an inline keyring with fullCustomConfig" fails_with "apisix.dataEncryption.keyring is not used with apisix.fullCustomConfig" \
-  --set apisix.fullCustomConfig.enabled=true --set-json "apisix.dataEncryption.keyring=[\"$NEW\"]"
+  "${CUSTOM_CONFIG[@]}" --set-json "apisix.dataEncryption.keyring=[\"$NEW\"]"
 check "fail: keyring and secretName together" fails_with "set either keyring or secretName, not both" \
   --set-json "apisix.dataEncryption.keyring=[\"$NEW\"]" --set apisix.dataEncryption.secretName=apisix-keyring
 check "fail: secretName without secretKeys" fails_with "apisix.dataEncryption.secretKeys must list the keys" \
@@ -194,7 +197,7 @@ check "fail: secretName without secretKeys" fails_with "apisix.dataEncryption.se
 
 check "standalone (file): no warning, APISIX does not encrypt without etcd" does_not_warn --set apisix.deployment.mode=standalone
 check "standalone (API): no warning, APISIX does not encrypt without etcd" does_not_warn --set apisix.deployment.role_traditional.config_provider=yaml --set etcd.enabled=false
-check "fullCustomConfig: no warning, the custom config decides" does_not_warn --set apisix.fullCustomConfig.enabled=true
+check "fullCustomConfig: no warning, the custom config decides" does_not_warn "${CUSTOM_CONFIG[@]}"
 check "decoupled data plane: warns, it decrypts with the same keyring" warns --set apisix.deployment.mode=decoupled --set apisix.deployment.role=data_plane
 check "decoupled control plane: warns" warns --set apisix.deployment.mode=decoupled --set apisix.deployment.role=control_plane
 check "the old apisix.data_encryption value: NOTES says it is not read" \
