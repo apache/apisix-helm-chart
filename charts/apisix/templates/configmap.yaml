@@ -203,7 +203,9 @@ data:
         ssl_protocols: {{ .Values.apisix.ssl.sslProtocols | quote }}
         ssl_ciphers: {{ .Values.apisix.ssl.sslCiphers | quote }}
         ssl_session_tickets: {{ .Values.apisix.ssl.sslSessionTickets }}
-        {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
+        {{- if and .Values.etcd.auth.tls.enabled .Values.etcd.auth.tls.caSecret }}
+        ssl_trusted_certificate: "/tmp/apisix-etcd-ca-bundle.pem"
+        {{- else if and .Values.apisix.ssl.enabled .Values.apisix.ssl.existingCASecret }}
         ssl_trusted_certificate: "/usr/local/apisix/conf/ssl/{{ .Values.apisix.ssl.certCAFilename }}"
         {{- end }}
         {{- if and .Values.apisix.ssl.enabled .Values.apisix.ssl.fallbackSNI }}

@@ -928,6 +928,14 @@ etcd:
       enabled: false
       # -- Secret containing the optional etcd client certificate and key. Mounted when TLS is enabled and the name is non-empty, including with fullCustomConfig. Required when certFilename and certKeyFilename are set.
       existingSecret: ""
+      # -- Secret containing the etcd server CA, independent of apisix.ssl.
+      caSecret: ""
+      # -- PEM certificate key in caSecret.
+      caFilename: ca.crt
+      # -- Include the image system trust store in the generated bundle.
+      includeSystemCA: true
+      # -- System trust store path in the APISIX image.
+      systemCAPath: /etc/ssl/certs/ca-certificates.crt
       # -- Client certificate filename in existingSecret. Set together with certKeyFilename for mTLS; leave both empty for server-only TLS.
       certFilename: ""
       # -- Client private key filename in existingSecret. Required when certFilename is set.
