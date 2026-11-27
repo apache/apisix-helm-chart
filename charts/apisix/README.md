@@ -8,6 +8,55 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## ingress-controller network isolation
+
+`ingressControllerNetworkPolicy.ingress.enabled` and `egress.enabled` independently enable
+isolation. Both default to false. Each `rules` value is a complete Kubernetes
+NetworkPolicy rule list; `[]` denies that direction, while `[{}]` allows it.
+Rules support selectors, CIDRs, named/numeric ports and TCP/UDP/SCTP directly.
+No fixed gateway, Admin, metrics, stream, QUIC or DNS ports are assumed.
+
+Before enabling egress isolation, provide the actual DNS (including NodeLocal
+DNS), API server, Admin API, etcd and upstream paths needed by this component.
+API server destination matching before/after Service NAT depends on your CNI.
+An egress policy is not functional just because DNS succeeds. Run connectivity
+and denial tests with the production CNI and all configured listener ports.
+An ingress policy permits Kubernetes node probe traffic according to CNI policy
+semantics; validate that behavior in the target cluster as well.
+
+Example rules (replace destinations and ports with this cluster's values):
+
+```yaml
+ingressControllerNetworkPolicy:
+  ingress:
+    enabled: true
+    rules:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: trusted-clients
+        ports:
+          - port: 9080
+            protocol: TCP
+          - port: 9100
+            protocol: UDP
+  egress:
+    enabled: true
+    rules:
+      - to:
+          - ipBlock:
+              cidr: 10.96.0.10/32
+        ports:
+          - port: 53
+            protocol: UDP
+          - port: 53
+            protocol: TCP
+      # Add etcd, Admin, API server and application upstream rules as needed.
+```
+
+The selector comes from the installed controller subchart, including its label
+and name overrides. No policy is created when the controller is disabled.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -840,6 +889,9 @@ keyring.
 | ingress.hosts | list | `[{"host":"apisix.local","paths":[]}]` | Ingress host and path rules |
 | ingress.servicePort | number | `nil` | Service port to send traffic. Defaults to `service.http.servicePort`. |
 | ingress.tls | list | `[]` | Ingress TLS settings |
+| ingressControllerNetworkPolicy | object | `{"egress":{"enabled":false,"rules":[]},"ingress":{"enabled":false,"rules":[]}}` | Optional ingress-controller policy. Each direction accepts complete Kubernetes NetworkPolicy rules. |
+| ingressControllerNetworkPolicy.egress.enabled | bool | `false` | Enable egress isolation; an empty rules list denies egress, including DNS. |
+| ingressControllerNetworkPolicy.ingress.enabled | bool | `false` | Enable ingress isolation; an empty rules list denies ingress. |
 | initContainer.image | string | `"busybox"` | Init container image |
 | initContainer.resources | object | `{}` | Resource requests and limits for the wait-etcd init container (only used when etcd.enabled is true) |
 | initContainer.securityContext | object | `{}` | Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings. |
