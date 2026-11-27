@@ -730,6 +730,7 @@ keyring.
 | apisix.prometheus.enabled | bool | `false` | Enable Prometheus metrics. ref: https://apisix.apache.org/docs/apisix/plugins/prometheus/ |
 | apisix.prometheus.metricPrefix | string | `"apisix_"` | prefix of the metrics |
 | apisix.prometheus.path | string | `"/apisix/prometheus/metrics"` | path of the metrics endpoint |
+| apisix.prometheus.service.type | string | `"ClusterIP"` | Metrics Service type |
 | apisix.proxyCache | object | `{"cacheTtl":"10s","zones":[{"cache_levels":"1:2","disk_path":"/tmp/disk_cache_one","disk_size":"1G","memory_size":"50m","name":"disk_cache_one"},{"memory_size":"50m","name":"memory_cache"}]}` | Proxy caching configuration used by the proxy-cache plugin. |
 | apisix.proxyCache.cacheTtl | string | `"10s"` | The default caching time in disk if the upstream does not specify the cache time |
 | apisix.proxyCache.zones | list | `[{"cache_levels":"1:2","disk_path":"/tmp/disk_cache_one","disk_size":"1G","memory_size":"50m","name":"disk_cache_one"},{"memory_size":"50m","name":"memory_cache"}]` | The parameters of a cache. The `memory_size` field stores the cache index for the disk strategy and the cache content for the memory strategy; `disk_size`, `disk_path` and `cache_levels` only apply to the disk strategy. |
