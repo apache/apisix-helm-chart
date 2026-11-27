@@ -177,6 +177,10 @@ autoscaling:
   enabled: false
   # -- HPA version, the value is "v2" or "v2beta1", default "v2"
   version: v2
+  # -- Complete HPA metrics. Non-empty overrides utilization metrics below.
+  metrics: []
+  # -- HPA v2 scaling behavior (stabilization and policies).
+  behavior: {}
   # -- Minimum number of APISIX replicas
   minReplicas: 1
   # -- Maximum number of APISIX replicas
