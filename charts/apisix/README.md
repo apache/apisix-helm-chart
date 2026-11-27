@@ -8,6 +8,60 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## etcd network isolation
+
+`etcdNetworkPolicy.ingress.enabled` and `egress.enabled` independently enable
+isolation. Both default to false. Each `rules` value is a complete Kubernetes
+NetworkPolicy rule list; `[]` denies that direction, while `[{}]` allows it.
+Rules support selectors, CIDRs, named/numeric ports and TCP/UDP/SCTP directly.
+No fixed gateway, Admin, metrics, stream, QUIC or DNS ports are assumed.
+
+Before enabling egress isolation, provide the actual DNS (including NodeLocal
+DNS), API server, Admin API, etcd and upstream paths needed by this component.
+API server destination matching before/after Service NAT depends on your CNI.
+An egress policy is not functional just because DNS succeeds. Run connectivity
+and denial tests with the production CNI and all configured listener ports.
+An ingress policy permits Kubernetes node probe traffic according to CNI policy
+semantics; validate that behavior in the target cluster as well.
+
+Example rules (replace destinations and ports with this cluster's values):
+
+```yaml
+etcdNetworkPolicy:
+  ingress:
+    enabled: true
+    rules:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: trusted-clients
+        ports:
+          - port: 9080
+            protocol: TCP
+          - port: 9100
+            protocol: UDP
+  egress:
+    enabled: true
+    rules:
+      - to:
+          - ipBlock:
+              cidr: 10.96.0.10/32
+        ports:
+          - port: 53
+            protocol: UDP
+          - port: 53
+            protocol: TCP
+      # Add etcd, Admin, API server and application upstream rules as needed.
+```
+
+The dependency already creates an etcd policy by default. Keep using
+`etcd.networkPolicy` for its built-in behavior, or explicitly set
+`etcd.networkPolicy.enabled=false` before enabling this replacement. Otherwise
+rendering fails: Kubernetes unions policies and a second restrictive policy
+cannot tighten an existing permissive one. The replacement selects the real
+subchart Pod labels, including overrides, and only exists for bundled etcd.
+Allow peers in both directions, APISIX clients and any upgrade/backup Jobs.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -812,6 +866,9 @@ keyring.
 | etcd.startupRetry | int | `2` | The number of retries to etcd during startup |
 | etcd.timeout | int | `30` | Set the timeout value in seconds for subsequent socket operations from apisix to etcd cluster |
 | etcd.watchTimeout | int | `50` | Set the timeout value in seconds for watching etcd |
+| etcdNetworkPolicy | object | `{"egress":{"enabled":false,"rules":[]},"ingress":{"enabled":false,"rules":[]}}` | Optional etcd policy. Each direction accepts complete Kubernetes NetworkPolicy rules. |
+| etcdNetworkPolicy.egress.enabled | bool | `false` | Enable egress isolation; an empty rules list denies egress, including DNS. |
+| etcdNetworkPolicy.ingress.enabled | bool | `false` | Enable ingress isolation; an empty rules list denies ingress. |
 | externalEtcd | object | `{"existingSecret":"","host":["http://etcd.host:2379"],"password":"","secretPasswordKey":"etcd-root-password","user":"root"}` | external etcd configuration. If etcd.enabled is false, these configuration will be used. |
 | externalEtcd.existingSecret | string | `""` | if externalEtcd.existingSecret is the name of secret containing the external etcd password |
 | externalEtcd.host | list | `["http://etcd.host:2379"]` | if etcd.enabled is false, use external etcd, support multiple address, if your etcd cluster enables TLS, please use https scheme, e.g. https://127.0.0.1:2379. |
