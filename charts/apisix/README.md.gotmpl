@@ -8,6 +8,21 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Graceful shutdown
+
+The official image uses `STOPSIGNAL SIGQUIT`. On termination the generated
+preStop hook waits `gracefulShutdown.preStopSeconds` for endpoint removal;
+Kubernetes then delivers the image stop signal and nginx drains active requests.
+The grace period must cover that wait, `apisix.nginx.workerShutdownTimeout`,
+and `gracefulShutdown.safetyMarginSeconds`. Defaults allow 10 + 240 + 5 seconds
+within a 300 second grace period. Connections exceeding this budget may close.
+
+`gracefulShutdown.enabled=false` disables the automatic hook. An explicitly
+configured `lifecycle.preStop` takes precedence, including null to omit it;
+`postStart` is preserved. With a custom hook or image, operators must configure
+and validate their own shutdown budget and stop signal. This controls process
+termination, not external load balancer propagation or unlimited connection drain.
+
 ## Prerequisites
 
 * Kubernetes v1.14+

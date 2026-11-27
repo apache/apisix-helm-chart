@@ -8,6 +8,21 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## Graceful shutdown
+
+The official image uses `STOPSIGNAL SIGQUIT`. On termination the generated
+preStop hook waits `gracefulShutdown.preStopSeconds` for endpoint removal;
+Kubernetes then delivers the image stop signal and nginx drains active requests.
+The grace period must cover that wait, `apisix.nginx.workerShutdownTimeout`,
+and `gracefulShutdown.safetyMarginSeconds`. Defaults allow 10 + 240 + 5 seconds
+within a 300 second grace period. Connections exceeding this budget may close.
+
+`gracefulShutdown.enabled=false` disables the automatic hook. An explicitly
+configured `lifecycle.preStop` takes precedence, including null to omit it;
+`postStart` is preserved. With a custom hook or image, operators must configure
+and validate their own shutdown budget and stop signal. This controls process
+termination, not external load balancer propagation or unlimited connection drain.
+
 ## Prerequisites
 
 * Kubernetes v1.14+
@@ -826,6 +841,8 @@ keyring.
 | extraVolumes | list | `[]` | Additional `volume`, See [Kubernetes Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) for the detail. |
 | fullnameOverride | string | `""` | String to fully override the chart fullname |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
+| gracefulShutdown | object | `{"enabled":true,"preStopSeconds":10,"safetyMarginSeconds":5}` | Automatic endpoint-drain hook. The image receives SIGQUIT after preStop completes. |
+| gracefulShutdown.safetyMarginSeconds | int | `5` | Time reserved beyond preStop and nginx workerShutdownTimeout. |
 | hostNetwork | bool | `false` | Use the host's network namespace |
 | image.pullPolicy | string | `"IfNotPresent"` | Apache APISIX image pull policy |
 | image.repository | string | `"apache/apisix"` | Apache APISIX image repository |
@@ -844,7 +861,7 @@ keyring.
 | initContainer.resources | object | `{}` | Resource requests and limits for the wait-etcd init container (only used when etcd.enabled is true) |
 | initContainer.securityContext | object | `{}` | Container security context for wait-etcd. Empty by default to inherit applicable podSecurityContext settings. |
 | initContainer.tag | float | `1.28` | Init container tag |
-| lifecycle | object | `{"preStop":{"exec":{"command":["/bin/sh","-c","sleep 30"]}}}` | Lifecycle hooks for the Apache APISIX container |
+| lifecycle | object | `{}` | Lifecycle hooks for the Apache APISIX container |
 | metrics | object | `{"serviceMonitor":{"annotations":{},"enabled":false,"interval":"15s","labels":{},"name":"","namespace":""}}` | Observability configuration. |
 | metrics.serviceMonitor.annotations | object | `{}` | @param serviceMonitor.annotations ServiceMonitor annotations |
 | metrics.serviceMonitor.enabled | bool | `false` | Enable or disable Apache APISIX serviceMonitor |
@@ -885,7 +902,7 @@ keyring.
 | serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount |
 | serviceAccount.create | bool | `false` | Whether a ServiceAccount should be created for the APISIX pods |
 | serviceAccount.name | string | `""` | Name of the ServiceAccount to use. If not set and create is true, a name is generated from the chart fullname |
-| terminationGracePeriodSeconds | int | `30` | Number of seconds Kubernetes waits for Apache APISIX to terminate gracefully |
+| terminationGracePeriodSeconds | int | `300` | Number of seconds Kubernetes waits for Apache APISIX to terminate gracefully |
 | timezone | string | `""` | timezone is the timezone where apisix uses. For example: "UTC" or "Asia/Shanghai" This value will be set on apisix container's environment variable TZ. You may need to set the timezone to be consistent with your local time zone, otherwise the apisix's logs may used to retrieve event maybe in wrong timezone. |
 | tolerations | list | `[]` | List of node taints to tolerate |
 | topologySpreadConstraints | list | `[]` | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods |

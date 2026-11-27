@@ -46,7 +46,14 @@ podLabels: {}
 podSecurityContext: {}
   # fsGroup: 2000
 # -- Number of seconds Kubernetes waits for Apache APISIX to terminate gracefully
-terminationGracePeriodSeconds: 30
+terminationGracePeriodSeconds: 300
+
+# -- Automatic endpoint-drain hook. The image receives SIGQUIT after preStop completes.
+gracefulShutdown:
+  enabled: true
+  preStopSeconds: 10
+  # -- Time reserved beyond preStop and nginx workerShutdownTimeout.
+  safetyMarginSeconds: 5
 # -- Set the securityContext for Apache APISIX container
 securityContext: {}
   # capabilities:
@@ -57,13 +64,7 @@ securityContext: {}
   # runAsUser: 1000
 
 # -- Lifecycle hooks for the Apache APISIX container
-lifecycle:
-  preStop:
-    exec:
-      command:
-        - /bin/sh
-        - -c
-        - "sleep 30"
+lifecycle: {}
 
 # -- See https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more details
 podDisruptionBudget:

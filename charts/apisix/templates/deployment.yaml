@@ -223,7 +223,28 @@ spec:
             {{- end}}
             timeoutSeconds: 1
           {{- end }}
-          {{- with .Values.lifecycle }}
+          {{- $lifecycle := deepCopy .Values.lifecycle }}
+          {{- if and .Values.gracefulShutdown.enabled (not (hasKey $lifecycle "preStop")) }}
+          {{- if lt (int .Values.gracefulShutdown.preStopSeconds) 0 }}
+          {{- fail "gracefulShutdown.preStopSeconds must be non-negative" }}
+          {{- end }}
+          {{- if lt (int .Values.gracefulShutdown.safetyMarginSeconds) 0 }}
+          {{- fail "gracefulShutdown.safetyMarginSeconds must be non-negative" }}
+          {{- end }}
+          {{- if lt (int .Values.terminationGracePeriodSeconds) 0 }}
+          {{- fail "terminationGracePeriodSeconds must be non-negative" }}
+          {{- end }}
+          {{- $timeout := .Values.apisix.nginx.workerShutdownTimeout | toString }}
+          {{- if not (regexMatch "^[0-9]+s$" $timeout) }}
+          {{- fail "automatic graceful shutdown requires nginx.workerShutdownTimeout in whole seconds (e.g. 240s); use lifecycle.preStop for other formats" }}
+          {{- end }}
+          {{- $minimum := add (trimSuffix "s" $timeout | int) (int .Values.gracefulShutdown.preStopSeconds) (int .Values.gracefulShutdown.safetyMarginSeconds) }}
+          {{- if lt (int .Values.terminationGracePeriodSeconds) (int $minimum) }}
+          {{- fail (printf "terminationGracePeriodSeconds must be at least %d for endpoint drain and worker shutdown" $minimum) }}
+          {{- end }}
+          {{- $_ := set $lifecycle "preStop" (dict "exec" (dict "command" (list "/bin/sh" "-c" (printf "sleep %d" (int .Values.gracefulShutdown.preStopSeconds))))) }}
+          {{- end }}
+          {{- with $lifecycle }}
           lifecycle:
             {{- toYaml . | nindent 12 }}
           {{- end }}
