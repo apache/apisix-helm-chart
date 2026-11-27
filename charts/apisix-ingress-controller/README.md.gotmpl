@@ -49,6 +49,22 @@ helm upgrade [RELEASE_NAME] [CHART] --install
 
 _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation._
 
+### ServiceMonitor namespace in 2.0.0
+
+Starting with chart 2.0.0, an enabled ServiceMonitor defaults to the Helm release namespace
+instead of `monitoring`. The `serviceMonitor.namespace` option still supports an explicit namespace.
+
+If your Prometheus instance only discovers ServiceMonitors in `monitoring`, keep the previous
+placement by adding the following to your upgrade values:
+
+```yaml
+serviceMonitor:
+  namespace: monitoring
+```
+
+Alternatively, update the Prometheus ServiceMonitor namespace selector to include the Helm
+release namespace so that it can discover the ServiceMonitor in its new location.
+
 ## Configuration
 
 See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
