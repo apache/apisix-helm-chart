@@ -15,6 +15,9 @@
 # limitations under the License.
 
 {{- if .Values.metrics.serviceMonitor.enabled }}
+{{- if not .Values.apisix.prometheus.enabled -}}
+{{- fail "metrics.serviceMonitor.enabled requires apisix.prometheus.enabled=true" -}}
+{{- end }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -31,14 +34,23 @@ metadata:
 spec:
   namespaceSelector:
     matchNames:
-    - {{ .Values.metrics.serviceMonitor.namespace | default .Release.Namespace }}
+    - {{ .Release.Namespace }}
   selector:
     matchLabels:
-      {{- include "apisix.labels" . | nindent 6 }}
+      {{- include "apisix.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/service: apisix-prometheus-metrics
   endpoints:
   - scheme: http
-    targetPort: prometheus
+    port: prometheus
     path: {{ .Values.apisix.prometheus.path }}
     interval: {{ .Values.metrics.serviceMonitor.interval }}
+    {{- with .Values.metrics.serviceMonitor.scrapeTimeout }}
+    scrapeTimeout: {{ . }}
+    {{- end }}
+    {{- with .Values.metrics.serviceMonitor.relabelings }}
+    relabelings: {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.metrics.serviceMonitor.metricRelabelings }}
+    metricRelabelings: {{- toYaml . | nindent 6 }}
+    {{- end }}
 {{- end }}

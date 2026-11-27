@@ -8,6 +8,17 @@ You can use Apache APISIX to handle traditional north-south traffic, as well as 
 
 This chart bootstraps all the components needed to run Apache APISIX on a Kubernetes Cluster using [Helm](https://helm.sh).
 
+## ServiceMonitor discovery
+
+Enable both `apisix.prometheus.enabled` and `metrics.serviceMonitor.enabled`.
+The ServiceMonitor can live in a monitoring namespace, while its namespace
+selector always targets the Services in this release's namespace. Discovery uses
+stable selector labels rather than chart version labels, so upgrades do not
+silently detach metrics targets. The endpoint references the Service's named
+`prometheus` port. Scrape timeout and target/metric relabeling are configurable.
+The Prometheus operator and its CRDs must already be installed; its Prometheus
+resource must select this ServiceMonitor and permit the target namespace.
+
 ## Prerequisites
 
 * Kubernetes v1.14+

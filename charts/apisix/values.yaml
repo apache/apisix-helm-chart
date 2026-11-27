@@ -328,6 +328,12 @@ metrics:
     name: ""
     # -- interval at which metrics should be scraped
     interval: 15s
+    # -- Optional scrape timeout; must not exceed interval.
+    scrapeTimeout: ""
+    # -- Target relabeling rules.
+    relabelings: []
+    # -- Metric relabeling rules.
+    metricRelabelings: []
     # -- @param serviceMonitor.labels ServiceMonitor extra labels
     labels: {}
     # -- @param serviceMonitor.annotations ServiceMonitor annotations
