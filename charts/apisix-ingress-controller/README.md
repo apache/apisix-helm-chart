@@ -49,6 +49,22 @@ helm upgrade [RELEASE_NAME] [CHART] --install
 
 _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation._
 
+### ServiceMonitor namespace in 1.5.1
+
+Starting with chart 1.5.1, an enabled ServiceMonitor defaults to the Helm release namespace
+instead of `monitoring`. The `serviceMonitor.namespace` option still supports an explicit namespace.
+
+If your Prometheus instance only discovers ServiceMonitors in `monitoring`, keep the previous
+placement by adding the following to your upgrade values:
+
+```yaml
+serviceMonitor:
+  namespace: monitoring
+```
+
+Alternatively, update the Prometheus ServiceMonitor namespace selector to include the Helm
+release namespace so that it can discover the ServiceMonitor in its new location.
+
 ## Configuration
 
 See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
@@ -139,6 +155,7 @@ The same for container level, you need to set:
 | deployment.imagePullSecrets | list | `[]` |  |
 | deployment.nodeSelector | object | `{}` |  |
 | deployment.podAnnotations | object | `{}` |  |
+| deployment.podLabels | object | `{}` | Additional labels with string values for ingress controller Pods. Keys already used by the selector are ignored. |
 | deployment.podSecurityContext | object | `{"fsGroup":2000}` | Set security context for the pod fsGroup: 2000 ensures containers can share Unix socket files via a common group. |
 | deployment.priorityClassName | string | `""` | Set the [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for the ingress controller pods |
 | deployment.replicas | int | `1` |  |
@@ -173,7 +190,7 @@ The same for container level, you need to set:
 | serviceMonitor.interval | string | `"15s"` | @param serviceMonitor.interval Interval at which metrics should be scraped |
 | serviceMonitor.labels | object | `{}` | @param serviceMonitor.labels ServiceMonitor extra labels |
 | serviceMonitor.metricRelabelings | object | `{}` | @param serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion. ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs |
-| serviceMonitor.namespace | string | `"monitoring"` | @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor |
+| serviceMonitor.namespace | string | `""` | @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor. Leave empty to use the release namespace. |
 | webhook.annotations | object | `{}` | Annotations for the ValidatingWebhookConfiguration, e.g. `cert-manager.io/inject-ca-from: <namespace>/<certificate>` so cert-manager's cainjector maintains the webhook caBundle. Only use CA injection with `certificate.provided: true` and `certificate.caBundle` unset; otherwise the injected CA replaces the chart-generated one and the webhook TLS handshake fails. |
 | webhook.certificate.provided | bool | `false` | Set to true if you want to provide your own certificate |
 | webhook.enabled | bool | `true` | Enable or disable admission webhook |

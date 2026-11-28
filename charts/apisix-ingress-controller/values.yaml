@@ -48,6 +48,8 @@ deployment:
   # -- Add annotations to Apache APISIX ingress controller resource
   annotations: {}
   podAnnotations: {}
+  # -- Additional labels with string values for ingress controller Pods. Keys already used by the selector are ignored.
+  podLabels: {}
   # -- Set the [priorityClassName](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority) for the ingress controller pods
   priorityClassName: ""
   replicas: 1
@@ -218,8 +220,8 @@ apisix:
 serviceMonitor:
   # -- Enable or disable ServiceMonitor
   enabled: false
-  # -- @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor
-  namespace: "monitoring"
+  # -- @param serviceMonitor.namespace Namespace in which to create the ServiceMonitor. Leave empty to use the release namespace.
+  namespace: ""
   # -- @param serviceMonitor.interval Interval at which metrics should be scraped
   interval: 15s
   # -- @param serviceMonitor.labels ServiceMonitor extra labels

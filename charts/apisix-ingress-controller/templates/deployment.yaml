@@ -40,7 +40,8 @@ spec:
         {{- end }}
         {{- end }}
       labels:
-        {{- include "apisix-ingress-controller-manager.selectorLabels" . | nindent 8 }}
+        {{- $selectorLabels := include "apisix-ingress-controller-manager.selectorLabels" . | fromYaml }}
+        {{- mergeOverwrite (dict) (.Values.deployment.podLabels | default dict) $selectorLabels | toYaml | nindent 8 }}
     spec:
       {{- with .Values.deployment.priorityClassName }}
       priorityClassName: {{ . }}
